@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hello-word-connector</artifactId>
+    <artifactId>hello-world-connector</artifactId>
 
     <properties>
         <top.basedir>${project.parent.basedir}</top.basedir>

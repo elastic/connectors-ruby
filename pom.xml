@@ -8,7 +8,7 @@
     <artifactId>ent-search-connectors</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <modules>
-        <module>hello-word-connector</module>
+        <module>hello-world-connector</module>
     </modules>
     <packaging>pom</packaging>
 
