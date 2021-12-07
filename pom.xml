@@ -20,6 +20,14 @@
         </license>
     </licenses>
 
+    <properties>
+        <groovy.version>3.0.8</groovy.version>
+        <spock.version>2.0-groovy-3.0</spock.version>
+        <cglib.version>3.3.0</cglib.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <top.basedir>${project.basedir}</top.basedir>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -30,20 +38,32 @@
                 <scope>provided</scope>
             </dependency>
 
+            <!-- test dependencies -->
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>${groovy.version}</version>
+                <scope>test</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-core</artifactId>
+                <version>${spock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>${cglib.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>11</source>
-                        <target>11</target>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
@@ -58,7 +78,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <executable>script/build_jruby.sh</executable>
+                        <executable>${top.basedir}/script/build_jruby.sh</executable>
                         <arguments>
                             <argument>${project.build.directory}/generated-sources</argument>
                             <argument>${project.basedir}/src/main/ruby</argument>
@@ -146,6 +166,8 @@
                     <version>3.8.0</version>
                     <configuration>
                         <compilerId>groovy-eclipse-compiler</compilerId>
+                        <source>11</source>
+                        <target>11</target>
                     </configuration>
                     <dependencies>
                         <dependency>
