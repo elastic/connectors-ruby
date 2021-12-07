@@ -15,7 +15,7 @@ class HelloWorldTest extends Specification {
         ])
     }
 
-    def "test stack trackes"(){
+    def "test stack traces"(){
         setup:
         HelloWorld helloWorld = new HelloWorld()
 

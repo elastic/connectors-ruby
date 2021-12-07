@@ -82,6 +82,7 @@
                         <arguments>
                             <argument>${project.build.directory}/generated-sources</argument>
                             <argument>${project.basedir}/src/main/ruby</argument>
+                            <argument>${project.name}</argument>
                         </arguments>
                     </configuration>
                 </plugin>
