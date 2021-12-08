@@ -1,5 +1,5 @@
-# ent-search-connectors
-The new home of Enterprise Search Connectors
+# connectors
+The new home of Elastic Connectors
 
 
 ### Building

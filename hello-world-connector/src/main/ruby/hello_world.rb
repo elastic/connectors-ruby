@@ -1,5 +1,5 @@
 require 'java'
-java_package 'co.elastic.enterprise.search.hello.world'
+java_package 'co.elastic.connectors.hello.world'
 class HelloWorld
   def fetch_documents
     {

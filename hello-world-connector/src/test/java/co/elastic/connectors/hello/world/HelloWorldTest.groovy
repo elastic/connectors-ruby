@@ -1,4 +1,4 @@
-package co.elastic.enterprise.search.hello.world
+package co.elastic.connectors.hello.world
 
 import spock.lang.Specification
 
