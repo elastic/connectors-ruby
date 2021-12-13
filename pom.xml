@@ -9,6 +9,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>hello-world-connector</module>
+        <module>connectors-api</module>
     </modules>
     <packaging>pom</packaging>
 

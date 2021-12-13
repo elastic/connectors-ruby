@@ -1,11 +1,19 @@
 require 'java'
+java_import 'co.elastic.connectors.api.Connector'
+java_import 'java.util.List'
+
 java_package 'co.elastic.connectors.hello.world'
 class HelloWorld
-  def fetch_documents
-    {
+  java_implements 'co.elastic.connectors.api.Connector'
+
+  java_signature 'List fetchDocuments()'
+  def fetch_Documents
+    [
+      {
       'title' => 'Traditional Test',
       'body' => 'Hello, world'
-    }
+      }
+    ]
   end
 
   def do_risky_thing

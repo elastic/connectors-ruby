@@ -15,6 +15,11 @@
         <top.basedir>${project.parent.basedir}</top.basedir>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>co.elastic.connectors</groupId>
+            <artifactId>connectors-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- provided dependencies -->
         <dependency>

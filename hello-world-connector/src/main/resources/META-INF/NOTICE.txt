@@ -6,4 +6,5 @@ This product includes software developed by The Apache Software Foundation (http
 Third party libraries used by hello-world-connector:
 ====================================================
 
+  connectors-api under Elastic License 2.0
 

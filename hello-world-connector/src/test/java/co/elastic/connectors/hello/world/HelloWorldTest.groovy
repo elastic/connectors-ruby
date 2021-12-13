@@ -1,5 +1,6 @@
 package co.elastic.connectors.hello.world
 
+import co.elastic.connectors.api.Connector
 import spock.lang.Specification
 
 class HelloWorldTest extends Specification {
@@ -9,7 +10,7 @@ class HelloWorldTest extends Specification {
         HelloWorld helloWorld = new HelloWorld()
 
         expect:
-        helloWorld.fetch_documents().equals([
+        helloWorld.fetchDocuments()[0].equals([
                 "title" : "Traditional Test",
                 "body" : "Hello, world"
         ])
@@ -25,5 +26,14 @@ class HelloWorldTest extends Specification {
         then:
         Exception e = thrown()
         e.printStackTrace()
+    }
+
+    def "test inheritance"(){
+        setup:
+        HelloWorld helloWorld = new HelloWorld()
+
+        expect:
+        helloWorld instanceof Connector
+        ((Connector) helloWorld).fetchDocuments()
     }
 }

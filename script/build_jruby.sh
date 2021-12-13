@@ -11,4 +11,4 @@ TARGET_DIR="./$MODULE_NAME/src/main"
 mkdir -p "$TARGET_DIR"
 cp -r "$SOURCE_DIR" "$TARGET_DIR"
 
-jrubyc --javac -v .
+jrubyc --java -v .
