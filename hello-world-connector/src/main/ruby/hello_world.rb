@@ -1,4 +1,5 @@
 require 'java'
+require 'awesome_print'
 java_import 'co.elastic.connectors.api.Connector'
 java_import 'java.util.List'
 
@@ -8,12 +9,15 @@ class HelloWorld
 
   java_signature 'List fetchDocuments()'
   def fetch_Documents
-    [
+    documents = [
       {
-      'title' => 'Traditional Test',
-      'body' => 'Hello, world'
+        'title' => 'Traditional Test',
+        'body' => 'Hello, world'
       }
     ]
+    puts 'these are the documents:'
+    ap documents
+    documents
   end
 
   def do_risky_thing

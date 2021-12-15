@@ -30,8 +30,23 @@
         <top.basedir>${project.basedir}</top.basedir>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>rubygems-release</id>
+            <url>http://rubygems-proxy.torquebox.org/releases</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>rubygems</groupId>
+                <artifactId>awesome_print</artifactId>
+                <version>1.8.0</version>
+                <type>gem</type>
+            </dependency>
+
+            <!-- provided -->
             <dependency>
                 <groupId>org.jruby</groupId>
                 <artifactId>jruby-complete</artifactId>
@@ -112,6 +127,9 @@
                     <configuration>
                         <fileName>NOTICE.txt</fileName>
                         <noticeTemplate>${project.basedir}/NOTICE.txt.template</noticeTemplate>
+                        <licenseMapping>
+                            <param>license-mappings.xml</param>
+                        </licenseMapping>
                         <includeScopes>
                             <includeScope>compile</includeScope>
                         </includeScopes>
@@ -188,6 +206,18 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M5</version>
+                </plugin>
+                <plugin>
+                    <groupId>de.saumya.mojo</groupId>
+                    <artifactId>gem-maven-plugin</artifactId>
+                    <version>2.0.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>initialize</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
