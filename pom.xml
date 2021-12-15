@@ -96,7 +96,7 @@
                     <configuration>
                         <executable>${top.basedir}/script/build_jruby.sh</executable>
                         <arguments>
-                            <argument>${project.build.directory}/generated-sources</argument>
+                            <argument>${project.build.directory}/jruby-generated-sources</argument>
                             <argument>${project.basedir}/src/main/ruby</argument>
                             <argument>${project.name}</argument>
                         </arguments>
@@ -114,7 +114,7 @@
                             </goals>
                             <configuration>
                                 <sources>
-                                    <source>${project.build.directory}/generated-sources</source>
+                                    <source>${project.build.directory}/jruby-generated-sources</source>
                                 </sources>
                             </configuration>
                         </execution>
@@ -128,7 +128,7 @@
                         <fileName>NOTICE.txt</fileName>
                         <noticeTemplate>${project.basedir}/NOTICE.txt.template</noticeTemplate>
                         <licenseMapping>
-                            <param>license-mappings.xml</param>
+                            <param>${maven.multiModuleProjectDirectory}/license-mappings.xml</param>
                         </licenseMapping>
                         <includeScopes>
                             <includeScope>compile</includeScope>
