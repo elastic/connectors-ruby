@@ -20,6 +20,8 @@
             <artifactId>connectors-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Example Gem dependency -->
         <dependency>
             <groupId>rubygems</groupId>
             <artifactId>awesome_print</artifactId>
