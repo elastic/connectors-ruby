@@ -19,7 +19,7 @@ eshPipeline(
             label: 'Maven Build',
             script: {
                 withMaven {
-                    sh './mvnw clean verify'
+                    sh 'JAVA_HOME=$JENKINS_HOME/.java/java11 ./mvnw clean verify'
                 }
             },
             match_on_all_branches: true,
