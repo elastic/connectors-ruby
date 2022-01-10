@@ -8,10 +8,20 @@
 
 set -ex
 
+export HOME=$JENKINS_HOME
+
+# set up rbenv
+export RBENV_VERSION="2.5.5"
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
+
+# get the right jruby
 export JRUBY_VERSION="$(cat .ruby-version)"
 rbenv shell "$RUBY_VERSION"
 rbenv rehash
 
-export JAVA_HOME=$JENKINS_HOME/.java/java11
+# get the right java
+export JAVA_HOME=$HOME/.java/java11
 
+# run the build
 ./mvnw clean verify
