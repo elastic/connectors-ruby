@@ -20,6 +20,7 @@ eval "$(rbenv init -)"
 
 # get the right jruby
 export JRUBY_VERSION="$(cat .ruby-version)"
+export RUBY_VERSION=$JRUBY_VERSION
 rbenv install --skip-existing "$JRUBY_VERSION"
 rbenv shell "$JRUBY_VERSION"
 rbenv rehash
