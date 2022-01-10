@@ -1,4 +1,4 @@
-# connectors
+# Connectors
 The new home of Elastic Connectors
 
 
