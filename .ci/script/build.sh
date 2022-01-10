@@ -19,6 +19,7 @@ eval "$(rbenv init -)"
 export JRUBY_VERSION="$(cat .ruby-version)"
 rbenv shell "$RUBY_VERSION"
 rbenv rehash
+rbenv global $JRUBY_VERSION
 
 # get the right java
 export JAVA_HOME=$HOME/.java/java11
