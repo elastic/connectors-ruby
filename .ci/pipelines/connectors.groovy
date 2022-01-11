@@ -19,7 +19,7 @@ eshPipeline(
             label: 'Maven Build',
             script: {
                 withMaven {
-                    sh './mvnw clean verify'
+                    sh '.ci/script/build.sh'
                 }
             },
             match_on_all_branches: true,
