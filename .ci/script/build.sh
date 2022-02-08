@@ -28,6 +28,13 @@ rbenv versions
 rbenv global $JRUBY_VERSION
 ruby --version # just to double-check...
 which -a ruby
+ruby_bin_file=$(which ruby)
+export BUNDLE_CMD="$ruby_bin_file -S bundle"
+export GEM_CMD="$ruby_bin_file -S gem"
+export BUNDLE_GEMFILE="./Gemfile"
+
+# install gems
+$BUNDLE_CMD install
 
 # run the build
 ./mvnw clean verify
