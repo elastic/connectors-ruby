@@ -143,6 +143,10 @@
                                     <argument>${project.basedir}/src/test/ruby/**/*test.rb</argument>
                                     <argument>--format</argument>
                                     <argument>documentation</argument>
+                                    <argument>--format</argument>
+                                    <argument>RspecJunitFormatter</argument>
+                                    <argument>--out</argument>
+                                    <argument>${project.build.testOutputDirectory}/rspec.xml</argument>
                                 </arguments>
                             </configuration>
                         </execution>
