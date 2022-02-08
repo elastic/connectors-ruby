@@ -31,7 +31,7 @@ which -a ruby
 ruby_bin_file=$(which ruby)
 export BUNDLE_CMD="$ruby_bin_file -S bundle"
 export GEM_CMD="$ruby_bin_file -S gem"
-export BUNDLE_GEMFILE="./Gemfile"
+export BUNDLE_GEMFILE="$(pwd)/Gemfile"
 
 # install bundler
 $GEM_CMD install bundler:2.2.29
