@@ -4,6 +4,10 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'java'
+
+java_package 'co.elastic.connectors.api'
+
 # Exports full error message and stack trace for storage in Connectors::Models::Job
 class DocumentError
   attr_accessor :error_class, :error_message, :stack_trace, :error_id
