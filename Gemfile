@@ -1,4 +1,3 @@
-
 # Pull gem index from rubygems
 source 'https://rubygems.org'
 
