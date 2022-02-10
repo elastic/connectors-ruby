@@ -11,10 +11,22 @@ the Maven Exec Plugin is used to execute the `script/build_jruby.sh` script for 
 to run this goal for the `hello-world-connector`, run:
 
 ```shell
-./mvnw clean exec:exec@build-ruby -pl hello-word-connector
+./mvnw clean exec:exec@build-ruby -pl hello-world-connector
 ```
 
 The output generated Java source files can then be found in `hello-world-connector/target/generated-sources/`
+
+
+### Testing
+run `./mvnw clean test`
+
+#### Testing Ruby changes only
+Sometimes, you may care less about testing all of the pieces of the project, or even about testing Java code generation
+and its tests. In these instances, you can run just rspec tests for your ruby files.
+
+```shell
+./mvnw clean exec:exec@test-ruby -pl hello-world-connector
+```
 
 ### Project Structure
 

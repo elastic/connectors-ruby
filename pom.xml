@@ -119,16 +119,38 @@
                             <goals>
                                 <goal>exec</goal>
                             </goals>
+                            <configuration>
+                                <executable>${top.basedir}/script/build_jruby.sh</executable>
+                                <arguments>
+                                    <argument>${project.build.directory}/jruby-generated-sources</argument>
+                                    <argument>${project.basedir}/src/main/ruby</argument>
+                                    <argument>${project.name}</argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>test-ruby</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>bundle</executable>
+                                <arguments>
+                                    <argument>exec</argument>
+                                    <argument>${top.basedir}/script/rspec</argument>
+                                    <argument>--pattern</argument>
+                                    <argument>${project.basedir}/src/test/ruby/**/*test.rb</argument>
+                                    <argument>--format</argument>
+                                    <argument>documentation</argument>
+                                    <argument>--format</argument>
+                                    <argument>RspecJunitFormatter</argument>
+                                    <argument>--out</argument>
+                                    <argument>${project.build.directory}/surefire-reports/rspec.xml</argument>
+                                </arguments>
+                            </configuration>
                         </execution>
                     </executions>
-                    <configuration>
-                        <executable>${top.basedir}/script/build_jruby.sh</executable>
-                        <arguments>
-                            <argument>${project.build.directory}/jruby-generated-sources</argument>
-                            <argument>${project.basedir}/src/main/ruby</argument>
-                            <argument>${project.name}</argument>
-                        </arguments>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
