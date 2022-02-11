@@ -5,10 +5,11 @@
 #
 
 require 'java'
+require 'app_config' unless defined?(Rails)
 
 java_package 'co.elastic.connectors.api'
 
-class Logger
+class ConnectorsLogger
   SUPPORTED_LOG_LEVELS = %i[fatal error warn info debug].freeze
 
   class << self
