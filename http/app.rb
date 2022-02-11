@@ -2,6 +2,7 @@
 
 require 'sinatra'
 require 'json'
+require_relative '../hello-world-connector/src/main/ruby/hello_world'
 
 
 get '/' do
@@ -15,9 +16,8 @@ get '/status' do
 end
 
 get '/documents' do
-  content_type :json
-  cursor = params['cursor'] || {}
-  { results => [] }.to_json
+  hello_world = HelloWorld.new
+  return hello_world.fetch_Documents().to_json
 end
 
 get '/file/:id' do |_id|
