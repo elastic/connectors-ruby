@@ -5,9 +5,11 @@
 #
 
 require 'logger'
+require 'java'
 
+java_package 'co.elastic.connectors.stubs'
 class AppConfig
-  def connectors_logger
+  def self.connectors_logger
     Logger.new(STDOUT)
   end
 end
