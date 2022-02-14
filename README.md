@@ -25,7 +25,7 @@ Sometimes, you may care less about testing all of the pieces of the project, or 
 and its tests. In these instances, you can run just rspec tests for your ruby files.
 
 ```shell
-./mvnw clean exec:exec@test-ruby -pl hello-world-connector
+./mvnw dependency:build-classpath@mvn-classpath exec:exec@test-ruby -pl hello-world-connector
 ```
 
 ### Project Structure

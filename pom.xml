@@ -74,12 +74,6 @@
                 <version>1.8.0</version>
                 <type>gem</type>
             </dependency>
-            <dependency>
-                <groupId>rubygems</groupId>
-                <artifactId>activesupport</artifactId>
-                <version>5.2.6</version>
-                <type>gem</type>
-            </dependency>
 
             <!-- provided -->
             <dependency>

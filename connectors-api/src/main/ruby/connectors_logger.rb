@@ -6,6 +6,7 @@
 
 require 'java'
 require 'app_config' unless defined?(Rails)
+require 'active_support/core_ext/module'
 
 java_package 'co.elastic.connectors.api'
 
@@ -26,7 +27,7 @@ class ConnectorsLogger
 
     SUPPORTED_LOG_LEVELS.each do |level|
       define_method(level) do |message|
-        @logger.public_send(level, message)
+        logger.public_send(level, message)
       end
     end
   end
