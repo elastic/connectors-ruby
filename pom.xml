@@ -9,6 +9,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>hello-world-connector</module>
+        <module>connectors-stubs</module>
         <module>connectors-api</module>
         <module>example-consumer</module>
     </modules>
@@ -71,6 +72,12 @@
                 <groupId>rubygems</groupId>
                 <artifactId>awesome_print</artifactId>
                 <version>1.8.0</version>
+                <type>gem</type>
+            </dependency>
+            <dependency>
+                <groupId>rubygems</groupId>
+                <artifactId>activesupport</artifactId>
+                <version>5.2.6</version>
                 <type>gem</type>
             </dependency>
 
@@ -148,6 +155,9 @@
                                     <argument>--out</argument>
                                     <argument>${project.build.directory}/surefire-reports/rspec.xml</argument>
                                 </arguments>
+                                <environmentVariables>
+                                    <RSPEC_JAVA_CLASSPATH>${maven.compile.classpath}</RSPEC_JAVA_CLASSPATH>
+                                </environmentVariables>
                             </configuration>
                         </execution>
                     </executions>
@@ -227,6 +237,24 @@
                                         </includes>
                                     </resource>
                                 </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <id>mvn-classpath</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>build-classpath</goal>
+                            </goals>
+                            <configuration>
+                                <outputProperty>maven.compile.classpath</outputProperty>
+                                <pathSeparator>;</pathSeparator>
                             </configuration>
                         </execution>
                     </executions>
@@ -356,6 +384,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
