@@ -92,4 +92,4 @@ class JobCannotBeUpdatedError < StandardError; end
 class SecretInvalidError < StandardError; end
 class InvalidIndexingConfigurationError < StandardError; end
 class TokenRefreshFailedError < StandardError; end
-class ThirdPartyNotAvailableError < StandardError; end
+class ConnectorNotAvailableError < StandardError; end
