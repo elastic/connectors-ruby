@@ -10,14 +10,20 @@ get '/' do
   { version: '1.0' }.to_json
 end
 
+get '/health' do
+  content_type :json
+  { healthy: 'yes' }.to_json
+end
+
 get '/status' do
   content_type :json
   { status: 'IDLING' }.to_json
 end
 
 get '/documents' do
+  content_type :json
   hello_world = HelloWorld.new
-  return hello_world.fetch_Documents().to_json
+  return { results: hello_world.fetch_Documents(), cursor: nil }.to_json
 end
 
 get '/file/:id' do |_id|

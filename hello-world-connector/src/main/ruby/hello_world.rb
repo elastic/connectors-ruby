@@ -18,13 +18,31 @@ class HelloWorld
   def fetch_Documents
     documents = [
       {
+        'id' => 'welp_1',
         'title' => 'Traditional Test',
         'body' => 'Hello, world'
+      },
+      {
+        'title' => 'Without Id Test',
+        'body' => 'Hello, world'
+      },
+      {
+        'id' => 'welp_3',
+        'title' => 'Without Body Test'
+      },
+      {
+        'id' => 'welp_4',
+        'body' => 'Without Title Test'
       }
     ]
     puts 'these are the documents:'
     ap documents
-    documents
+    documents.map do |doc|
+      {
+        :action => "create_or_update",
+        :document => doc
+      }
+    end
   end
 
   def do_risky_thing
