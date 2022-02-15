@@ -28,6 +28,12 @@
             <groupId>org.jruby</groupId>
             <artifactId>jruby-complete</artifactId>
         </dependency>
+        <dependency>
+            <groupId>co.elastic.connectors</groupId>
+            <artifactId>connectors-stubs</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>

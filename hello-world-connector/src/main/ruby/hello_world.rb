@@ -8,6 +8,7 @@ require 'java'
 require 'awesome_print'
 java_import 'co.elastic.connectors.api.Connector'
 java_import 'java.util.List'
+require 'connectors_exception_tracking'
 
 java_package 'co.elastic.connectors.hello.world'
 class HelloWorld
@@ -28,6 +29,9 @@ class HelloWorld
 
   def do_risky_thing
     do_risky_thing_helper
+  rescue StandardError => e
+    ConnectorsExceptionTracking.log_exception(e)
+    raise
   end
 
   def do_risky_thing_helper
