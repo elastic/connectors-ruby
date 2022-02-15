@@ -1,6 +1,13 @@
 # Connectors
 The new home of Elastic Connectors
 
+### System Requirements
+- java 11
+- jruby (see [.ruby-version](.ruby-version))
+- bundler 2.2.29
+
+### Setup
+1. `bundle install`
 
 ### Building
 run `./mvnw clean install`
