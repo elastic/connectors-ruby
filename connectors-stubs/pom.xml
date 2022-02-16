@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>connectors-api</artifactId>
+    <artifactId>connectors-stubs</artifactId>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -24,12 +24,6 @@
             <groupId>org.jruby</groupId>
             <artifactId>jruby-complete</artifactId>
         </dependency>
-        <dependency>
-            <groupId>co.elastic.connectors</groupId>
-            <artifactId>connectors-stubs</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- test dependencies -->
         <dependency>
@@ -37,6 +31,7 @@
             <artifactId>spock-core</artifactId>
         </dependency>
     </dependencies>
+
 
     <build>
         <plugins>

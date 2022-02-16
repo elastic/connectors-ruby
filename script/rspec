@@ -8,6 +8,12 @@
 # The application 'rspec' is installed as part of a gem, and
 # this file is here to facilitate running it.
 #
+include Java
+if ENV['RSPEC_JAVA_CLASSPATH']
+  classpath = ENV['RSPEC_JAVA_CLASSPATH'].split(';').map { |path| "file:#{path}" }
+  classpath.each { |path| $CLASSPATH << path }
+end
+
 require 'pathname'
 ENV['BUNDLE_GEMFILE'] ||= File.expand_path("../../Gemfile",
                                            Pathname.new(__FILE__).realpath)
