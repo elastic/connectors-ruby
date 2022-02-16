@@ -164,6 +164,7 @@
                                 <environmentVariables>
                                     <RSPEC_JAVA_CLASSPATH>${maven.compile.classpath}</RSPEC_JAVA_CLASSPATH>
                                 </environmentVariables>
+                                <skip>${skipTests}</skip>
                             </configuration>
                         </execution>
                     </executions>
