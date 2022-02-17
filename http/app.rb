@@ -26,7 +26,7 @@ get '/documents' do
   return { results: hello_world.fetch_Documents(), cursor: nil }.to_json
 end
 
-get '/file/:id' do |_id|
+post '/download' do
   file = File.join(__dir__, 'cat.jpg')
   send_file(file, type: 'image/jpeg', disposition: 'inline')
 end

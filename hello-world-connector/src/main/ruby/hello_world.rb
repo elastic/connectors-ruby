@@ -33,6 +33,16 @@ class HelloWorld
       {
         'id' => 'welp_4',
         'body' => 'Without Title Test'
+      },
+      {
+        'id' => 'kitty',
+        'title' => 'I would title this kitty as "kittiest kitty of all kitties"',
+        'body' => 'kitty does have a body indeed',
+        'download' => {
+          'id' => '1',
+          'name' => 'can I download a kitty',
+          'size' => 20971520
+        }
       }
     ]
     puts 'these are the documents:'
@@ -40,7 +50,8 @@ class HelloWorld
     documents.map do |doc|
       {
         :action => "create_or_update",
-        :document => doc
+        :document => doc,
+        :download => doc['download']
       }
     end
   end
