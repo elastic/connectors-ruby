@@ -28,3 +28,11 @@ hs_err_pid*
 
 # maven
 target
+
+# bundler state
+/.bundle
+/vendor/bundle/
+/vendor/ruby/
+/vendor/filebeat/
+/vendor/metricbeat/
+/vendor/jruby/
