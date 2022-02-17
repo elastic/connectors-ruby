@@ -33,11 +33,11 @@ class ExampleConsumerTest extends Specification {
         then:
         1==1
 
-        when: "active_support"
-        runtime.executeScript("require 'active_support'", 'foo.rb') // not transitively included
+        when: "nokogiri"
+        runtime.executeScript("require 'nokogiri'", 'foo.rb') // not transitively included
 
         then:
         LoadError e = thrown(LoadError)
-        e.message.contains("no such file to load -- active_support")
+        e.message.contains("no such file to load -- nokogiri")
     }
 }

@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 gem 'bundler', '2.2.29'
 
 gem 'activesupport', '5.2.6'
+gem 'bson', '~> 4.2.2'
 
 group :test do
   gem 'rspec-core', '~> 3.10.1'

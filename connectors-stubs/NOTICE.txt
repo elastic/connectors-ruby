@@ -6,4 +6,11 @@ This product includes software developed by The Apache Software Foundation (http
 Third party libraries used by connectors-stubs:
 ===============================================
 
+  A toolkit of support libraries and Ruby core extensions extracted from the Rails framework. under MIT License
+  Daylight savings aware timezone library under MIT License
+  minitest provides a complete suite of testing facilities supporting TDD, BDD, mocking, and benchmarking under MIT License
+  Modern concurrency tools for Ruby. Inspired by Erlang, Clojure, Scala, Haskell, F#, C#, Java, and classic concurrency patterns. under MIT License
+  New wave Internationalization support for Ruby under MIT License
+  Ruby Implementation of the BSON specification under Apache License Version 2.0
+  Thread-safe collections and utilities for Ruby under Apache-2.0
 

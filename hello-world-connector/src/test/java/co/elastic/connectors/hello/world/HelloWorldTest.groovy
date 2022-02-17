@@ -31,6 +31,7 @@ class HelloWorldTest extends Specification {
 
         then:
         Exception e = thrown()
+        e.message.contains("Oh dear, an error")
         e.printStackTrace()
     }
 

@@ -18,6 +18,16 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>bson</artifactId>
+            <type>gem</type>
+        </dependency>
+        <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>activesupport</artifactId>
+            <type>gem</type>
+        </dependency>
 
         <!-- provided dependencies -->
         <dependency>
