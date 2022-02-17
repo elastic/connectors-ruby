@@ -17,43 +17,53 @@ class HelloWorld
   java_signature 'List fetchDocuments()'
   def fetch_Documents
     documents = [
+
       {
-        'id' => 'welp_1',
-        'title' => 'Traditional Test',
-        'body' => 'Hello, world'
+        :action => "create_or_update",
+        :document => {
+          'id' => 'welp_1',
+          'title' => 'Traditional Test',
+          'body' => 'Hello, world'
+        }
       },
       {
-        'title' => 'Without Id Test',
-        'body' => 'Hello, world'
+        :action => "create_or_update",
+        :document => {
+          'title' => 'Without Id Test',
+          'body' => 'Hello, world'
+        }
       },
       {
-        'id' => 'welp_3',
-        'title' => 'Without Body Test'
+        :action => "create_or_update",
+        :document => {
+          'id' => 'welp_3',
+          'title' => 'Without Body Test'
+        }
       },
       {
-        'id' => 'welp_4',
-        'body' => 'Without Title Test'
+        :action => "create_or_update",
+        :document => {
+          'id' => 'welp_4',
+          'body' => 'Without Title Test'
+        }
       },
       {
-        'id' => 'kitty',
-        'title' => 'I would title this kitty as "kittiest kitty of all kitties"',
-        'body' => 'kitty does have a body indeed',
-        'download' => {
+        :action => "create_or_update",
+        :document => {
+          'id' => 'kitty',
+          'title' => 'I would title this kitty as "kittiest kitty of all kitties"',
+          'body' => 'kitty does have a body indeed'
+        },
+        :download => {
           'id' => '1',
-          'name' => 'can I download a kitty',
+          'name' => 'can I download a kitty.jpg',
           'size' => 20971520
         }
       }
     ]
     puts 'these are the documents:'
     ap documents
-    documents.map do |doc|
-      {
-        :action => "create_or_update",
-        :document => doc,
-        :download => doc['download']
-      }
-    end
+    documents
   end
 
   def do_risky_thing
