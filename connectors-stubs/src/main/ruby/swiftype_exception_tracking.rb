@@ -22,6 +22,15 @@ class Swiftype::ExceptionTracking
     logger.error { "Context: #{context.inspect}" } if context
   end
 
+  def self.generate_error_message(exception, message, context)
+    context = { :message_id => exception.id }.merge(context || {}) if exception.respond_to?(:id)
+    context_message = context && "Context: #{context.inspect}"
+    ['Exception', message, exception.class.to_s, exception.message, context_message]
+      .compact
+      .map { |part| part.to_s.dup.force_encoding('UTF-8') }
+      .join(': ')
+  end
+
   def self.generate_stack_trace(exception)
     full_message = exception.full_message
 

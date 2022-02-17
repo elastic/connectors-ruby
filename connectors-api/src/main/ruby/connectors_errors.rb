@@ -6,6 +6,8 @@
 
 require 'java'
 
+require 'active_support/core_ext/string'
+
 java_package 'co.elastic.connectors.api'
 
 # Exports full error message and stack trace for storage in Connectors::Models::Job
