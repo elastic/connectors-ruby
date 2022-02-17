@@ -1,8 +1,11 @@
-.phony: install credentials run
+.phony: build_java_artifacts install credentials run
 
 install:
 	bundle config set --local path 'vendor/bundle'
 	bundle install
+
+build_java_artifacts:
+	./mvnw clean install
 
 credentials:
 	vaulter read ws-google-drive-service-account --json > http/ent-search-dev.json
