@@ -36,3 +36,6 @@ target
 /vendor/filebeat/
 /vendor/metricbeat/
 /vendor/jruby/
+
+# temp file with auth credentials
+http/ent-search-dev.json
