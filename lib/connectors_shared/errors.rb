@@ -31,7 +31,6 @@ module ConnectorsShared
   end
 
   class ClientError < StandardError; end
-  class MaxQueueSizeExceeded < StandardError; end
   class EvictionWithNoProgressError < StandardError; end
   class EvictionError < StandardError
     attr_accessor :cursors
