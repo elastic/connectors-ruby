@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'connectors-shared'
+  s.name        = 'connectors'
   s.version     = '0.0.1'
   s.summary     = "Connectors Gem containing shared implementation of apis used by Enterprise Search"
   s.description = ""

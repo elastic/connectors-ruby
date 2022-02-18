@@ -19,4 +19,4 @@ test:
 
 build:
 	mkdir -p .gems
-	gem build connectors_shared.gemspec -o .gems/connectors_shared-${gem_version}.gem
+	gem build connectors.gemspec -o .gems/connectors-${gem_version}.gem
