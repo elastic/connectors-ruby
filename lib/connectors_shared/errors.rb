@@ -32,7 +32,6 @@ module ConnectorsShared
 
   class ClientError < StandardError; end
   class MaxQueueSizeExceeded < StandardError; end
-
   class EvictionWithNoProgressError < StandardError; end
   class EvictionError < StandardError
     attr_accessor :cursors
@@ -55,7 +54,6 @@ module ConnectorsShared
   class ThrottlingError < SuspendedJobError; end
   class TransientServerError < SuspendedJobError; end
   class UnrecoverableServerError < StandardError; end
-
   class TransientSubextractorError < StandardError; end
   class JobDocumentLimitError < StandardError; end
   class JobClaimingError < StandardError; end

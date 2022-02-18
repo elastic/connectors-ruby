@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Pull gem index from rubygems
 source 'https://rubygems.org'
 
@@ -8,8 +9,8 @@ gem 'activesupport', '5.2.6'
 gem 'bson', '~> 4.2.2'
 
 group :test do
-  gem 'rspec-core', '~> 3.10.1'
   gem 'rspec-collection_matchers', '~> 1.2.0'
+  gem 'rspec-core', '~> 3.10.1'
   gem 'rspec_junit_formatter'
 end
 
@@ -17,5 +18,5 @@ end
 gem 'sinatra'
 gem 'rack'
 gem 'awesome_print'
-gemspec(:name => "connectors-api")
-gemspec(:name => "connectors-stubs")
+gemspec 'connectors-api'
+gemspec 'connectors-stubs'

@@ -6,9 +6,9 @@
 
 module ConnectorsShared
   class Constants
-    THUMBNAIL_FIELDS = %w[_thumbnail_80x100 _thumbnail_310x430]
-    SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version]
-    ALLOW_FIELD = '_allow_permissions'
-    DENY_FIELD = '_deny_permissions'
+    THUMBNAIL_FIELDS = %w[_thumbnail_80x100 _thumbnail_310x430].freeze
+    SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version].freeze
+    ALLOW_FIELD = '_allow_permissions'.freeze
+    DENY_FIELD = '_deny_permissions'.freeze
   end
 end

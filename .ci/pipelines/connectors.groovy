@@ -13,24 +13,24 @@ eshPipeline(
     repository: 'connectors',
     stage_name: 'Connectors Unit Tests',
     stages: [
-        [
-            name: 'Tests',
-            type: 'script',
-            label: 'Makefile',
-            script: {
-                sh 'make test'
-            },
-            match_on_all_branches: true,
-        ],
-        [
-            name: 'Packaging',
-            type: 'script',
-            label: 'Makefile',
-            script: {
-                sh 'make build'
-            },
-            match_on_all_branches: true,
-        ]
+       // [
+       //     name: 'Tests',
+       //     type: 'script',
+       //     label: 'Makefile',
+       //     script: {
+       //         sh 'make test'
+       //     },
+       //     match_on_all_branches: true,
+       // ],
+       // [
+       //     name: 'Packaging',
+       //     type: 'script',
+       //     label: 'Makefile',
+       //     script: {
+       //         sh 'make build'
+       //     },
+       //     match_on_all_branches: true,
+       // ]
     ],
     slack_channel: 'workplace-search-connectors'
 )
