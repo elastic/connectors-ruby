@@ -4,15 +4,15 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require_relative '../../lib/connectors/errors'
-require_relative '../../lib/connectors/logger'
-require_relative '../../lib/connectors/monitor'
+require_relative '../../lib/connectors_shared/errors'
+require_relative '../../lib/connectors_shared/logger'
+require_relative '../../lib/connectors_shared/monitor'
 
 
-RSpec.describe Connectors::Monitor do
+RSpec.describe ConnectorsShared::Monitor do
   class StubConnector
     def log_debug(message)
-      Connectors::Logger.debug(message)
+      ConnectorsShared::Logger.debug(message)
     end
   end
 
@@ -24,7 +24,7 @@ RSpec.describe Connectors::Monitor do
       11.times do |n|
         subject.note_error(StandardError.new("This is error number #{n}"))
       end
-    end.to raise_error(Connectors::MaxSuccessiveErrorsExceededError)
+    end.to raise_error(ConnectorsShared::MaxSuccessiveErrorsExceededError)
   end
 
 

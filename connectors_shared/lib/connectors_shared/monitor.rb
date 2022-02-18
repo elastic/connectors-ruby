@@ -10,7 +10,7 @@ require_relative './errors'
 require_relative '../stubs/app_config' unless defined?(Rails)
 require_relative '../stubs/swiftype/exception_tracking' unless defined?(Rails)
 
-module Connectors
+module ConnectorsShared
   class Monitor
     attr_reader :total_error_count, :success_count, :consecutive_error_count, :error_queue
 

@@ -7,7 +7,7 @@
 require_relative '../stubs/app_config' unless defined?(Rails)
 require 'active_support/core_ext/module'
 
-module Connectors
+module ConnectorsShared
   class Logger
     SUPPORTED_LOG_LEVELS = %i[fatal error warn info debug].freeze
 

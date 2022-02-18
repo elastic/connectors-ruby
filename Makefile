@@ -15,8 +15,8 @@ run:
 gem_version = 0.0.1
 
 test:
-	rspec connectors/spec
+	rspec connectors_shared/spec
 
 build:
 	mkdir -p .gems
-	gem build connectors.gemspec -o .gems/connectors-${gem_version}.gem
+	gem build connectors_shared.gemspec -o .gems/connectors-shared-${gem_version}.gem

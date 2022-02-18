@@ -11,7 +11,7 @@ require_relative '../stubs/swiftype/exception_tracking' unless defined?(Rails)
 require 'bson'
 require_relative './logger'
 
-module Connectors
+module ConnectorsShared
   class ExceptionTracking
     class << self
       def capture_message(message, context = {})
@@ -23,7 +23,7 @@ module Connectors
       end
 
       def log_exception(exception, message = nil)
-        Swiftype::ExceptionTracking.log_exception(exception, message, :logger => Connectors::Logger.logger)
+        Swiftype::ExceptionTracking.log_exception(exception, message, :logger => ConnectorsShared::Logger.logger)
       end
 
       def augment_exception(exception)

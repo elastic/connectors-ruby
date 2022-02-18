@@ -4,17 +4,10 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'java'
 require 'awesome_print'
-java_import 'co.elastic.connectors.api.Connector'
-java_import 'java.util.List'
-require 'connectors_exception_tracking'
+require_relative '../connectors_shared/exception_tracking'
 
-java_package 'co.elastic.connectors.hello.world'
 class HelloWorld
-  java_implements 'co.elastic.connectors.api.Connector'
-
-  java_signature 'List fetchDocuments()'
   def fetch_Documents
     documents = [
 

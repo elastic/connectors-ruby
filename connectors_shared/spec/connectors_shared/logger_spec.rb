@@ -4,9 +4,9 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require_relative '../../lib/connectors/logger'
+require_relative '../../lib/connectors_shared/logger'
 
-RSpec.describe Connectors::Logger do
+RSpec.describe ConnectorsShared::Logger do
   let(:message) { 'this is a test message' }
 
   it "can give the connectors logger" do

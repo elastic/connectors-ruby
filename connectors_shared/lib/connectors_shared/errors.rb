@@ -6,7 +6,7 @@
 
 require 'active_support/core_ext/string'
 
-module Connectors
+module ConnectorsShared
   class DocumentError
     attr_accessor :error_class, :error_message, :stack_trace, :error_id
 

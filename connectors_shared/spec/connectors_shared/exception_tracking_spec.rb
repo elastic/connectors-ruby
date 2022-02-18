@@ -4,9 +4,9 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require_relative '../../lib/connectors/exception_tracking'
+require_relative '../../lib/connectors_shared/exception_tracking'
 
-RSpec.describe Connectors::ExceptionTracking do
+RSpec.describe ConnectorsShared::ExceptionTracking do
   let(:message) { 'this is a test message' }
   let(:exception) { StandardError.new(message) }
 
