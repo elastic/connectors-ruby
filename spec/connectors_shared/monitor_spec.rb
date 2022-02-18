@@ -4,10 +4,10 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require_relative '../../lib/connectors_shared/errors'
-require_relative '../../lib/connectors_shared/logger'
-require_relative '../../lib/connectors_shared/monitor'
-
+require 'spec_helper'
+require 'connectors_shared/errors'
+require 'connectors_shared/logger'
+require 'connectors_shared/monitor'
 
 RSpec.describe ConnectorsShared::Monitor do
   class StubConnector
