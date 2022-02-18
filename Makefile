@@ -18,4 +18,4 @@ credentials:
 	vaulter read ws-google-drive-service-account --json > http/ent-search-dev.json
 
 run:
-	cd http; bundle exec rackup config.ru
+	cd app; bundle exec rackup config.ru
