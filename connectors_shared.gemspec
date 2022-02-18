@@ -6,13 +6,13 @@ Gem::Specification.new do |s|
   s.authors     = ["Elastic"]
   s.email       = 'ent-search-dev@elastic.co'
   s.files       = [
-    "connectors_shared/lib/connectors_shared/constants.rb",
-    "connectors_shared/lib/connectors_shared/errors.rb",
-    "connectors_shared/lib/connectors_shared/exception_tracking.rb",
-    "connectors_shared/lib/connectors_shared/logger.rb",
-    "connectors_shared/lib/connectors_shared/monitor.rb",
-    "connectors_shared/lib/stubs/swiftype/exception_tracking.rb",
-    "connectors_shared/lib/stubs/app_config.rb"
+    "lib/connectors_shared/constants.rb",
+    "lib/connectors_shared/errors.rb",
+    "lib/connectors_shared/exception_tracking.rb",
+    "lib/connectors_shared/logger.rb",
+    "lib/connectors_shared/monitor.rb",
+    "lib/stubs/swiftype/exception_tracking.rb",
+    "lib/stubs/app_config.rb"
   ]
   s.homepage    =
     'https://elastic.co'
