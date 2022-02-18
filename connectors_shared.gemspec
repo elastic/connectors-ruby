@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Elastic"]
   s.email       = 'ent-search-dev@elastic.co'
   s.files       = [
+    "lib/connectors_shared.rb",
     "lib/connectors_shared/constants.rb",
     "lib/connectors_shared/errors.rb",
     "lib/connectors_shared/exception_tracking.rb",
