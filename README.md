@@ -39,7 +39,7 @@ and its tests. In these instances, you can run just rspec tests for your ruby fi
 To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work. You can run all of them for now with a `make` command.
 
 ```shell
-make .phony
+make all
 ```
 
 ### Project Structure
