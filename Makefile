@@ -1,4 +1,11 @@
-all: install build_java_artifacts credentials run
+all: install credentials run
+
+test:
+	rspec spec
+
+build:
+	mkdir -p .gems
+	gem build connectors_shared.gemspec -o .gems/connectors-shared-snapshot.gem
 
 install:
 	bundle config set --local path 'vendor/bundle'
@@ -12,11 +19,3 @@ credentials:
 
 run:
 	cd http; bundle exec rackup config.ru
-gem_version = 0.0.1
-
-test:
-	rspec spec
-
-build:
-	mkdir -p .gems
-	gem build connectors_shared.gemspec -o .gems/connectors-shared-snapshot.gem
