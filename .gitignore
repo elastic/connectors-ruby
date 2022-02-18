@@ -29,6 +29,9 @@ hs_err_pid*
 # maven
 target
 
+# temp folder for built gems
+.gems
+
 # bundler state
 /.bundle
 /vendor/bundle/

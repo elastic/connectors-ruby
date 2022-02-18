@@ -12,3 +12,11 @@ credentials:
 
 run:
 	cd http; bundle exec rackup config.ru
+gem_version = 0.0.1
+
+test:
+	rspec connectors/spec
+
+build:
+	mkdir -p .gems
+	gem build connectors_shared.gemspec -o .gems/connectors_shared-${gem_version}.gem

@@ -17,3 +17,5 @@ end
 gem 'sinatra'
 gem 'rack'
 gem 'awesome_print'
+gemspec(:name => "connectors-api")
+gemspec(:name => "connectors-stubs")
