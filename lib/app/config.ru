@@ -1,4 +1,4 @@
-$: << '../lib'
+$: << '../'
 
 require 'rack'
 require './app'
