@@ -27,7 +27,8 @@ eshPipeline(
         label: 'Makefile',
         script: {
             sh 'make build'
-        }
+        },
+        match_on_all_branches: true,
     ]
     slack_channel: 'workplace-search-connectors'
 )
