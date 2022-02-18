@@ -1,4 +1,4 @@
-.phony: install build_java_artifacts credentials run
+all: install build_java_artifacts credentials run
 
 install:
 	bundle config set --local path 'vendor/bundle'
