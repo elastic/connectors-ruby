@@ -2,7 +2,7 @@
 
 require 'sinatra'
 require 'json'
-require_relative '../hello-world-connector/src/main/ruby/hello_world'
+require 'hello_world_connector/hello_world'
 
 
 get '/' do
