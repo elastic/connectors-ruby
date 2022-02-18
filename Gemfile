@@ -12,3 +12,8 @@ group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
   gem 'rspec_junit_formatter'
 end
+
+# Dependencies for the HTTP service
+gem 'sinatra'
+gem 'rack'
+gem 'awesome_print'
