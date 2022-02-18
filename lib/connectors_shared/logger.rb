@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require_relative '../stubs/app_config' unless defined?(Rails)
+require 'stubs/app_config' unless defined?(Rails)
 require 'active_support/core_ext/module'
 
 module ConnectorsShared

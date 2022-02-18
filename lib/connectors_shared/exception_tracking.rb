@@ -7,9 +7,9 @@
 
 # frozen_string_literal: true
 
-require_relative '../stubs/swiftype/exception_tracking' unless defined?(Rails)
+require 'stubs/swiftype/exception_tracking' unless defined?(Rails)
 require 'bson'
-require_relative './logger'
+require 'connectors_shared/logger'
 
 module ConnectorsShared
   class ExceptionTracking

@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require_relative './errors'
-require_relative '../stubs/app_config' unless defined?(Rails)
-require_relative '../stubs/swiftype/exception_tracking' unless defined?(Rails)
+require 'connectors_shared/errors'
+require 'stubs/app_config' unless defined?(Rails)
+require 'stubs/swiftype/exception_tracking' unless defined?(Rails)
 
 module ConnectorsShared
   class Monitor
