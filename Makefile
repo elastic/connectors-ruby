@@ -15,7 +15,7 @@ build_java_artifacts:
 	./mvnw clean install
 
 credentials:
-	vaulter read ws-google-drive-service-account --json > http/ent-search-dev.json
+	vaulter read ws-google-drive-service-account --json > ent-search-dev.json
 
 run:
 	cd lib/app; bundle exec rackup config.ru
