@@ -235,8 +235,15 @@ module Base
     end
 
     def client
-      @client ||= FritoPie::ContentSourceService.source_for(content_source.service_type).web_client(
-        :content_source => content_source
+      @client ||= Connectors::ContentSources::Office365::CustomClient.new(
+        :access_token => content_source.access_token,
+        :cursors => content_source.cursors&.fetch(Connectors::ContentSources::Office365::Extractor::DRIVE_IDS_CURSOR_KEY, {}) || {},
+        :ensure_fresh_auth => lambda do |client|
+          if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes
+            content_source.authorization_details!
+            client.update_auth_data!(content_source.access_token)
+          end
+        end
       )
     end
 
