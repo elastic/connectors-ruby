@@ -1,7 +1,7 @@
 all: install credentials run
 
 test:
-	rspec spec
+	bundle exec rspec spec
 
 build:
 	mkdir -p .gems

@@ -58,7 +58,6 @@ module ConnectorsShared
       raise_if_necessary
     end
 
-    java_signature 'void close()'
     def finalize
       total_documents = @total_error_count + @success_count
       if total_documents > 0 && @total_error_count.to_f / total_documents > @max_error_ratio
