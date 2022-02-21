@@ -39,5 +39,15 @@ post '/oauth/init' do
   content_type :json
   params = request.params
   logger.info "Received client ID: #{params[:client_id]} and client secret: #{params[:client_secret]}"
-  return { oauth2redirect: 'https://accounts.google.com/o/oauth2/auth' }.to_json
+  logger.info "Received redirect URL: #{params[:redirect_uri]}"
+  { oauth2redirect: 'https://accounts.google.com/o/oauth2/auth' }.to_json
+end
+
+post '/oauth/exchange' do
+  content_type :json
+  params = request.params
+  logger.info "Received auth code: #{params[:authorization_code]}"
+  logger.info "Received redirect URL: #{params[:redirect_uri]}"
+  # TODO need to request the tokens with auth code
+  { access_token: 'dummy_access_token', refresh_token: 'dummy_refresh_token' }.to_json
 end
