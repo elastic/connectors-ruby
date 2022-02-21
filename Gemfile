@@ -14,6 +14,7 @@ group :test do
   gem 'rspec_junit_formatter'
   gem 'rubocop'
   gem 'rspec-mocks'
+  gem 'webmock'
 end
 
 # Dependencies for the HTTP service
