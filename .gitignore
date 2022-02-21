@@ -29,6 +29,9 @@ hs_err_pid*
 # maven
 target
 
+# temp folder for built gems
+.gems
+
 # bundler state
 /.bundle
 /vendor/bundle/
@@ -38,4 +41,4 @@ target
 /vendor/jruby/
 
 # temp file with auth credentials
-http/ent-search-dev.json
+ent-search-dev.json

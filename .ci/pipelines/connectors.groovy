@@ -5,7 +5,7 @@
  */
 
 // Loading the shared lib
-@Library(['estc', 'entsearch']) _
+@Library(['apm', 'estc', 'entsearch']) _
 
 eshPipeline(
     timeout: 45,
@@ -13,17 +13,27 @@ eshPipeline(
     repository: 'connectors',
     stage_name: 'Connectors Unit Tests',
     stages: [
-        [
-            name: 'Maven Build',
+       [
+            name: 'Tests',
             type: 'script',
-            label: 'Maven Build',
             script: {
-                withMaven {
-                    sh '.ci/script/build.sh'
+                eshWithRbenv {
+                  sh 'make install test'
                 }
             },
             match_on_all_branches: true,
-        ]
+       ],
+       [
+           name: 'Packaging',
+           type: 'script',
+           script: {
+               eshWithRbenv {
+                 sh 'make install build'
+               }
+           },
+           artifacts: [[pattern: 'app/.gems/*.gem']],
+           match_on_all_branches: true,
+       ]
     ],
     slack_channel: 'workplace-search-connectors'
 )

@@ -6,7 +6,6 @@ How to build and contribute to Connectors.
 
 ### Requirements
 
-- Java 11
 - JRuby
 - OS: Unix/Linux
 
@@ -15,26 +14,22 @@ How to build and contribute to Connectors.
 From the root level of this repository:
 
 ```shell
-./mvnw clean install -DskipTests
+make install
 ```
 
 ### Building
 
-For all projects, run from project root. For single module, run from
-module root.
+The repository can generate a ruby gem, if needed.
 
 ```shell
 # Build
-./mvnw clean install -DskipTests
+make build
 ```
 
 ### Testing
 
-For all projects, run from project root. For single module, run from
-module root.
-
 ```shell
-./mvnw clean test
+make test
 ```
 
 It is expected that any contribution will include unit tests. Tests must be passing in order to merge any pull request.
@@ -78,4 +73,3 @@ We will create branches for all minor releases.
 4. Even after the build goes green, artifacts may take 30 minutes or so to appear in [https://repo1.maven.org/maven2/co/elastic/connectors](https://repo1.maven.org/maven2/co/elastic/connectors)
 5. In the mean time, verify the automatic (or manually deploy) [snapshot build](https://internal-ci.elastic.co/job/elastic+connectors+deploy-snapshot/) for the new patch SNAPSHOT (`1.0.2-SNAPSHOT` in this example)
 6. Once the release artifacts are available from Maven Central, [create a new Github Release](https://github.com/elastic/connectors/releases/new) from the new tag and artifacts.
-
