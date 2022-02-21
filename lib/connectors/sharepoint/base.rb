@@ -14,8 +14,8 @@ module Base
     end
 
     def middleware!
-      @middleware = Array.wrap(additional_middleware)
-      @middleware += Array.wrap(default_middleware)
+      @middleware = Array(additional_middleware)
+      @middleware += Array(default_middleware)
       @middleware.compact!
     end
 
