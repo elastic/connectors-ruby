@@ -13,6 +13,7 @@ group :test do
   gem 'rspec-core', '~> 3.10.1'
   gem 'rspec_junit_formatter'
   gem 'rubocop'
+  gem 'rspec-mocks'
 end
 
 # Dependencies for the HTTP service

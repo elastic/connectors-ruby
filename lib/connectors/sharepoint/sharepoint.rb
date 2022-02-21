@@ -37,9 +37,10 @@ module Sharepoint
   end
 
   class HttpCallWrapper
-    def initialize
-
-      @extractor = Sharepoint::Extractor.new
+    def initialize(config)
+      features = {}
+      @extractor = Sharepoint::Extractor.new(
+        config: config, features: features)
     end
 
 
