@@ -240,10 +240,10 @@ module Base
         :access_token => 'BLA BLA ACCESS TOKEN',
         :cursors => {},
         :ensure_fresh_auth => lambda do |client|
-          if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes
-            content_source.authorization_details!
-            client.update_auth_data!(content_source.access_token)
-          end
+          # if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes
+          #   content_source.authorization_details!
+          #   client.update_auth_data!(content_source.access_token)
+          # end
         end
       )
     end
