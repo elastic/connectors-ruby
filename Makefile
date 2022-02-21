@@ -5,7 +5,7 @@ test:
 
 build:
 	mkdir -p .gems
-	gem build ent-search-connectors.gemspec
+	gem build connectors_shared.gemspec
 	mv *.gem .gems/
 
 install:
