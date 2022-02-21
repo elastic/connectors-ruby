@@ -54,22 +54,6 @@ module Sharepoint
     end
   end
 
-  class Extractor < Office365::Extractor
-    private
-
-    def convert_id_to_fp_id(id)
-      SharePoint::Adapter.share_point_id_to_fp_id(id)
-    end
-
-    def adapter
-      Connectors::ContentSources::SharePoint::Adapter
-    end
-
-    def drives
-      client.share_point_drives(fields: %w[id owner name driveType])
-    end
-  end
-
   class AdapterBase
     def self.generate_id_helpers(method_prefix, id_prefix)
       define_singleton_method("#{method_prefix}_id_to_fp_external_id") do |id|
@@ -152,6 +136,23 @@ module Sharepoint
       end
 
       adapted_object.symbolize_keys
+    end
+  end
+
+  class Extractor < Office365::Extractor
+
+    private
+
+    def convert_id_to_fp_id(id)
+      SharePoint::Adapter.share_point_id_to_fp_id(id)
+    end
+
+    def adapter
+      Connectors::ContentSources::SharePoint::Adapter
+    end
+
+    def drives
+      client.share_point_drives(:fields => %w(id owner name driveType))
     end
   end
 end

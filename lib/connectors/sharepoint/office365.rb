@@ -280,7 +280,7 @@ module Office365
     end
   end
 
-  class Extractor
+  class Extractor < Base::Extractor
     DRIVE_IDS_CURSOR_KEY = 'drive_ids'
 
     def yield_document_changes(modified_since: nil, &block)
@@ -369,7 +369,7 @@ module Office365
 
     def drives_to_index
       @drives_to_index ||=
-        if config.index_all_drives?
+        if self.config().index_all_drives?
           drives
         else
           drives.select { |d| config.drive_ids.include?(d.id) }
@@ -390,7 +390,7 @@ module Office365
       raise NotImplementedError
     end
 
-    def convert_id_to_fp_id(_id)
+    def convert_id_to_fp_id(id)
       raise NotImplementedError
     end
 
