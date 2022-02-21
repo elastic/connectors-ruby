@@ -2,7 +2,7 @@
 
 require 'sinatra'
 require 'json'
-require 'hello_world_connector/hello_world'
+require_relative '../connectors/dummy/dummy'
 
 
 get '/' do
