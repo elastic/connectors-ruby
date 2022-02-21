@@ -8,6 +8,7 @@ build:
 	gem build connectors_shared.gemspec -o .gems/connectors-shared-snapshot.gem
 
 install:
+	- gem install bundler
 	bundle config set --local path 'vendor/bundle'
 	bundle install
 

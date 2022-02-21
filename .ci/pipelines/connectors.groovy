@@ -16,7 +16,6 @@ eshPipeline(
        [
             name: 'Tests',
             type: 'script',
-            label: 'Makefile',
             script: {
                 eshWithRbenv {
                   sh 'make install test'
@@ -24,15 +23,17 @@ eshPipeline(
             },
             match_on_all_branches: true,
        ],
-       // [
-       //     name: 'Packaging',
-       //     type: 'script',
-       //     label: 'Makefile',
-       //     script: {
-       //         sh 'make build'
-       //     },
-       //     match_on_all_branches: true,
-       // ]
+       [
+           name: 'Packaging',
+           type: 'script',
+           script: {
+               eshWithRbenv {
+                 sh 'make install build'
+               }
+           },
+           artifacts: [[pattern: '.gems/connectors-shared-snapshot.gem']],
+           match_on_all_branches: true,
+       ]
     ],
     slack_channel: 'workplace-search-connectors'
 )
