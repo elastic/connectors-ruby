@@ -12,3 +12,7 @@ Gem::Specification.new do |s|
     'https://elastic.co'
   s.license       = 'Nonstandard'
 end
+
+# TODO: figure out how to pin versions without harming ent-search repo
+s.add_dependency 'activesupport'
+s.add_dependency 'bson'
