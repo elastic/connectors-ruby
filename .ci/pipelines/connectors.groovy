@@ -31,7 +31,7 @@ eshPipeline(
                  sh 'make install build'
                }
            },
-           artifacts: [[pattern: 'app/.gems/connectors-shared-snapshot.gem']],
+           artifacts: [[pattern: 'app/.gems/*.gem']],
            match_on_all_branches: true,
        ]
     ],
