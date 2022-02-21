@@ -7,7 +7,7 @@ class Config
   attr_reader :cursors
 
   def initialize
-    @cursors = {}   
+    @cursors = {}
   end
 
   def index_all_drives?
