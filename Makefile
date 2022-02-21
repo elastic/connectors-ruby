@@ -5,15 +5,12 @@ test:
 
 build:
 	mkdir -p .gems
-	gem build connectors_shared.gemspec -o .gems/connectors-shared-snapshot.gem
+	gem build ent-search-connectors.gemspec -o .gems/ent-search-connectors.gem
 
 install:
 	- gem install bundler -v 2.2.29
 	bundle config set --local path 'vendor/bundle'
 	bundle install
-
-build_java_artifacts:
-	./mvnw clean install
 
 credentials:
 	vaulter read ws-google-drive-service-account --json > ent-search-dev.json

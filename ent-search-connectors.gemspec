@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Gem::Specification.new do |s|
-  s.name        = 'connectors_shared'
+  s.name        = 'ent-search-connectors'
   s.version     = '0.0.1'
   s.summary     = 'Connectors Gem containing shared implementation of apis used by Enterprise Search'
   s.description = ''
