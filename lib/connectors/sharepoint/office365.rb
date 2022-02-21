@@ -1,5 +1,6 @@
 require 'connectors/sharepoint/base'
 require 'connectors_shared'
+require 'forwardable'
 
 module Office365
   class CustomClient < Base::CustomClient
