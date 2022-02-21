@@ -208,7 +208,7 @@ module Base
       ]
     )
 
-    attr_reader :content_source_id, :config, :features, :original_cursors
+    attr_reader :config, :features, :original_cursors
     attr_accessor :monitor
 
     delegate(
@@ -222,16 +222,11 @@ module Base
       :to => :content_source
     )
 
-    def initialize(content_source_id:, config:, features:, monitor: ConnectorsShared::Monitor.new(:connector => self))
-      @content_source_id = content_source_id
+    def initialize(config:, features:, monitor: ConnectorsShared::Monitor.new(:connector => self))
       @config = config
       @features = features
       @original_cursors = config.cursors.deep_dup
       @monitor = monitor
-    end
-
-    def content_source
-      @content_source ||= FritoPie::ContentSource.find(content_source_id)
     end
 
     def client!
@@ -378,7 +373,7 @@ module Base
     ConnectorsShared::Logger::SUPPORTED_LOG_LEVELS.each do |log_level|
       define_method(:"log_#{log_level}") do |message|
         if message.kind_of?(String)
-          message = "ContentSource[#{content_source_id}, #{content_source.service_type}]: #{message}"
+          message = "[Sharepoint]]: #{message}"
         end
         ConnectorsShared::Logger.public_send(log_level, message)
       end
@@ -429,73 +424,13 @@ module Base
     end
 
     def indexed_object_types
-      @_indexed_object_types ||= (
-        default_object_types +
-        configured_object_types -
-        excluded_object_types
-      ).uniq
+      default_object_types
     end
 
     def default_object_types
       raise NotImplementedError
     end
 
-    def configured_object_types
-      @_configured_object_types ||= begin
-        types = []
-
-        yield_configured_objects do |object_type, _|
-          types << object_type
-        end
-
-        types
-      end
-    end
-
-    def yield_configured_objects
-      Array.wrap(content_source&.indexing&.rules).each do |rule|
-        if indexing_rule_configures_object?(rule)
-          object_type = rule.fetch(:include)
-          fields = rule.fetch(:fields)
-          log_info("Yielding object type for extraction: #{object_type}")
-          yield object_type, fields
-        end
-      end
-    end
-
-    def indexing_rule_configures_object?(rule)
-      return false unless rule[:filter_type] == FritoPie::IndexingConfig::IndexingFilterType::OBJECT_TYPE
-      return false if rule[:include].blank?
-      return false if rule[:fields].blank?
-      return false if default_object_types.include?(rule.fetch(:include))
-
-      true
-    end
-
-    def excluded_object_types
-      Array.wrap(content_source&.indexing&.rules).map do |rule|
-        if indexing_rule_excludes_object_type?(rule)
-          rule.fetch(:exclude)
-        end
-      end.compact
-    end
-
-    def indexing_rule_excludes_object_type?(rule)
-      return false unless rule[:filter_type] == FritoPie::IndexingConfig::IndexingFilterType::OBJECT_TYPE
-      return false if rule[:exclude].blank?
-
-      true
-    end
-
-    def get_indexing_rule_for_object_type(object_type)
-      rules = content_source&.indexing&.rules || []
-
-      rules.find do |rule|
-        rule[:filter_type] == FritoPie::IndexingConfig::IndexingFilterType::OBJECT_TYPE &&
-          rule[:include].present? &&
-          rule[:include].casecmp(object_type).zero?
-      end
-    end
 
     private
 

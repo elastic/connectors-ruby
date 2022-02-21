@@ -4,7 +4,8 @@ require 'connectors/sharepoint/sharepoint'
 
 RSpec.describe Sharepoint::HttpCallWrapper do
   let(:backend) do
-    described_class.new
+    config = {}
+    described_class.new(config: config)
   end
 
   it 'can get documents' do

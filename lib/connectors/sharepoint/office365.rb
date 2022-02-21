@@ -471,7 +471,7 @@ module Office365
     end
   end
 
-  class Office365::Adapter < Base::Adapter
+  class Adapter < Base::Adapter
     def self.swiftype_document_from_file(_file)
       raise NotImplementedError
     end
