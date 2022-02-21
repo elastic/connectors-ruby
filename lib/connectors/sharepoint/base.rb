@@ -1,8 +1,24 @@
 require 'faraday'
 require 'httpclient'
 require 'active_support/core_ext/array/wrap'
+require 'active_support/core_ext/numeric/time'
 
 module Base
+  class ContentSource
+    def authorization_details
+      {
+        :expires_at => Time.now
+      }
+    end
+
+    def authorization_details!
+    end
+
+    def access_token
+      'HEY IT\'S A ME ACCESS TOKEN-IO!'
+    end
+  end
+
   class CustomClient
     attr_reader :base_url, :middleware, :ensure_fresh_auth
 
@@ -209,7 +225,7 @@ module Base
       ]
     )
 
-    attr_reader :config, :features, :original_cursors
+    attr_reader :content_source, :config, :features, :original_cursors
     attr_accessor :monitor
 
     delegate(
@@ -223,7 +239,8 @@ module Base
       :to => :content_source
     )
 
-    def initialize(config:, features:, monitor: ConnectorsShared::Monitor.new(:connector => self))
+    def initialize(content_source:, config:, features:, monitor: ConnectorsShared::Monitor.new(:connector => self))
+      @content_source = content_source
       @config = config
       @features = features
       @original_cursors = config.cursors.deep_dup
@@ -240,10 +257,10 @@ module Base
         :access_token => 'BLA BLA ACCESS TOKEN',
         :cursors => {},
         :ensure_fresh_auth => lambda do |client|
-          # if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes
-          #   content_source.authorization_details!
-          #   client.update_auth_data!(content_source.access_token)
-          # end
+          if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes
+            content_source.authorization_details!
+            client.update_auth_data!(content_source.access_token)
+          end
         end
       )
     end

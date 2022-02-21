@@ -2,6 +2,27 @@
 require 'connectors/sharepoint/office365'
 
 module Sharepoint
+
+  class HttpCallWrapper
+    def initialize(content_source, config)
+      features = {}
+      @extractor = Sharepoint::Extractor.new(
+        content_source: content_source,
+        config: config,
+        features: features
+      )
+    end
+
+    def get_document_batch
+      results = []
+
+      @extractor.yield_document_changes do |action, doc, subextractors|
+        results.add(doc)
+      end
+
+      results
+    end
+  end
   class Adapter < Office365::Adapter
     generate_id_helpers :share_point, 'share_point'
 
@@ -33,25 +54,6 @@ module Sharepoint
       def self.convert_id_to_fp_id(id)
         SharePoint::Adapter.share_point_id_to_fp_id(id)
       end
-    end
-  end
-
-  class HttpCallWrapper
-    def initialize(config)
-      features = {}
-      @extractor = Sharepoint::Extractor.new(
-        config: config, features: features)
-    end
-
-
-    def get_document_batch
-      results = []
-
-      @extractor.yield_document_changes do |action, doc, subextractors|
-        results.add(doc)
-      end
-
-      results
     end
   end
 
