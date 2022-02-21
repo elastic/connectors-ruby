@@ -8,7 +8,7 @@ require 'awesome_print'
 require 'connectors_shared/exception_tracking'
 
 class HelloWorld
-  def fetch_Documents
+  def get_document_batch
     documents = [
 
       {
