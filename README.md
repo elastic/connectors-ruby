@@ -2,67 +2,27 @@
 The new home of Elastic Connectors
 
 ### System Requirements
-- java 11
 - jruby (see [.ruby-version](.ruby-version))
 - bundler 2.2.29
 
 ### Setup
-1. `bundle install`
+1. `make install`
 
 ### Building
-run `./mvnw clean install`
-
-### Generating Java from Ruby
-This project uses Ruby source files (for historical reasons), and generates java code from them. To generate the code,
-the Maven Exec Plugin is used to execute the `script/build_jruby.sh` script for a given module. As an example,
-to run this goal for the `hello-world-connector`, run:
-
-```shell
-./mvnw clean exec:exec@build-ruby -pl hello-world-connector
-```
-
-The output generated Java source files can then be found in `hello-world-connector/target/generated-sources/`
-
+run `make build`
 
 ### Testing
-run `./mvnw clean test`
+run `make test`
 
-#### Testing Ruby changes only
-Sometimes, you may care less about testing all of the pieces of the project, or even about testing Java code generation
-and its tests. In these instances, you can run just rspec tests for your ruby files.
-
-```shell
-./mvnw dependency:build-classpath@mvn-classpath exec:exec@test-ruby -pl hello-world-connector
-```
+### Copying artifacts to Enterprise Search
+1. run `make build`
+2. copy the artifact in `.gems` directory to `vendor/cache` directory in Enterprise Search repository.
 
 ### Running a webserver with a Connector
 To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work. You can run all of them for now with a `make` command.
 
 ```shell
 make all
-```
-
-### Project Structure
-
-
-```
-.
-├── LICENSE                                                                            # License for this repo
-├── NOTICE.txt.template                                                                # Used to generate legal notices
-├── README.md                                                                          # This README
-├── connectors-api
-│         └── src/main/java/co/elastic/connectors/api/Connector.java                   # A Java interface
-├── hello-world-connector
-│         └── src
-│             ├── main
-│             │   └── ruby
-│             │       └── hello_world.rb                                               # An example Ruby source file
-│             └── test
-│                 └── java
-│                     └── co/elastic/connectors/hello/world/HelloWorldTest.groovy      # A test of the generated Java
-├── pom.xml
-└── script
-          └── build_jruby.sh                                                           # Script that builds Jruby->Java
 ```
 
 ### Where do I report issues with Connectors?
