@@ -1,5 +1,6 @@
 require 'faraday'
 require 'httpclient'
+require 'active_support/core_ext/array/wrap'
 
 module Base
   class CustomClient
