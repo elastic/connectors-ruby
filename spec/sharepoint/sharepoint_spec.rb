@@ -1,9 +1,13 @@
+# frozen_string_literal: true
+
 require 'connectors/sharepoint/sharepoint'
 
 RSpec.describe Sharepoint::HttpCallWrapper do
-  it "can get documents" do
+  let(:backend) do
+    described_class.new
+  end
 
-    backend = Sharepoint::HttpCallWrapper.new
+  it 'can get documents' do
     backend.get_document_batch
   end
 end
