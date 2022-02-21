@@ -5,7 +5,7 @@ test:
 
 build:
 	mkdir -p .gems
-	gem build ent-search-connectors.gemspec -o .gems/ent-search-connectors.gem
+	gem build ent-search-connectors.gemspec -o .gems/ent-search-connectors-0.0.1.gem
 
 install:
 	- gem install bundler -v 2.2.29
