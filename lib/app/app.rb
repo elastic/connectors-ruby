@@ -2,7 +2,7 @@
 
 require 'sinatra'
 require 'json'
-require_relative '../connectors/dummy/dummy'
+require_relative '../connectors/sharepoint/sharepoint'
 
 
 get '/' do
@@ -22,7 +22,7 @@ end
 
 get '/documents' do
   content_type :json
-  hello_world = HelloWorld.new
+  hello_world = Sharepoint.new
   return { results: hello_world.fetch_Documents(), cursor: nil }.to_json
 end
 

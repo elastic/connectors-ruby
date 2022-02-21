@@ -3,6 +3,9 @@ all: install credentials run
 test:
 	bundle exec rspec spec
 
+lint:
+	bundle exec rubocop lib spec
+
 build:
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
