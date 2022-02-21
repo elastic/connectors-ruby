@@ -2,6 +2,7 @@ require 'faraday'
 require 'httpclient'
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/numeric/time'
+require 'connectors_shared'
 
 module Base
   class ContentSource
@@ -15,7 +16,7 @@ module Base
     end
 
     def access_token
-      'HEY IT\'S A ME ACCESS TOKEN-IO!'
+      "BEARER A BEAR"
     end
   end
 
