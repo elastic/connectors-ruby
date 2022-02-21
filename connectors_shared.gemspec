@@ -13,11 +13,12 @@ Gem::Specification.new do |s|
     'lib/connectors_shared/errors.rb',
     'lib/connectors_shared/exception_tracking.rb',
     'lib/connectors_shared/logger.rb',
-    'lib/connectors_shared/monitor.rb'
+    'lib/connectors_shared/monitor.rb',
+    'LICENSE'
   ]
   s.homepage    =
     'https://elastic.co'
-  s.license       = 'Nonstandard'
+  s.license       = 'Elastic-2.0'
 
   # TODO: figure out how to pin versions without harming ent-search repo
   s.add_dependency 'activesupport'
