@@ -1,21 +1,13 @@
 # frozen_string_literal: true
-
+require 'active_support/core_ext/object/deep_dup'
 require 'connectors/sharepoint/sharepoint'
 
 # TODO do proper mocking
-class Dup
-  attr_reader :deep_dup
-
-  def initialize
-    @deep_dup = {}
-  end
-end
-
 class Config
   attr_reader :cursors
 
   def initialize
-    @cursors = Dup.new
+    @cursors = {}   
   end
 
   def index_all_drives?
