@@ -5,7 +5,7 @@
  */
 
 // Loading the shared lib
-@Library(['estc', 'entsearch']) _
+@Library(['apm', 'estc', 'entsearch']) _
 
 eshPipeline(
     timeout: 45,
