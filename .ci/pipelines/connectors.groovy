@@ -18,7 +18,9 @@ eshPipeline(
             type: 'script',
             label: 'Makefile',
             script: {
-                sh 'make install test'
+                eshWithRbenv {
+                  sh 'make install test'
+                }
             },
             match_on_all_branches: true,
        ],
