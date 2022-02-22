@@ -2,7 +2,7 @@
 
 require 'sinatra'
 require 'json'
-require 'hello_world_connector/hello_world'
+require 'connectors/sharepoint/sharepoint'
 
 
 get '/' do
@@ -22,8 +22,8 @@ end
 
 get '/documents' do
   content_type :json
-  hello_world = HelloWorld.new
-  return { results: hello_world.fetch_Documents(), cursor: nil }.to_json
+  hello_world = Sharepoint::HttpCallWrapper.new
+  return { results: hello_world.get_document_batch(), cursor: nil }.to_json
 end
 
 post '/download' do
