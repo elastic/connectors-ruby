@@ -508,7 +508,7 @@ module Office365
 
       def to_swiftype_document
         {
-          :_fields_to_preserve => Connectors::ContentSources::Office365::Adapter.fields_to_preserve,
+          :_fields_to_preserve => Office365::Adapter.fields_to_preserve,
           :id => self.class.convert_id_to_fp_id(item.id),
           :path => get_path(item),
           :title => item.name,
@@ -525,7 +525,7 @@ module Office365
       private
 
       def get_path(item)
-        Connectors::ContentSources::Office365::Adapter::GraphItem.get_path(item)
+        Office365::Adapter::GraphItem.get_path(item)
       end
 
       def type
