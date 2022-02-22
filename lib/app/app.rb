@@ -40,7 +40,9 @@ post '/oauth/init' do
   params = request.params
   logger.info "Received client ID: #{params[:client_id]} and client secret: #{params[:client_secret]}"
   logger.info "Received redirect URL: #{params[:redirect_uri]}"
-  { oauth2redirect: 'https://accounts.google.com/o/oauth2/auth' }.to_json
+  {
+    oauth2redirect: Sharepoint::HttpCallWrapper.authorization_url
+  }.to_json
 end
 
 post '/oauth/exchange' do
