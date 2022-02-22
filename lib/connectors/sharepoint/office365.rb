@@ -3,6 +3,8 @@ require 'connectors_shared'
 require 'forwardable'
 require 'hashie'
 
+OFFICE365_PERMISSION_SYNC_TIME_SLA = 24.hours
+
 module Office365
   class CustomClient < Base::CustomClient
     class ClientError < ConnectorsShared::ClientError
@@ -207,7 +209,6 @@ module Office365
     def request_all(endpoint:, fields: [], additional_query_params: {})
       query_params = transform_fields_to_request_query_params(fields)
       response = request_endpoint(:endpoint => endpoint, :query_params => query_params.merge(additional_query_params))
-
       items = response.value
       while next_link = response['@odata.nextLink']
         response = request_json(:url => next_link)
