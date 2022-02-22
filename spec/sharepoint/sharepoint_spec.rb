@@ -98,6 +98,6 @@ RSpec.describe Sharepoint::HttpCallWrapper do
                  body: permissions,
                  headers: {})
 
-    expect(backend.get_document_batch).to eq []
+    expect(backend.get_document_batch.size).to eq 11
   end
 end

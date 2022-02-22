@@ -15,9 +15,11 @@ module Sharepoint
 
     def get_document_batch
       results = []
+      max = 10
 
       @extractor.yield_document_changes do |action, doc, subextractors|
         results << doc
+        break if results.size > max
       end
 
       results
