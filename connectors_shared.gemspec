@@ -1,10 +1,8 @@
-# frozen_string_literal: true
-$: << './lib'
-require 'connectors_shared'
+require_relative 'lib/version'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_shared'
-  s.version     = ConnectorsShared::VERSION
+  s.version     = VERSION
   s.summary     = 'Connectors Gem containing shared implementation of apis used by Enterprise Search'
   s.description = ''
   s.authors     = ['Elastic']
