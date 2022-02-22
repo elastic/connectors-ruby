@@ -20,10 +20,17 @@ get '/status' do
   { status: 'IDLING' }.to_json
 end
 
-get '/documents' do
+post '/documents' do
   content_type :json
-  hello_world = Sharepoint::HttpCallWrapper.new
-  return { results: hello_world.get_document_batch(), cursor: nil }.to_json
+  params = JSON.parse(request.body.read)
+  access_token = params['access_token']
+
+  connector = Sharepoint::HttpCallWrapper.new(
+    Base::ContentSource.new(access_token: access_token),
+    Base::Config.new
+  )
+
+  return { results: connector.get_document_batch(), cursor: nil }.to_json
 end
 
 post '/download' do

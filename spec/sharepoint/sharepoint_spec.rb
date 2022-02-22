@@ -7,22 +7,6 @@ require 'json'
 require 'time'
 
 # TODO: do proper mocking
-class Config
-  attr_reader :cursors
-
-  def initialize
-    @cursors = {}
-  end
-
-  def index_all_drives?
-    true
-  end
-
-  def index_permissions
-    true
-  end
-end
-
 RSpec.describe Sharepoint::HttpCallWrapper do
   # XXX This is also stubs in lib/stubs/app_config.rb
   let(:content_source) do
@@ -30,7 +14,7 @@ RSpec.describe Sharepoint::HttpCallWrapper do
   end
 
   let(:backend) do
-    described_class.new(content_source, Config.new)
+    described_class.new(content_source, Base::Config.new)
   end
 
   def mock_endpoint(path, data)
