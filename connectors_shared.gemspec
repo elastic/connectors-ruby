@@ -4,7 +4,7 @@ require 'connectors_shared'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_shared'
-  s.version     = ConnectorsShared::GEM_VERSION
+  s.version     = ConnectorsShared::VERSION
   s.summary     = 'Connectors Gem containing shared implementation of apis used by Enterprise Search'
   s.description = ''
   s.authors     = ['Elastic']

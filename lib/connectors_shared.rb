@@ -5,5 +5,5 @@ require "connectors_shared/logger"
 require "connectors_shared/monitor"
 
 module ConnectorsShared
-  GEM_VERSION = '0.0.1'
+  VERSION = '0.0.1'
 end
