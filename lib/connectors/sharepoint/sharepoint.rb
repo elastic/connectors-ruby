@@ -4,10 +4,10 @@ require 'connectors/sharepoint/office365'
 module Sharepoint
 
   class HttpCallWrapper
-    def initialize(content_source, config)
+    def initialize(params)
       features = {}
       @extractor = Sharepoint::Extractor.new(
-        content_source: content_source,
+        content_source: Base::ContentSource.new(params['access_token']),
         config: config,
         features: features
       )

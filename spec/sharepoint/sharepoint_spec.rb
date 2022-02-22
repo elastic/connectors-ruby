@@ -9,12 +9,9 @@ require 'time'
 # TODO: do proper mocking
 RSpec.describe Sharepoint::HttpCallWrapper do
   # XXX This is also stubs in lib/stubs/app_config.rb
-  let(:content_source) do
-    Base::ContentSource.new
-  end
 
   let(:backend) do
-    described_class.new(content_source, Base::Config.new)
+    described_class.new({'access_token' => 'something'})
   end
 
   def mock_endpoint(path, data)

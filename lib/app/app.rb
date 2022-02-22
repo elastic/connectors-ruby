@@ -23,11 +23,9 @@ end
 post '/documents' do
   content_type :json
   params = JSON.parse(request.body.read)
-  access_token = params['access_token']
 
   connector = Sharepoint::HttpCallWrapper.new(
-    Base::ContentSource.new(access_token: access_token),
-    Base::Config.new
+    params
   )
 
   return { results: connector.get_document_batch(), cursor: nil }.to_json

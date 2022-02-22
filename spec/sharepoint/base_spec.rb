@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'connectors/sharepoint/base'
-      require 'active_support/time_with_zone'
+require 'active_support/time_with_zone'
 
 # TODO: do proper mocking
 RSpec.describe Base::Adapter do
