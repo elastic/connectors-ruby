@@ -23,6 +23,7 @@ module Sharepoint
       results
     end
   end
+
   class Adapter < Office365::Adapter
     generate_id_helpers :share_point, 'share_point'
 
@@ -40,19 +41,19 @@ module Sharepoint
 
     class FileGraphItem < Office365::Adapter::FileGraphItem
       def self.convert_id_to_fp_id(id)
-        SharePoint::Adapter.share_point_id_to_fp_id(id)
+        Sharepoint::Adapter.share_point_id_to_fp_id(id)
       end
     end
 
     class FolderGraphItem < Office365::Adapter::FolderGraphItem
       def self.convert_id_to_fp_id(id)
-        SharePoint::Adapter.share_point_id_to_fp_id(id)
+        Sharepoint::Adapter.share_point_id_to_fp_id(id)
       end
     end
 
     class PackageGraphItem < Office365::Adapter::PackageGraphItem
       def self.convert_id_to_fp_id(id)
-        SharePoint::Adapter.share_point_id_to_fp_id(id)
+        Sharepoint::Adapter.share_point_id_to_fp_id(id)
       end
     end
   end
@@ -62,11 +63,11 @@ module Sharepoint
     private
 
     def convert_id_to_fp_id(id)
-      SharePoint::Adapter.share_point_id_to_fp_id(id)
+      Sharepoint::Adapter.share_point_id_to_fp_id(id)
     end
 
     def adapter
-      SharePoint::Adapter
+      Sharepoint::Adapter
     end
 
     def drives
