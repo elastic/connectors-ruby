@@ -17,9 +17,14 @@ class Config
   def index_all_drives?
     true
   end
+
+  def index_permissions
+    true
+  end
 end
 
 RSpec.describe Sharepoint::HttpCallWrapper do
+  # XXX This is also stubs in lib/stubs/app_config.rb
   let(:content_source) do
     Base::ContentSource.new
   end
@@ -47,7 +52,10 @@ RSpec.describe Sharepoint::HttpCallWrapper do
                  body: sites,
                  headers: {})
 
-    drives = JSON.generate({ value: [{ id: 4567 }] })
+    drives = JSON.generate({
+                             value: [{ id: 4567,
+                                       driveType: 'documentLibrary' }]
+                           })
 
     stub_request(:get, 'https://graph.microsoft.com/v1.0/sites/4567/drives/?$select=id,owner,name,driveType')
       .with { true }
@@ -61,6 +69,35 @@ RSpec.describe Sharepoint::HttpCallWrapper do
                  body: drives,
                  headers: {})
 
-    backend.get_document_batch
+    drive = JSON.generate({ id: 1111,
+                            driveType: 'documentLibrary' })
+
+    stub_request(:get, 'https://graph.microsoft.com/v1.0/drives/4567/root?$select=id')
+      .with { true }
+      .to_return(status: 200,
+                 body: drive,
+                 headers: {})
+
+    children = JSON.generate({ value: [{ folder: 'folder', id: 1111,
+                                         name: 'item' }] })
+
+    stub_request(:get, 'https://graph.microsoft.com/v1.0/drives/4567/items/1111/children')
+      .with { true }
+      .to_return(status: 200,
+                 body: children,
+                 headers: {})
+
+    permissions = JSON.generate({
+                                  value: [
+                                    { id: 666 }
+                                  ]
+                                })
+    stub_request(:get, 'https://graph.microsoft.com/v1.0/drives/4567/items/1111/permissions')
+      .with { true }
+      .to_return(status: 200,
+                 body: permissions,
+                 headers: {})
+
+    expect(backend.get_document_batch).to eq []
   end
 end

@@ -5,6 +5,12 @@ require 'active_support/core_ext/numeric/time'
 require 'connectors_shared'
 
 module Base
+  class ServiceType
+    def classify
+      'classify'
+    end
+  end
+
   class ContentSource
     def authorization_details
       {
@@ -17,6 +23,10 @@ module Base
 
     def access_token
       "BEARER A BEAR"
+    end
+
+    def service_type
+      ServiceType.new
     end
   end
 

@@ -70,7 +70,9 @@ module Office365
       share_point_sites
         .map(&:id)
         .uniq
-        .map { |site_id| site_drives(site_id, :fields => fields) }
+        .map { |site_id|
+          site_drives(site_id, :fields => fields) 
+        }
         .flatten
         .compact
     end
@@ -501,7 +503,7 @@ module Office365
           else
             CGI.unescape(parent_reference_path).split('root:').last
           end
-        Connectors::ContentSources::Office365::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
+        Base::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
       end
 
       def to_swiftype_document

@@ -151,7 +151,7 @@ module Sharepoint
     end
 
     def adapter
-      Connectors::ContentSources::SharePoint::Adapter
+      SharePoint::Adapter
     end
 
     def drives
