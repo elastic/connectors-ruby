@@ -4,7 +4,6 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'awesome_print'
 require 'connectors_shared/exception_tracking'
 
 class HelloWorld
@@ -54,8 +53,6 @@ class HelloWorld
         }
       }
     ]
-    puts 'these are the documents:'
-    ap documents
     documents
   end
 
