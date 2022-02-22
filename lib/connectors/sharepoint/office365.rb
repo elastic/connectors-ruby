@@ -4,6 +4,9 @@ require 'forwardable'
 require 'hashie'
 
 OFFICE365_PERMISSION_SYNC_TIME_SLA = 24.hours
+# From FritoPie::Permissions::ALLOW_FIELD
+ALLOW_FIELD = '_allow_permissions'
+
 
 module Office365
   class CustomClient < Base::CustomClient
@@ -547,7 +550,7 @@ module Office365
       def permissions
         if item.permissions.present?
           {
-            FritoPie::Permissions::ALLOW_FIELD => item.permissions.map do |next_permission|
+            ALLOW_FIELD => item.permissions.map do |next_permission|
               [
                 next_permission.dig(:grantedTo, :user, :id),
                 next_permission.dig(:grantedTo, :user, :displayName)

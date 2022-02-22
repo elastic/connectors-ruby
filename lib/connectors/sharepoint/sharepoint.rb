@@ -17,7 +17,7 @@ module Sharepoint
       results = []
 
       @extractor.yield_document_changes do |action, doc, subextractors|
-        results.add(doc)
+        results << doc
       end
 
       results
