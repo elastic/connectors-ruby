@@ -12,7 +12,7 @@ build:
 	mv *.gem .gems/
 
 install:
-	- gem install bundler -v 2.2.29
+	- gem install bundler -v 2.2.33
 	bundle config set --local path 'vendor/bundle'
 	bundle install
 

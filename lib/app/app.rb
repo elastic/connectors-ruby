@@ -35,17 +35,26 @@ post '/download' do
   send_file(file, type: 'image/jpeg', disposition: 'inline')
 end
 
-post '/oauth/init' do
+post '/oauth2/init' do
   content_type :json
-  params = request.params
-  logger.info "Received client ID: #{params[:client_id]} and client secret: #{params[:client_secret]}"
+  body = JSON.parse(request.body.read, :symbolize_names => true)
+  logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
   logger.info "Received redirect URL: #{params[:redirect_uri]}"
-  {
-    oauth2redirect: Sharepoint::HttpCallWrapper.authorization_url
-  }.to_json
+
+  client = Signet::OAuth2::Client.new(
+    :authorization_uri => Sharepoint::Authorization.authorization_url,
+    :token_credential_uri => Sharepoint::Authorization.token_credential_uri,
+    :scope => Sharepoint::Authorization.oauth_scope,
+    :client_id => body[:client_id],
+    :client_secret => body[:client_secret],
+    :redirect_uri => body[:redirect_uri],
+    :state => nil,
+    :additional_parameters => { :prompt => 'consent' }
+  )
+  { oauth2redirect: client.authorization_uri.to_s }.to_json
 end
 
-post '/oauth/exchange' do
+post '/oauth2/exchange' do
   content_type :json
   params = request.params
   logger.info "Received auth code: #{params[:authorization_code]}"

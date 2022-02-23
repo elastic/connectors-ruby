@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 # Pin the version of bundle we support
-gem 'bundler', '2.2.29'
+gem 'bundler', '2.2.33'
 
 gem 'activesupport', '5.2.6'
 gem 'bson', '~> 4.2.2'
@@ -25,3 +25,6 @@ gem 'faraday'
 gem 'httpclient'
 gem 'attr_extras'
 gem 'hashie'
+
+# Dependencies for oauth
+gem 'signet', '~> 0.16.0'

@@ -2,9 +2,33 @@
 require 'connectors/sharepoint/office365'
 
 module Sharepoint
+  class Authorization
+    class << self
+      def authorization_url
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+      end
+
+      def token_credential_uri
+        'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+      end
+
+      def oauth_scope
+        %w[
+        User.ReadBasic.All
+        Group.Read.All
+        Directory.AccessAsUser.All
+        Files.Read
+        Files.Read.All
+        Sites.Read.All
+        offline_access
+      ]
+      end
+    end
+  end
 
   class HttpCallWrapper
-    def initialize(params)
+
+    def initialize(content_source, config)
       features = {}
       @extractor = Sharepoint::Extractor.new(
         content_source: Base::ContentSource.new(access_token: params['access_token']),
