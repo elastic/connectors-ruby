@@ -7,8 +7,8 @@ module Sharepoint
     def initialize(params)
       features = {}
       @extractor = Sharepoint::Extractor.new(
-        content_source: Base::ContentSource.new(params['access_token']),
-        config: config,
+        content_source: Base::ContentSource.new(access_token: params['access_token']),
+        config: Base::Config.new,
         features: features
       )
     end
