@@ -2,7 +2,10 @@ require 'faraday'
 require 'httpclient'
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/numeric/time'
+require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
+require 'date'
+require 'active_support/all'
 
 module Base
   class ServiceType
@@ -11,7 +14,29 @@ module Base
     end
   end
 
+  class Config
+    attr_reader :cursors
+
+    def initialize
+      @cursors = {}
+    end
+
+    def index_all_drives?
+      true
+    end
+
+    def index_permissions
+      true
+    end
+  end
+
   class ContentSource
+    attr_reader :access_token
+
+    def initialize(access_token: "BEARER A BEAR")
+      @access_token = access_token
+    end
+
     def authorization_details
       {
         :expires_at => Time.now
@@ -19,10 +44,6 @@ module Base
     end
 
     def authorization_details!
-    end
-
-    def access_token
-      "BEARER A BEAR"
     end
 
     def service_type
@@ -178,6 +199,7 @@ module Base
         date.to_datetime.rfc3339
       else
         begin
+          Time.zone ||= 'UTC' # TODO: idk where to put that
           Time.zone.parse(date).to_datetime.rfc3339
         rescue ArgumentError, TypeError => e
           ConnectorsShared::ExceptionTracking.capture_exception(e)
@@ -265,7 +287,7 @@ module Base
 
     def client
       @client ||= Office365::CustomClient.new(
-        :access_token => 'BLA BLA ACCESS TOKEN',
+        :access_token => content_source.access_token,
         :cursors => {},
         :ensure_fresh_auth => lambda do |client|
           if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes

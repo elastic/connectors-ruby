@@ -74,7 +74,7 @@ module Office365
         .map(&:id)
         .uniq
         .map { |site_id|
-          site_drives(site_id, :fields => fields) 
+          site_drives(site_id, :fields => fields)
         }
         .flatten
         .compact
