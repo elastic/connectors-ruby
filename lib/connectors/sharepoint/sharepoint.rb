@@ -27,8 +27,7 @@ module Sharepoint
   end
 
   class HttpCallWrapper
-
-    def initialize(content_source, config)
+    def initialize(params)
       features = {}
       @extractor = Sharepoint::Extractor.new(
         content_source: Base::ContentSource.new(access_token: params['access_token']),
@@ -39,10 +38,14 @@ module Sharepoint
 
     def get_document_batch
       results = []
-      max = 10
+      max = 100
 
       @extractor.yield_document_changes do |action, doc, subextractors|
-        results << doc
+        results << {
+          :action => action,
+          :document => doc,
+          :download => nil
+        }
         break if results.size > max
       end
 
