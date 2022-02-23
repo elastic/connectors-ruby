@@ -2,6 +2,29 @@
 require 'connectors/sharepoint/office365'
 
 module Sharepoint
+  class Authorization
+    class << self
+      def authorization_url
+        'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+      end
+
+      def token_credential_uri
+        'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+      end
+
+      def oauth_scope
+        %w[
+        User.ReadBasic.All
+        Group.Read.All
+        Directory.AccessAsUser.All
+        Files.Read
+        Files.Read.All
+        Sites.Read.All
+        offline_access
+      ]
+      end
+    end
+  end
 
   class HttpCallWrapper
     def initialize(params)
@@ -15,10 +38,14 @@ module Sharepoint
 
     def get_document_batch
       results = []
-      max = 10
+      max = 100
 
       @extractor.yield_document_changes do |action, doc, subextractors|
-        results << doc
+        results << {
+          :action => action,
+          :document => doc,
+          :download => nil
+        }
         break if results.size > max
       end
 

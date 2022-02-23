@@ -173,10 +173,10 @@ module Base
     end
 
     def self.mime_type_for_file(file_name)
-      ruby_detected_type = MIME::Types.type_for(file_name)
+      ruby_detected_type = nil # MIME::Types.type_for(file_name)
       return ruby_detected_type.first.simplified if ruby_detected_type.present?
       extension = extension_for_file(file_name)
-      Connectors::Subextractor::ExtensionMappingUtil.get_mime_types(extension)&.first
+      # Connectors::Subextractor::ExtensionMappingUtil.get_mime_types(extension)&.first
     end
 
     def self.extension_for_file(file_name)

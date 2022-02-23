@@ -27,5 +27,9 @@ class AppConfig
     def content_source_sync_error_ratio_window_size
       100
     end
+
+    def content_source_sync_thumbnails_enabled?
+      true
+    end
   end
 end
