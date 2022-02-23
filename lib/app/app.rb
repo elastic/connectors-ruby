@@ -65,6 +65,8 @@ post '/oauth2/exchange' do
   # TODO: need to request the tokens with auth code
   client = Signet::OAuth2::Client.new(
     token_credential_uri: Sharepoint::Authorization.token_credential_uri,
+    client_id: params[:client_id],
+    client_secret: params[:client_secret],
     redirect_uri: params[:redirect_uri],
     session_state: oauth_params[:session_state],
     state: oauth_params[:state],
