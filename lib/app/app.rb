@@ -60,17 +60,15 @@ end
 post '/oauth2/exchange' do
   content_type :json
   params = JSON.parse(request.body.read, symbolize_names: true)
-  oauth_params = params[:oauth_params]
   logger.info "Received payload: #{params}"
-  # TODO: need to request the tokens with auth code
   client = Signet::OAuth2::Client.new(
     token_credential_uri: Sharepoint::Authorization.token_credential_uri,
     client_id: params[:client_id],
     client_secret: params[:client_secret],
     redirect_uri: params[:redirect_uri],
-    session_state: oauth_params[:session_state],
-    state: oauth_params[:state],
-    code: oauth_params[:code]
+    session_state:params[:session_state],
+    state: params[:state],
+    code: params[:code]
   )
   client.fetch_access_token.to_json
 end
