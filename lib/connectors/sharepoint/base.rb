@@ -26,7 +26,7 @@ module Base
     end
 
     def index_permissions
-      true
+      false
     end
   end
 
