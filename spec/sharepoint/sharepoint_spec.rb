@@ -46,6 +46,6 @@ RSpec.describe Sharepoint::HttpCallWrapper do
     mock_endpoint('drives/4567/items/1111/children', children)
     mock_endpoint('drives/4567/items/1111/permissions', permissions)
 
-    expect(backend.get_document_batch.size).to eq 11
+    expect(backend.get_document_batch.size).to eq 101
   end
 end
