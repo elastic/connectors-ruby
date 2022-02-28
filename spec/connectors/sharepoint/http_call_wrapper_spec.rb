@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/object/deep_dup'
-require 'connectors/sharepoint/sharepoint'
+require 'connectors/sharepoint/http_call_wrapper'
 require 'connectors/base/custom_client'
 require 'connectors/base/adapter'
 require 'connectors/base/config'
@@ -10,7 +10,7 @@ require 'json'
 require 'time'
 
 # TODO: do proper mocking
-RSpec.describe Sharepoint::HttpCallWrapper do
+RSpec.describe Connectors::Sharepoint::HttpCallWrapper do
   # XXX This is also stubs in lib/stubs/app_config.rb
 
   let(:backend) do
