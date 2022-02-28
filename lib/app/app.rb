@@ -30,7 +30,7 @@ post '/documents' do
     params
   )
 
-  return { results: connector.get_document_batch(), cursor: nil }.to_json
+  return { results: connector.get_document_batch, cursor: nil }.to_json
 end
 
 post '/download' do
@@ -40,37 +40,42 @@ end
 
 post '/oauth2/init' do
   content_type :json
-  body = JSON.parse(request.body.read, symbolize_names: true)
-  logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
-  logger.info "Received redirect URL: #{params[:redirect_uri]}"
+  params = JSON.parse(request.body.read, symbolize_names: true)
+  logger.info "Initializing OAuth dance, received payload: #{params}"
 
-  client = Signet::OAuth2::Client.new(
-    authorization_uri: Sharepoint::Authorization.authorization_url,
-    token_credential_uri: Sharepoint::Authorization.token_credential_uri,
-    scope: Sharepoint::Authorization.oauth_scope,
-    client_id: body[:client_id],
-    client_secret: body[:client_secret],
-    redirect_uri: body[:redirect_uri],
-    state: JSON.dump(body[:state]),
-    additional_parameters: { prompt: 'consent' }
+  oauth_data = params.merge(
+    {
+      authorization_uri: Sharepoint::Authorization.authorization_url,
+      token_credential_uri: Sharepoint::Authorization.token_credential_uri,
+      scope: Sharepoint::Authorization.oauth_scope,
+      state: JSON.dump(params[:state]),
+      additional_parameters: { prompt: 'consent' }
+    }
   )
+  client = Signet::OAuth2::Client.new(oauth_data)
   { oauth2redirect: client.authorization_uri.to_s }.to_json
 end
 
 post '/oauth2/exchange' do
   content_type :json
   params = JSON.parse(request.body.read, symbolize_names: true)
-  oauth_params = params[:oauth_params]
-  logger.info "Received payload: #{params}"
-  # TODO: need to request the tokens with auth code
-  client = Signet::OAuth2::Client.new(
+  logger.info "Exchanging code for tokens, received payload: #{params}"
+  oauth_data = {
     token_credential_uri: Sharepoint::Authorization.token_credential_uri,
     client_id: params[:client_id],
-    client_secret: params[:client_secret],
-    redirect_uri: params[:redirect_uri],
-    session_state: oauth_params[:session_state],
-    state: oauth_params[:state],
-    code: oauth_params[:code]
-  )
+    client_secret: params[:client_secret]
+  }
+  # on the first dance
+  oauth_data[:code] = params[:code] if params[:code].present?
+  oauth_data[:redirect_uri] = params[:redirect_uri] if params[:redirect_uri].present?
+  oauth_data[:session_state] = params[:session_state] if params[:session_state].present?
+  oauth_data[:state] = params[:state] if params[:state].present?
+
+  # on refresh dance
+  if params[:refresh_token].present?
+    oauth_data[:refresh_token] = params[:refresh_token]
+    oauth_data[:grant_type] = :authorization
+  end
+  client = Signet::OAuth2::Client.new(oauth_data)
   client.fetch_access_token.to_json
 end
