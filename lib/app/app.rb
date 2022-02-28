@@ -3,7 +3,6 @@
 require 'sinatra'
 require 'json'
 require 'connectors/sharepoint/sharepoint'
-require 'connectors/sharepoint/auth'
 
 get '/' do
   content_type :json
