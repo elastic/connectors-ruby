@@ -1,4 +1,7 @@
-require 'connectors/sharepoint/base'
+require 'connectors/base/custom_client'
+require 'connectors/base/adapter'
+require 'connectors/base/config'
+require 'connectors/base/extractor'
 require 'connectors_shared'
 require 'forwardable'
 require 'hashie'
@@ -9,7 +12,7 @@ ALLOW_FIELD = '_allow_permissions'
 
 
 module Office365
-  class CustomClient < Base::CustomClient
+  class CustomClient < Connectors::Base::CustomClient
     class ClientError < ConnectorsShared::ClientError
       attr_reader :status_code, :endpoint
 
@@ -287,7 +290,7 @@ module Office365
     end
   end
 
-  class Extractor < Base::Extractor
+  class Extractor < Connectors::Base::Extractor
     DRIVE_IDS_CURSOR_KEY = 'drive_ids'
 
     def yield_document_changes(modified_since: nil, &block)
@@ -478,7 +481,7 @@ module Office365
     end
   end
 
-  class Adapter < Base::Adapter
+  class Adapter < Connectors::Base::Adapter
     def self.swiftype_document_from_file(_file)
       raise NotImplementedError
     end
@@ -506,7 +509,7 @@ module Office365
           else
             CGI.unescape(parent_reference_path).split('root:').last
           end
-        Base::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
+        Connectors::Base::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
       end
 
       def to_swiftype_document
@@ -516,10 +519,10 @@ module Office365
           :path => get_path(item),
           :title => item.name,
           :url => item.webUrl,
-          :type => Base::Adapter.normalize_enum(type),
+          :type => Connectors::Base::Adapter.normalize_enum(type),
           :created_by => created_by(item),
-          :created_at => Base::Adapter.normalize_date(item.createdDateTime),
-          :last_updated => Base::Adapter.normalize_date(item.lastModifiedDateTime),
+          :created_at => Connectors::Base::Adapter.normalize_date(item.createdDateTime),
+          :last_updated => Connectors::Base::Adapter.normalize_date(item.lastModifiedDateTime),
           :updated_by => last_modified_by(item),
           :drive_owner => item.drive_owner_name
         }.merge(fields).merge(permissions)
@@ -577,9 +580,9 @@ module Office365
       def fields
         # FIXME: potentially add `updated_by_email`
         {
-          :title => Base::Adapter.strip_file_extension(item.name),
-          :mime_type => Base::Adapter.mime_type_for_file(item.name),
-          :extension => Base::Adapter.extension_for_file(item.name)
+          :title => Connectors::Base::Adapter.strip_file_extension(item.name),
+          :mime_type => Connectors::Base::Adapter.mime_type_for_file(item.name),
+          :extension => Connectors::Base::Adapter.extension_for_file(item.name)
         }
       end
     end

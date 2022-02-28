@@ -1,10 +1,17 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
 # frozen_string_literal: true
 
-require 'connectors/sharepoint/base'
+
+require 'connectors/base/adapter'
 require 'active_support/time_with_zone'
 
 # TODO: do proper mocking
-RSpec.describe Base::Adapter do
+RSpec.describe Connectors::Base::Adapter do
   # XXX This is also stubs in lib/stubs/app_config.rb
 
   context '.normalize_date' do

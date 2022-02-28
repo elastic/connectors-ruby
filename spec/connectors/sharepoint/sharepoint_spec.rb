@@ -2,7 +2,10 @@
 
 require 'active_support/core_ext/object/deep_dup'
 require 'connectors/sharepoint/sharepoint'
-require 'connectors/sharepoint/base'
+require 'connectors/base/custom_client'
+require 'connectors/base/adapter'
+require 'connectors/base/config'
+require 'connectors/base/extractor'
 require 'json'
 require 'time'
 
