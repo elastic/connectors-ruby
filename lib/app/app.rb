@@ -5,7 +5,6 @@ require 'json'
 require 'connectors/sharepoint/sharepoint'
 require 'connectors/sharepoint/auth'
 
-
 get '/' do
   content_type :json
   { version: '1.0' }.to_json

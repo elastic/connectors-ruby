@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'connectors/sharepoint/office365'
 
 module Sharepoint
@@ -50,14 +51,14 @@ module Sharepoint
 
       def oauth_scope
         %w[
-        User.ReadBasic.All
-        Group.Read.All
-        Directory.AccessAsUser.All
-        Files.Read
-        Files.Read.All
-        Sites.Read.All
-        offline_access
-      ]
+          User.ReadBasic.All
+          Group.Read.All
+          Directory.AccessAsUser.All
+          Files.Read
+          Files.Read.All
+          Sites.Read.All
+          offline_access
+        ]
       end
     end
   end
@@ -76,11 +77,11 @@ module Sharepoint
       results = []
       max = 100
 
-      @extractor.yield_document_changes do |action, doc, subextractors|
+      @extractor.yield_document_changes do |action, doc, _subextractors|
         results << {
-          :action => action,
-          :document => doc,
-          :download => nil
+          action: action,
+          document: doc,
+          download: nil
         }
         break if results.size > max
       end
@@ -124,7 +125,6 @@ module Sharepoint
   end
 
   class Extractor < Office365::Extractor
-
     private
 
     def convert_id_to_fp_id(id)
@@ -136,7 +136,7 @@ module Sharepoint
     end
 
     def drives
-      client.share_point_drives(:fields => %w(id owner name driveType))
+      client.share_point_drives(fields: %w[id owner name driveType])
     end
   end
 end
