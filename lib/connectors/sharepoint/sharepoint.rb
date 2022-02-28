@@ -1,5 +1,7 @@
 # frozen_string_literal: true
-
+require 'signet'
+require 'signet/oauth_2'
+require 'signet/oauth_2/client'
 require 'connectors/sharepoint/office365'
 
 module Sharepoint
