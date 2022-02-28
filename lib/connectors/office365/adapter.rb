@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'connectors/base/adapter'
+
 module Connectors
   module Office365
     class Adapter < Connectors::Base::Adapter

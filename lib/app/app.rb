@@ -2,7 +2,11 @@
 
 require 'sinatra'
 require 'json'
-require 'connectors/sharepoint/sharepoint'
+
+require 'connectors/sharepoint/http_call_wrapper'
+require 'signet'
+require 'signet/oauth_2'
+require 'signet/oauth_2/client'
 
 get '/' do
   content_type :json
@@ -23,7 +27,7 @@ post '/documents' do
   content_type :json
   params = JSON.parse(request.body.read)
 
-  connector = Sharepoint::HttpCallWrapper.new(
+  connector = Connectors::Sharepoint::HttpCallWrapper.new(
     params
   )
 
