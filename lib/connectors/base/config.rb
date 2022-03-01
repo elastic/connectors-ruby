@@ -21,4 +21,3 @@ module Connectors
     end
   end
 end
-

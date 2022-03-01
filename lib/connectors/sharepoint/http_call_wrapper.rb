@@ -26,11 +26,11 @@ module Connectors
         )
       end
 
-      def get_document_batch
+      def document_batch
         results = []
         max = 100
 
-        @extractor.yield_document_changes do |action, doc, subextractors|
+        @extractor.yield_document_changes do |action, doc, _subextractors|
           results << {
             :action => action,
             :document => doc,

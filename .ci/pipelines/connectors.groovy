@@ -24,6 +24,16 @@ eshPipeline(
             match_on_all_branches: true,
        ],
        [
+            name: 'Linter',
+            type: 'script',
+            script: {
+                eshWithRbenv {
+                  sh 'make install lint'
+                }
+            },
+            match_on_all_branches: true,
+       ],
+       [
            name: 'Packaging',
            type: 'script',
            script: {

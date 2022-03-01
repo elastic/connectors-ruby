@@ -7,11 +7,11 @@
 require 'connectors_shared/exception_tracking'
 
 class HelloWorld
-  def get_document_batch
-    documents = [
+  def document_batch
+    [
 
       {
-        :action => "create_or_update",
+        :action => 'create_or_update',
         :document => {
           'id' => 'welp_1',
           'title' => 'Traditional Test',
@@ -19,28 +19,28 @@ class HelloWorld
         }
       },
       {
-        :action => "create_or_update",
+        :action => 'create_or_update',
         :document => {
           'title' => 'Without Id Test',
           'body' => 'Hello, world'
         }
       },
       {
-        :action => "create_or_update",
+        :action => 'create_or_update',
         :document => {
           'id' => 'welp_3',
           'title' => 'Without Body Test'
         }
       },
       {
-        :action => "create_or_update",
+        :action => 'create_or_update',
         :document => {
           'id' => 'welp_4',
           'body' => 'Without Title Test'
         }
       },
       {
-        :action => "create_or_update",
+        :action => 'create_or_update',
         :document => {
           'id' => 'kitty',
           'title' => 'I would title this kitty as "kittiest kitty of all kitties"',
@@ -49,11 +49,10 @@ class HelloWorld
         :download => {
           'id' => '1',
           'name' => 'can I download a kitty.jpg',
-          'size' => 20971520
+          'size' => 20_971_520
         }
       }
     ]
-    documents
   end
 
   def do_risky_thing
@@ -68,6 +67,6 @@ class HelloWorld
   end
 
   def throw_exception
-    raise "Oh dear, an error"
+    raise 'Oh dear, an error'
   end
 end

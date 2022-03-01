@@ -258,17 +258,17 @@ module Connectors
         else
           response_body = response.body.to_s
           error_message = begin
-                            error = JSON.parse(response_body).fetch('error')
-                            if error['code'] == 'resyncRequired'
-                              Connectors::Stats.increment('custom_client.office365.error.invalid_cursors')
-                              raise Office365InvalidCursorsError.new(response.status, url)
-                            end
-                            JSON.parse(error.fetch('message')).fetch('Message').strip
-                          rescue ClientError
-                            raise
-                          rescue StandardError
-                            "got a #{response.status} from #{url} with query #{query_params}"
-                          end
+            error = JSON.parse(response_body).fetch('error')
+            if error['code'] == 'resyncRequired'
+              Connectors::Stats.increment('custom_client.office365.error.invalid_cursors')
+              raise Office365InvalidCursorsError.new(response.status, url)
+            end
+            JSON.parse(error.fetch('message')).fetch('Message').strip
+          rescue ClientError
+            raise
+          rescue StandardError
+            "got a #{response.status} from #{url} with query #{query_params}"
+          end
           raise ClientError.new(response.status, url), error_message
         end
       end

@@ -17,10 +17,10 @@ module Connectors
     class Adapter
       def self.fields_to_preserve
         @fields_to_preserve ||= ['body']
-                                  .concat(ConnectorsShared::Constants::THUMBNAIL_FIELDS)
-                                  .concat(ConnectorsShared::Constants::SUBEXTRACTOR_RESERVED_FIELDS)
-                                  .map(&:freeze)
-                                  .freeze
+          .concat(ConnectorsShared::Constants::THUMBNAIL_FIELDS)
+          .concat(ConnectorsShared::Constants::SUBEXTRACTOR_RESERVED_FIELDS)
+          .map(&:freeze)
+          .freeze
       end
 
       def self.generate_id_helpers(method_prefix, id_prefix)

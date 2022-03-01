@@ -61,7 +61,7 @@ GEM
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
     parallel (1.21.0)
-    parser (3.1.0.0)
+    parser (3.1.1.0)
       ast (~> 2.4.1)
     pry (0.14.1)
       coderay (~> 1.1)
@@ -98,19 +98,20 @@ GEM
     rspec-support (3.10.3)
     rspec_junit_formatter (0.5.1)
       rspec-core (>= 2, < 4, != 2.12.0)
-    rubocop (1.25.1)
+    rubocop (1.18.4)
       parallel (~> 1.10)
-      parser (>= 3.1.0.0)
+      parser (>= 3.0.0.0)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 1.8, < 3.0)
       rexml
-      rubocop-ast (>= 1.15.1, < 2.0)
+      rubocop-ast (>= 1.8.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.15.2)
-      parser (>= 3.0.1.1)
-    ruby-debug-ide (0.7.3)
-      rake (>= 0.8.1)
+    rubocop-ast (1.16.0)
+      parser (>= 3.1.1.0)
+    rubocop-performance (1.11.5)
+      rubocop (>= 1.7.0, < 2.0)
+      rubocop-ast (>= 0.4.0)
     ruby-progressbar (1.11.0)
     ruby2_keywords (0.0.5)
     signet (0.16.0)
@@ -162,8 +163,8 @@ DEPENDENCIES
   rspec-core (~> 3.10.1)
   rspec-mocks
   rspec_junit_formatter
-  rubocop
-  ruby-debug-ide
+  rubocop (= 1.18.4)
+  rubocop-performance (= 1.11.5)
   signet (~> 0.16.0)
   sinatra
   timecop
