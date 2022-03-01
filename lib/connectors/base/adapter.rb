@@ -10,7 +10,7 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'date'
 require 'active_support/all'
-require 'mime/type'
+require 'mime-types'
 
 module Connectors
   module Base
