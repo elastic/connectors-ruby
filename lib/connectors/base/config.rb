@@ -9,16 +9,14 @@ module Connectors
     class Config
       attr_reader :cursors
 
-      def initialize
-        @cursors = {}
+      def initialize(cursors:)
+        @cursors = cursors || {}
       end
 
-      def index_all_drives?
-        true
-      end
-
-      def index_permissions
-        false
+      def to_h
+        {
+          :cursors => cursors
+        }
       end
     end
   end
