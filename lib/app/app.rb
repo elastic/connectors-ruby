@@ -12,6 +12,11 @@ require 'signet/oauth_2/client'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
+  configure do
+    set :raise_errors, true
+    set :show_exceptions, false
+  end
+
   get '/' do
     content_type :json
     { version: '1.0' }.to_json
