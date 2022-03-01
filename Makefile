@@ -14,7 +14,7 @@ build:
 install:
 	rbenv install -s
 	- gem install bundler -v 2.2.33
-	bundle install
+	bundle install --jobs 1
 
 credentials:
 	vaulter read ws-google-drive-service-account --json > ent-search-dev.json
