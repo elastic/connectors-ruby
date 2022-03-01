@@ -11,7 +11,7 @@ require 'connectors/base/adapter'
 describe Connectors::Base::Adapter do
   context '.generate_id_helpers' do
     before do
-      class Dummy < described_class
+      class Dummy < Connectors::Base::Adapter
         generate_id_helpers :dummy, 'dummy'
       end
     end
