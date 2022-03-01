@@ -28,3 +28,7 @@ end
 def connectors_fixture_json(fixture_name)
   JSON.parse(connectors_fixture_raw(fixture_name))
 end
+
+def random_string
+  SecureRandom.hex
+end
