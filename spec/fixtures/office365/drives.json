@@ -1,0 +1,40 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives",
+  "value": [
+    {
+      "id": "eac871c1371902ee",
+      "driveType": "personal",
+      "name": "Documents",
+      "owner": {
+        "user": {
+          "displayName": "Third-Party App Admin",
+          "id": "eac871c1371902ee"
+        }
+      },
+      "quota": {
+        "deleted": 0,
+        "remaining": -1013793,
+        "state": "exceeded",
+        "total": 5368709120,
+        "used": 5369722913
+      }
+    },
+    {
+      "id": "b!oj3_wlgSokuzZGcvT48FcA15OXewaoFDp0jo-NImzu9iL9GnnXziQI-2p4cAYd0I",
+      "driveType": "business",
+      "name": "Special documents",
+      "owner": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Third-Part App Admin's Company"
+        }
+      },
+      "quota": {
+        "deleted": 0,
+        "remaining": 1099509753868,
+        "state": "normal",
+        "total": 1099511627776
+      }
+    }
+  ]
+}

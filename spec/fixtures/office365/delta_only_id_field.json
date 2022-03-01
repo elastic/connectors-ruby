@@ -1,0 +1,14 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)",
+  "@odata.deltaLink": "https://graph.microsoft.com/v1.0/drive/root/microsoft.graph.delta(token='delta_only_id_field')?%24select=id",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "id": "01P227ST2FICAGPYOPKFEZLY57JH5SDRO2"
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "id": "01P227ST2VRN3WMGV6C5CZBDG7JPPUMVOC"
+    }
+  ]
+}

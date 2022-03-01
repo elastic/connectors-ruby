@@ -1,0 +1,39 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('84e12774-eda7-44e6-a60c-2f0503213421')/drives('eac871c1371902ee')/items('01E4DADQ56Y2GOVW7725BZO354PWSELRRZ')/children",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/drives/eac871c1371902ee/items/01E4DADQ7NCNZQA4IKNFA3JSI74WHGBE3J/children?$skiptoken=Paged%3dTRUE%26p_SortBehavior%3d0%26p_FileLeafRef%3dScreen%2520Shot%25202017%252d04%252d03%2520at%25204%252e28%252e37%2520PM%252epng%26p_ID%3d93%26p_FileDirRef%3dpersonal%252ftotallyanonymous%255fswiftype%255fonmicrosoft%255fcom%252fDocuments%26RootFolder%3d%252fpersonal%252ftotallyanonymous%255fswiftype%255fonmicrosoft%255fcom%252fDocuments",
+  "value": [
+    {
+      "@microsoft.graph.downloadUrl": "https://swiftype-my.sharepoint.com/personal/totallyanonymous_swiftype_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=639c8cbd-8747-411a-a8ea-adf2e112828a&access_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvc3dpZnR5cGUtbXkuc2hhcmVwb2ludC5jb21ANDkyZmE1ZWMtNmQ1Yy00NGI3LWFkNjktZDI3YjZhMTlhMmIzIiwiaXNzIjoiMDAwMDAwMDMtMDAwMC0wZmYxLWNlMDAtMDAwMDAwMDAwMDAwIiwibmJmIjoxNDg1NDY3MzA1LCJleHAiOjE0ODU0NzA5MDUsImVuZHBvaW50dXJsIjoiaVBLaWEvY2tYQUQ3eldHUU52T0htY2JrNUxHY043ZkQreFVNUmVIclQ5VT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE0NiIsImlzbG9vcGJhY2siOiJUcnVlIiwibmFtZWlkIjoiMCMuZnxtZW1iZXJzaGlwfGN3YW5nQHN3aWZ0eXBlLm9ubWljcm9zb2Z0LmNvbSIsIm5paSI6Im1pY3Jvc29mdC5zaGFyZXBvaW50IiwiaXN1c2VyIjoidHJ1ZSIsImNhY2hla2V5IjoiMGguZnxtZW1iZXJzaGlwfDEwMDMzZmZmOWE4Nzk2NDNAbGl2ZS5jb20iLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.Jzs_nhnp7QUkcAG10Qg-17-5qp2fOiQEisNNHBNk9_w&prooftoken=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImlZR1ZYcU1YbDZuSkI5MldBdW9jN1V3RHI0WSJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDBAKiIsImlzcyI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMEAqIiwibmJmIjoiMTQ4NTQ2MTQ2MCIsImV4cCI6IjE0ODYwNjYyNjAiLCJwcmYiOiJkK2VkREc0UlRaTm5LV0cyMDRENncxWlNhZUtnU2p1NTlsRnJkSjl6UkI1akhINkhsSzBoaDlkT0U0MEVXRmhRNkk4YlU4WkZ0OVJyRlQwQk1YNDdaQlB1ank2U1c3c1lYZmVhbGNoRjRna2c4bk5ZL3MxNmxQTHVoSTI2dm51aWliUWs0bG5QWGFZR3lkZ3lvTHd2UGZGZkY4UzIyN3ZOaHNmZ0xXcU9LdnNsWnFQYk9aaEg2WEo4VDV6Sm5ZQysvdUlFdnJzYVhsWGhmN1JuTHJBbzNFK1dkU1ZvcEU4YTl5RXA5ekkvVzNaM3ROVytMeXZsYUtOVTRZK2ZPUlRYSzlhV0hwemQ3d21tMncvT3k5N21Iai8vYlF4bUt5OWlYK0Z6bEVoSDZzcnp6WlJEOGtCdTI4UHhwSi85bnN3d09jWkFxeFpNQUs3Z3R0VmlpYkNqZnc9PSIsImlzdXNlciI6InRydWUifQ.Wk0qnsyaBGshHqwdLYnlskBVLwCjE4h9Di2THIu9iwKlP3O2fPP0MVaasJvFrMfXRe0OifHMceUgknNElL1QhxrnqW8RK6dNJvcrzcBqUbVK7YTmVdRreWoknvcw7ihDNtZZ4ZN41jbuoUVSs4kviYi6bf0mlIYZAmLGSItws2doTYkWqipL4nO5_0MQ1yjjAbnraKjqB8sZjQ6GEB6N7DFuUAnTzbf-NJSL4gVd9XipEBU4igcZOtZERq5fhm5GygYPJGnKZQTkwZfyF0nCX74BiXlqeZjyIWVrhdI78DjI0_QJOIsnJNfhjNUmL4uWyiH8nhWrURR_aDTHGs_Gsw",
+      "createdBy": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Chris Wang"
+        }
+      },
+      "createdDateTime": "2017-01-20T22:27:28Z",
+      "eTag": "\"{639C8CBD-8747-411A-A8EA-ADF2E112828A},2\"",
+      "id": "01E4DADQ55RSOGGR4HDJA2R2VN6LQRFAUK",
+      "lastModifiedBy": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Chris Wang"
+        }
+      },
+      "lastModifiedDateTime": "2017-01-20T22:27:28Z",
+      "name": "document me mate.docx",
+      "webUrl": "https://swiftype-my.sharepoint.com/personal/cwang_swiftype_onmicrosoft_com/_layouts/15/WopiFrame.aspx?sourcedoc=%7B639C8CBD-8747-411A-A8EA-ADF2E112828A%7D&file=document%20me%20mate.docx&action=default",
+      "cTag": "\"c:{639C8CBD-8747-411A-A8EA-ADF2E112828A},1\"",
+      "file": {
+        "hashes": {
+          "quickXorHash": "+cGREInTDPMUcusZfu+NjwDql9s="
+        }
+      },
+      "parentReference": {
+        "driveId": "eac871c1371902ee",
+        "id": "01E4DADQ56Y2GOVW7725BZO354PWSELRRZ",
+        "path": "/drives/eac871c1371902ee/root:/folder me mate"
+      },
+      "size": 10880
+    }
+  ]
+}

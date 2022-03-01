@@ -22,6 +22,7 @@ group :test do
   gem 'pry-remote'
   gem 'pry-nav'
   gem 'debase'
+  gem 'timecop'
 end
 
 # Dependencies for the HTTP service

@@ -1,0 +1,30 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#sites",
+  "value": [
+    {
+      "createdDateTime": "2019-09-13T20:42:04Z",
+      "id": "enterprisesearch.sharepoint.com,f62543c6-b329-4e0a-96c1-c1a065f5be3f,23ed25a9-4dee-4750-afb0-acb21475a499",
+      "lastModifiedDateTime": "2019-09-01T20:51:29Z",
+      "name": "enterprisesearch.sharepoint.com",
+      "webUrl": "https://enterprisesearch.sharepoint.com",
+      "displayName": "Communication site",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-10-25T17:04:16Z",
+      "description": "Collaborate on PDX Meat Collective Documents",
+      "id": "enterprisesearch.sharepoint.com,79e9ffcd-05d4-49b5-8d7c-eb0c111f218c,f19c4f31-428a-4627-89e1-72355835e8eb",
+      "lastModifiedDateTime": "2019-10-13T05:17:46Z",
+      "name": "PDXMeatCollective",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/PDXMeatCollective",
+      "displayName": "PDX Meat Collective",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    }
+  ]
+}

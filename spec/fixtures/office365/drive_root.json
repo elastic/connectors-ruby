@@ -1,0 +1,16 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('84e12774-eda7-44e6-a60c-2f0503213421')/drives('eac871c1371902ee')/root/$entity",
+  "createdDateTime": "2016-09-30T11:04:34Z",
+  "id": "01E4DADQ56Y2GOVW7725BZO354PWSELRRZ",
+  "lastModifiedDateTime": "2017-01-24T00:02:52Z",
+  "name": "root",
+  "webUrl": "https://swiftype-my.sharepoint.com/personal/cwang_swiftype_onmicrosoft_com/Documents",
+  "folder": {
+    "childCount": 5
+  },
+  "root": {},
+  "size": 0,
+  "specialFolder": {
+    "name": "documents"
+  }
+}

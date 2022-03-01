@@ -1,0 +1,5 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)",
+  "@odata.deltaLink": "https://graph.microsoft.com/v1.0/drives/eac871c1371902ee/root/microsoft.graph.delta('token=empty_delta_link_json_token')",
+  "value": []
+}

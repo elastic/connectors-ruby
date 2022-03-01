@@ -1,0 +1,48 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/drive/root/delta?token=track_changes_next_link_token",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdBy": {
+        "application": {
+          "id": "4c1c1425"
+        },
+        "user": {
+          "displayName": "Third-Party App Admin",
+          "id": "eac871c1371902ee"
+        }
+      },
+      "createdDateTime": "2017-01-20T18:10:20.2Z",
+      "cTag": "adDpFQUM4NzFDMTM3MTkwMkVFITEwMy42MzYyMTA1NzEwNzMzMDAwMDA",
+      "eTag": "aRUFDODcxQzEzNzE5MDJFRSExMDMuMA",
+      "id": "EAC871C1371902EE!103",
+      "lastModifiedBy": {
+        "application": {
+          "id": "4c1c1425"
+        },
+        "user": {
+          "displayName": "Third-Party App Admin",
+          "id": "eac871c1371902ee"
+        }
+      },
+      "lastModifiedDateTime": "2017-01-26T19:51:47.33Z",
+      "name": "root",
+      "parentReference": {
+        "driveId": "eac871c1371902ee",
+        "id": "EAC871C1371902EE!0",
+        "path": "/drive/root:"
+      },
+      "size": 4843207186,
+      "webUrl": "https://onedrive.live.com/?cid=eac871c1371902ee",
+      "fileSystemInfo": {
+        "createdDateTime": "2017-01-20T18:10:20.2Z",
+        "lastModifiedDateTime": "2017-01-20T18:10:20.2Z"
+      },
+      "folder": {
+        "childCount": 0
+      },
+      "root": {}
+    }
+  ]
+}

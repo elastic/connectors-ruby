@@ -79,9 +79,7 @@ module Connectors
         share_point_sites
           .map(&:id)
           .uniq
-          .map { |site_id|
-            site_drives(site_id, :fields => fields)
-          }
+          .map { |site_id| site_drives(site_id, :fields => fields) }
           .flatten
           .compact
       end
@@ -220,6 +218,7 @@ module Connectors
       def request_all(endpoint:, fields: [], additional_query_params: {})
         query_params = transform_fields_to_request_query_params(fields)
         response = request_endpoint(:endpoint => endpoint, :query_params => query_params.merge(additional_query_params))
+
         items = response.value
         while next_link = response['@odata.nextLink']
           response = request_json(:url => next_link)

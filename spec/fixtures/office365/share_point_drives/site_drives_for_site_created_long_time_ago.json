@@ -1,0 +1,40 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives",
+    "value": [
+        {
+            "createdDateTime": "2021-04-11T05:15:29Z",
+            "description": "",
+            "id": "b!8da5r-QaKkKupuoZZfe4VPyR3ZEQ4uJLtB9_Hb7blpxPGfc1sn1LQ6jfNJDaTbO5",
+            "lastModifiedDateTime": "2021-04-26T12:13:52Z",
+            "name": "Documents",
+            "webUrl": "https://enterprisesearch.sharepoint.com/sites/PublicCommunicationSite/Shared%20Documents",
+            "driveType": "documentLibrary",
+            "createdBy": {
+                "user": {
+                    "displayName": "System Account"
+                }
+            },
+            "lastModifiedBy": {
+                "user": {
+                    "email": "demo@enterprisesearch.onmicrosoft.com",
+                    "id": "baa37bda-0dd1-4799-ae22-f3476c2cf58d",
+                    "displayName": "Enterprise Search"
+                }
+            },
+            "owner": {
+                "user": {
+                    "email": "demo@enterprisesearch.onmicrosoft.com",
+                    "id": "baa37bda-0dd1-4799-ae22-f3476c2cf58d",
+                    "displayName": "Enterprise Search"
+                }
+            },
+            "quota": {
+                "deleted": 21560,
+                "remaining": 27487789131292,
+                "state": "normal",
+                "total": 27487790694400,
+                "used": 17076
+            }
+        }
+    ]
+}

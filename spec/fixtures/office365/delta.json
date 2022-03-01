@@ -1,0 +1,771 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)",
+  "@odata.deltaLink": "https://graph.microsoft.com/v1.0/me/drives/b!nmHnaiLX4Ue9J6NreO3_X65Qc7bx1_lGnFnXvFmmP2O7usCkgL9bRoLftLwr3lpi/root/delta?$select=id%2ccontent.downloadUrl%2clastModifiedDateTime%2clastModifiedBy%2croot%2cdeleted%2cfile%2cfolder%2cpackage%2cname%2cwebUrl%2ccreatedBy%2ccreatedDateTime%2csize&token=MzslMjM0OyUyMzE7MzthNGMwYmFiYi1iZjgwLTQ2NWItODJkZi1iNGJjMmJkZTVhNjI7NjM3MzgyMTg3NjA2MzMwMDAwOzQ1OTg5OTQ5ODslMjM7JTIzOyUyMzA",
+  "value": [
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2019-09-01T20:46:28Z",
+      "id": "016KMSKL56Y2GOVW7725BZO354PWSELRRZ",
+      "lastModifiedDateTime": "2020-10-13T20:30:21Z",
+      "name": "root",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents",
+      "size": 1421696,
+      "folder": {
+        "childCount": 25
+      },
+      "root": {}
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=db19eb87-a5b2-4765-b1b6-61550712b8f7&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoidjdyNDJFQnJOemkra2JsS0Q5MGhOUzNad0JkZmhPK1ZhK0psN0tPSjNlUT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.ZEplQ1EvMkRQMlB1ME95VHVkdkRJbEovZ2xxYWk4M3YrRXhjS0hJbGZRVT0",
+      "createdDateTime": "2019-11-12T20:07:04Z",
+      "id": "016KMSKL4H5MM5XMVFMVD3DNTBKUDRFOHX",
+      "lastModifiedDateTime": "2019-11-12T20:07:04Z",
+      "name": "Release Blog Post.url",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/Release%20Blog%20Post.url",
+      "size": 92,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/octet-stream",
+        "hashes": {
+          "quickXorHash": "igbRoG9lMLBF0pYWJJwac+CcEco="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2019-11-12T20:10:41Z",
+      "id": "016KMSKL4F5TSA2SZI2JFLJFQKYIWCT7DQ",
+      "lastModifiedDateTime": "2019-11-12T20:11:24Z",
+      "name": "Sagan Quotes",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B0DE4EC85-284B-4AD2-B496-0AC22C29FC70%7D&file=Sagan%20Quotes&action=edit&mobileredirect=true&wdorigin=Sharepoint",
+      "size": 244261,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "package": {
+        "type": "oneNote"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=d570b1d1-ca89-4f85-aaab-71b884eade6b&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiNTR6c3dMTjhiK2RyWXYxM0tSekJyOHNZS0VtSGdiZmxXaFNna1M0ZkJvST0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.UzQ0akNPQXlha3ByQ1ViVWNVMFVDbUZiWUV3aUo2b0oyMm40T2NXc3Fsaz0",
+      "createdDateTime": "2019-11-12T20:10:47Z",
+      "id": "016KMSKL6RWFYNLCOKQVH2VK3RXCCOVXTL",
+      "lastModifiedDateTime": "2020-08-24T21:18:23Z",
+      "name": "Untitled Section.one",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BD570B1D1-CA89-4F85-AAAB-71B884EADE6B%7D&file=Untitled%20Section.one&action=edit&mobileredirect=true&wdorigin=Sharepoint",
+      "size": 182096,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/msonenote"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=645e951f-9d95-40ca-8036-18a13acc6f97&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiSk1iUU9ZNGxkYVJHZVI3NG1Mc2hUOUFGNU95aGpDNnJXeUZVVHErNThSWT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.T0VYemRMc2wzTzVWWVlneHkzbzU5U3ViNzRIUTVVdlZrR3lMSUoxYWFzST0",
+      "createdDateTime": "2019-11-12T20:10:54Z",
+      "id": "016KMSKLY7SVPGJFM5ZJAIANQYUE5MY34X",
+      "lastModifiedDateTime": "2019-11-12T20:15:07Z",
+      "name": "Open Notebook.onetoc2",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B645E951F-9D95-40CA-8036-18A13ACC6F97%7D&file=Open%20Notebook.onetoc2&action=edit&mobileredirect=true&wdorigin=Sharepoint",
+      "size": 7117,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/octet-stream"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=91bea72f-f6cb-40bb-b74c-2aa37402f016&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiVjJSelpGbndmMnQ1bFhuMkgwd2szQlkvR3lIazBjRStkWUdYOU42VnNkND0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.ZXlPUHJ0cGN3L04vNFRDR0pjWmNPbUxqdEs4V2NNVXZrNnFtVlEzQ3c4OD0",
+      "createdDateTime": "2019-11-12T20:14:31Z",
+      "id": "016KMSKLZPU67JDS7WXNALOTBKUN2AF4AW",
+      "lastModifiedDateTime": "2020-08-24T19:44:36Z",
+      "name": "Next Two Quotes.one",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B91BEA72F-F6CB-40BB-B74C-2AA37402F016%7D&file=Next%20Two%20Quotes.one&action=edit&mobileredirect=true&wdorigin=Sharepoint",
+      "size": 38809,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/msonenote"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=c2f8ecca-91d9-487a-8a2f-6c6ea64ae782&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiemk0czRUb0dhdkVyMGp2ZnpJaFJuTUtvTmJUd2VZdkZ5d2ZxVk9GTFU1WT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.K01LRlBGMVBnMXgzOWcvMy9ldCtZYUNnUFdLYzdRWDBaL2QvQlRoeDhJYz0",
+      "createdDateTime": "2019-11-12T20:15:04Z",
+      "id": "016KMSKL6K5T4MFWMRPJEIUL3MN2TEVZ4C",
+      "lastModifiedDateTime": "2019-11-12T20:15:15Z",
+      "name": "One Last Quote.one",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BC2F8ECCA-91D9-487A-8A2F-6C6EA64AE782%7D&file=One%20Last%20Quote.one&action=edit&mobileredirect=true&wdorigin=Sharepoint",
+      "size": 16239,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/msonenote"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=a7f77791-75f3-484a-9247-5f0338a531bd&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoid3J6anFiUllWdVlMNm1OTk5lZnZ5V3hXaTUvdUc4WDZiN3pSd1Q5OVhuST0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.d3RqYUJ3Y3dOd1FMY3ZBb3lEdWVUcWpBQmZvMmhpYTNONzFiQUdjQTIrcz0",
+      "createdDateTime": "2019-11-12T20:17:27Z",
+      "id": "016KMSKL4RO732P43VJJEJER27AM4KKMN5",
+      "lastModifiedDateTime": "2019-11-12T20:24:49Z",
+      "name": "Presentation.pptx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BA7F77791-75F3-484A-9247-5F0338A531BD%7D&file=Presentation.pptx&action=edit&mobileredirect=true",
+      "size": 36828,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "hashes": {
+          "quickXorHash": "/nu2Qig3VwtSqdH52XJHoaZOv34="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=530415d8-9260-4773-9d8f-0805db499b7d&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiWmlJMG9iNWxPTG1pdFIzSDdsWkZpTUxSQjEvWUJRSnA2eVRack9LOHFudz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.dXJ4L3cwYThOajRwd2h6RkRXaUlSb0pxeU9QRUNCT2NkTWtCc3V1aDZ0OD0",
+      "createdDateTime": "2019-11-12T20:24:46Z",
+      "id": "016KMSKL6YCUCFGYESONDZ3DYIAXNUTG35",
+      "lastModifiedDateTime": "2020-06-04T18:56:40Z",
+      "name": "The Score So Far.xlsx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B530415D8-9260-4773-9D8F-0805DB499B7D%7D&file=The%20Score%20So%20Far.xlsx&action=default&mobileredirect=true",
+      "size": 8564,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "hashes": {
+          "quickXorHash": "BNMspLUMHLonFiSf4A1hOPTYQRs="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2019-11-12T20:53:38Z",
+      "id": "016KMSKL47QAOYTRROZVHL3RNI6R3TJ2WO",
+      "lastModifiedDateTime": "2019-11-12T20:53:38Z",
+      "name": "Riker",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/Riker",
+      "size": 23042,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "folder": {
+        "childCount": 2
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=35d1aa35-b115-4600-8a77-9c8d01e1a843&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiQk1Dd3dOa0VZR2RZZVIzU1B5dXdERTRUbjk0VlNGNHRBV1h1Uk5oOG5HMD0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.V0N5bmZYRXRlU1htQlhFUmlVVlFsazZCdEhCY3N5ZWhWZVFnMWhTLzB5bz0",
+      "createdDateTime": "2019-10-04T22:48:24Z",
+      "id": "016KMSKLZVVLITKFNRABDIU544RUA6DKCD",
+      "lastModifiedDateTime": "2019-11-12T20:08:14Z",
+      "name": "Riker Ramblings.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B35D1AA35-B115-4600-8A77-9C8D01E1A843%7D&file=Riker%20Ramblings.docx&action=default&mobileredirect=true",
+      "size": 11510,
+      "createdBy": {
+        "application": {
+          "displayName": "O365 Suite UX"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "057yTyninsXFgAjJtiqOHcPknXw="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=19255f2c-31bb-484a-8577-fafd98e09910&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoidENVdkNJT2dDV0pxaTJ0WUxobGZnWWcxNXhjLzFUd3FKTldGSXpOdUIxRT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.NnprNTUyU0NwUCtYQ1lmN1N4T3JmdWFQckNZM2wzV3hXZHBlM3hmekVpMD0",
+      "createdDateTime": "2019-10-21T20:13:12Z",
+      "id": "016KMSKLZML4SRTOZRJJEIK5727WMOBGIQ",
+      "lastModifiedDateTime": "2019-11-12T20:09:03Z",
+      "name": "More Riker Ramblings.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B19255F2C-31BB-484A-8577-FAFD98E09910%7D&file=More%20Riker%20Ramblings.docx&action=default&mobileredirect=true",
+      "size": 11532,
+      "createdBy": {
+        "application": {
+          "displayName": "O365 Suite UX"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "JP3lxynTgjvjlgTIALklvlFa0/c="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=de3ae981-1d6c-4c47-80af-523746dedb70&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoidWxhL2UvalpOd1FCQVRaajQzelBkbTdTcWFILzFkUm41Y0NaNGNNU3BTQT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.SjE0WnlZY2FxY0xGaTlnL040cTBEOWtzZ1RJZkJ2MVcvR1B0dnJlbjdtZz0",
+      "createdDateTime": "2019-11-15T14:18:19Z",
+      "id": "016KMSKL4B5E5N43A5I5GIBL2SG5DN5W3Q",
+      "lastModifiedDateTime": "2020-04-01T00:57:12Z",
+      "name": "Bacon ipsum.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BDE3AE981-1D6C-4C47-80AF-523746DEDB70%7D&file=Bacon%20ipsum.docx&action=default&mobileredirect=true",
+      "size": 7754,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "Lz30+547jSVl9sebHVkl7J5nJlk="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=2684fafc-47ae-4b4d-a612-bec6bd07559c&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiWFpiVmZuSHZJS0IwWUgveExkZFkzSjVQNkRnVWw4eDhsQWNIUElUenZEST0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.NWVtbkZ5RTZpb1o4bW5FdjNVbnNWazdTSUt5LytwcGE2bUFSVjJIZFI3RT0",
+      "createdDateTime": "2019-12-06T12:31:56Z",
+      "id": "016KMSKL747KCCNLSHJVF2MEV6Y26QOVM4",
+      "lastModifiedDateTime": "2019-12-06T12:31:57Z",
+      "name": "Thoughts_on_Ada.pdf",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/Thoughts_on_Ada.pdf",
+      "size": 773773,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/pdf",
+        "hashes": {
+          "quickXorHash": "x4QDUx3XSbXBq7dcp4tndJS9Dis="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2019-12-18T07:07:53Z",
+      "id": "016KMSKLYF7VKQK6K3PNGIPNB7ZSB5NTBC",
+      "lastModifiedDateTime": "2019-12-18T07:07:53Z",
+      "name": "root",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/root",
+      "size": 0,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "folder": {
+        "childCount": 2
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2019-12-18T07:08:41Z",
+      "id": "016KMSKL7AHO4PPBH3F5AZYRRPEFJBPRXC",
+      "lastModifiedDateTime": "2019-12-18T07:08:41Z",
+      "name": "causes",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/root/causes",
+      "size": 0,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "folder": {
+        "childCount": 0
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2019-12-18T07:08:50Z",
+      "id": "016KMSKLYIIBEDTCXOOBHYKVR3UKCSWXFX",
+      "lastModifiedDateTime": "2019-12-18T07:08:50Z",
+      "name": "vegetables",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/root/vegetables",
+      "size": 0,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "folder": {
+        "childCount": 0
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=c5a632e7-3b1b-4297-8de9-62b7bbe03234&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiU0p0aC9NWFlISlhDQlRSWk1YUG8zYTdXSldrWndFaDZLQXR3UXNWN0Nkaz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.WldGUkU3dGR2Um56VGw0KzFRN29BdHN4enRrSVZEcUZrODFIckU5enlRUT0",
+      "createdDateTime": "2020-01-31T14:34:19Z",
+      "id": "016KMSKL7HGKTMKGZ3S5BI32LCW656AMRU",
+      "lastModifiedDateTime": "2020-01-31T14:35:58Z",
+      "name": "Mr Darcy.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BC5A632E7-3B1B-4297-8DE9-62B7BBE03234%7D&file=Mr%20Darcy.docx&action=default&mobileredirect=true",
+      "size": 41677,
+      "createdBy": {
+        "application": {
+          "displayName": "Microsoft Office Web Apps Service"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "/1iExkksiHcQ7Nn2jrwJqM1/PBk="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=cfb01f05-8247-486a-80cc-8cadb06018b3&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiN0ZNYWtwTUVsRms5NjZJNE9TdUhtOTVJa2trQTExRm84Y0t3WGtEYkJJZz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.ZloxejJwSkYvY1pzdXJSNDlKQWdFa3FkRjU1UU4zSWRrTW84QmZNM1ExMD0",
+      "createdDateTime": "2020-01-31T15:29:07Z",
+      "id": "016KMSKLYFD6YM6R4CNJEIBTEMVWYGAGFT",
+      "lastModifiedDateTime": "2020-01-31T15:31:24Z",
+      "name": "Peer out window, chatter at birds, lure them to mouth.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BCFB01F05-8247-486A-80CC-8CADB06018B3%7D&file=Peer%20out%20window,%20chatter%20at%20birds,%20lure%20them%20to%20mouth.docx&action=default&mobileredirect=true",
+      "size": 41818,
+      "createdBy": {
+        "application": {
+          "displayName": "Microsoft Office Web Apps Service"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "bFMOa3xlJWvCPyL8POXf2CLPmJ0="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=86d88948-4328-4b88-bf1a-240eac36f6c3&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiOHJUZzJWa1NVUzRIWTM3eUVqL1JGU3R5aTF0Smw3dFl5MDdqN1RxbTZ3TT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.eDNYRzY5c3RQMVBUd0dvQjJma2F0K3VYbVJ2OEN2cDdSWXBxVUwwYkFQVT0",
+      "createdDateTime": "2020-02-21T14:21:57Z",
+      "id": "016KMSKL2IRHMIMKCDRBF36GREB2WDN5WD",
+      "lastModifiedDateTime": "2020-02-21T14:22:30Z",
+      "name": "Document.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B86D88948-4328-4B88-BF1A-240EAC36F6C3%7D&file=Document.docx&action=default&mobileredirect=true",
+      "size": 15246,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "b63gBKRylEDcQ7zAP7pcH0SRh8s="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2020-02-21T14:25:40Z",
+      "id": "016KMSKL2CXXP6PYEL7BEKXASTPARPC3IC",
+      "lastModifiedDateTime": "2020-03-02T15:04:56Z",
+      "name": "World's world",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/World%27s%20world",
+      "size": 26642,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "folder": {
+        "childCount": 2
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=a15e7d6a-f31d-4eaf-b18f-e3f2486e8b1e&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiaDBPVGxNN2ZYY3I4aWNKOFFvZVA2ckhmU09aQjhwbjRIK3dIT2pnQXlaYz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.cXRWWjhubXc4MDM2d25Uay9wRm1sSEZnWStyUFd2YXQvcmRLdFB2THdZWT0",
+      "createdDateTime": "2020-02-21T14:22:31Z",
+      "id": "016KMSKL3KPVPKCHPTV5HLDD7D6JEG5CY6",
+      "lastModifiedDateTime": "2020-02-21T14:22:31Z",
+      "name": "XSS Polyglots.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BA15E7D6A-F31D-4EAF-B18F-E3F2486E8B1E%7D&file=XSS%20Polyglots.docx&action=default&mobileredirect=true",
+      "size": 15246,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=543930e2-8f1d-448a-8d06-e7693824f08b&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiZFhoQUJkS0JtSldhVHBndzg5WWMza2VMT2s1VEpMRDN5ZlpVUXdkUllVdz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.S2JDV1NwVTREYnc1MWIyKzlkMXhwQnJJNmxPQitQVHJmT201SXpaNjg1cz0",
+      "createdDateTime": "2020-03-02T14:55:26Z",
+      "id": "016KMSKL7CGA4VIHMPRJCI2BXHNE4CJ4EL",
+      "lastModifiedDateTime": "2020-03-02T15:37:08Z",
+      "name": "world's.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B543930E2-8F1D-448A-8D06-E7693824F08B%7D&file=world%27s.docx&action=default&mobileredirect=true",
+      "size": 11396,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "txFe8sfuXSpKtQHfU7U/rH2Sc7Y="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=4f0409e7-da08-4005-a24d-fb647d3813aa&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoibjMvTWhxcTRqN0xNVENFUEErZHQ2QTRoUTJnSDIxb2s4YjgxWDUwTEY4cz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.Z2dsVGZCT0RhSXpLS25jMVhZRVZpb1pObXc1UkJqTjE0YXFqTWR0bCtjcz0",
+      "createdDateTime": "2020-04-01T00:54:37Z",
+      "id": "016KMSKL7HBECE6CG2AVAKETP3MR6TQE5K",
+      "lastModifiedDateTime": "2020-04-01T00:55:22Z",
+      "name": "7.7 Testing Document.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B4F0409E7-DA08-4005-A24D-FB647D3813AA%7D&file=7.7%20Testing%20Document.docx&action=default&mobileredirect=true",
+      "size": 11052,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "/l+71yhVJ/tr6cuehJdtQwEbvhc="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=455a0d8a-a7ba-4007-8163-50567bdef614&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiTEIzbjlmN1dTa3RNZ2NyWi9LRzJiNlZkbDZtMm44S3NkWU5oMjU0ZE1qWT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.VFkrYmtKMnE4T3NkVS9WNUpTOFEzSEtSLzZRRTlMM2tGc0lvUmwvOGhMUT0",
+      "createdDateTime": "2020-05-14T20:28:52Z",
+      "id": "016KMSKL4KBVNELOVHA5AICY2QKZ5555QU",
+      "lastModifiedDateTime": "2020-06-04T20:24:10Z",
+      "name": "Doc Won.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B455A0D8A-A7BA-4007-8163-50567BDEF614%7D&file=Doc%20Won.docx&action=default&mobileredirect=true",
+      "size": 40079,
+      "createdBy": {
+        "application": {
+          "displayName": "Microsoft Office Web Apps Service"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "qbgm5WIx5qNYZirsj8FxVXtgcRQ="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=c952f02e-ec37-4b2b-a1a1-14cdb902d544&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiUzFROVZuK1FuQXYrZWVKUEpmamh4NStyY21peGEvZjExQ0J5dGhQQUVuZz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.aTJEcng4RVByRDNPYVJoUmNrbDc1bTNTQlFieGN0ZzkyZHVLNGNSMkFzND0",
+      "createdDateTime": "2020-05-14T20:29:35Z",
+      "id": "016KMSKLZO6BJMSN7MFNF2DIIUZW4QFVKE",
+      "lastModifiedDateTime": "2020-05-14T21:55:30Z",
+      "name": "7.8 Test 1.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BC952F02E-EC37-4B2B-A1A1-14CDB902D544%7D&file=7.8%20Test%201.docx&action=default&mobileredirect=true",
+      "size": 40125,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "qGcgZaBAOnRngy7vqlyoAEB59sY="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=fb782b26-c789-403e-959c-19a84a3f24dd&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoicXRnWE1QRk44ckRONFQzdStrUllKOGl0VFdNWFhtY0xOeTJ4b1BnV2pTaz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.VUhEM0lLS2RuUTY4MlROQlRJWG9sZlZyT1Nqa1NKeTQzZDJqWnIwS3pMMD0",
+      "createdDateTime": "2020-05-14T21:55:48Z",
+      "id": "016KMSKLZGFN4PXCOHHZAJLHAZVBFD6JG5",
+      "lastModifiedDateTime": "2020-05-14T21:56:47Z",
+      "name": "7.8 Test 2.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BFB782B26-C789-403E-959C-19A84A3F24DD%7D&file=7.8%20Test%202.docx&action=default&mobileredirect=true",
+      "size": 11167,
+      "createdBy": {
+        "application": {
+          "displayName": "O365 Suite UX"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "a18YT3gHW/PXpCU4fMUxO7vvON8="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=3a51dc7a-fb33-4590-9663-8068e924c753&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiektPRngxRzZCSFhObVQ5ZlN0V0RNUWxCcHNFZjYvcE1kdWdpenhhTXJDcz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.UUd3MnZhZlVuWFREakJvanpaZ2w0MEJFZkxiYWF4M0JheGIybzRJQzdRYz0",
+      "createdDateTime": "2020-05-15T09:49:43Z",
+      "id": "016KMSKL323RITUM73SBCZMY4ANDUSJR2T",
+      "lastModifiedDateTime": "2020-06-04T19:36:29Z",
+      "name": "Mads_testing.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B3A51DC7A-FB33-4590-9663-8068E924C753%7D&file=Mads_testing.docx&action=default&mobileredirect=true",
+      "size": 11253,
+      "createdBy": {
+        "application": {
+          "displayName": "Microsoft Office Web Apps Service"
+        },
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "P3vbAHzic+IsyY7OjL9nkry2ATk="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=2fbe7968-c10d-4f27-acd1-31e3fa9b1735&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiTVdLMUVYY1U2dm9Lc1NBUkNEa2ViTnNOR0NXY1pIQmxHU0hsUVNFbHh2MD0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.WWZVcVJmTjc2MlEwQ1d2bDAyNk9MMG1heGo4Z1gzaXFSM0VVWGxZWU9sdz0",
+      "createdDateTime": "2020-05-28T03:59:39Z",
+      "id": "016KMSKL3IPG7C6DOBE5H2ZUJR4P5JWFZV",
+      "lastModifiedDateTime": "2020-05-28T03:59:53Z",
+      "name": "one_drive.jpeg",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/one_drive.jpeg",
+      "size": 1935,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "image/jpeg"
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=9ecaa83c-923e-4f1a-93d2-e58c07c2a3b5&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoicm1JMVBMRFFuRUJiVzFZQ2hSTXg0aGVZOXdKZ0orUTU4aDc3aVBQWGcrMD0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.YUw3SXpTTTRjZS9rRjJ3NHU4TTBhcnRFdUpPT2pVUTJ2NENmK0dvam9xND0",
+      "createdDateTime": "2020-06-04T19:17:45Z",
+      "id": "016KMSKLZ4VDFJ4PUSDJHZHUXFRQD4FI5V",
+      "lastModifiedDateTime": "2020-06-04T21:23:25Z",
+      "name": "James_test.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B9ECAA83C-923E-4F1A-93D2-E58C07C2A3B5%7D&file=James_test.docx&action=default&mobileredirect=true",
+      "size": 11195,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "gBCivgA1Ki06JIIdMGmcGz8sWvM="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=ba35c10a-83fd-43aa-8c71-3f8ff4e3d576&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiT3BvM0JkZHlibzZNOVNpc25wT2ZmQTllMVVhODhFYVd4ekZKRjc3b0Nvbz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.U0pldTdxMFZublkrQU4xOENmV0Q4eURGdlI5K1RrQVFDOTBGQ2NkbktxVT0",
+      "createdDateTime": "2020-06-04T20:08:12Z",
+      "id": "016KMSKLYKYE23V7MDVJBYY4J7R72OHVLW",
+      "lastModifiedDateTime": "2020-06-04T20:09:10Z",
+      "name": "I can show you a doc.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BBA35C10A-83FD-43AA-8C71-3F8FF4E3D576%7D&file=I%20can%20show%20you%20a%20doc.docx&action=default&mobileredirect=true",
+      "size": 11056,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "dClfNPBEaeHGFIQAHBCSB8otW+A="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=e05bfe51-46d9-42e5-9fa2-b9c21ec30bf7&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiemJkUWxyQmtxNEtiVEdZeHJZYmNhdGxHME85bVJPc084S00wems2eEFHRT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.dXlHMThhRlJPeDBydW5VdldaUUxIZVhWOFE4anJjV1FVVzI4Yy8rdVRIdz0",
+      "createdDateTime": "2020-06-04T20:15:24Z",
+      "id": "016KMSKL2R7ZN6BWKG4VBJ7IVZYIPMGC7X",
+      "lastModifiedDateTime": "2020-06-04T20:15:55Z",
+      "name": "Tell me Admin.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BE05BFE51-46D9-42E5-9FA2-B9C21EC30BF7%7D&file=Tell%20me%20Admin.docx&action=default&mobileredirect=true",
+      "size": 11058,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "zaHPHuDzRbZM+k++hCFhIQebWmI="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=53e0087c-82db-49b2-9111-0e0b235847cf&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiN3BUQXdPM0h0cHlaczNvUGtJYkw5Rm4vTk80bDV5ZVJUKzBaVWs2ZzdOYz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.R2ZCZVl0bkd2MlV6SGtlbHpQcDRuWkxHNENiMnVVNEk5YXFWL2p5SC9RQT0",
+      "createdDateTime": "2020-06-04T20:24:41Z",
+      "id": "016KMSKL34BDQFHW4CWJEZCEIOBMRVQR6P",
+      "lastModifiedDateTime": "2020-06-04T20:25:53Z",
+      "name": "But now from way up here.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B53E0087C-82DB-49B2-9111-0E0B235847CF%7D&file=But%20now%20from%20way%20up%20here.docx&action=default&mobileredirect=true",
+      "size": 11051,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "w4lemNFfnbJuaKM1L14X16UmrYM="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=b6007dcc-d6a5-4454-87ab-019e0f98bd30&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiK1o4eVdoZDlWaFI0NFBtWVBFOW5uQ3VkK21JZ0oyOUgyeFc5NkwzOGdhRT0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.WGRleHUyeVd3c2hHS3NqMXVqV2txcldzV0M3ZDEvd3VhTXhCandiZm8rYz0",
+      "createdDateTime": "2020-06-04T21:23:32Z",
+      "id": "016KMSKL6MPUALNJOWKRCIPKYBTYHZRPJQ",
+      "lastModifiedDateTime": "2020-06-04T21:23:59Z",
+      "name": "Whats up doc.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BB6007DCC-D6A5-4454-87AB-019E0F98BD30%7D&file=Whats%20up%20doc.docx&action=default&mobileredirect=true",
+      "size": 11054,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "Nv5oDVph6INeoR+dHty8HAOszAE="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "createdDateTime": "2020-07-20T21:24:19Z",
+      "id": "016KMSKL73M2YRXS4TEVFL7PEMUBKM23IW",
+      "lastModifiedDateTime": "2020-07-20T21:24:19Z",
+      "name": "7.9 QA",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/Documents/7.9%20QA",
+      "size": 19583,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "folder": {
+        "childCount": 2
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=e41ff509-8ccd-458e-8864-082807fc987d&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiZFE0Q2QySTI2RDlhb1VCWXdrNnFaNXFVS2FQbUphdzJKeTZBeEFOK0FMaz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.M0h0b1FsdlIrWjcwbzA3V0E5QklUOVZIMWZ3ci8vckVidFQzL0FNZnlkRT0",
+      "createdDateTime": "2020-07-20T21:24:27Z",
+      "id": "016KMSKLYJ6UP6JTMMRZCYQZAIFAD7ZGD5",
+      "lastModifiedDateTime": "2020-07-20T21:45:18Z",
+      "name": "Document.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7BE41FF509-8CCD-458E-8864-082807FC987D%7D&file=Document.docx&action=default&mobileredirect=true",
+      "size": 11202,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "ZCtdN8X+wFkHMbJYZcxrwfx9w3Y="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=99f8cffe-e31c-4466-bd21-af3922729037&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoicnRJenhZS0FCMTE2dHJJTE50bFhxMXVMVFo3ZGNTS1pRRzQybjdnZGl6cz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.a3dFVFppaVdTeFU2c0kxT3RmbDZTUXZlaHRnNUs4S21rUk9TNXRlR0xGYz0",
+      "createdDateTime": "2020-07-20T21:47:45Z",
+      "id": "016KMSKL76Z74JSHHDMZCL2INPHERHFEBX",
+      "lastModifiedDateTime": "2020-07-20T21:54:13Z",
+      "name": "Book.xlsx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B99F8CFFE-E31C-4466-BD21-AF3922729037%7D&file=Book.xlsx&action=default&mobileredirect=true",
+      "size": 8381,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "hashes": {
+          "quickXorHash": "imDr0G3ugfII1yAAw6fDlQX1PR8="
+        }
+      }
+    },
+    {
+      "@odata.type": "#microsoft.graph.driveItem",
+      "@microsoft.graph.downloadUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=76a0ba90-ccc5-4114-83c0-c38cee2a41af&Translate=false&tempauth=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvZW50ZXJwcmlzZXNlYXJjaC1teS5zaGFyZXBvaW50LmNvbUA2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJpc3MiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAiLCJuYmYiOiIxNjAyNjIxOTYwIiwiZXhwIjoiMTYwMjYyNTU2MCIsImVuZHBvaW50dXJsIjoiN0dFdWdsSFFTNXdnbzhVUmFheFpIeHhvcy9xL0cvRWJPMGs3K2l5NTIrbz0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE3NyIsImlzbG9vcGJhY2siOiJUcnVlIiwiY2lkIjoiWlRabE5tWmpaVEV0TWpCaVlTMWhaV00wTFRJek9ERXROek15TlRFeFlqSTJZalEyIiwidmVyIjoiaGFzaGVkcHJvb2Z0b2tlbiIsInNpdGVpZCI6Ik5tRmxOell4T1dVdFpEY3lNaTAwTjJVeExXSmtNamN0WVRNMllqYzRaV1JtWmpWbSIsImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIGV4cGxvcmVyIChvZmZpY2lhbCBzaXRlKSIsImdpdmVuX25hbWUiOiJFbnRlcnByaXNlIiwiZmFtaWx5X25hbWUiOiJTZWFyY2giLCJzaWduaW5fc3RhdGUiOiJbXCJrbXNpXCJdIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJ0aWQiOiI2NjZmMGVhYi00YjE1LTQ1NDQtYTVhOC0wOGMwMWFjNmNhZWMiLCJ1cG4iOiJkZW1vQGVudGVycHJpc2VzZWFyY2gub25taWNyb3NvZnQuY29tIiwicHVpZCI6IjEwMDMyMDAwNkNGQTdCNzkiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwMDZjZmE3Yjc5QGxpdmUuY29tIiwic2NwIjoibXlmaWxlcy5yZWFkIGFsbGZpbGVzLnJlYWQgZ3JvdXAucmVhZCBhbGxzaXRlcy5yZWFkIGFsbHByb2ZpbGVzLnJlYWQiLCJ0dCI6IjIiLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ.WnhyR0N1TFBUeHI4dXRMNXZreUZtS05xWWttN2Y5K01mVC9Ic1J5bjZpST0",
+      "createdDateTime": "2020-10-13T20:08:08Z",
+      "id": "016KMSKL4QXKQHNROMCRAYHQGDRTXCUQNP",
+      "lastModifiedDateTime": "2020-10-13T20:30:21Z",
+      "name": "Incremental add.docx",
+      "webUrl": "https://enterprisesearch-my.sharepoint.com/personal/demo_enterprisesearch_onmicrosoft_com/_layouts/15/Doc.aspx?sourcedoc=%7B76A0BA90-CCC5-4114-83C0-C38CEE2A41AF%7D&file=Incremental%20add.docx&action=default&mobileredirect=true",
+      "size": 11391,
+      "createdBy": {
+        "user": {
+          "displayName": "Enterprise Search"
+        }
+      },
+      "file": {
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "hashes": {
+          "quickXorHash": "CXCdxsLmojV5XkITkdXLsAWcFJs="
+        }
+      }
+    }
+  ]
+}
