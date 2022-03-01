@@ -58,6 +58,8 @@ GEM
     rack (2.2.3)
     rack-protection (2.1.0)
       rack
+    rack-test (1.1.0)
+      rack (>= 1.0, < 3)
     rainbow (3.1.1)
     regexp_parser (2.2.1)
     rexml (3.2.5)
@@ -111,6 +113,7 @@ GEM
 PLATFORMS
   universal-darwin-21
   universal-java-11
+  x86_64-darwin-20
 
 DEPENDENCIES
   activesupport (= 5.2.6)
@@ -122,6 +125,7 @@ DEPENDENCIES
   hashie
   httpclient
   rack
+  rack-test
   rspec-collection_matchers (~> 1.2.0)
   rspec-core (~> 3.10.1)
   rspec-mocks

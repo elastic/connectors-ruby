@@ -15,6 +15,7 @@ group :test do
   gem 'rubocop'
   gem 'rspec-mocks'
   gem 'webmock'
+  gem 'rack-test'
 end
 
 # Dependencies for the HTTP service

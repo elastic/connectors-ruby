@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'faraday'
+require 'hashie'
 require 'sinatra'
 require 'json'
 
@@ -8,52 +10,72 @@ require 'signet'
 require 'signet/oauth_2'
 require 'signet/oauth_2/client'
 
-get '/' do
-  content_type :json
-  { version: '1.0' }.to_json
-end
+# Sinatra app
+class ConnectorsWebApp < Sinatra::Base
+  get '/' do
+    content_type :json
+    { version: '1.0' }.to_json
+  end
 
-get '/health' do
-  content_type :json
-  { healthy: 'yes' }.to_json
-end
+  get '/health' do
+    content_type :json
+    { healthy: 'yes' }.to_json
+  end
 
-get '/status' do
-  content_type :json
-  { status: 'IDLING' }.to_json
-end
+  get '/status' do
+    content_type :json
 
-post '/documents' do
-  content_type :json
-  params = JSON.parse(request.body.read)
+    # TODO: wait for other refactorings to replace this code in the right spot
+    response = Faraday.get('https://graph.microsoft.com/v1.0/me')
+    res = Hashie::Mash.new(JSON.parse(response.body))
 
-  connector = Connectors::Sharepoint::HttpCallWrapper.new(
-    params
-  )
+    status = res.error? ? 'FAILURE' : 'OK'
+    message = res.error? ? res.error.message : 'Connected to Sharepoint'
 
-  return { results: connector.get_document_batch, cursor: nil }.to_json
-end
+    {
+      extractor: {
+        name: 'Sharepoint'
+      },
+      contentProvider: {
+        status: status,
+        statusCode: response.status,
+        message: message
+      }
+    }.to_json
+  end
 
-post '/download' do
-  file = File.join(__dir__, 'cat.jpg')
-  send_file(file, type: 'image/jpeg', disposition: 'inline')
-end
+  post '/documents' do
+    content_type :json
+    params = JSON.parse(request.body.read)
 
-# XXX remove `oauth2` from the name
-post '/oauth2/init' do
-  content_type :json
-  body = JSON.parse(request.body.read, symbolize_names: true)
-  logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
-  logger.info "Received redirect URL: #{params[:redirect_uri]}"
-  authorization_uri = Sharepoint::Authorization.authorization_uri(body)
+    connector = Sharepoint::HttpCallWrapper.new(
+      params
+    )
 
-  { oauth2redirect: authorization_uri.to_s }.to_json
-end
+    return { results: connector.get_document_batch, cursor: nil }.to_json
+  end
 
-# XXX remove `oauth2` from the name
-post '/oauth2/exchange' do
-  content_type :json
-  params = JSON.parse(request.body.read, symbolize_names: true)
-  logger.info "Received payload: #{params}"
-  Sharepoint::Authorization.access_token(params)
+  post '/download' do
+    file = File.join(__dir__, 'cat.jpg')
+    send_file(file, type: 'image/jpeg', disposition: 'inline')
+  end
+
+  # XXX remove `oauth2` from the name
+  post '/oauth2/init' do
+    content_type :json
+    body = JSON.parse(request.body.read, symbolize_names: true)
+    logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
+    logger.info "Received redirect URL: #{params[:redirect_uri]}"
+    authorization_uri = Sharepoint::Authorization.authorization_uri(body)
+
+    { oauth2redirect: authorization_uri.to_s }.to_json
+  end
+
+  # XXX remove `oauth2` from the name
+  post '/oauth2/exchange' do
+    content_type :json
+    params = JSON.parse(request.body.read, symbolize_names: true)
+    logger.info "Received payload: #{params}"
+    Sharepoint::Authorization.access_token(params)
+  end
 end
