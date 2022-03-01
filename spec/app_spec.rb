@@ -10,7 +10,7 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
 
-  context 'GET to /status' do
+  describe 'GET /status' do
     let(:response) { get '/status' }
 
     it 'returns status 200 OK' do
