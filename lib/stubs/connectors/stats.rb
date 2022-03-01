@@ -24,9 +24,9 @@ module Connectors
 
     def self.class_key(klass, deconstantize = true)
       name = klass.name
-      # Changes Connectors::ContentSources::GoogleDrive::Adapter to Connectors::ContentSources::GoogleDrive
+      # Changes Connectors::GoogleDrive::Adapter to Connectors::GoogleDrive
       name = ActiveSupport::Inflector.deconstantize(name) if deconstantize
-      # Changes Connectors::ContentSources::GoogleDrive to GoogleDrive
+      # Changes Connectors::GoogleDrive to GoogleDrive
       name = ActiveSupport::Inflector.demodulize(name)
       # Changes GoogleDrive to google_drive
       ActiveSupport::Inflector.underscore(name)
