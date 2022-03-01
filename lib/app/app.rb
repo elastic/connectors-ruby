@@ -6,9 +6,7 @@ require 'sinatra'
 require 'json'
 
 require 'connectors/sharepoint/http_call_wrapper'
-require 'signet'
-require 'signet/oauth_2'
-require 'signet/oauth_2/client'
+require 'connectors/sharepoint/authorization'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
@@ -70,8 +68,8 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     body = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
-    logger.info "Received redirect URL: #{params[:redirect_uri]}"
-    authorization_uri = Sharepoint::Authorization.authorization_uri(body)
+    logger.info "Received redirect URL: #{body[:redirect_uri]}"
+    authorization_uri = Connectors::Sharepoint::Authorization.authorization_uri(body)
 
     { oauth2redirect: authorization_uri.to_s }.to_json
   end
@@ -81,6 +79,6 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
-    Sharepoint::Authorization.access_token(params)
+    Connectors::Sharepoint::Authorization.access_token(params)
   end
 end
