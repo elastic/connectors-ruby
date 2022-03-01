@@ -46,6 +46,9 @@ GEM
     i18n (1.10.0)
       concurrent-ruby (~> 1.0)
     jwt (2.3.0)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2022.0105)
     minitest (5.15.0)
     multi_json (1.15.0)
     multipart-post (2.1.1)
@@ -124,6 +127,7 @@ DEPENDENCIES
   forwardable
   hashie
   httpclient
+  mime-types (= 3.1)
   rack
   rack-test
   rspec-collection_matchers (~> 1.2.0)
