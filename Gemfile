@@ -18,6 +18,10 @@ group :test do
   gem 'rspec-mocks'
   gem 'webmock'
   gem 'rack-test'
+  gem 'ruby-debug-ide'
+  gem 'pry-remote'
+  gem 'pry-nav'
+  gem 'debase'
 end
 
 # Dependencies for the HTTP service
