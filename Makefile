@@ -12,6 +12,7 @@ build:
 	mv *.gem .gems/
 
 install:
+	rbenv install -s
 	- gem install bundler -v 2.2.33
 	bundle config set --local path 'vendor/bundle'
 	bundle install
