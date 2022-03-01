@@ -27,10 +27,10 @@ class ConnectorsWebApp < Sinatra::Base
 
     # TODO: wait for other refactorings to replace this code in the right spot
     response = Faraday.get('https://graph.microsoft.com/v1.0/me')
-    res = Hashie::Mash.new(JSON.parse(response.body))
+    response_json = Hashie::Mash.new(JSON.parse(response.body))
 
-    status = res.error? ? 'FAILURE' : 'OK'
-    message = res.error? ? res.error.message : 'Connected to Sharepoint'
+    status = response_json.error? ? 'FAILURE' : 'OK'
+    message = response_json.error? ? response_json.error.message : 'Connected to Sharepoint'
 
     {
       extractor: {
