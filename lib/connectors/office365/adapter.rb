@@ -38,7 +38,7 @@ module Connectors
             else
               CGI.unescape(parent_reference_path).split('root:').last
             end
-          Connectors::Base::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
+          Connectors::Office365::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
         end
 
         def to_swiftype_document
@@ -60,7 +60,7 @@ module Connectors
         private
 
         def get_path(item)
-          Office365::Adapter::GraphItem.get_path(item)
+          Connectors::Office365::Adapter::GraphItem.get_path(item)
         end
 
         def type
@@ -117,9 +117,6 @@ module Connectors
       end
 
       class FolderGraphItem < GraphItem
-        def self.convert_id_to_fp_id(_id)
-          raise NotImplementedError
-        end
 
         private
 
@@ -135,7 +132,7 @@ module Connectors
       end
 
       class PackageGraphItem < GraphItem
-        def self.convert_id_to_fp_id(_id)
+        def self.convert_id_to_fp_id(id)
           raise NotImplementedError
         end
 

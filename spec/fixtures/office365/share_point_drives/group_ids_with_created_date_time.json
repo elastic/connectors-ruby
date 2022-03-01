@@ -1,0 +1,9 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#groups",
+    "value": [
+        {
+            "id": "ed5f8403-cc9b-40bf-9adc-5642238447ab",
+            "createdDateTime": "2021-05-03T08:33:49Z"
+        }
+    ]
+}

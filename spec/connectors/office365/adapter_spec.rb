@@ -4,21 +4,12 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-module Connectors
-  module Base
-    class Config
-      attr_reader :cursors
+# frozen_string_literal: true
 
-      def initialize(cursors:)
-        @cursors = cursors || {}
-      end
+require 'connectors/office365/adapter'
 
-      def to_h
-        {
-          :cursors => cursors
-        }
-      end
-    end
+describe Connectors::Office365::Adapter do
+  it 'is not a concrete class' do
+    expect { described_class.swiftype_document_from_folder(nil) }.to raise_error(NotImplementedError)
   end
 end
-

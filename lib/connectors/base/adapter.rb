@@ -10,6 +10,7 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'date'
 require 'active_support/all'
+require 'mime/type'
 
 module Connectors
   module Base
@@ -41,10 +42,10 @@ module Connectors
       end
 
       def self.mime_type_for_file(file_name)
-        ruby_detected_type = nil # MIME::Types.type_for(file_name)
+        ruby_detected_type = MIME::Types.type_for(file_name)
         return ruby_detected_type.first.simplified if ruby_detected_type.present?
         extension = extension_for_file(file_name)
-        # Connectors::Subextractor::ExtensionMappingUtil.get_mime_types(extension)&.first
+        ConnectorsShared::ExtensionMappingUtil.get_mime_types(extension)&.first
       end
 
       def self.extension_for_file(file_name)
@@ -67,7 +68,6 @@ module Connectors
           date.to_datetime.rfc3339
         else
           begin
-            Time.zone ||= 'UTC' # TODO: idk where to put that
             Time.zone.parse(date).to_datetime.rfc3339
           rescue ArgumentError, TypeError => e
             ConnectorsShared::ExceptionTracking.capture_exception(e)
@@ -110,6 +110,8 @@ module Connectors
 
         adapted_object.symbolize_keys
       end
+
+      delegate :normalize_enum, :normalize_date, :normalize_path, :to => :class
     end
   end
 end

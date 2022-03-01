@@ -1,0 +1,8 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#sites",
+    "value": [
+        {
+            "id": "enterprisesearch.sharepoint.com,afb9d6f1-1ae4-422a-aea6-ea1965f7b854,91dd91fc-e210-4be2-b41f-7f1dbedb969c"
+        }
+    ]
+}

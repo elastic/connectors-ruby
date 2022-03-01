@@ -7,8 +7,9 @@
 # frozen_string_literal: true
 
 require 'stubs/content_source'
-require 'connectors/base/config'
+require 'connectors/office365/config'
 require 'connectors/sharepoint/extractor'
+require 'bson'
 
 module Connectors
   module Sharepoint
@@ -16,8 +17,11 @@ module Connectors
       def initialize(params)
         features = {}
         @extractor = Connectors::Sharepoint::Extractor.new(
-          content_source: ContentSource.new(access_token: params['access_token']),
-          config: Connectors::Base::Config.new,
+          content_source_id: BSON::ObjectId.new,
+          service_type: 'sharepoint_online',
+          authorization_data_proc: proc { { access_token: params['access_token']} },
+          client_proc: proc { Connectors::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => {}) },
+          config: Connectors::Office365::Config.new(:cursors => {}, :drive_ids => 'all'),
           features: features
         )
       end

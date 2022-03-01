@@ -1,0 +1,129 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#sites",
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/sites/?$skiptoken=s!MTA7ZWZiOTI5MzAtNzAyYy00Yjg2LWI1ODUtN2UyNTViNzBlMjM1&search=&top=10",
+  "value": [
+    {
+      "createdDateTime": "2019-09-13T20:42:45Z",
+      "id": "enterprisesearch.sharepoint.com,98f12a74-4526-42f0-b3d9-9cb72b4607bd,3d6de993-ae7f-431d-a742-e74cd50b74f2",
+      "lastModifiedDateTime": "0001-01-01T08:00:00Z",
+      "name": "hub",
+      "webUrl": "https://enterprisesearch.sharepoint.com/portals/hub",
+      "displayName": "PointPublishing Hub Site",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-09-13T20:43:49Z",
+      "id": "enterprisesearch.sharepoint.com,c3352711-7812-4823-9913-a1d1a102ad3b,335ef69a-e9bf-409f-b688-603635e665bf",
+      "lastModifiedDateTime": "0001-01-01T08:00:00Z",
+      "name": "Community",
+      "webUrl": "https://enterprisesearch.sharepoint.com/portals/Community",
+      "displayName": "Community",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-11-13T22:25:40Z",
+      "description": "Site3",
+      "id": "enterprisesearch.sharepoint.com,bc6c3385-b190-4f0d-860d-6d585ee8236b,ae50c01f-3959-4751-b8d7-8b4b55337526",
+      "lastModifiedDateTime": "2019-10-27T05:18:08Z",
+      "name": "Site3",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/Site3",
+      "displayName": "Site3",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-11-13T22:23:27Z",
+      "description": "Site!",
+      "id": "enterprisesearch.sharepoint.com,d3cad9b3-7aa7-4e07-9170-a37f7e23555b,ae50c01f-3959-4751-b8d7-8b4b55337526",
+      "lastModifiedDateTime": "2019-10-27T05:18:08Z",
+      "name": "Site",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/Site",
+      "displayName": "Site!",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-11-13T22:26:54Z",
+      "description": "Site4",
+      "id": "enterprisesearch.sharepoint.com,fb788049-ffb5-42cf-a21d-0e8990ac81d7,ae50c01f-3959-4751-b8d7-8b4b55337526",
+      "lastModifiedDateTime": "2019-10-27T05:18:08Z",
+      "name": "Site4",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/Site4",
+      "displayName": "Site4",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-11-13T22:24:12Z",
+      "description": "Site2",
+      "id": "enterprisesearch.sharepoint.com,13ed2b97-18d2-4c24-bdcf-08d351a3131d,ae50c01f-3959-4751-b8d7-8b4b55337526",
+      "lastModifiedDateTime": "2019-10-27T05:18:08Z",
+      "name": "Site2",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/Site2",
+      "displayName": "Site2",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-11-13T22:42:34Z",
+      "description": "Site5",
+      "id": "enterprisesearch.sharepoint.com,ed632a06-afdd-4e88-87df-ec8b1e99c9b3,ae50c01f-3959-4751-b8d7-8b4b55337526",
+      "lastModifiedDateTime": "2019-10-27T05:18:08Z",
+      "name": "Site5",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/Site5",
+      "displayName": "Site5",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-09-13T20:42:53Z",
+      "id": "enterprisesearch.sharepoint.com,acea3ac2-c6f5-4ac7-a694-07da96a00db8,90f2b707-3248-4c33-a0c8-a0459314a32d",
+      "lastModifiedDateTime": "2019-09-13T20:45:54Z",
+      "name": "contentTypeHub",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/contentTypeHub",
+      "displayName": "Team Site",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-10-03T18:41:59Z",
+      "description": "This Site is a test! I hope we pass!",
+      "id": "enterprisesearch.sharepoint.com,c5369ecf-5109-4c5e-89d5-3f8de6e4a0eb,c6a720b7-c30e-4935-ab11-78b56e494410",
+      "lastModifiedDateTime": "2019-09-21T09:21:20Z",
+      "name": "TestSite",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/TestSite",
+      "displayName": "Test Site",
+      "root": {},
+      "siteCollection": {
+        "hostname": "enterprisesearch.sharepoint.com"
+      }
+    },
+    {
+      "createdDateTime": "2019-10-25T17:32:21Z",
+      "description": "Biographies of Instructors",
+      "id": "enterprisesearch.sharepoint.com,79e9ffcd-05d4-49b5-8d7c-eb0c111f218c,582658a2-b4a2-4d76-8c01-0bfe2559e1e7",
+      "lastModifiedDateTime": "2019-10-25T17:32:24Z",
+      "name": "instructors",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/PDXMeatCollective/instructors",
+      "displayName": "Instructor Bios"
+    }
+  ]
+}

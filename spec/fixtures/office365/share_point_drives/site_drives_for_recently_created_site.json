@@ -1,0 +1,38 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives",
+    "value": [
+        {
+            "createdDateTime": "2021-05-02T05:14:59Z",
+            "description": "",
+            "id": "b!4fml-jibOU-MVJzy8JdXvzhuQmvv8UBHqhJ4XVZZWUIObp889uKCTprDevwAuVaS",
+            "lastModifiedDateTime": "2021-05-02T05:14:59Z",
+            "name": "Documents",
+            "webUrl": "https://enterprisesearch.sharepoint.com/sites/PrivateTeamSite9/Shared%20Documents",
+            "driveType": "documentLibrary",
+            "createdBy": {
+                "user": {
+                    "displayName": "System Account"
+                }
+            },
+            "lastModifiedBy": {
+                "user": {
+                    "displayName": "System Account"
+                }
+            },
+            "owner": {
+                "group": {
+                    "email": "PrivateTeamSite@enterprisesearch.onmicrosoft.com",
+                    "id": "ed5f8403-cc9b-40bf-9adc-5642238447ab",
+                    "displayName": "Private Team Site Owners"
+                }
+            },
+            "quota": {
+                "deleted": 0,
+                "remaining": 1099510184674,
+                "state": "normal",
+                "total": 1099511627776,
+                "used": 0
+            }
+        }
+    ]
+}

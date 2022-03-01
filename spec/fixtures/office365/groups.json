@@ -1,0 +1,28 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#groups",
+  "value": [
+    {
+      "id": "4432c3e3-93bd-47af-b640-972df0e37385",
+      "deletedDateTime": null,
+      "classification": null,
+      "createdDateTime": "2017-01-20T21:50:43Z",
+      "description": "testing for development",
+      "displayName": "development test group",
+      "groupTypes": [
+        "Unified"
+      ],
+      "mail": "developmenttestgroup@Swiftype.onmicrosoft.com",
+      "mailEnabled": true,
+      "mailNickname": "developmenttestgroup",
+      "onPremisesLastSyncDateTime": null,
+      "onPremisesSecurityIdentifier": null,
+      "onPremisesSyncEnabled": null,
+      "proxyAddresses": [
+        "SMTP:developmenttestgroup@Swiftype.onmicrosoft.com"
+      ],
+      "renewedDateTime": "2017-01-20T21:50:43Z",
+      "securityEnabled": false,
+      "visibility": "Public"
+    }
+  ]
+}

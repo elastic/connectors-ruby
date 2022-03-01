@@ -1,0 +1,32 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives/$entity",
+  "value": [
+    {
+      "createdDateTime": "2019-09-01T20:51:29Z",
+      "description": "",
+      "id": "b!xkMl9imzCk6WwcGgZfW-P6kl7SPuTVBHr7CsshR1pJmadPwhs0amQac8eamQOZxV",
+      "lastModifiedDateTime": "2019-09-01T20:51:29Z",
+      "name": "Documents",
+      "webUrl": "https://enterprisesearch.sharepoint.com/Shared%20Documents",
+      "driveType": "documentLibrary",
+      "createdBy": {
+        "user": {
+          "displayName": "System Account"
+        }
+      },
+      "owner": {
+        "group": {
+          "id": "ede26346-3aff-470c-98dc-388032f25ef5",
+          "displayName": "ede26346-3aff-470c-98dc-388032f25ef5"
+        }
+      },
+      "quota": {
+        "deleted": 0,
+        "remaining": 27487789208688,
+        "state": "normal",
+        "total": 27487790694400,
+        "used": 0
+      }
+    }
+  ]
+}

@@ -12,6 +12,10 @@ class AppConfig
       Logger.new(STDOUT)
     end
 
+    def connectors
+      ConnectorsConfig
+    end
+
     def content_source_sync_max_errors
       1000
     end
@@ -30,6 +34,16 @@ class AppConfig
 
     def content_source_sync_thumbnails_enabled?
       true
+    end
+  end
+end
+
+class ConnectorsConfig
+  class << self
+    def config
+      {
+        'transient_server_error_retry_delay_minutes' => 5
+      }
     end
   end
 end

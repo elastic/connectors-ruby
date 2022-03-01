@@ -1,0 +1,33 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives/$entity",
+  "value": [
+    {
+      "createdDateTime": "2019-10-13T05:17:44Z",
+      "description": "",
+      "id": "b!zf_pedQFtUmNfOsMER8hjDFPnPGKQidGieFyNVg16OvoPJID7t_0Q6x3kR3OyckE",
+      "lastModifiedDateTime": "2019-10-31T21:06:01Z",
+      "name": "Documents",
+      "webUrl": "https://enterprisesearch.sharepoint.com/sites/PDXMeatCollective/Shared%20Documents",
+      "driveType": "documentLibrary",
+      "createdBy": {
+        "user": {
+          "displayName": "System Account"
+        }
+      },
+      "owner": {
+        "group": {
+          "email": "PDXMeatCollective@enterprisesearch.onmicrosoft.com",
+          "id": "306c4915-0254-4ac6-b387-34c886d94f61",
+          "displayName": "PDX Meat Collective Owners"
+        }
+      },
+      "quota": {
+        "deleted": 1930403,
+        "remaining": 27487785792825,
+        "state": "normal",
+        "total": 27487790694400,
+        "used": 93544
+      }
+    }
+  ]
+}

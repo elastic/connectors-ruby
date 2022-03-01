@@ -1,0 +1,68 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('84e12774-eda7-44e6-a60c-2f0503213421')/drives('eac871c1371902ee')/items('01E4DADQ56Y2GOVW7725BZO354PWSELRRZ')/children",
+  "value": [
+    {
+      "@microsoft.graph.downloadUrl": "https://swiftype-my.sharepoint.com/personal/cwang_swiftype_onmicrosoft_com/_layouts/15/download.aspx?UniqueId=b1f06591-9db8-4ef3-9c78-e9f91312c081&access_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvc3dpZnR5cGUtbXkuc2hhcmVwb2ludC5jb21ANDkyZmE1ZWMtNmQ1Yy00NGI3LWFkNjktZDI3YjZhMTlhMmIzIiwiaXNzIjoiMDAwMDAwMDMtMDAwMC0wZmYxLWNlMDAtMDAwMDAwMDAwMDAwIiwibmJmIjoxNDg1NDY4MDM2LCJleHAiOjE0ODU0NzE2MzYsImVuZHBvaW50dXJsIjoidTdEU0lkcjVQRkhFMUVXNGhaM1JsNkF5cTFWRDFYR1lpRnd5ay84UmtNMD0iLCJlbmRwb2ludHVybExlbmd0aCI6IjE0NiIsImlzbG9vcGJhY2siOiJUcnVlIiwibmFtZWlkIjoiMCMuZnxtZW1iZXJzaGlwfGN3YW5nQHN3aWZ0eXBlLm9ubWljcm9zb2Z0LmNvbSIsIm5paSI6Im1pY3Jvc29mdC5zaGFyZXBvaW50IiwiaXN1c2VyIjoidHJ1ZSIsImNhY2hla2V5IjoiMGguZnxtZW1iZXJzaGlwfDEwMDMzZmZmOWE4Nzk2NDNAbGl2ZS5jb20iLCJ1c2VQZXJzaXN0ZW50Q29va2llIjpudWxsfQ._usaKqNMStWRbV0qhHPVZoVPLTztrgEARVB7w84eB-c&prooftoken=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImlZR1ZYcU1YbDZuSkI5MldBdW9jN1V3RHI0WSJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDBAKiIsImlzcyI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMEAqIiwibmJmIjoiMTQ4NTQ2MDY1MCIsImV4cCI6IjE0ODYwNjU0NTAiLCJwcmYiOiJiaTVNcXcxR2hOaGgyazAxTkI5N1RQWWorZTV2enJVZVlJaVVSVHFaUTh1QVRWT2dNdGQvYXJROEF1K3FLMHVlRmk2Z2UyUUtMdWREeG1PeVRML1hWZ3F4UFVzZ1Zsa0JIeEtvcmZXYzlySFhnM2hpRWhsdkVid2IxbHEwME5xQStCMVpyTHVsNGlWaWtucm9uYmJHOWlxVHlveGRuYVRpL1JzMkJ4K1I3Q2xremw5d1BaV0pTK1laYmFRZjVJWmJ2R1FzbTFDK05qcnRDeUw5S3d6ZnYzdEZ4UDVOVk9vNHpLcTQybXNvSTI5eCswZEdHM1ZLbWp1a2ZvZDdkVlVyMnRtay92bjBwVXEvZVNBcVRCWDFHdUxUNDZucDdkejV1S2ZkdnJiWDgrbmZtUlYreVZRaWhrdFJCbzBXYnhGWGI1QVlGOFNmVCtNcGhoNGQ4eWM1Smc9PSIsImlzdXNlciI6InRydWUifQ.vpeG8FH9NMDNzF8wMV76pWlwl37Ih5oer9-xcy3y2Lj3dfCf4bZJ-3D25-2nlL0BetJvPb_tSXjhPj9Q_A3aHCrLBu-gXS6reXPUkSwIqGNwDzg2Sc__W1xYC0kLI1onG9-saPvUzexvwUQCPhrZosoVkyU1aqVk5FzCZ8D0eRI3T8t-CKQdf3nZ28kDX-hLAKes0N8FaXvUnKmXmJG-war3A2jT2afOuo3kpb5G4XOopORsRjJA4CvwKqEStZEhhQFigpH1D_7SyK2D-O4kT_EhOzGcNxXJt-TN4hKzy9-tz8vCVou7BVMZ6C0amMelFVWEjzztjP72bmrAsHDvDA",
+      "createdBy": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Chris Wang"
+        }
+      },
+      "createdDateTime": "2017-01-20T22:26:57Z",
+      "eTag": "\"{B1F06591-9DB8-4EF3-9C78-E9F91312C081},5\"",
+      "id": "01E4DADQ4RMXYLDOE56NHJY6HJ7EJRFQEB",
+      "lastModifiedBy": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Chris Wang"
+        }
+      },
+      "lastModifiedDateTime": "2017-01-20T22:27:01Z",
+      "name": "Document.docx",
+      "webUrl": "https://swiftype-my.sharepoint.com/personal/cwang_swiftype_onmicrosoft_com/_layouts/15/WopiFrame.aspx?sourcedoc=%7BB1F06591-9DB8-4EF3-9C78-E9F91312C081%7D&file=Document.docx&action=default",
+      "cTag": "\"c:{B1F06591-9DB8-4EF3-9C78-E9F91312C081},2\"",
+      "file": {
+        "hashes": {
+          "quickXorHash": "+cGREInTDPMUcusZfu+NjwDql9s="
+        }
+      },
+      "parentReference": {
+        "driveId": "b!oj3_wlgSokuzZGcvT48FcA15OXewaoFDp0jo-NImzu9iL9GnnXziQI-2p4cAYd0I",
+        "id": "01E4DADQ7NCNZQA4IKNFA3JSI74WHGBE3J",
+        "path": "/drives/b!oj3_wlgSokuzZGcvT48FcA15OXewaoFDp0jo-NImzu9iL9GnnXziQI-2p4cAYd0I/root:/folder me mate"
+      },
+      "size": 10880
+    },
+    {
+      "createdBy": {
+        "user": {
+          "id": "somerandomid",
+          "displayName": "Totes Anonymous"
+        }
+      },
+      "createdDateTime": "2017-02-22T04:11:56Z",
+      "eTag": "\"{27A1EA78-7CCA-48F4-9851-D79DCEDC4C9D},1\"",
+      "id": "01Q7HJRADY5KQSPST46REJQUOXTXHNYTE5",
+      "lastModifiedBy": {
+        "user": {
+          "id": "3c636154-cc9a-44da-b207-ee46b6dbdd88",
+          "displayName": "Totes Anonymous"
+        }
+      },
+      "lastModifiedDateTime": "2017-02-22T04:11:56Z",
+      "name": "Some OneNote Document",
+      "webUrl": "https://swiftype-my.sharepoint.com/personal/cwang_swiftype_onmicrosoft_com/_layouts/15/WopiFrame.aspx?sourcedoc=%7BB1F06591-9DB8-4EF3-9C78-E9F91312C081%7D&file=Document.docx&action=default",
+      "cTag": "\"c:{B1F06591-9DB8-4EF3-9C78-E9F91312D081},2\"",
+      "package": {
+        "type": "oneNote"
+      },
+      "parentReference": {
+        "driveId": "b!oj3_wlgSokuzZGcvT48FcA15OXewaoFDp0jo-NImzu9iL9GnnXziQI-2p4cAYd0I",
+        "id": "01E4DADQ7NCNZQA4IKNFA3JSI74WHGBE3J",
+        "path": "/drives/b!oj3_wlgSokuzZGcvT48FcA15OXewaoFDp0jo-NImzu9iL9GnnXziQI-2p4cAYd0I/root:/folder me mate"
+      },
+      "size": 5519
+    }
+  ]
+}

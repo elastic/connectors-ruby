@@ -12,7 +12,7 @@ require 'connectors/base/extractor'
 module Connectors
   module Office365
     class Extractor < Connectors::Base::Extractor
-      DRIVE_IDS_CURSOR_KEY = 'drive_ids'
+      DRIVE_IDS_CURSOR_KEY = 'drive_ids'.freeze
 
       def yield_document_changes(modified_since: nil, &block)
         drives_to_index.each do |drive|
@@ -23,21 +23,19 @@ module Connectors
           drive_id_to_delta_link = config.cursors.fetch(DRIVE_IDS_CURSOR_KEY, {})
           begin
             if start_delta_link = drive_id_to_delta_link[drive_id]
-              log_debug("Starting an incremental crawl with cursor for #{content_source.service_type.classify} with drive_id: #{drive_id}")
+              log_debug("Starting an incremental crawl with cursor for #{service_type.classify} with drive_id: #{drive_id}")
               begin
-                yield_changes(drive_id,
-                              start_delta_link: start_delta_link, drive_owner_name: drive_owner_name, drive_name: drive_name, &block)
+                yield_changes(drive_id, :start_delta_link => start_delta_link, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
               rescue Connectors::Office365::CustomClient::Office365InvalidCursorsError
                 log_warn("Error listing changes with start_delta_link: #{start_delta_link}, falling back to full crawl")
-                yield_drive_items(drive_id, drive_owner_name: drive_owner_name, drive_name: drive_name, &block)
+                yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
               end
             elsif !modified_since.nil?
-              log_debug("Starting an incremental crawl using last_modified (no cursor found) for #{content_source.service_type.classify} with drive_id: #{drive_id}")
-              yield_changes(drive_id,
-                            last_modified: modified_since, drive_owner_name: drive_owner_name, drive_name: drive_name, &block)
+              log_debug("Starting an incremental crawl using last_modified (no cursor found) for #{service_type.classify} with drive_id: #{drive_id}")
+              yield_changes(drive_id, :last_modified => modified_since, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
             else
-              log_debug("Starting a full crawl #{content_source.service_type.classify} with drive_id: #{drive_id}")
-              yield_drive_items(drive_id, drive_owner_name: drive_owner_name, drive_name: drive_name, &block)
+              log_debug("Starting a full crawl #{service_type.classify} with drive_id: #{drive_id}")
+              yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
             end
           rescue Connectors::Office365::CustomClient::ClientError => e
             log_warn("Error searching and listing drive #{drive_id}")
@@ -70,7 +68,7 @@ module Connectors
 
       def yield_permissions(source_user_id)
         permissions = [source_user_id]
-        client.user_groups(source_user_id, %w[id displayName]).each do |next_group|
+        client.user_groups(source_user_id, %w(id displayName)).each do |next_group|
           # Adding "Members" suffix since that is how the item permissions endpoint return group permissions
           permissions << "#{next_group.displayName} Members"
         end
@@ -100,7 +98,7 @@ module Connectors
 
       def drives_to_index
         @drives_to_index ||=
-          if self.config().index_all_drives?
+          if config.index_all_drives?
             drives
           else
             drives.select { |d| config.drive_ids.include?(d.id) }
@@ -121,15 +119,15 @@ module Connectors
         raise NotImplementedError
       end
 
-      def convert_id_to_fp_id(id)
+      def convert_id_to_fp_id(_id)
         raise NotImplementedError
       end
 
       def capture_exception(office365_client_error)
         options = {
-          extra: {
-            status_code: office365_client_error.status_code,
-            endpoint: office365_client_error.endpoint
+          :extra => {
+            :status_code => office365_client_error.status_code,
+            :endpoint => office365_client_error.endpoint
           }
         }
         ConnectorsShared::ExceptionTracking.capture_exception(office365_client_error, options)
@@ -137,7 +135,7 @@ module Connectors
 
       def yield_drive_items(drive_id, drive_owner_name:, drive_name:, &block)
         client.list_items(drive_id) do |item|
-          yield_single_document_change(identifier: "Office365 change: #{item&.id} (#{Connectors::Office365::Adapter::GraphItem.get_path(item)})") do
+          yield_single_document_change(:identifier => "Office365 change: #{item&.id} (#{Office365::Adapter::GraphItem.get_path(item)})") do
             item.drive_owner_name = drive_owner_name
             item.drive_name = drive_name
             yield_create_or_update(drive_id, item, &block)
@@ -154,9 +152,8 @@ module Connectors
       end
 
       def yield_changes(drive_id, drive_owner_name:, drive_name:, start_delta_link: nil, last_modified: nil, &block)
-        client.list_changes(drive_id: drive_id, start_delta_link: start_delta_link,
-                            last_modified: last_modified) do |item|
-          yield_single_document_change(identifier: "Office365 change: #{item&.id} (#{Connectors::Office365::Adapter::GraphItem.get_path(item)})") do
+        client.list_changes(:drive_id => drive_id, :start_delta_link => start_delta_link, :last_modified => last_modified) do |item|
+          yield_single_document_change(:identifier => "Office365 change: #{item&.id} (#{Office365::Adapter::GraphItem.get_path(item)})") do
             item.drive_owner_name = drive_owner_name
             item.drive_name = drive_name
             yield_correct_actions_and_converted_item(drive_id, item, &block)
@@ -168,15 +165,15 @@ module Connectors
         item = with_permissions(drive_id, item)
 
         document = generate_document(item)
-        subextractors =
+        download_args =
           if downloadable?(item)
-            features_subextractors(document.fetch(:id), item.name, item[:size]) do
+            download_args_and_proc(document.fetch(:id), item.name, item[:size]) do
               client.download_item(item.fetch('@microsoft.graph.downloadUrl'))
             end
           else
             []
           end
-        yield :create_or_update, document, subextractors
+        yield :create_or_update, document, download_args
       end
 
       def downloadable?(item)

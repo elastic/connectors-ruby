@@ -88,4 +88,15 @@ module ConnectorsShared
   class InvalidIndexingConfigurationError < StandardError; end
   class TokenRefreshFailedError < StandardError; end
   class ConnectorNotAvailableError < StandardError; end
+
+  # For when we want to explicitly set a #cause but can't
+  class ExplicitlyCausedError < StandardError
+    attr_reader :reason
+
+    def initialize(reason)
+      @reason = reason
+    end
+  end
+
+  class PublishingFailedError < ExplicitlyCausedError; end
 end

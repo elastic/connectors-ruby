@@ -1,0 +1,17 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives/$entity",
+  "id": "b!ahszInZ9TUiVeIlLTP0ZbjM5MMbMoq9NtzwH8hEKMePb-FWyKQMwQ67EgaIoMVvM",
+  "driveType": "documentLibrary",
+  "name": "My group's documents",
+  "owner": {
+    "user": {
+      "displayName": "development test group"
+    }
+  },
+  "quota": {
+    "deleted": 0,
+    "remaining": 1099509690089,
+    "state": "normal",
+    "total": 1099511627776
+  }
+}

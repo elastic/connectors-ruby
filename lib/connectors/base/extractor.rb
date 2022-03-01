@@ -12,6 +12,7 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'date'
 require 'active_support/all'
+require 'stubs/connectors/stats' unless defined?(Rails)
 
 module Connectors
   module Base
@@ -29,26 +30,33 @@ module Connectors
         ]
       )
 
-      attr_reader :content_source, :config, :features, :original_cursors
-      attr_accessor :monitor
+      attr_reader :content_source_id, :config, :features, :original_cursors, :service_type
+      attr_accessor :monitor, :client_proc
 
-      delegate(
-        :authorization_details,
-        :authorization_details!,
-        :authorization_data,
-        :authorization_data!,
-        :access_token,
-        :access_token_secret,
-        :indexing_allowed?,
-        :to => :content_source
-      )
-
-      def initialize(content_source:, config:, features:, monitor: ConnectorsShared::Monitor.new(:connector => self))
-        @content_source = content_source
+      def initialize(content_source_id:,
+                     service_type:,
+                     config:,
+                     features:,
+                     client_proc:,
+                     authorization_data_proc:,
+                     monitor: ConnectorsShared::Monitor.new(:connector => self))
+        @content_source_id = content_source_id
+        @service_type = service_type
         @config = config
         @features = features
+        @client_proc = client_proc
+        @authorization_data_proc = authorization_data_proc
         @original_cursors = config.cursors.deep_dup
         @monitor = monitor
+      end
+
+      def authorization_data!
+        @authorization_data = nil
+        authorization_data
+      end
+
+      def authorization_data
+        @authorization_data ||= @authorization_data_proc.call
       end
 
       def client!
@@ -57,16 +65,7 @@ module Connectors
       end
 
       def client
-        @client ||= Office365::CustomClient.new(
-          :access_token => content_source.access_token,
-          :cursors => {},
-          :ensure_fresh_auth => lambda do |client|
-            if Time.now >= content_source.authorization_details.fetch(:expires_at) - 2.minutes
-              content_source.authorization_details!
-              client.update_auth_data!(content_source.access_token)
-            end
-          end
-        )
+        @client ||= client_proc.call
       end
 
       def retrieve_latest_cursors
@@ -83,7 +82,7 @@ module Connectors
         rescue ConnectorsShared::TokenRefreshFailedError => e
           log_error('Could not refresh token, aborting')
           raise e
-        rescue Connectors::Work::AbstractExtractorWork::PublishingFailedError => e
+        rescue ConnectorsShared::PublishingFailedError => e
           log_error('Could not publish, aborting')
           raise e.reason
         rescue ConnectorsShared::EvictionWithNoProgressError
@@ -202,7 +201,7 @@ module Connectors
       ConnectorsShared::Logger::SUPPORTED_LOG_LEVELS.each do |log_level|
         define_method(:"log_#{log_level}") do |message|
           if message.kind_of?(String)
-            message = "[Sharepoint]]: #{message}"
+            message = "ContentSource[#{content_source_id}, #{service_type}]: #{message}"
           end
           ConnectorsShared::Logger.public_send(log_level, message)
         end
@@ -215,7 +214,7 @@ module Connectors
 
         raise ConnectorsShared::TransientServerError.new(
           "Transient error #{e.class}: #{e.message}",
-          :suspend_until => Connectors.config.fetch('transient_server_error_retry_delay_minutes').minutes.from_now,
+          :suspend_until => AppConfig.connectors.config.fetch('transient_server_error_retry_delay_minutes').minutes.from_now,
           :cursors => config.cursors
         )
       end
@@ -232,57 +231,11 @@ module Connectors
         config.cursors != original_cursors
       end
 
-      class << self
-        def reset_subextractor_semaphore
-          @subextractor_semaphore = nil
-        end
-
-        def subextractor_semaphore
-          return @subextractor_semaphore if @subextractor_semaphore
-
-          # We allow 2Gb for basic operations: 1Gb for the app's baseline and 1Gb for the main extraction thread
-          subextractor_threads = (SharedTogo::JvmMemory.total_heap / 1.gigabyte) - 2
-          @subextractor_semaphore =
-            if subextractor_threads > 0
-              Concurrent::Semaphore.new([subextractor_threads, 2].min)
-            else
-              # Don't bother using a thread pool, just use the calling thread.
-              nil
-            end
-        end
+      def download_args_and_proc(id, file_name, file_size, &block)
+        [id, file_name, file_size, block]
       end
-
-      def indexed_object_types
-        default_object_types
-      end
-
-      def default_object_types
-        raise NotImplementedError
-      end
-
 
       private
-
-      def supports_thumbnails?(file_name, file_size)
-        AppConfig.content_source_sync_thumbnails_enabled? &&
-          features.include?('thumbnails') &&
-          Connectors::Subextractor::Thumbnail.supports_file?(file_name, file_size)
-      end
-
-      def supports_full_text_extraction?(file_name, file_size)
-        features.include?('full_text') && Connectors::Subextractor::FullText.supports_file?(file_name, file_size)
-      end
-
-      def features_subextractors(id, file_name, file_size, &block)
-        subextractors = []
-        if supports_thumbnails?(file_name, file_size) || supports_full_text_extraction?(file_name, file_size)
-          log_debug("Running subextractors for file #{file_name} with id: #{id}")
-          downloader = download_subextractor(file_size, content_source.service_type, file_name, &block)
-          subextractors << thumbnail_subextractor(downloader, id, file_name) if supports_thumbnails?(file_name, file_size)
-          subextractors << full_text_subextractor(downloader, id, file_name) if supports_full_text_extraction?(file_name, file_size)
-        end
-        subextractors
-      end
 
       def convert_rate_limit_errors
         yield # subclasses override this with source-specific handling.
@@ -296,24 +249,6 @@ module Connectors
           ConnectorsShared::JobDocumentLimitError,
           ConnectorsShared::MonitoringError
         ]
-      end
-
-      def download_subextractor(expected_file_size, service_type, file_name, download_type = 'file', &block)
-        Connectors::Subextractor::Download.new(
-          :expected_file_size => expected_file_size,
-          :service_type => service_type,
-          :download_type => download_type,
-          :file_name => file_name,
-          &block
-        )
-      end
-
-      def full_text_subextractor(downloader, id, name)
-        Connectors::Subextractor::FullText.new(downloader, :id => id, :name => name)
-      end
-
-      def thumbnail_subextractor(downloader, id, name)
-        Connectors::Subextractor::Thumbnail.new(downloader, :id => id, :name => name)
       end
     end
   end

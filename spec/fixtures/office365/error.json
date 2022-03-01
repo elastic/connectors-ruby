@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "UnknownError",
+    "message": "{\"Status\":500,\"Message\":\"All the offeractions povided in the property bag cannot be validated for the token.\\u000d\\u000a\"}",
+    "innerError": {
+      "request-id": "e3e88758-5026-48a5-87ba-8585e043344e",
+      "date": "2017-01-20T23:58:56"
+    }
+  }
+}

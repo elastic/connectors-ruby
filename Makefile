@@ -1,7 +1,7 @@
 all: install credentials run
 
 test:
-	bundle exec rspec spec --format documentation
+	bundle exec rspec spec
 
 lint:
 	bundle exec rubocop lib spec

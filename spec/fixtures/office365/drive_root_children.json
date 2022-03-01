@@ -1,0 +1,35 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('84e12774-eda7-44e6-a60c-2f0503213421')/drives('b%21oj3_wlgSokuzZGcvT48FcA15OXewaoFDp0jo-NImzu9iL9GnnXziQI-2p4cAYd0I')/root/children",
+  "value": [
+    {
+      "createdBy": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Chris Wang"
+        }
+      },
+      "createdDateTime": "2017-01-20T22:26:52Z",
+      "eTag": "\"{007313ED-0A71-4169-B4C9-1FE58E609369},1\"",
+      "id": "01E4DADQ7NCNZQA4IKNFA3JSI74WHGBE3J",
+      "lastModifiedBy": {
+        "user": {
+          "id": "84e12774-eda7-44e6-a60c-2f0503213421",
+          "displayName": "Chris Wang"
+        }
+      },
+      "lastModifiedDateTime": "2017-01-20T22:27:28Z",
+      "name": "folder me mate",
+      "webUrl": "https://swiftype-my.sharepoint.com/personal/cwang_swiftype_onmicrosoft_com/Documents/folder%20me%20mate",
+      "cTag": "\"c:{007313ED-0A71-4169-B4C9-1FE58E609369},0\"",
+      "folder": {
+        "childCount": 2
+      },
+      "parentReference": {
+        "driveId": "eac871c1371902ee",
+        "id": "01E4DADQ56Y2GOVW7725BZO354PWSELRRZ",
+        "path": "/drives/eac871c1371902ee/root:"
+      },
+      "size": 0
+    }
+  ]
+}
