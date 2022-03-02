@@ -51,7 +51,7 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     params = JSON.parse(request.body.read)
 
-    connector = Sharepoint::HttpCallWrapper.new(
+    connector = Connectors::Sharepoint::HttpCallWrapper.new(
       params
     )
 

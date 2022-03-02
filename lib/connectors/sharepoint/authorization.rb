@@ -23,38 +23,25 @@ module Connectors
         end
 
         def authorization_uri(params)
-          client = Signet::OAuth2::Client.new(
-            authorization_uri: authorization_url,
-            token_credential_uri: token_credential_uri,
-            scope: oauth_scope,
-            client_id: params[:client_id],
-            client_secret: params[:client_secret],
-            redirect_uri: params[:redirect_uri],
-            state: JSON.dump(params[:state]),
-            additional_parameters: { prompt: 'consent' }
-          )
+          params[:additional_parameters] = { :prompt => 'consent' }
+          client = oauth_client(params)
           client.authorization_uri.to_s
         end
 
         def access_token(params)
-          oauth_data = {
-            token_credential_uri: token_credential_uri,
-            client_id: params[:client_id],
-            client_secret: params[:client_secret]
-          }
-          # on the first dance
-          oauth_data[:code] = params[:code] if params[:code].present?
-          oauth_data[:redirect_uri] = params[:redirect_uri] if params[:redirect_uri].present?
-          oauth_data[:session_state] = params[:session_state] if params[:session_state].present?
-          oauth_data[:state] = params[:state] if params[:state].present?
-
-          # on refresh dance
-          if params[:refresh_token].present?
-            oauth_data[:refresh_token] = params[:refresh_token]
-            oauth_data[:grant_type] = :authorization
-          end
-          client = Signet::OAuth2::Client.new(oauth_data)
+          params[:grant_type] = 'authorization_code'
+          client = oauth_client(params)
           client.fetch_access_token.to_json
+        end
+
+        def oauth_client(params)
+          options = params.merge(
+            :authorization_uri => authorization_url,
+            :token_credential_uri => token_credential_uri,
+            :scope => oauth_scope
+          ).with_indifferent_access
+          options[:state] = JSON.dump(options[:state]) if options[:state]
+          Signet::OAuth2::Client.new(options)
         end
 
         def oauth_scope
