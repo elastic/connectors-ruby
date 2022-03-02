@@ -14,14 +14,15 @@ group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
   gem 'rspec-core', '~> 3.10.1'
   gem 'rspec_junit_formatter'
-  gem 'rubocop'
+  gem 'rubocop', '1.18.4'
+  gem 'rubocop-performance', '1.11.5'
   gem 'rspec-mocks'
   gem 'webmock'
   gem 'rack-test'
   gem 'ruby-debug-ide'
   gem 'pry-remote'
   gem 'pry-nav'
-  gem 'debase'
+  gem 'debase', '0.2.5.beta2'
   gem 'timecop'
 end
 

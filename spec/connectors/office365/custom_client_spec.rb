@@ -14,7 +14,7 @@ describe Connectors::Office365::CustomClient do
   let(:client) do
     Connectors::Office365::CustomClient.new(
       :access_token => access_token,
-      :cursors =>  cursors,
+      :cursors => cursors,
       :ensure_fresh_auth => lambda do |client|
         if Time.now >= authorization_details.fetch(:expires_at) - 2.minutes
           client.update_auth_data!(access_token)
@@ -70,15 +70,15 @@ describe Connectors::Office365::CustomClient do
         # yes, MSFT does not use spell check
         expect { client.send(:request_endpoint, :endpoint => 'drives/') }
           .to raise_error(Connectors::Office365::CustomClient::ClientError)
-                .with_message(/All the offeractions povided in the property bag cannot be validated for the token/)
+          .with_message(/All the offeractions povided in the property bag cannot be validated for the token/)
       end
     end
   end
 
   it 'retries on a 429 response' do
     stubbed_request = stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'drives/')
-                        .to_return(:status => 429, :body => connectors_fixture_raw('office365/429.json')).then
-                        .to_return({ body: connectors_fixture_raw('office365/drives.json') })
+      .to_return(:status => 429, :body => connectors_fixture_raw('office365/429.json')).then
+      .to_return({ body: connectors_fixture_raw('office365/drives.json') })
 
     client.send(:request_endpoint, :endpoint => 'drives/')
 
@@ -169,7 +169,7 @@ describe Connectors::Office365::CustomClient do
           Timecop.freeze(time_within_azure_permission_sync_sla) do
             drives = client.share_point_drives
             unique_drive_ids = drives.map(&:id)
-                                     .uniq
+              .uniq
 
             expect(drives.length).to eq(unique_drive_ids.length)
           end

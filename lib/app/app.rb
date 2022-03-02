@@ -55,7 +55,7 @@ class ConnectorsWebApp < Sinatra::Base
       params
     )
 
-    return { results: connector.get_document_batch, cursor: nil }.to_json
+    return { results: connector.document_batch, cursor: nil }.to_json
   end
 
   post '/download' do

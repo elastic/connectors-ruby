@@ -42,3 +42,6 @@ target
 
 # temp file with auth credentials
 ent-search-dev.json
+
+# vim
+*.un~

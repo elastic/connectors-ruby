@@ -29,7 +29,6 @@ describe Connectors::Base::Extractor do
   end
 
   context 'retry logic' do
-
     context 'when ConnectorsShared::TokenRefreshFailedError is raised' do
       class ExtractorWithTokenRefreshFailure < Connectors::Base::Extractor
         def yield_document_changes(modified_since: nil)
@@ -261,4 +260,3 @@ describe Connectors::Base::Extractor do
     end
   end
 end
-

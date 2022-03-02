@@ -19,18 +19,18 @@ module Connectors
         @extractor = Connectors::Sharepoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: 'sharepoint_online',
-          authorization_data_proc: proc { { access_token: params['access_token']} },
+          authorization_data_proc: proc { { access_token: params['access_token'] } },
           client_proc: proc { Connectors::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => {}) },
           config: Connectors::Office365::Config.new(:cursors => {}, :drive_ids => 'all'),
           features: features
         )
       end
 
-      def get_document_batch
+      def document_batch
         results = []
         max = 100
 
-        @extractor.yield_document_changes do |action, doc, subextractors|
+        @extractor.yield_document_changes do |action, doc, _subextractors|
           results << {
             :action => action,
             :document => doc,

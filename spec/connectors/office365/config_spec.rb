@@ -15,6 +15,6 @@ describe Connectors::Office365::Config do
 
   it 'serializes' do
     hsh = subject.to_h
-    expect(hsh).to eq({:cursors => cursors, :drive_ids => drive_ids, :index_permissions => false})
+    expect(hsh).to eq({ :cursors => cursors, :drive_ids => drive_ids, :index_permissions => false })
   end
 end

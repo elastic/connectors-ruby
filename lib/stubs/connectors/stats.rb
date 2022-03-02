@@ -10,7 +10,7 @@ require 'active_support/inflector'
 
 module Connectors
   module Stats
-    def self.measure(key, value = nil, &block)
+    def self.measure(_key, _value = nil, &block)
       block.call
     end
 

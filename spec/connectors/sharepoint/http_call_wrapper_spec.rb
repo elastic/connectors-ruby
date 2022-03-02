@@ -20,7 +20,7 @@ RSpec.describe Connectors::Sharepoint::HttpCallWrapper do
   # XXX This is also stubs in lib/stubs/app_config.rb
 
   let(:backend) do
-    described_class.new({'access_token' => 'something'})
+    described_class.new({ 'access_token' => 'something' })
   end
 
   def mock_endpoint(path, data)
@@ -55,6 +55,6 @@ RSpec.describe Connectors::Sharepoint::HttpCallWrapper do
     mock_endpoint('drives/4567/items/1111/children', children)
     mock_endpoint('drives/4567/items/1111/permissions', permissions)
 
-    expect(backend.get_document_batch.size).to eq 101
+    expect(backend.document_batch.size).to eq 101
   end
 end

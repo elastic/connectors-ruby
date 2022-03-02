@@ -89,12 +89,12 @@ module Connectors
           log_error('Aborting job because it did not make any progress and cannot be evicted')
           raise
         rescue ConnectorsShared::EvictionError,
-          ConnectorsShared::ThrottlingError,
-          ConnectorsShared::JobDocumentLimitError,
-          ConnectorsShared::MonitoringError,
-          ConnectorsShared::JobInterruptedError,
-          ConnectorsShared::SecretInvalidError,
-          ConnectorsShared::InvalidIndexingConfigurationError => e
+               ConnectorsShared::ThrottlingError,
+               ConnectorsShared::JobDocumentLimitError,
+               ConnectorsShared::MonitoringError,
+               ConnectorsShared::JobInterruptedError,
+               ConnectorsShared::SecretInvalidError,
+               ConnectorsShared::InvalidIndexingConfigurationError => e
           # Don't retry eviction, throttling, document limit, or monitoring errors, let them bubble out
           raise
         rescue StandardError => e
