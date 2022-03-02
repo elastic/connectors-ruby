@@ -27,7 +27,7 @@ RSpec.describe ConnectorsWebApp do
       # we call /oauth2/init with the client_id and client_secret
       params = { :client_id => 'client id', :client_secret => 'secret', :redirect_uri => 'http://here' }
       response_json = JSON.parse(post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }).body)
-      url = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?access_type=offline&client_id=client%20id&prompt=consent&redirect_uri=http://here&response_type=code&scope=User.ReadBasic.All%20Group.Read.All%20Directory.AccessAsUser.All%20Files.Read%20Files.Read.All%20Sites.Read.All%20offline_access&state=null'
+      url = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?access_type=offline&client_id=client%20id&prompt=consent&redirect_uri=http://here&response_type=code&scope=User.ReadBasic.All%20Group.Read.All%20Directory.AccessAsUser.All%20Files.Read%20Files.Read.All%20Sites.Read.All%20offline_access'
       expect(response_json['oauth2redirect']).to eq url
 
       # the user gets redirected, and we get a code
