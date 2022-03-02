@@ -6,14 +6,8 @@ AllCops:
   SuggestExtensions: false
   TargetRubyVersion: 2.6
   Exclude:
-    - 'Jarfile'
-    - 'dist/vendor/**/*'
     - 'vendor/**/*'
     - 'Gemfile'
-    - 'node_modules/**/*'
-    - 'testing/vendor/**/*'
-    - 'ci_state/**/*'
-    - 'bin/**/*'
 
 #
 # Specific settings for alignement indentation
@@ -21,14 +15,14 @@ AllCops:
 Layout/ParameterAlignment:
   Enabled: true
   SupportedStyles:
-  - with_first_parameter
-  - with_fixed_indentation
+    - with_first_parameter
+    - with_fixed_indentation
 
 Layout/ArgumentAlignment:
   Enabled: true
   SupportedStyles:
-  - with_first_parameter
-  - with_fixed_indentation
+    - with_first_parameter
+    - with_fixed_indentation
 
 Layout/HashAlignment:
   Enabled: true
@@ -36,10 +30,10 @@ Layout/HashAlignment:
   EnforcedColonStyle: key
   EnforcedLastArgumentHashStyle: always_inspect
   SupportedLastArgumentHashStyles:
-  - always_inspect
-  - always_ignore
-  - ignore_implicit
-  - ignore_explicit
+    - always_inspect
+    - always_ignore
+    - ignore_implicit
+    - ignore_explicit
 
 Layout/MultilineArrayBraceLayout:
   Enabled: true
@@ -53,30 +47,13 @@ Layout/MultilineMethodCallIndentation:
 
 Lint/UnusedMethodArgument:
   AllowUnusedKeywordArguments: true
-  Exclude:
-    - 'connectors/lib/connectors/fake_clients/google_drive.rb'
 
 #
 # Exceptions
 #
-Naming/MethodName:
-  Exclude:
-    - 'crawler/lib/crawler/http_client/all_trusting_trust_manager.rb'
-
 Style/NumericLiterals:
   Exclude:
     - !ruby/regexp /_spec\.rb$/
-
-Style/ClassVars:
-  Exclude:
-    - 'shared_togo/config/initializers/active_record.rb'
-    - 'connectors/config/initializers/salesforce_bulk_query.rb'
-
-Style/SignalException:
-  Exclude:
-    - 'shared_togo/config/initializers/devise.rb'
-    - 'frito_pie/config/initializers/devise.rb'
-    - 'loco_moco/config/initializers/devise.rb'
 
 # it's ok to use global variables in specs
 Style/GlobalVars:
