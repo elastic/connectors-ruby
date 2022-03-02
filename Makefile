@@ -9,6 +9,7 @@ lint:
 build:
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
+	gem build sharepoint_connector.gemspec
 	mv *.gem .gems/
 
 install:
