@@ -30,7 +30,7 @@ describe Connectors::Office365::Extractor do
     proc do
       Connectors::Office365::CustomClient.new(
         :access_token => access_token,
-        :cursors =>  cursors
+        :cursors => cursors
       )
     end
   end
@@ -88,7 +88,7 @@ describe Connectors::Office365::Extractor do
 
       expect {
         subject.yield_permissions(user_id)
-      }.to(raise_error( Connectors::Office365::CustomClient::ClientError))
+      }.to(raise_error(Connectors::Office365::CustomClient::ClientError))
     end
 
     it 'yields empty permissions if user is deleted' do
@@ -124,7 +124,7 @@ describe Connectors::Office365::Extractor do
     end
 
     def graph_base_url
-       Connectors::Office365::CustomClient::BASE_URL
+      Connectors::Office365::CustomClient::BASE_URL
     end
 
     def graph_response(body)

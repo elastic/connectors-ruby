@@ -22,7 +22,7 @@ group :test do
   gem 'ruby-debug-ide'
   gem 'pry-remote'
   gem 'pry-nav'
-  gem 'debase'
+  gem 'debase', '0.2.5.beta2'
   gem 'timecop'
 end
 

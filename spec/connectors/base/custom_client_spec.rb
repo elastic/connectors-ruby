@@ -39,8 +39,8 @@ describe Connectors::Base::CustomClient do
   context 'retries' do
     it 'retries on timeout response' do
       stubbed_request = stub_request(:get, 'http://localhost')
-                          .to_timeout.then
-                          .to_return(:status => 200)
+        .to_timeout.then
+        .to_return(:status => 200)
 
       client.get('')
       expect(stubbed_request).to have_been_requested.twice
