@@ -13,12 +13,12 @@ VERSION = '0.0.1'
 # - fallback to `Unknown`
 revision = `git rev-parse HEAD`
 if $CHILD_STATUS.success?
-  REVISION = revision
+  REVISION = revision.strip
 else
   # use the .revision file if present
   stored_revision = File.join(__dir__, '.revision')
   REVISION = if File.exist?(stored_revision)
-               File.read(stored_revision)
+               File.read(stored_revision).strip
              else
                'Unknown'
              end
