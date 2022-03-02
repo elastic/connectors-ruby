@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'app/app'
+require 'version'
 
 ENV['APP_ENV'] = 'test'
 
@@ -8,6 +9,16 @@ RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
 
   let(:app) { ConnectorsWebApp }
+
+  describe 'GET /' do
+    let(:response) { get '/' }
+
+    it 'returns the connectors metadata' do
+      expect(response.status).to eq 200
+      response_json = JSON.parse(response.body)
+      expect(response_json['version']).to eq VERSION
+    end
+  end
 
   describe 'GET /status' do
     let(:response) { get '/status' }
@@ -17,7 +28,6 @@ RSpec.describe ConnectorsWebApp do
         .with { true }
         .to_return(status: 200, body: JSON.generate({}))
 
-      puts(response.body)
       expect(response.status).to eq 200
     end
   end

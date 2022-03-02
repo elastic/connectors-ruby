@@ -6,6 +6,9 @@ test:
 lint:
 	bundle exec rubocop lib spec
 
+autocorrect:
+	bundle exec rubocop lib spec -a
+
 build:
 	mkdir -p .gems
 	gem build connectors_shared.gemspec

@@ -8,6 +8,7 @@ require 'json'
 require 'connectors/sharepoint/http_call_wrapper'
 require 'connectors/sharepoint/authorization'
 require 'connectors_shared'
+require 'version'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
@@ -18,7 +19,11 @@ class ConnectorsWebApp < Sinatra::Base
 
   get '/' do
     content_type :json
-    { version: '1.0' }.to_json
+    {
+      version: VERSION,
+      repository: 'https://github.com/elastic/connectors',
+      revision: REVISION
+    }.to_json
   end
 
   get '/health' do
