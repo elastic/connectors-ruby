@@ -10,7 +10,7 @@ require 'connectors/office365/adapter'
 
 module Connectors
   module Sharepoint
-    class Adapter < Connectors::Office365::Adapter
+    class Adapter < Office365::Adapter
       generate_id_helpers :share_point, 'share_point'
 
       def self.swiftype_document_from_file(file)
@@ -25,19 +25,19 @@ module Connectors
         PackageGraphItem.new(package).to_swiftype_document
       end
 
-      class FileGraphItem < Connectors::Office365::Adapter::FileGraphItem
+      class FileGraphItem < Office365::Adapter::FileGraphItem
         def self.convert_id_to_fp_id(id)
           Connectors::Sharepoint::Adapter.share_point_id_to_fp_id(id)
         end
       end
 
-      class FolderGraphItem < Connectors::Office365::Adapter::FolderGraphItem
+      class FolderGraphItem < Office365::Adapter::FolderGraphItem
         def self.convert_id_to_fp_id(id)
           Connectors::Sharepoint::Adapter.share_point_id_to_fp_id(id)
         end
       end
 
-      class PackageGraphItem < Connectors::Office365::Adapter::PackageGraphItem
+      class PackageGraphItem < Office365::Adapter::PackageGraphItem
         def self.convert_id_to_fp_id(id)
           Connectors::Sharepoint::Adapter.share_point_id_to_fp_id(id)
         end

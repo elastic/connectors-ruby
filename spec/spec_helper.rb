@@ -32,3 +32,5 @@ end
 def random_string
   SecureRandom.hex
 end
+
+Time.zone = ActiveSupport::TimeZone.new('UTC')
