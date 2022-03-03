@@ -75,7 +75,7 @@ class ConnectorsWebApp < Sinatra::Base
     { oauth2redirect: authorization_uri.to_s }.to_json
   rescue StandardError => e
     status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
-    { error: e.message }.to_json
+    { errors: [{ message: e.message }] }.to_json
   end
 
   # XXX remove `oauth2` from the name
@@ -86,6 +86,6 @@ class ConnectorsWebApp < Sinatra::Base
     Connectors::Sharepoint::Authorization.access_token(params)
   rescue StandardError => e
     status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
-    { error: e.message }.to_json
+    { errors: [{ message: e.message }] }.to_json
   end
 end
