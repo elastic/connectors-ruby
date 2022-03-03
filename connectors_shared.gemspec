@@ -1,12 +1,12 @@
-require_relative 'lib/version'
+require 'yaml'
+
+
+config = YAML.load_file(File.join(__dir__, 'config', 'connectors.yml'))
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_shared'
-  s.version     = VERSION
+  s.version     = config['version']
   s.homepage    = 'https://github.com/elastic/connectors'
-  s.metadata    = {
-    'revision' => REVISION
-  }
   s.summary     = 'Connectors Gem containing shared implementation of apis used by Enterprise Search'
   s.description = ''
   s.authors     = ['Elastic']

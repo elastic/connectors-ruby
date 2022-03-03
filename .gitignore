@@ -45,6 +45,3 @@ ent-search-dev.json
 
 # vim
 *.un~
-
-# .revision file generated for packaging
-lib/.revision

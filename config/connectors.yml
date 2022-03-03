@@ -1,0 +1,11 @@
+
+# general metadata
+version: "0.0.1"
+repository: https://github.com/elastic/connectors
+revision: main
+
+# web service
+http:
+  port: 9292
+  raise_errors: true
+  show_exceptions: false

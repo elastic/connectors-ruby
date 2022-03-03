@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'app/app'
-require 'version'
 
 ENV['APP_ENV'] = 'test'
 
@@ -16,7 +15,7 @@ RSpec.describe ConnectorsWebApp do
     it 'returns the connectors metadata' do
       expect(response.status).to eq 200
       response_json = JSON.parse(response.body)
-      expect(response_json['version']).to eq VERSION
+      expect(response_json['version']).to eq '0.0.1'
     end
   end
 
