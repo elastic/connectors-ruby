@@ -23,6 +23,7 @@ module Connectors
         end
 
         def authorization_uri(params)
+          params[:response_type] = 'code'
           params[:additional_parameters] = { :prompt => 'consent' }
           client = oauth_client(params)
           client.authorization_uri.to_s
@@ -34,12 +35,18 @@ module Connectors
           client.fetch_access_token.to_json
         end
 
+        def refresh(params)
+          params[:grant_type] = 'refresh_token'
+          client = oauth_client(params)
+          client.refresh!.to_json
+        end
+
         def oauth_client(params)
           options = params.merge(
             :authorization_uri => authorization_url,
             :token_credential_uri => token_credential_uri,
             :scope => oauth_scope
-          ).with_indifferent_access
+          )
           options[:state] = JSON.dump(options[:state]) if options[:state]
           Signet::OAuth2::Client.new(options)
         end
