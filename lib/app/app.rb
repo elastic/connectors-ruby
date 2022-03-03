@@ -15,7 +15,7 @@ require 'config'
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
-  config_file Connectors::ConfigFile
+  config_file Connectors::CONFIG_FILE
 
   configure do
     set :raise_errors, settings.http['raise_errors']

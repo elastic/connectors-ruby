@@ -1,18 +1,16 @@
-require 'yaml'
+require_relative 'lib/config'
 
-
-config = YAML.load_file(File.join(__dir__, 'config', 'connectors.yml'))
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_shared'
-  s.version     = config['version']
-  s.homepage    = config['repository']
+  s.version     = Connectors::Config['version']
+  s.homepage    = Connectors::Config['repository']
   s.summary     = 'Connectors Gem containing shared implementation of apis used by Enterprise Search'
   s.description = ''
   s.authors     = ['Elastic']
   s.email       = 'ent-search-dev@elastic.co'
   s.metadata    = {
-    "revision" => config['revision']
+    "revision" => Connectors::Config['revision']
   }
   s.files       = Dir.glob("lib/**/*", File::FNM_DOTMATCH) + [
     'LICENSE', 'config/connectors.yml'
