@@ -38,6 +38,8 @@ eshPipeline(
            type: 'script',
            script: {
                eshWithRbenv {
+                 sh 'curl -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64'
+                 sh 'chmod +x jq'
                  sh 'make install build'
                }
            },
