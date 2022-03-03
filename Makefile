@@ -10,10 +10,12 @@ autocorrect:
 	bundle exec rubocop lib spec -a
 
 build:
+	cp config/connectors.yml .saved
 	yq e ".revision = \"$(git rev-parse HEAD)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
 	mv *.gem .gems/
+	mv .saved config/connectors.yml
 
 install:
 	rbenv install -s

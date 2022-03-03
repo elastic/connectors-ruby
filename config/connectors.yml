@@ -1,7 +1,7 @@
 # general metadata
 version: "0.0.1"
 repository: "https://github.com/elastic/connectors"
-revision: "477def98a611b31dc771c9fef90f742ab4a9b69a"
+revision: "main"
 # web service
 http:
   port: 9292
