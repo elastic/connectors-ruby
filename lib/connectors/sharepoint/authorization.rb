@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'connectors_shared'
 require 'signet'
 require 'signet/oauth_2'
 require 'signet/oauth_2/client'
@@ -23,38 +24,47 @@ module Connectors
         end
 
         def authorization_uri(params)
-          client = Signet::OAuth2::Client.new(
-            authorization_uri: authorization_url,
-            token_credential_uri: token_credential_uri,
-            scope: oauth_scope,
-            client_id: params[:client_id],
-            client_secret: params[:client_secret],
-            redirect_uri: params[:redirect_uri],
-            state: JSON.dump(params[:state]),
-            additional_parameters: { prompt: 'consent' }
-          )
+          missing = missing_fields(params, %w[client_id])
+          unless missing.blank?
+            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
+          end
+
+          params[:response_type] = 'code'
+          params[:additional_parameters] = { :prompt => 'consent' }
+          client = oauth_client(params)
           client.authorization_uri.to_s
         end
 
         def access_token(params)
-          oauth_data = {
-            token_credential_uri: token_credential_uri,
-            client_id: params[:client_id],
-            client_secret: params[:client_secret]
-          }
-          # on the first dance
-          oauth_data[:code] = params[:code] if params[:code].present?
-          oauth_data[:redirect_uri] = params[:redirect_uri] if params[:redirect_uri].present?
-          oauth_data[:session_state] = params[:session_state] if params[:session_state].present?
-          oauth_data[:state] = params[:state] if params[:state].present?
-
-          # on refresh dance
-          if params[:refresh_token].present?
-            oauth_data[:refresh_token] = params[:refresh_token]
-            oauth_data[:grant_type] = :authorization
+          missing = missing_fields(params, %w[client_id client_secret code redirect_uri])
+          unless missing.blank?
+            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
           end
-          client = Signet::OAuth2::Client.new(oauth_data)
+
+          params[:grant_type] = 'authorization_code'
+          client = oauth_client(params)
           client.fetch_access_token.to_json
+        end
+
+        def refresh(params)
+          missing = missing_fields(params, %w[client_id client_secret refresh_token redirect_uri])
+          unless missing.blank?
+            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
+          end
+
+          params[:grant_type] = 'refresh_token'
+          client = oauth_client(params)
+          client.refresh!.to_json
+        end
+
+        def oauth_client(params)
+          options = params.merge(
+            :authorization_uri => authorization_url,
+            :token_credential_uri => token_credential_uri,
+            :scope => oauth_scope
+          )
+          options[:state] = JSON.dump(options[:state]) if options[:state]
+          Signet::OAuth2::Client.new(options)
         end
 
         def oauth_scope
@@ -67,6 +77,10 @@ module Connectors
             Sites.Read.All
             offline_access
           ]
+        end
+
+        def missing_fields(params, required = [])
+          Array.wrap(required).select { |field| params[field.to_sym].nil? }
         end
       end
     end
