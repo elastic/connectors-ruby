@@ -38,9 +38,9 @@ eshPipeline(
            type: 'script',
            script: {
                eshWithRbenv {
-                 sh 'curl -o jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64'
-                 sh 'chmod +x jq'
-                 sh 'make install build'
+                 sh 'curl -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
+                 sh 'chmod +x yq'
+                 sh 'YQ=./yq make install build'
                }
            },
            artifacts: [[pattern: 'app/.gems/*.gem']],
