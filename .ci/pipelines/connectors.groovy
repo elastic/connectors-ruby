@@ -38,7 +38,7 @@ eshPipeline(
            type: 'script',
            script: {
                eshWithRbenv {
-                 sh 'curl -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
+                 sh 'curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
                  sh 'chmod +x yq'
                  sh 'YQ=`realpath yq` make install build'
                }
