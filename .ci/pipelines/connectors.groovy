@@ -40,7 +40,7 @@ eshPipeline(
                eshWithRbenv {
                  sh 'curl -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
                  sh 'chmod +x yq'
-                 sh 'YQ=./yq make install build'
+                 sh 'YQ=`pwd`/yq make install build'
                }
            },
            artifacts: [[pattern: 'app/.gems/*.gem']],
