@@ -1,4 +1,4 @@
-YQ := "yq"
+YQ ?= "yq"
 
 all: install credentials run
 
