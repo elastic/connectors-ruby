@@ -38,7 +38,7 @@ RSpec.describe ConnectorsWebApp do
         .with { true }
         .to_return(status: 200, body: JSON.generate({ :token => 'TOKEN' }), headers: { 'Content-Type' => 'application/json' })
 
-      params = { :client_id => 'client id', :client_secret => 'secret', :code => authorization_code }
+      params = { :client_id => 'client id', :client_secret => 'secret', :code => authorization_code, :redirect_uri => 'http://here' }
       response_json = JSON.parse(post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }).body)
       expect(response_json['token']).to eq 'TOKEN'
     end

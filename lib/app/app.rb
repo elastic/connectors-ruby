@@ -7,6 +7,7 @@ require 'json'
 
 require 'connectors/sharepoint/http_call_wrapper'
 require 'connectors/sharepoint/authorization'
+require 'connectors_shared'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
@@ -72,6 +73,9 @@ class ConnectorsWebApp < Sinatra::Base
     authorization_uri = Connectors::Sharepoint::Authorization.authorization_uri(body)
 
     { oauth2redirect: authorization_uri.to_s }.to_json
+  rescue StandardError => e
+    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
+    body e.message
   end
 
   # XXX remove `oauth2` from the name
@@ -80,5 +84,8 @@ class ConnectorsWebApp < Sinatra::Base
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
     Connectors::Sharepoint::Authorization.access_token(params)
+  rescue StandardError => e
+    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
+    body e.message
   end
 end

@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'connectors_shared'
 require 'signet'
 require 'signet/oauth_2'
 require 'signet/oauth_2/client'
@@ -23,6 +24,11 @@ module Connectors
         end
 
         def authorization_uri(params)
+          missing = missing_fields(params, %w[client_id])
+          unless missing.blank?
+            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
+          end
+
           params[:response_type] = 'code'
           params[:additional_parameters] = { :prompt => 'consent' }
           client = oauth_client(params)
@@ -30,12 +36,22 @@ module Connectors
         end
 
         def access_token(params)
+          missing = missing_fields(params, %w[client_id client_secret code redirect_uri])
+          unless missing.blank?
+            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
+          end
+
           params[:grant_type] = 'authorization_code'
           client = oauth_client(params)
           client.fetch_access_token.to_json
         end
 
         def refresh(params)
+          missing = missing_fields(params, %w[client_id client_secret refresh_token redirect_uri])
+          unless missing.blank?
+            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
+          end
+
           params[:grant_type] = 'refresh_token'
           client = oauth_client(params)
           client.refresh!.to_json
@@ -61,6 +77,10 @@ module Connectors
             Sites.Read.All
             offline_access
           ]
+        end
+
+        def missing_fields(params, required = [])
+          Array.wrap(required).select { |field| params[field.to_sym].nil? }
         end
       end
     end
