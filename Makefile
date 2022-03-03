@@ -9,9 +9,12 @@ lint:
 autocorrect:
 	bundle exec rubocop lib spec -a
 
+
+# build will set the revision key in the config we use in the Gem
+# we can add more build=time info there if we want
 build:
 	cp config/connectors.yml .saved
-	yq e ".revision = \"$(git rev-parse HEAD)\"" -i config/connectors.yml
+	yq e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
 	mv *.gem .gems/

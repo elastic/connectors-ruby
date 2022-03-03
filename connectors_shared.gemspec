@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.email       = 'ent-search-dev@elastic.co'
   s.metadata    = {
     "revision" => config['revision']
-  },
+  }
   s.files       = Dir.glob("lib/**/*", File::FNM_DOTMATCH) + [
     'LICENSE', 'config/connectors.yml'
   ]
