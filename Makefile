@@ -10,7 +10,7 @@ autocorrect:
 	bundle exec rubocop lib spec -a
 
 build:
-	git rev-parse HEAD > lib/.revision
+	yq e ".revision = \"$(git rev-parse HEAD)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
 	mv *.gem .gems/
