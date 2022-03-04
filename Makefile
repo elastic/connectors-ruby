@@ -11,6 +11,8 @@ lint:
 autocorrect:
 	bundle exec rubocop lib spec -a
 
+api_key:
+	${YQ} e ".http.api_key = \"$(shell uuidgen | tr -d '-')\"" -i config/connectors.yml
 
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
