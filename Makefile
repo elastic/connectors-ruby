@@ -17,6 +17,7 @@ autocorrect:
 build:
 	cp config/connectors.yml .saved
 	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
+	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
 	mv *.gem .gems/
