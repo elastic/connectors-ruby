@@ -11,7 +11,11 @@ require 'connectors_shared'
 require 'date'
 require 'active_support/all'
 require 'simplecov'
+require 'simplecov-material'
 
+# Eneable coverage report
+SimpleCov.add_filter('spec')
+SimpleCov.formatter = SimpleCov::Formatter::MaterialFormatter
 SimpleCov.start
 
 $LOAD_PATH << '../lib'
