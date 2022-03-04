@@ -19,7 +19,10 @@ run `make test`
 Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, then:
 
 1. run `make build`
-2. copy the artifact in `.gems` directory to `vendor/cache` directory in Enterprise Search repository.
+1. cd to your ent-search checkout
+1. run `gem uninstall connectors_shared`
+1. copy the artifact in `.gems` directory to `vendor/cache` directory in Enterprise Search repository.
+1. run `script/bundle install`
 
 ### Running a webserver with a Connector
 To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work.
