@@ -3,8 +3,8 @@
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
-require 'config'
 
-module Connectors
-  VERSION = Connectors::Config['version']
-end
+require 'connectors/base'
+require 'connectors/dummy'
+require 'connectors/office365'
+require 'connectors/sharepoint'

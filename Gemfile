@@ -28,6 +28,7 @@ end
 
 # Dependencies for the HTTP service
 gem 'sinatra'
+gem 'sinatra-contrib'
 gem 'rack'
 gem 'forwardable'
 gem 'faraday'

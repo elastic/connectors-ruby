@@ -1,24 +1,40 @@
 # frozen_string_literal: true
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
 
 require 'faraday'
 require 'hashie'
-require 'sinatra'
 require 'json'
+
+require 'sinatra'
+require 'sinatra/config_file'
 
 require 'connectors/sharepoint/http_call_wrapper'
 require 'connectors/sharepoint/authorization'
 require 'connectors_shared'
+require 'config'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
+  register Sinatra::ConfigFile
+  config_file Connectors::CONFIG_FILE
+
   configure do
-    set :raise_errors, true
-    set :show_exceptions, false
+    set :raise_errors, settings.http['raise_errors']
+    set :show_exceptions, settings.http['show_exceptions']
+    set :port, settings.http['port']
   end
 
   get '/' do
     content_type :json
-    { version: '1.0' }.to_json
+    {
+      version: settings.version,
+      repository: settings.repository,
+      revision: settings.revision
+    }.to_json
   end
 
   get '/health' do

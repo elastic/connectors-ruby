@@ -9,6 +9,16 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
 
+  describe 'GET /' do
+    let(:response) { get '/' }
+
+    it 'returns the connectors metadata' do
+      expect(response.status).to eq 200
+      response_json = JSON.parse(response.body)
+      expect(response_json['version']).to eq '0.0.1'
+    end
+  end
+
   describe 'GET /status' do
     let(:response) { get '/status' }
 
@@ -17,7 +27,6 @@ RSpec.describe ConnectorsWebApp do
         .with { true }
         .to_return(status: 200, body: JSON.generate({}))
 
-      puts(response.body)
       expect(response.status).to eq 200
     end
   end

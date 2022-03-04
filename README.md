@@ -2,28 +2,34 @@
 The new home of Elastic Connectors
 
 ### System Requirements
-- jruby (see [.ruby-version](.ruby-version))
+- Ruby (see [.ruby-version](.ruby-version))
 - bundler 2.2.29
 
 ### Setup
 1. `make install`
 
-### Building
-run `make build`
+### Lintint
+run `make lint`
 
 ### Testing
 run `make test`
 
 ### Copying artifacts to Enterprise Search
+
+Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, then:
+
 1. run `make build`
 2. copy the artifact in `.gems` directory to `vendor/cache` directory in Enterprise Search repository.
 
 ### Running a webserver with a Connector
-To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work. You can run all of them for now with a `make` command.
+To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work.
+
+You can run all of them for now with a `make` command:
 
 ```shell
 make all
 ```
+
 
 ### Where do I report issues with Connectors?
 If something is not working as expected, please open an [issue](https://github.com/elastic/connectors/issues/new).
