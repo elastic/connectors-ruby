@@ -10,6 +10,9 @@ require 'timecop'
 require 'connectors_shared'
 require 'date'
 require 'active_support/all'
+require 'simplecov'
+
+SimpleCov.start
 
 $LOAD_PATH << '../lib'
 

@@ -21,6 +21,8 @@ eshPipeline(
                   sh 'make install test'
                 }
             },
+            publish_coverage: true,
+            coverage_dir: 'app/coverage',
             match_on_all_branches: true,
        ],
        [
