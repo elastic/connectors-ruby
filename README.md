@@ -16,7 +16,7 @@ run `make test`
 
 ### Copying artifacts to Enterprise Search
 
-Make sure you have `jq` installed, then:
+Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, then:
 
 1. run `make build`
 2. copy the artifact in `.gems` directory to `vendor/cache` directory in Enterprise Search repository.
