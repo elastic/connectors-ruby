@@ -14,6 +14,7 @@ require 'sinatra/config_file'
 
 require 'connectors/sharepoint/http_call_wrapper'
 require 'connectors/sharepoint/authorization'
+require 'connectors/errors'
 require 'connectors_shared'
 require 'config'
 
@@ -26,6 +27,27 @@ class ConnectorsWebApp < Sinatra::Base
     set :raise_errors, settings.http['raise_errors']
     set :show_exceptions, settings.http['show_exceptions']
     set :port, settings.http['port']
+    set :api_key, settings.http['api_key']
+  end
+
+  before do
+    raise StandardError.new 'You need to set an API key in the config file' if settings.environment != :test && settings.api_key == 'secret'
+
+    auth = Rack::Auth::Basic::Request.new(request.env)
+
+    # Check that the key matches
+    return if auth.provided? && auth.basic? && auth.credentials && auth.credentials[1] == settings.api_key
+
+    # We only support Basic for now
+    if auth.provided? && auth.scheme != 'basic'
+      code = Connectors::Errors::UNSUPPORTED_AUTH_SCHEME
+      message = 'Unsupported authorization scheme'
+    else
+      code = Connectors::Errors::INVALID_API_KEY
+      message = 'Invalid API key'
+    end
+    response = { errors: [{ message: message, code: code }] }.to_json
+    halt(401, { 'Content-Type' => 'application/json' }, response)
   end
 
   get '/' do

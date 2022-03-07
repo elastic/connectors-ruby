@@ -4,8 +4,9 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'connectors/base'
-require 'connectors/errors'
-require 'connectors/dummy'
-require 'connectors/office365'
-require 'connectors/sharepoint'
+module Connectors
+  module Errors
+    INVALID_API_KEY = 'INVALID_API_KEY'
+    UNSUPPORTED_AUTH_SCHEME = 'UNSUPPORTED_AUTH_SCHEME'
+  end
+end

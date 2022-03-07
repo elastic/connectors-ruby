@@ -41,3 +41,4 @@ def random_string
 end
 
 Time.zone = ActiveSupport::TimeZone.new('UTC')
+ENV['APP_ENV'] = 'test'
