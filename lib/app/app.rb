@@ -14,6 +14,7 @@ require 'sinatra/config_file'
 
 require 'connectors/sharepoint/http_call_wrapper'
 require 'connectors/sharepoint/authorization'
+require 'connectors/errors'
 require 'connectors_shared'
 require 'config'
 
@@ -35,7 +36,7 @@ class ConnectorsWebApp < Sinatra::Base
     # Check that the key matches
     return if auth.provided? && auth.basic? && auth.credentials && auth.credentials[1] == settings.api_key
 
-    response = { errors: [{ message: 'Invalid API key', code: 'INVALID_API_KEY' }] }.to_json
+    response = { errors: [{ message: 'Invalid API key', code: Connectors::Errors::INVALID_API_KEY }] }.to_json
     halt(401, response)
   end
 

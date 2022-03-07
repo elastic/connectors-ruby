@@ -7,14 +7,12 @@ ENV['APP_ENV'] = 'test'
 RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
 
-
-
   let(:app) { ConnectorsWebApp }
 
   describe 'GET /' do
     let(:response) {
-        basic_authorize "ent-search", "secret"
-        get '/'
+      basic_authorize 'ent-search', 'secret'
+      get '/'
     }
 
     it 'returns the connectors metadata' do
@@ -26,7 +24,7 @@ RSpec.describe ConnectorsWebApp do
 
   describe 'GET /status' do
     let(:response) {
-      basic_authorize "ent-search", "secret"
+      basic_authorize 'ent-search', 'secret'
       get '/status'
     }
 
@@ -47,7 +45,7 @@ RSpec.describe ConnectorsWebApp do
       it 'returns authorization uri' do
         allow(Connectors::Sharepoint::Authorization).to receive(:authorization_uri).and_return(authorization_uri)
 
-        basic_authorize "ent-search", "secret"
+        basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response).to be_successful
         response_json = JSON.parse(response.body)
@@ -62,7 +60,7 @@ RSpec.describe ConnectorsWebApp do
       it 'returns bad request' do
         allow(Connectors::Sharepoint::Authorization).to receive(:authorization_uri).and_raise(ConnectorsShared::ClientError.new(error))
 
-        basic_authorize "ent-search", "secret"
+        basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response.status).to eq(400)
         response_json = JSON.parse(response.body)
@@ -75,7 +73,7 @@ RSpec.describe ConnectorsWebApp do
     it 'does the oauth2 dance' do
       # we call /oauth2/init with the client_id and client_secret
       params = { :client_id => 'client id', :client_secret => 'secret', :redirect_uri => 'http://here' }
-      basic_authorize "ent-search", "secret"
+      basic_authorize 'ent-search', 'secret'
       response_json = JSON.parse(post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }).body)
       url = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?access_type=offline&client_id=client%20id&prompt=consent&redirect_uri=http://here&response_type=code&scope=User.ReadBasic.All%20Group.Read.All%20Directory.AccessAsUser.All%20Files.Read%20Files.Read.All%20Sites.Read.All%20offline_access'
       expect(response_json['oauth2redirect']).to eq url
