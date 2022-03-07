@@ -12,8 +12,8 @@ require 'json'
 require 'sinatra'
 require 'sinatra/config_file'
 
-require 'connectors_sdk/sharepoint/http_call_wrapper'
-require 'connectors_sdk/sharepoint/authorization'
+require 'connectors_sdk/share_point/http_call_wrapper'
+require 'connectors_sdk/share_point/authorization'
 require 'connectors_app/errors'
 require 'connectors_shared'
 require 'connectors_app/config'
@@ -77,11 +77,11 @@ class ConnectorsWebApp < Sinatra::Base
     response_json = Hashie::Mash.new(JSON.parse(response.body))
 
     status = response_json.error? ? 'FAILURE' : 'OK'
-    message = response_json.error? ? response_json.error.message : 'Connected to Sharepoint'
+    message = response_json.error? ? response_json.error.message : 'Connected to SharePoint'
 
     {
       extractor: {
-        name: 'Sharepoint'
+        name: 'SharePoint'
       },
       contentProvider: {
         status: status,
@@ -95,7 +95,7 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     params = JSON.parse(request.body.read)
 
-    connector = ConnectorsSdk::Sharepoint::HttpCallWrapper.new(
+    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(
       params
     )
 
@@ -113,7 +113,7 @@ class ConnectorsWebApp < Sinatra::Base
     body = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
     logger.info "Received redirect URL: #{body[:redirect_uri]}"
-    authorization_uri = ConnectorsSdk::Sharepoint::Authorization.authorization_uri(body)
+    authorization_uri = ConnectorsSdk::SharePoint::Authorization.authorization_uri(body)
 
     { oauth2redirect: authorization_uri.to_s }.to_json
   rescue StandardError => e
@@ -126,9 +126,9 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
     if params[:refresh_token] # FIXME: hmmmm not sure if it's the best way to move forward
-      ConnectorsSdk::Sharepoint::Authorization.refresh(params)
+      ConnectorsSdk::SharePoint::Authorization.refresh(params)
     else
-      ConnectorsSdk::Sharepoint::Authorization.access_token(params)
+      ConnectorsSdk::SharePoint::Authorization.access_token(params)
     end
   rescue StandardError => e
     status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500

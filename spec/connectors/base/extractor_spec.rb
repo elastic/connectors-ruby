@@ -10,7 +10,7 @@ require 'connectors_sdk/base/config'
 require 'connectors_sdk/base/extractor'
 
 describe ConnectorsSdk::Base::Extractor do
-  let(:service_type) { 'sharepoint' }
+  let(:service_type) { 'share_point' }
   let(:config) { ConnectorsSdk::Base::Config.new(:cursors => {}) }
   let(:content_source_id) { BSON::ObjectId.new }
   let(:cursors) { nil }

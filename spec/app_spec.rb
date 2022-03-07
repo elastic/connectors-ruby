@@ -102,7 +102,7 @@ RSpec.describe ConnectorsWebApp do
       let(:authorization_uri) { 'authorization_uri' }
 
       it 'returns authorization uri' do
-        allow(ConnectorsSdk::Sharepoint::Authorization).to receive(:authorization_uri).and_return(authorization_uri)
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:authorization_uri).and_return(authorization_uri)
 
         basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -116,7 +116,7 @@ RSpec.describe ConnectorsWebApp do
       let(:error) { 'error' }
 
       it 'returns bad request' do
-        allow(ConnectorsSdk::Sharepoint::Authorization).to receive(:authorization_uri).and_raise(ConnectorsShared::ClientError.new(error))
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:authorization_uri).and_raise(ConnectorsShared::ClientError.new(error))
 
         basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })

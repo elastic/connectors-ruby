@@ -9,7 +9,7 @@
 require 'connectors_sdk/office365/adapter'
 
 module ConnectorsSdk
-  module Sharepoint
+  module SharePoint
     class Adapter < Office365::Adapter
       generate_id_helpers :share_point, 'share_point'
 
@@ -27,19 +27,19 @@ module ConnectorsSdk
 
       class FileGraphItem < Office365::Adapter::FileGraphItem
         def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::Sharepoint::Adapter.share_point_id_to_fp_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
         end
       end
 
       class FolderGraphItem < Office365::Adapter::FolderGraphItem
         def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::Sharepoint::Adapter.share_point_id_to_fp_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
         end
       end
 
       class PackageGraphItem < Office365::Adapter::PackageGraphItem
         def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::Sharepoint::Adapter.share_point_id_to_fp_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
         end
       end
     end

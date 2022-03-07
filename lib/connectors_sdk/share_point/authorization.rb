@@ -12,7 +12,7 @@ require 'signet/oauth_2'
 require 'signet/oauth_2/client'
 
 module ConnectorsSdk
-  module Sharepoint
+  module SharePoint
     class Authorization
       class << self
         def authorization_url

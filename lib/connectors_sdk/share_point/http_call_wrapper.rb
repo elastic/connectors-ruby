@@ -7,15 +7,15 @@
 # frozen_string_literal: true
 
 require 'connectors_sdk/office365/config'
-require 'connectors_sdk/sharepoint/extractor'
+require 'connectors_sdk/share_point/extractor'
 require 'bson'
 
 module ConnectorsSdk
-  module Sharepoint
+  module SharePoint
     class HttpCallWrapper
       def initialize(params)
         features = {}
-        @extractor = ConnectorsSdk::Sharepoint::Extractor.new(
+        @extractor = ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: 'sharepoint_online',
           authorization_data_proc: proc { { access_token: params['access_token'] } },

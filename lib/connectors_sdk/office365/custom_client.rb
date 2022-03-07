@@ -69,7 +69,7 @@ module ConnectorsSdk
       end
 
       def share_point_drives(fields: [])
-        # When new Private Team site is created in Sharepoint, permissions take some time to propagate, therefore
+        # When new Private Team site is created in SharePoint, permissions take some time to propagate, therefore
         # this site won't be indexed by us until propagation happens. This code tries to also fetch sites from
         # recently created groups (new Private Team site will be there) to reduce friction and index this site
         # earlier.

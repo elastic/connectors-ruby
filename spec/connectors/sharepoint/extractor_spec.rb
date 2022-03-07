@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/sharepoint/extractor'
+require 'connectors_sdk/share_point/extractor'
 require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/office365/config'
 
-describe ConnectorsSdk::Sharepoint::Extractor do
+describe ConnectorsSdk::SharePoint::Extractor do
   let(:content_source_id) { BSON::ObjectId.new }
   let(:service_type) { 'sharepoint_online' }
   let(:access_token) { 'access_token' }

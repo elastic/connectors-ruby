@@ -6,10 +6,10 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/sharepoint/adapter'
+require 'connectors_sdk/share_point/adapter'
 require 'support/shared_examples'
 
-describe ConnectorsSdk::Sharepoint::Adapter do
+describe ConnectorsSdk::SharePoint::Adapter do
   it 'should have id conversion functions set by generate_id_helpers' do
     expect(described_class.singleton_methods).to include(:share_point_id_to_fp_id)
     expect(described_class.singleton_methods).to include(:fp_id_to_share_point_id)
