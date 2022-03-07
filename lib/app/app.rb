@@ -31,8 +31,7 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   before do
-    default_key_in_prod = settings.environment != :test && settings.api_key == 'secret'
-    raise StandardError.new 'You need to set an API key in the config file' if default_key_in_prod
+    raise StandardError.new 'You need to set an API key in the config file' if settings.environment != :test && settings.api_key == 'secret'
 
     auth = Rack::Auth::Basic::Request.new(request.env)
 
