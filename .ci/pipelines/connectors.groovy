@@ -20,9 +20,15 @@ eshPipeline(
                 eshWithRbenv {
                   sh 'make install test'
                 }
+                publishHTML (target: [
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: true,
+                    reportDir: 'coverage',
+                    reportFiles: 'index.html',
+                    reportName: 'Coverage Report'
+                ])
             },
-            publish_coverage: true,
-            coverage_dir: 'app/coverage',
             match_on_all_branches: true,
        ],
        [
