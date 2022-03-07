@@ -13,7 +13,4 @@ def required_path(absolute_path)
   File.join(relative_dir, name)
 end
 
-Dir[File.join(__dir__, 'connectors/base/**/*.rb')].each { |f| require required_path(f) }
-Dir[File.join(__dir__, 'connectors/dummy/**/*.rb')].each { |f| require required_path(f) }
-Dir[File.join(__dir__, 'connectors/office365/**/*.rb')].each { |f| require required_path(f) }
-Dir[File.join(__dir__, 'connectors/sharepoint/**/*.rb')].each { |f| require required_path(f) }
+Dir[File.join(__dir__, 'connectors/**/*.rb')].each { |f| require required_path(f) }
