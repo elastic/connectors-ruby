@@ -26,6 +26,17 @@ class ConnectorsWebApp < Sinatra::Base
     set :raise_errors, settings.http['raise_errors']
     set :show_exceptions, settings.http['show_exceptions']
     set :port, settings.http['port']
+    set :api_key, settings.http['api_key']
+  end
+
+  before do
+    auth = Rack::Auth::Basic::Request.new(request.env)
+
+    # Check that the key matches
+    return if auth.provided? && auth.basic? && auth.credentials && auth.credentials[1] == settings.api_key
+
+    response = { errors: [{ message: 'Invalid API key', code: 'INVALID_API_KEY' }] }.to_json
+    halt(401, response)
   end
 
   get '/' do
