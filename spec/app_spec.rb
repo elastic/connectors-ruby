@@ -3,8 +3,6 @@
 require 'app/app'
 require 'connectors/errors'
 
-ENV['APP_ENV'] = 'test'
-
 RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
 

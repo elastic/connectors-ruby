@@ -24,12 +24,19 @@ Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, the
 ### Running a webserver with a Connector
 To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work.
 
-You can run all of them for now with a `make` command:
+First, make sure that you create a unique `api_key` for your service, with:
+```shell
+make api_key
+```
+
+Then, you can run all of them for now with a `make` command:
 
 ```shell
 make all
 ```
 
+Consumers will need to use the `api_key` string as the password in
+the Authorization header.
 
 ### Where do I report issues with Connectors?
 If something is not working as expected, please open an [issue](https://github.com/elastic/connectors/issues/new).
