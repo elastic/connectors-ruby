@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'app/app'
+require 'connectors/errors'
 
 ENV['APP_ENV'] = 'test'
 
@@ -8,6 +9,36 @@ RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
 
   let(:app) { ConnectorsWebApp }
+
+  def expect_json(response, json)
+    expect(json(response)).to eq json
+  end
+
+  def json(response)
+    Hashie::Mash.new(JSON.parse(response.body))
+  end
+
+  describe 'Authorization /' do
+    let(:bad_auth) {
+      { 'errors' => [
+        { 'code' => Connectors::Errors::INVALID_API_KEY,
+          'message' => 'Invalid API key' }
+      ] }
+    }
+
+    it 'returns a 401 when Basic auth misses' do
+      response = get '/'
+      expect(response.status).to eq 401
+      expect_json(response, bad_auth)
+    end
+
+    it 'returns a 401 when Basic auth is wrong' do
+      response = get '/'
+      basic_authorize 'ent-search', 'bad_secret'
+      expect(response.status).to eq 401
+      expect_json(response, bad_auth)
+    end
+  end
 
   describe 'GET /' do
     let(:response) {
@@ -17,8 +48,7 @@ RSpec.describe ConnectorsWebApp do
 
     it 'returns the connectors metadata' do
       expect(response.status).to eq 200
-      response_json = JSON.parse(response.body)
-      expect(response_json['version']).to eq '0.0.1'
+      expect(json(response)['version']).to eq '0.0.1'
     end
   end
 
@@ -48,8 +78,7 @@ RSpec.describe ConnectorsWebApp do
         basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response).to be_successful
-        response_json = JSON.parse(response.body)
-        expect(response_json['oauth2redirect']).to eq(authorization_uri)
+        expect(json(response)['oauth2redirect']).to eq(authorization_uri)
       end
     end
 
@@ -63,8 +92,7 @@ RSpec.describe ConnectorsWebApp do
         basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response.status).to eq(400)
-        response_json = JSON.parse(response.body)
-        expect(response_json['errors'].first['message']).to eq(error)
+        expect(json(response)['errors'].first['message']).to eq(error)
       end
     end
   end
