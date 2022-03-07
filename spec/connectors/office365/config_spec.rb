@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors/office365/config'
+require 'connectors_sdk/office365/config'
 
-describe Connectors::Office365::Config do
+describe ConnectorsSdk::Office365::Config do
   let(:cursors) { { 'foo' => 'bar' } }
   let(:drive_ids) { described_class::ALL_DRIVE_IDS }
   subject { described_class.new(:cursors => cursors, :drive_ids => drive_ids) }

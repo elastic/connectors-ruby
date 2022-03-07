@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors/office365/config'
-require 'connectors/office365/custom_client'
-require 'connectors/office365/extractor'
+require 'connectors_sdk/office365/config'
+require 'connectors_sdk/office365/custom_client'
+require 'connectors_sdk/office365/extractor'
 
-describe Connectors::Office365::Extractor do
+describe ConnectorsSdk::Office365::Extractor do
   let(:content_source_id) { BSON::ObjectId.new }
   let(:service_type) { 'sharepoint_online' }
   let(:access_token) { 'access_token' }
@@ -20,7 +20,7 @@ describe Connectors::Office365::Extractor do
   let(:config_drive_ids) { 'all' }
   let(:cursors) { nil }
   let(:config) do
-    Connectors::Office365::Config.new(
+    ConnectorsSdk::Office365::Config.new(
       :drive_ids => config_drive_ids,
       :index_permissions => false,
       :cursors => cursors
@@ -28,7 +28,7 @@ describe Connectors::Office365::Extractor do
   end
   let(:client_proc) do
     proc do
-      Connectors::Office365::CustomClient.new(
+      ConnectorsSdk::Office365::CustomClient.new(
         :access_token => access_token,
         :cursors => cursors
       )
@@ -88,7 +88,7 @@ describe Connectors::Office365::Extractor do
 
       expect {
         subject.yield_permissions(user_id)
-      }.to(raise_error(Connectors::Office365::CustomClient::ClientError))
+      }.to(raise_error(ConnectorsSdk::Office365::CustomClient::ClientError))
     end
 
     it 'yields empty permissions if user is deleted' do
@@ -124,7 +124,7 @@ describe Connectors::Office365::Extractor do
     end
 
     def graph_base_url
-      Connectors::Office365::CustomClient::BASE_URL
+      ConnectorsSdk::Office365::CustomClient::BASE_URL
     end
 
     def graph_response(body)

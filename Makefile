@@ -22,6 +22,7 @@ build:
 	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_shared.gemspec
+	gem build connectors_sdk.gemspec
 	mv *.gem .gems/
 	mv .saved config/connectors.yml
 

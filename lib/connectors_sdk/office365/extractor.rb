@@ -6,12 +6,12 @@
 
 # frozen_string_literal: true
 
-require 'connectors/office365/custom_client'
-require 'connectors/base/extractor'
+require 'connectors_sdk/office365/custom_client'
+require 'connectors_sdk/base/extractor'
 
-module Connectors
+module ConnectorsSdk
   module Office365
-    class Extractor < Connectors::Base::Extractor
+    class Extractor < ConnectorsSdk::Base::Extractor
       DRIVE_IDS_CURSOR_KEY = 'drive_ids'.freeze
 
       def yield_document_changes(modified_since: nil, &block)
@@ -26,7 +26,7 @@ module Connectors
               log_debug("Starting an incremental crawl with cursor for #{service_type.classify} with drive_id: #{drive_id}")
               begin
                 yield_changes(drive_id, :start_delta_link => start_delta_link, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
-              rescue Connectors::Office365::CustomClient::Office365InvalidCursorsError
+              rescue ConnectorsSdk::Office365::CustomClient::Office365InvalidCursorsError
                 log_warn("Error listing changes with start_delta_link: #{start_delta_link}, falling back to full crawl")
                 yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
               end
@@ -37,7 +37,7 @@ module Connectors
               log_debug("Starting a full crawl #{service_type.classify} with drive_id: #{drive_id}")
               yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, &block)
             end
-          rescue Connectors::Office365::CustomClient::ClientError => e
+          rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
             log_warn("Error searching and listing drive #{drive_id}")
             capture_exception(e)
           end
@@ -55,7 +55,7 @@ module Connectors
       def retrieve_latest_cursors
         delta_links_for_drive_ids = drives_to_index.map(&:id).each_with_object({}) do |drive_id, h|
           h[drive_id] = client.get_latest_delta_link(drive_id)
-        rescue Connectors::Office365::CustomClient::ClientError => e
+        rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
           log_warn("Error getting delta link for #{drive_id}")
           capture_exception(e)
           raise e
@@ -74,7 +74,7 @@ module Connectors
         end
 
         yield permissions.uniq
-      rescue Connectors::Office365::CustomClient::ClientError => e
+      rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
         # if a user is deleted, client.user_groups will throw 404 Not Found error, saving another call to get user profile
         if e.status_code == 404
           log_warn("Could not find a user with id #{source_user_id}")

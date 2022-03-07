@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'app/app'
-require 'connectors/errors'
+require 'connectors_app/errors'
 
 RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
@@ -23,14 +23,14 @@ RSpec.describe ConnectorsWebApp do
   describe 'Authorization /' do
     let(:bad_auth) {
       { 'errors' => [
-        { 'code' => Connectors::Errors::INVALID_API_KEY,
+        { 'code' => ConnectorsApp::Errors::INVALID_API_KEY,
           'message' => 'Invalid API key' }
       ] }
     }
 
     let(:unsupported_auth) {
       { 'errors' => [
-        { 'code' => Connectors::Errors::UNSUPPORTED_AUTH_SCHEME,
+        { 'code' => ConnectorsApp::Errors::UNSUPPORTED_AUTH_SCHEME,
           'message' => 'Unsupported authorization scheme' }
       ] }
     }
@@ -102,7 +102,7 @@ RSpec.describe ConnectorsWebApp do
       let(:authorization_uri) { 'authorization_uri' }
 
       it 'returns authorization uri' do
-        allow(Connectors::Sharepoint::Authorization).to receive(:authorization_uri).and_return(authorization_uri)
+        allow(ConnectorsSdk::Sharepoint::Authorization).to receive(:authorization_uri).and_return(authorization_uri)
 
         basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -116,7 +116,7 @@ RSpec.describe ConnectorsWebApp do
       let(:error) { 'error' }
 
       it 'returns bad request' do
-        allow(Connectors::Sharepoint::Authorization).to receive(:authorization_uri).and_raise(ConnectorsShared::ClientError.new(error))
+        allow(ConnectorsSdk::Sharepoint::Authorization).to receive(:authorization_uri).and_raise(ConnectorsShared::ClientError.new(error))
 
         basic_authorize 'ent-search', 'secret'
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })

@@ -6,21 +6,21 @@
 
 # frozen_string_literal: true
 
-require 'connectors/office365/extractor'
-require 'connectors/sharepoint/adapter'
+require 'connectors_sdk/office365/extractor'
+require 'connectors_sdk/sharepoint/adapter'
 
-module Connectors
+module ConnectorsSdk
   module Sharepoint
-    class Extractor < Connectors::Office365::Extractor
+    class Extractor < ConnectorsSdk::Office365::Extractor
 
       private
 
       def convert_id_to_fp_id(id)
-        Connectors::Sharepoint::Adapter.share_point_id_to_fp_id(id)
+        ConnectorsSdk::Sharepoint::Adapter.share_point_id_to_fp_id(id)
       end
 
       def adapter
-        Connectors::Sharepoint::Adapter
+        ConnectorsSdk::Sharepoint::Adapter
       end
 
       def drives

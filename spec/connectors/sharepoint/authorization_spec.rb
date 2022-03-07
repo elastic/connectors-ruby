@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 
-describe Connectors::Sharepoint::Authorization do
+describe ConnectorsSdk::Sharepoint::Authorization do
   describe '.authorization_uri' do
     let(:params) { { :client_id => 'client_id' } }
 

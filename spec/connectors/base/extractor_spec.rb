@@ -6,22 +6,22 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/config'
-require 'connectors/base/extractor'
+require 'connectors_sdk/base/config'
+require 'connectors_sdk/base/extractor'
 
-describe Connectors::Base::Extractor do
+describe ConnectorsSdk::Base::Extractor do
   let(:service_type) { 'sharepoint' }
-  let(:config) { Connectors::Base::Config.new(:cursors => {}) }
+  let(:config) { ConnectorsSdk::Base::Config.new(:cursors => {}) }
   let(:content_source_id) { BSON::ObjectId.new }
   let(:cursors) { nil }
-  let(:client_proc) { proc { Connectors::Base::CustomClient.new(base_url: 'https://example.com') } }
+  let(:client_proc) { proc { ConnectorsSdk::Base::CustomClient.new(base_url: 'https://example.com') } }
   let(:authorization_data_proc) { proc { {} } }
 
   subject do
     described_class.new(
       :content_source_id => content_source_id,
       :service_type => service_type,
-      :config => Connectors::Base::Config.new(:cursors => cursors),
+      :config => ConnectorsSdk::Base::Config.new(:cursors => cursors),
       :features => [],
       :client_proc => client_proc,
       :authorization_data_proc => authorization_data_proc
@@ -30,7 +30,7 @@ describe Connectors::Base::Extractor do
 
   context 'retry logic' do
     context 'when ConnectorsShared::TokenRefreshFailedError is raised' do
-      class ExtractorWithTokenRefreshFailure < Connectors::Base::Extractor
+      class ExtractorWithTokenRefreshFailure < ConnectorsSdk::Base::Extractor
         def yield_document_changes(modified_since: nil)
           raise ConnectorsShared::TokenRefreshFailedError
         end
@@ -56,7 +56,7 @@ describe Connectors::Base::Extractor do
     context 'when a rate limit error is raised' do
       class RateLimitFailure < StandardError
       end
-      class ExtractorWithRateLimitFailure < Connectors::Base::Extractor
+      class ExtractorWithRateLimitFailure < ConnectorsSdk::Base::Extractor
         def yield_document_changes(modified_since: nil)
           yield_single_document_change(:identifier => 'the only one') do
             raise RateLimitFailure.new('oops, rate limit')
@@ -89,7 +89,7 @@ describe Connectors::Base::Extractor do
     end
 
     context 'when ConnectorsShared::JobInterruptedError is raised' do
-      class ExtractorWithInterruptedJob < Connectors::Base::Extractor
+      class ExtractorWithInterruptedJob < ConnectorsSdk::Base::Extractor
         def yield_document_changes(modified_since: nil)
           raise ConnectorsShared::JobInterruptedError
         end
@@ -115,7 +115,7 @@ describe Connectors::Base::Extractor do
     context 'when extracting content raises unexpected errors' do
       let(:error_raised) { RuntimeError.new('fail') }
 
-      class ExtractorWithFailure < Connectors::Base::Extractor
+      class ExtractorWithFailure < ConnectorsSdk::Base::Extractor
         attr_accessor :setup_failure_count, :documents
 
         def initialize(setup_failure_count: nil, documents: [], error_to_raise: 'fail', **args)

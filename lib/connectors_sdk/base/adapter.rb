@@ -13,7 +13,7 @@ require 'date'
 require 'active_support/all'
 require 'mime-types'
 
-module Connectors
+module ConnectorsSdk
   module Base
     class Adapter
       def self.fields_to_preserve

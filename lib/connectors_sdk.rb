@@ -4,13 +4,13 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require_relative 'connectors_shared'
+require 'connectors_shared'
 
 def required_path(absolute_path)
   absolute_dir = File.dirname(absolute_path)
-  relative_dir = absolute_dir.sub(/.*lib\/connectors/, 'connectors')
+  relative_dir = absolute_dir.sub(/.*lib\/connectors_sdk/, 'connectors_sdk')
   name = File.basename(absolute_path, '.rb')
   File.join(relative_dir, name)
 end
 
-Dir[File.join(__dir__, 'connectors/**/*.rb')].each { |f| require required_path(f) }
+Dir[File.join(__dir__, 'connectors_sdk/**/*.rb')].each { |f| require required_path(f) }

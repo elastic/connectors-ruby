@@ -6,10 +6,10 @@
 
 # frozen_string_literal: true
 
-require 'connectors/sharepoint/adapter'
+require 'connectors_sdk/sharepoint/adapter'
 require 'support/shared_examples'
 
-describe Connectors::Sharepoint::Adapter do
+describe ConnectorsSdk::Sharepoint::Adapter do
   it 'should have id conversion functions set by generate_id_helpers' do
     expect(described_class.singleton_methods).to include(:share_point_id_to_fp_id)
     expect(described_class.singleton_methods).to include(:fp_id_to_share_point_id)
@@ -18,10 +18,10 @@ describe Connectors::Sharepoint::Adapter do
   describe 'conversions to swiftype documents' do
     let(:created_by) { 'creator' }
     let(:created_at) { '2017-01-20T22:27:28Z' }
-    let(:created_at_rfc3339) { Connectors::Base::Adapter.normalize_date(created_at) }
+    let(:created_at_rfc3339) { ConnectorsSdk::Base::Adapter.normalize_date(created_at) }
     let(:last_updated_by) { 'last modified by' }
     let(:last_updated_at) { '2017-01-20T22:27:28Z' }
-    let(:last_updated_at_rfc3339) { Connectors::Base::Adapter.normalize_date(last_updated_at) }
+    let(:last_updated_at_rfc3339) { ConnectorsSdk::Base::Adapter.normalize_date(last_updated_at) }
     let(:title) { 'title.docx' }
     let(:url) { 'url.earl' }
     let(:drive_owner_name) { 'drive owner' }

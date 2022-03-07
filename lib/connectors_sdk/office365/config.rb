@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/config'
+require 'connectors_sdk/base/config'
 
-module Connectors
+module ConnectorsSdk
   module Office365
-    class Config < Connectors::Base::Config
+    class Config < ConnectorsSdk::Base::Config
       ALL_DRIVE_IDS = 'all'.freeze
 
       attr_reader :drive_ids, :index_permissions

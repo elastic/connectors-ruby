@@ -21,7 +21,8 @@ Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, the
 1. run `make build`
 1. cd to your ent-search checkout
 1. run `gem uninstall connectors_shared`
-1. copy the artifact in `.gems` directory to `vendor/cache` directory in Enterprise Search repository.
+1. run  `gem uninstall connectors_sdk`
+1. copy the artifacts in the `.gems` directory to the `vendor/cache` directory in Enterprise Search repository.
 1. run `script/bundle install`
 
 ### Running a webserver with a Connector

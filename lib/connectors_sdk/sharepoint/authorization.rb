@@ -11,7 +11,7 @@ require 'signet'
 require 'signet/oauth_2'
 require 'signet/oauth_2/client'
 
-module Connectors
+module ConnectorsSdk
   module Sharepoint
     class Authorization
       class << self

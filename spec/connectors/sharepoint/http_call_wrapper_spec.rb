@@ -7,16 +7,16 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/object/deep_dup'
-require 'connectors/sharepoint/http_call_wrapper'
-require 'connectors/base/custom_client'
-require 'connectors/base/adapter'
-require 'connectors/base/config'
-require 'connectors/base/extractor'
+require 'connectors_sdk/sharepoint/http_call_wrapper'
+require 'connectors_sdk/base/custom_client'
+require 'connectors_sdk/base/adapter'
+require 'connectors_sdk/base/config'
+require 'connectors_sdk/base/extractor'
 require 'json'
 require 'time'
 
 # TODO: do proper mocking
-RSpec.describe Connectors::Sharepoint::HttpCallWrapper do
+RSpec.describe ConnectorsSdk::Sharepoint::HttpCallWrapper do
   # XXX This is also stubs in lib/stubs/app_config.rb
 
   let(:backend) do

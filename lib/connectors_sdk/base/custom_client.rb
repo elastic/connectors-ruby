@@ -13,7 +13,7 @@ require 'connectors_shared'
 require 'date'
 require 'active_support/all'
 
-module Connectors
+module ConnectorsSdk
   module Base
     class CustomClient
       attr_reader :base_url, :middleware, :ensure_fresh_auth

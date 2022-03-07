@@ -14,7 +14,7 @@ require 'date'
 require 'active_support/all'
 require 'stubs/connectors/stats' unless defined?(Rails)
 
-module Connectors
+module ConnectorsSdk
   module Base
     class Extractor
       MAX_CONNECTION_ATTEMPTS = 3

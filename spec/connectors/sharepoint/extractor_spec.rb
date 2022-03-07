@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors/sharepoint/extractor'
-require 'connectors/office365/custom_client'
-require 'connectors/office365/config'
+require 'connectors_sdk/sharepoint/extractor'
+require 'connectors_sdk/office365/custom_client'
+require 'connectors_sdk/office365/config'
 
-describe Connectors::Sharepoint::Extractor do
+describe ConnectorsSdk::Sharepoint::Extractor do
   let(:content_source_id) { BSON::ObjectId.new }
   let(:service_type) { 'sharepoint_online' }
   let(:access_token) { 'access_token' }
@@ -20,7 +20,7 @@ describe Connectors::Sharepoint::Extractor do
   let(:config_drive_ids) { 'all' }
   let(:cursors) { nil }
   let(:config) do
-    Connectors::Office365::Config.new(
+    ConnectorsSdk::Office365::Config.new(
       :drive_ids => config_drive_ids,
       :index_permissions => false,
       :cursors => cursors
@@ -28,7 +28,7 @@ describe Connectors::Sharepoint::Extractor do
   end
   let(:client_proc) do
     proc do
-      Connectors::Office365::CustomClient.new(
+      ConnectorsSdk::Office365::CustomClient.new(
         :access_token => access_token,
         :cursors => cursors
       )
@@ -55,13 +55,13 @@ describe Connectors::Sharepoint::Extractor do
       ]
     end
     let(:drive_ids) { share_point_site_drive_ids }
-    let(:groups_url) { "#{Connectors::Office365::CustomClient::BASE_URL}groups/?$select=id,createdDateTime" }
-    let(:sites_url) { "#{Connectors::Office365::CustomClient::BASE_URL}sites/?$select=id&search=&top=10" }
+    let(:groups_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}groups/?$select=id,createdDateTime" }
+    let(:sites_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/?$select=id&search=&top=10" }
     let(:sites_body) { connectors_fixture_raw('office365/sites.json') }
     let(:site_1_id) { 'enterprisesearch.sharepoint.com,f62543c6-b329-4e0a-96c1-c1a065f5be3f,23ed25a9-4dee-4750-afb0-acb21475a499' }
     let(:site_2_id) { 'enterprisesearch.sharepoint.com,79e9ffcd-05d4-49b5-8d7c-eb0c111f218c,f19c4f31-428a-4627-89e1-72355835e8eb' }
-    let(:site_1_drive_url) { "#{Connectors::Office365::CustomClient::BASE_URL}sites/#{site_1_id}/drives/?$select=id,owner,name,driveType" }
-    let(:site_2_drive_url) { "#{Connectors::Office365::CustomClient::BASE_URL}sites/#{site_2_id}/drives/?$select=id,owner,name,driveType" }
+    let(:site_1_drive_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/#{site_1_id}/drives/?$select=id,owner,name,driveType" }
+    let(:site_2_drive_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/#{site_2_id}/drives/?$select=id,owner,name,driveType" }
     let(:site_drive_1_body) { connectors_fixture_raw('office365/site_drives_1.json') }
     let(:site_drive_2_body) { connectors_fixture_raw('office365/site_drives_2.json') }
     let(:groups_body) { connectors_fixture_raw('office365/groups.json') }
@@ -332,6 +332,6 @@ describe Connectors::Sharepoint::Extractor do
   end
 
   def graph_base_url
-    Connectors::Office365::CustomClient::BASE_URL
+    ConnectorsSdk::Office365::CustomClient::BASE_URL
   end
 end

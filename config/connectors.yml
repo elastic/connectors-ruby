@@ -1,7 +1,7 @@
 # general metadata
 version: "0.0.1"
-repository: "https://github.com/elastic/connectors"
-revision: "main"
+repository: "git@github.com:elastic/ent-search-connectors.git"
+revision: "39980fac598996d841ace42b281499e4cf32647d"
 # web service
 http:
   port: 9292

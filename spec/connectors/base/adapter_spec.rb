@@ -6,12 +6,12 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/adapter'
+require 'connectors_sdk/base/adapter'
 
-describe Connectors::Base::Adapter do
+describe ConnectorsSdk::Base::Adapter do
   context '.generate_id_helpers' do
     before do
-      class Dummy < Connectors::Base::Adapter
+      class Dummy < ConnectorsSdk::Base::Adapter
         generate_id_helpers :dummy, 'dummy'
       end
     end

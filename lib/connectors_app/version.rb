@@ -5,6 +5,6 @@
 #
 require 'config'
 
-module Connectors
+module ConnectorsApp
   VERSION = Connectors::Config['version']
 end

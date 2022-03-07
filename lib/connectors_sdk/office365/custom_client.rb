@@ -6,13 +6,13 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/custom_client'
+require 'connectors_sdk/base/custom_client'
 require 'connectors_shared'
 require 'hashie/mash'
 
-module Connectors
+module ConnectorsSdk
   module Office365
-    class CustomClient < Connectors::Base::CustomClient
+    class CustomClient < ConnectorsSdk::Base::CustomClient
 
       OFFICE365_PERMISSION_SYNC_TIME_SLA = 24.hours
 

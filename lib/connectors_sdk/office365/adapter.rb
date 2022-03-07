@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/adapter'
+require 'connectors_sdk/base/adapter'
 
-module Connectors
+module ConnectorsSdk
   module Office365
-    class Adapter < Connectors::Base::Adapter
+    class Adapter < ConnectorsSdk::Base::Adapter
       def self.swiftype_document_from_file(_file)
         raise NotImplementedError
       end
@@ -38,20 +38,20 @@ module Connectors
             else
               CGI.unescape(parent_reference_path).split('root:').last
             end
-          Connectors::Office365::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
+          ConnectorsSdk::Office365::Adapter.normalize_path("#{parent_folder_path}/#{item.name}")
         end
 
         def to_swiftype_document
           {
-            :_fields_to_preserve => Connectors::Office365::Adapter.fields_to_preserve,
+            :_fields_to_preserve => ConnectorsSdk::Office365::Adapter.fields_to_preserve,
             :id => self.class.convert_id_to_fp_id(item.id),
             :path => get_path(item),
             :title => item.name,
             :url => item.webUrl,
-            :type => Connectors::Base::Adapter.normalize_enum(type),
+            :type => ConnectorsSdk::Base::Adapter.normalize_enum(type),
             :created_by => created_by(item),
-            :created_at => Connectors::Base::Adapter.normalize_date(item.createdDateTime),
-            :last_updated => Connectors::Base::Adapter.normalize_date(item.lastModifiedDateTime),
+            :created_at => ConnectorsSdk::Base::Adapter.normalize_date(item.createdDateTime),
+            :last_updated => ConnectorsSdk::Base::Adapter.normalize_date(item.lastModifiedDateTime),
             :updated_by => last_modified_by(item),
             :drive_owner => item.drive_owner_name
           }.merge(fields).merge(permissions)
@@ -60,7 +60,7 @@ module Connectors
         private
 
         def get_path(item)
-          Connectors::Office365::Adapter::GraphItem.get_path(item)
+          ConnectorsSdk::Office365::Adapter::GraphItem.get_path(item)
         end
 
         def type
@@ -109,9 +109,9 @@ module Connectors
         def fields
           # FIXME: potentially add `updated_by_email`
           {
-            :title => Connectors::Base::Adapter.strip_file_extension(item.name),
-            :mime_type => Connectors::Base::Adapter.mime_type_for_file(item.name),
-            :extension => Connectors::Base::Adapter.extension_for_file(item.name)
+            :title => ConnectorsSdk::Base::Adapter.strip_file_extension(item.name),
+            :mime_type => ConnectorsSdk::Base::Adapter.mime_type_for_file(item.name),
+            :extension => ConnectorsSdk::Base::Adapter.extension_for_file(item.name)
           }
         end
       end

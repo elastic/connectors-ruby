@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors/office365/adapter'
+require 'connectors_sdk/office365/adapter'
 
-describe Connectors::Office365::Adapter do
+describe ConnectorsSdk::Office365::Adapter do
   it 'is not a concrete class' do
     expect { described_class.swiftype_document_from_folder(nil) }.to raise_error(NotImplementedError)
   end

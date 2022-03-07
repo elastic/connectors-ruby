@@ -6,13 +6,13 @@
 
 # frozen_string_literal: true
 
-require 'connectors/office365/custom_client'
+require 'connectors_sdk/office365/custom_client'
 
-describe Connectors::Office365::CustomClient do
+describe ConnectorsSdk::Office365::CustomClient do
   let(:access_token) { 'access_token' }
   let(:cursors) { {} }
   let(:client) do
-    Connectors::Office365::CustomClient.new(
+    ConnectorsSdk::Office365::CustomClient.new(
       :access_token => access_token,
       :cursors => cursors,
       :ensure_fresh_auth => lambda do |client|
@@ -42,7 +42,7 @@ describe Connectors::Office365::CustomClient do
     let(:body) { connectors_fixture_raw('office365/drives.json') }
 
     before(:each) do
-      stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'drives/')
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'drives/')
         .to_return(:status => status, :body => body)
     end
 
@@ -69,14 +69,14 @@ describe Connectors::Office365::CustomClient do
       it 'should throw error with fallback error message of status code explanation' do
         # yes, MSFT does not use spell check
         expect { client.send(:request_endpoint, :endpoint => 'drives/') }
-          .to raise_error(Connectors::Office365::CustomClient::ClientError)
+          .to raise_error(ConnectorsSdk::Office365::CustomClient::ClientError)
           .with_message(/All the offeractions povided in the property bag cannot be validated for the token/)
       end
     end
   end
 
   it 'retries on a 429 response' do
-    stubbed_request = stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'drives/')
+    stubbed_request = stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'drives/')
       .to_return(:status => 429, :body => connectors_fixture_raw('office365/429.json')).then
       .to_return({ body: connectors_fixture_raw('office365/drives.json') })
 
@@ -86,9 +86,9 @@ describe Connectors::Office365::CustomClient do
   end
 
   describe '#sites' do
-    let(:first_page_url) { "#{Connectors::Office365::CustomClient::BASE_URL}sites/?search=&top=10" }
+    let(:first_page_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/?search=&top=10" }
     let(:first_page_body) { connectors_fixture_raw('office365/sites_with_nextlink.json') }
-    let(:second_page_url) { "#{Connectors::Office365::CustomClient::BASE_URL}sites/?$skiptoken=s!MTA7ZWZiOTI5MzAtNzAyYy00Yjg2LWI1ODUtN2UyNTViNzBlMjM1&search=&top=10" }
+    let(:second_page_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/?$skiptoken=s!MTA7ZWZiOTI5MzAtNzAyYy00Yjg2LWI1ODUtN2UyNTViNzBlMjM1&search=&top=10" }
     let(:second_page_body) { connectors_fixture_raw('office365/sites.json') }
 
     it 'should correctly page through and return all sites' do
@@ -107,7 +107,7 @@ describe Connectors::Office365::CustomClient do
     let(:private_group_drive_body) { connectors_fixture_raw(directory + 'group_drive_private.json') }
 
     before(:each) do
-      stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + "groups/#{group_id}/drive/")
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + "groups/#{group_id}/drive/")
         .to_return(:status => status, :body => private_group_drive_body)
     end
   end
@@ -124,16 +124,16 @@ describe Connectors::Office365::CustomClient do
     let(:recent_site_drives_body) { connectors_fixture_raw(directory + 'site_drives_for_recently_created_site.json') } # returns 2 results
 
     before(:each) do
-      stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'groups/?$select=id,createdDateTime')
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'groups/?$select=id,createdDateTime')
         .to_return(:status => status, :body => groups_mapped_body)
 
-      stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'groups/ed5f8403-cc9b-40bf-9adc-5642238447ab/sites/root?$select=id')
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'groups/ed5f8403-cc9b-40bf-9adc-5642238447ab/sites/root?$select=id')
         .to_return(:status => status, :body => private_group_site_id_body)
 
-      stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'sites/enterprisesearch.sharepoint.com,afb9d6f1-1ae4-422a-aea6-ea1965f7b854,91dd91fc-e210-4be2-b41f-7f1dbedb969c/drives/')
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/enterprisesearch.sharepoint.com,afb9d6f1-1ae4-422a-aea6-ea1965f7b854,91dd91fc-e210-4be2-b41f-7f1dbedb969c/drives/')
         .to_return(:status => status, :body => public_site_drives_body)
 
-      stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'sites/enterprisesearch.sharepoint.com,faa5f9e1-9b38-4f39-8c54-9cf2f09757bf,6b426e38-f1ef-4740-aa12-785d56595942/drives/')
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/enterprisesearch.sharepoint.com,faa5f9e1-9b38-4f39-8c54-9cf2f09757bf,6b426e38-f1ef-4740-aa12-785d56595942/drives/')
         .to_return(:status => status, :body => recent_site_drives_body)
     end
 
@@ -141,7 +141,7 @@ describe Connectors::Office365::CustomClient do
       let(:site_ids_body) { connectors_fixture_raw(directory + 'sites_select_ids_before_permission_sync.json') }
 
       before(:each) do
-        stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'sites/?$select=id&search=&top=10')
+        stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/?$select=id&search=&top=10')
           .to_return(:status => status, :body => site_ids_body)
       end
 
@@ -160,7 +160,7 @@ describe Connectors::Office365::CustomClient do
       let(:site_ids_body) { connectors_fixture_raw(directory + 'sites_select_ids_after_permission_sync.json') }
 
       before(:each) do
-        stub_request(:get, Connectors::Office365::CustomClient::BASE_URL + 'sites/?$select=id&search=&top=10')
+        stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/?$select=id&search=&top=10')
           .to_return(:status => status, :body => site_ids_body)
       end
 

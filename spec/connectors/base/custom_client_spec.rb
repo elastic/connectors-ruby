@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/custom_client'
+require 'connectors_sdk/base/custom_client'
 
-describe Connectors::Base::CustomClient do
+describe ConnectorsSdk::Base::CustomClient do
   let(:base_url) { 'http://localhost' }
   let(:client) { described_class.new(:base_url => base_url) }
 
@@ -47,7 +47,7 @@ describe Connectors::Base::CustomClient do
     end
 
     it 'only retries MAX_RETRIES times' do
-      max = Connectors::Base::CustomClient::MAX_RETRIES
+      max = ConnectorsSdk::Base::CustomClient::MAX_RETRIES
       stubbed_request = (max + 5).times.each_with_object(stub_request(:get, 'http://localhost')) do |_, stub|
         stub.to_timeout.then
       end.to_return(:status => 200)

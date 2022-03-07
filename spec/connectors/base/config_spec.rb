@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/config'
+require 'connectors_sdk/base/config'
 
-describe Connectors::Base::Config do
+describe ConnectorsSdk::Base::Config do
   let(:cursors) { { 'cursorKey' => 'cursorValue' } }
-  subject { Connectors::Base::Config.new(:cursors => cursors) }
+  subject { ConnectorsSdk::Base::Config.new(:cursors => cursors) }
 
   it 'has cursors' do
     expect(subject.cursors).to eq(cursors)

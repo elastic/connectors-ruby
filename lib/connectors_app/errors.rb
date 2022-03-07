@@ -4,20 +4,9 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-module Connectors
-  module Base
-    class Config
-      attr_reader :cursors
-
-      def initialize(cursors:)
-        @cursors = cursors || {}
-      end
-
-      def to_h
-        {
-          :cursors => cursors
-        }
-      end
-    end
+module ConnectorsApp
+  module Errors
+    INVALID_API_KEY = 'INVALID_API_KEY'
+    UNSUPPORTED_AUTH_SCHEME = 'UNSUPPORTED_AUTH_SCHEME'
   end
 end
