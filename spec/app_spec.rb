@@ -24,17 +24,44 @@ RSpec.describe ConnectorsWebApp do
       ] }
     }
 
+    let(:unsupported_auth) {
+      { 'errors' => [
+        { 'code' => Connectors::Errors::UNSUPPORTED_AUTH_SCHEME,
+          'message' => 'Unsupported authorization scheme' }
+      ] }
+    }
+
     it 'returns a 401 when Basic auth misses' do
       response = get '/'
       expect(response.status).to eq 401
       expect_json(response, bad_auth)
     end
 
-    it 'returns a 401 when Basic auth is wrong' do
+    it 'returns a 200 when Basic auth is OK' do
+      basic_authorize 'ent-search', 'secret'
       response = get '/'
+      expect(response.status).to eq 200
+    end
+
+    it 'returns a 401 when Basic auth is wrong' do
       basic_authorize 'ent-search', 'bad_secret'
+      response = get '/'
       expect(response.status).to eq 401
       expect_json(response, bad_auth)
+    end
+
+    it 'returns a 401 on malformed Basic auth' do
+      basic_authorize 'ent-search', nil
+      response = get '/'
+      expect(response.status).to eq 401
+      expect_json(response, bad_auth)
+    end
+
+    it 'returns a 401 on unsupported auth scheme' do
+      header('Authorization', 'Bearer TOKEN')
+      response = get '/'
+      expect(response.status).to eq 401
+      expect_json(response, unsupported_auth)
     end
   end
 

@@ -7,5 +7,6 @@
 module Connectors
   module Errors
     INVALID_API_KEY = 'INVALID_API_KEY'
+    UNSUPPORTED_AUTH_SCHEME = 'UNSUPPORTED_AUTH_SCHEME'
   end
 end

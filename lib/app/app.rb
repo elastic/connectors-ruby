@@ -38,7 +38,15 @@ class ConnectorsWebApp < Sinatra::Base
     # Check that the key matches
     return if auth.provided? && auth.basic? && auth.credentials && auth.credentials[1] == settings.api_key
 
-    response = { errors: [{ message: 'Invalid API key', code: Connectors::Errors::INVALID_API_KEY }] }.to_json
+    # We only support Basic for now
+    if auth.provided? && auth.scheme != 'basic'
+      code = Connectors::Errors::UNSUPPORTED_AUTH_SCHEME
+      message = 'Unsupported authorization scheme'
+    else
+      code = Connectors::Errors::INVALID_API_KEY
+      message = 'Invalid API key'
+    end
+    response = { errors: [{ message: message, code: code }] }.to_json
     halt(401, { 'Content-Type' => 'application/json' }, response)
   end
 
