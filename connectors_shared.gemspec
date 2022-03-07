@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   # TODO: figure out how to pin versions without harming ent-search repo
   s.add_dependency 'activesupport'
   s.add_dependency 'bson'
+  s.add_dependency 'mime-types'
 end
