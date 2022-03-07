@@ -24,6 +24,8 @@ group :test do
   gem 'pry-nav'
   gem 'debase', '0.2.5.beta2'
   gem 'timecop'
+  gem 'simplecov', require: false
+  gem 'simplecov-material'
 end
 
 # Dependencies for the HTTP service
