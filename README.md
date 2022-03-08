@@ -38,6 +38,22 @@ make all
 Consumers will need to use the `api_key` string as the password in
 the Authorization header.
 
+### Configuration
+
+By design, we try to avoid duplicating any metadata in the project, like its
+**version**. For this reason, we have one single configuration file in
+`config/connectors.yml` that contains all the metadata needed for runtime and
+buildtime. It can be used from the dev tree or in a production deployment.
+
+The Gem spec, the connectors and the Sinatra app use that config file to get
+the metadata they need.
+
+The build process might change it on-the-fly when the Gem is created but will
+not change the one in the dev tree.
+
+When Sinatra is launched, it will pick `config/connectors.yml` by default, 
+but you can provide your own configuration file by using the **CONNECTORS_CONFIG** env.
+
 ### Where do I report issues with Connectors?
 If something is not working as expected, please open an [issue](https://github.com/elastic/connectors/issues/new).
 
