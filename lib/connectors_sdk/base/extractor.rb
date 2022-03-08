@@ -214,7 +214,7 @@ module ConnectorsSdk
 
         raise ConnectorsShared::TransientServerError.new(
           "Transient error #{e.class}: #{e.message}",
-          :suspend_until => AppConfig.connectors.config.fetch('transient_server_error_retry_delay_minutes').minutes.from_now,
+          :suspend_until => Connectors.config.fetch('transient_server_error_retry_delay_minutes').minutes.from_now,
           :cursors => config.cursors
         )
       end
