@@ -8,7 +8,7 @@ require 'yaml'
 module ConnectorsApp
   # We look for places in this order:
   # - CONNECTORS_CONFIG environement variable
-  # - here/../config/connectors.yml
+  # - here: /../../config/connectors.yml
   CONFIG_FILE = ENV['CONNECTORS_CONFIG'] || File.join(__dir__, '../..', 'config', 'connectors.yml')
 
   Config = YAML.load_file(CONFIG_FILE)
