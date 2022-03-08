@@ -2,6 +2,7 @@
 
 require 'app/app'
 require 'connectors_app/errors'
+require 'connectors_app/version'
 
 RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
@@ -77,7 +78,7 @@ RSpec.describe ConnectorsWebApp do
 
     it 'returns the connectors metadata' do
       expect(response.status).to eq 200
-      expect(json(response)['version']).to eq '0.0.1'
+      expect(json(response)['version']).to eq ConnectorsApp::VERSION
     end
   end
 

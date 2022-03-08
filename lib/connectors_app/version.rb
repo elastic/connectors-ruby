@@ -3,8 +3,8 @@
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
-require 'config'
+require 'connectors_app/config'
 
 module ConnectorsApp
-  VERSION = Connectors::Config['version']
+  VERSION = ConnectorsApp::Config['version']
 end
