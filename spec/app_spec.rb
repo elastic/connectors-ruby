@@ -163,16 +163,32 @@ RSpec.describe ConnectorsWebApp do
   describe 'POST /oauth2/refresh' do
     context 'with valid request' do
       let(:params) { { :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
-      let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
-      it 'returns tokens' do
-        allow(Connectors::Sharepoint::Authorization).to receive(:refresh).and_return(token_hash.to_json)
+      context 'with valid refresh token' do
+        let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
-        basic_authorize 'ent-search', api_key
-        response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
-        expect(response).to be_successful
-        expect(json(response)['access_token']).to eq(token_hash[:access_token])
-        expect(json(response)['refresh_token']).to eq(token_hash[:refresh_token])
+        it 'returns tokens' do
+          allow(Connectors::Sharepoint::Authorization).to receive(:refresh).and_return(token_hash.to_json)
+
+          basic_authorize 'ent-search', api_key
+          response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+          expect(response).to be_successful
+          expect(json(response)['access_token']).to eq(token_hash[:access_token])
+          expect(json(response)['refresh_token']).to eq(token_hash[:refresh_token])
+        end
+      end
+
+      context 'with expired refresh token' do
+        let(:error) { 'error' }
+
+        it 'returns 401' do
+          allow(Connectors::Sharepoint::Authorization).to receive(:refresh).and_raise(Signet::AuthorizationError.new(error))
+
+          basic_authorize 'ent-search', api_key
+          response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+          expect(response.status).to eq(401)
+          expect(json(response)['errors'].first['message']).to eq(error)
+        end
       end
     end
 

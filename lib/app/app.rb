@@ -141,7 +141,14 @@ class ConnectorsWebApp < Sinatra::Base
     logger.info "Received payload: #{params}"
     Connectors::Sharepoint::Authorization.refresh(params)
   rescue StandardError => e
-    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
+    status case e
+           when ConnectorsShared::ClientError
+             400
+           when ::Signet::AuthorizationError
+             401
+           else
+             500
+           end
     { errors: [{ message: e.message }] }.to_json
   end
 end
