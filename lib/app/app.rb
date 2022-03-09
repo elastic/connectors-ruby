@@ -128,11 +128,8 @@ class ConnectorsWebApp < Sinatra::Base
   post '/oauth2/exchange' do
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
-    if params[:refresh_token] # FIXME: hmmmm not sure if it's the best way to move forward
-      ConnectorsSdk::SharePoint::Authorization.refresh(params)
-    else
-      ConnectorsSdk::SharePoint::Authorization.access_token(params)
-    end
+    logger.info "Received payload: #{params}"
+    Connectors::Sharepoint::Authorization.access_token(params)
   rescue ConnectorsShared::ClientError => e
     status 400
     { errors: [{ message: e.message }] }.to_json
