@@ -117,11 +117,9 @@ class ConnectorsWebApp < Sinatra::Base
 
     { oauth2redirect: authorization_uri.to_s }.to_json
   rescue ConnectorsShared::ClientError => e
-    status 400
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(400, e.message)
   rescue StandardError => e
-    status 500
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(500, e.message)
   end
 
   # XXX remove `oauth2` from the name
@@ -131,11 +129,9 @@ class ConnectorsWebApp < Sinatra::Base
     logger.info "Received payload: #{params}"
     Connectors::Sharepoint::Authorization.access_token(params)
   rescue ConnectorsShared::ClientError => e
-    status 400
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(400, e.message)
   rescue StandardError => e
-    status 500
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(500, e.message)
   end
 
   post '/oauth2/refresh' do
@@ -144,13 +140,15 @@ class ConnectorsWebApp < Sinatra::Base
     logger.info "Received payload: #{params}"
     Connectors::Sharepoint::Authorization.refresh(params)
   rescue ConnectorsShared::ClientError => e
-    status 400
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(400, e.message)
   rescue ::Signet::AuthorizationError => e
-    status 401
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(401, e.message)
   rescue StandardError => e
-    status 500
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(500, e.message)
+  end
+
+  def render_exception(status_code, message)
+    status status_code
+    { errors: [{ message: message }] }.to_json
   end
 end
