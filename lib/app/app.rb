@@ -134,4 +134,14 @@ class ConnectorsWebApp < Sinatra::Base
     status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
     { errors: [{ message: e.message }] }.to_json
   end
+
+  post '/oauth2/refresh' do
+    content_type :json
+    params = JSON.parse(request.body.read, symbolize_names: true)
+    logger.info "Received payload: #{params}"
+    Connectors::Sharepoint::Authorization.refresh(params)
+  rescue StandardError => e
+    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
+    { errors: [{ message: e.message }] }.to_json
+  end
 end
