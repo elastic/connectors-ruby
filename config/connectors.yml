@@ -8,3 +8,4 @@ http:
   raise_errors: true
   show_exceptions: false
   api_key: secret
+  deactivate_auth: true

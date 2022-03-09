@@ -16,6 +16,10 @@ RSpec.describe ConnectorsWebApp do
     Hashie::Mash.new(JSON.parse(response.body))
   end
 
+  before(:each) do
+    allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
+  end
+
   describe 'Authorization /' do
     let(:bad_auth) {
       { 'errors' => [
