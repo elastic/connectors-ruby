@@ -9,8 +9,6 @@
 require 'connectors/base/custom_client'
 require 'connectors_shared'
 require 'hashie/mash'
-require 'time'
-require 'json'
 
 module Connectors
   module Office365

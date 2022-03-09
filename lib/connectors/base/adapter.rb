@@ -12,7 +12,6 @@ require 'connectors_shared/extension_mapping_util'
 require 'date'
 require 'active_support/all'
 require 'mime-types'
-require 'time'
 
 module Connectors
   module Base
