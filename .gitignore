@@ -29,8 +29,9 @@ hs_err_pid*
 # maven
 target
 
-# temp folder for built gems
+# temp folders for build artifacts
 .gems
+coverage
 
 # bundler state
 /.bundle
@@ -45,3 +46,4 @@ ent-search-dev.json
 
 # vim
 *.un~
+

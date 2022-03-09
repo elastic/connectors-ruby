@@ -1,5 +1,5 @@
 # general metadata
-version: "0.0.1"
+version: "8.2.0-SNAPSHOT"
 repository: "https://github.com/elastic/connectors"
 revision: "main"
 # web service

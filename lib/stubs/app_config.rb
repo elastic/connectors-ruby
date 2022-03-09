@@ -13,7 +13,9 @@ class AppConfig
     end
 
     def connectors
-      ConnectorsConfig
+      {
+        'transient_server_error_retry_delay_minutes' => 5
+      }
     end
 
     def content_source_sync_max_errors
@@ -34,16 +36,6 @@ class AppConfig
 
     def content_source_sync_thumbnails_enabled?
       true
-    end
-  end
-end
-
-class ConnectorsConfig
-  class << self
-    def config
-      {
-        'transient_server_error_retry_delay_minutes' => 5
-      }
     end
   end
 end

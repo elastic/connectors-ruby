@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash'
+
 module ConnectorsShared
   class ExtensionMappingUtil
     @extension_to_mime = {
