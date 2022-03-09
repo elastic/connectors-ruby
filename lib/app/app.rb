@@ -116,8 +116,11 @@ class ConnectorsWebApp < Sinatra::Base
     authorization_uri = ConnectorsSdk::SharePoint::Authorization.authorization_uri(body)
 
     { oauth2redirect: authorization_uri.to_s }.to_json
+  rescue ConnectorsShared::ClientError => e
+    status 400
+    { errors: [{ message: e.message }] }.to_json
   rescue StandardError => e
-    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
+    status 500
     { errors: [{ message: e.message }] }.to_json
   end
 
@@ -130,8 +133,11 @@ class ConnectorsWebApp < Sinatra::Base
     else
       ConnectorsSdk::SharePoint::Authorization.access_token(params)
     end
+  rescue ConnectorsShared::ClientError => e
+    status 400
+    { errors: [{ message: e.message }] }.to_json
   rescue StandardError => e
-    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
+    status 500
     { errors: [{ message: e.message }] }.to_json
   end
 
@@ -140,15 +146,14 @@ class ConnectorsWebApp < Sinatra::Base
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
     Connectors::Sharepoint::Authorization.refresh(params)
+  rescue ConnectorsShared::ClientError => e
+    status 400
+    { errors: [{ message: e.message }] }.to_json
+  rescue ::Signet::AuthorizationError => e
+    status 401
+    { errors: [{ message: e.message }] }.to_json
   rescue StandardError => e
-    status case e
-           when ConnectorsShared::ClientError
-             400
-           when ::Signet::AuthorizationError
-             401
-           else
-             500
-           end
+    status 500
     { errors: [{ message: e.message }] }.to_json
   end
 end
