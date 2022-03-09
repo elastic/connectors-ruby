@@ -47,7 +47,7 @@ module Connectors
         end
 
         def refresh(params)
-          missing = missing_fields(params, %w[client_id client_secret refresh_token redirect_uri])
+          missing = missing_fields(params, %w[client_id client_secret refresh_token])
           unless missing.blank?
             raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
           end

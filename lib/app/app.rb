@@ -32,6 +32,7 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   before do
+    Time.zone = ActiveSupport::TimeZone.new('UTC')
     # XXX to be removed
     return if settings.deactivate_auth
 
@@ -124,8 +125,11 @@ class ConnectorsWebApp < Sinatra::Base
   post '/oauth2/exchange' do
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received payload: #{params}"
-    Connectors::Sharepoint::Authorization.access_token(params)
+    if params[:refresh_token] # FIXME: hmmmm not sure if it's the best way to move forward
+      Connectors::Sharepoint::Authorization.refresh(params)
+    else
+      Connectors::Sharepoint::Authorization.access_token(params)
+    end
   rescue StandardError => e
     status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
     { errors: [{ message: e.message }] }.to_json
