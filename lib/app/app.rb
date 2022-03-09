@@ -32,11 +32,11 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   before do
+    Time.zone = ActiveSupport::TimeZone.new('UTC')
     # XXX to be removed
     return if settings.deactivate_auth
 
     raise StandardError.new 'You need to set an API key in the config file' if settings.environment != :test && settings.api_key == 'secret'
-    Time.zone = ActiveSupport::TimeZone.new('UTC')
 
     auth = Rack::Auth::Basic::Request.new(request.env)
 
