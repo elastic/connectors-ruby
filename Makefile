@@ -23,7 +23,7 @@ build:
 	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_sdk.gemspec
-	rm .gems/*
+	rm -f .gems/*
 	mv *.gem .gems/
 	mv .saved config/connectors.yml
 
