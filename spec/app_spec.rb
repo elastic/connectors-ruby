@@ -8,6 +8,7 @@ RSpec.describe ConnectorsWebApp do
   include Rack::Test::Methods
 
   let(:app) { ConnectorsWebApp }
+  let(:api_key) { 'api_key' }
 
   def expect_json(response, json)
     expect(json(response)).to eq json
@@ -19,6 +20,7 @@ RSpec.describe ConnectorsWebApp do
 
   before(:each) do
     allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
+    allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
   end
 
   describe 'Authorization /' do
@@ -43,7 +45,7 @@ RSpec.describe ConnectorsWebApp do
     end
 
     it 'returns a 200 when Basic auth is OK' do
-      basic_authorize 'ent-search', 'secret'
+      basic_authorize 'ent-search', api_key
       response = get '/'
       expect(response.status).to eq 200
     end
@@ -72,7 +74,7 @@ RSpec.describe ConnectorsWebApp do
 
   describe 'GET /' do
     let(:response) {
-      basic_authorize 'ent-search', 'secret'
+      basic_authorize 'ent-search', api_key
       get '/'
     }
 
@@ -84,7 +86,7 @@ RSpec.describe ConnectorsWebApp do
 
   describe 'GET /status' do
     let(:response) {
-      basic_authorize 'ent-search', 'secret'
+      basic_authorize 'ent-search', api_key
       get '/status'
     }
 
@@ -105,7 +107,7 @@ RSpec.describe ConnectorsWebApp do
       it 'returns authorization uri' do
         allow(ConnectorsSdk::SharePoint::Authorization).to receive(:authorization_uri).and_return(authorization_uri)
 
-        basic_authorize 'ent-search', 'secret'
+        basic_authorize 'ent-search', api_key
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response).to be_successful
         expect(json(response)['oauth2redirect']).to eq(authorization_uri)
@@ -119,7 +121,7 @@ RSpec.describe ConnectorsWebApp do
       it 'returns bad request' do
         allow(ConnectorsSdk::SharePoint::Authorization).to receive(:authorization_uri).and_raise(ConnectorsShared::ClientError.new(error))
 
-        basic_authorize 'ent-search', 'secret'
+        basic_authorize 'ent-search', api_key
         response = post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response.status).to eq(400)
         expect(json(response)['errors'].first['message']).to eq(error)
@@ -127,26 +129,81 @@ RSpec.describe ConnectorsWebApp do
     end
   end
 
-  describe 'Oauth2 dance' do
-    it 'does the oauth2 dance' do
-      # we call /oauth2/init with the client_id and client_secret
-      params = { :client_id => 'client id', :client_secret => 'secret', :redirect_uri => 'http://here' }
-      basic_authorize 'ent-search', 'secret'
-      response_json = JSON.parse(post('/oauth2/init', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }).body)
-      url = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?access_type=offline&client_id=client%20id&prompt=consent&redirect_uri=http://here&response_type=code&scope=User.ReadBasic.All%20Group.Read.All%20Directory.AccessAsUser.All%20Files.Read%20Files.Read.All%20Sites.Read.All%20offline_access'
-      expect(response_json['oauth2redirect']).to eq url
+  describe 'POST /oauth2/exchange' do
+    context 'with valid request' do
+      let(:params) { { :client_id => 'client id', :client_secret => 'client_secret', :code => 'code', :redirect_uri => 'http://here' } }
+      let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
-      # the user gets redirected, and we get a code
-      authorization_code = 'the code'
+      it 'returns tokens' do
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:access_token).and_return(token_hash.to_json)
 
-      # we exchange the code with an access token
-      stub_request(:post, 'https://login.microsoftonline.com/common/oauth2/v2.0/token')
-        .with { true }
-        .to_return(status: 200, body: JSON.generate({ :token => 'TOKEN' }), headers: { 'Content-Type' => 'application/json' })
+        basic_authorize 'ent-search', api_key
+        response = post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+        expect(response).to be_successful
+        expect(json(response)['access_token']).to eq(token_hash[:access_token])
+        expect(json(response)['refresh_token']).to eq(token_hash[:refresh_token])
+      end
+    end
 
-      params = { :client_id => 'client id', :client_secret => 'secret', :code => authorization_code, :redirect_uri => 'http://here' }
-      response_json = JSON.parse(post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }).body)
-      expect(response_json['token']).to eq 'TOKEN'
+    context 'with invalid request' do
+      let(:params) { {} }
+      let(:error) { 'error' }
+
+      it 'returns bad request' do
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:access_token).and_raise(ConnectorsShared::ClientError.new(error))
+
+        basic_authorize 'ent-search', api_key
+        response = post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(400)
+        expect(json(response)['errors'].first['message']).to eq(error)
+      end
+    end
+  end
+
+  describe 'POST /oauth2/refresh' do
+    context 'with valid request' do
+      let(:params) { { :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
+
+      context 'with valid refresh token' do
+        let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
+
+        it 'returns tokens' do
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_return(token_hash.to_json)
+
+          basic_authorize 'ent-search', api_key
+          response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+          expect(response).to be_successful
+          expect(json(response)['access_token']).to eq(token_hash[:access_token])
+          expect(json(response)['refresh_token']).to eq(token_hash[:refresh_token])
+        end
+      end
+
+      context 'with expired refresh token' do
+        let(:error) { 'error' }
+
+        it 'returns 401' do
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(Signet::AuthorizationError.new(error))
+
+          basic_authorize 'ent-search', api_key
+          response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+          expect(response.status).to eq(401)
+          expect(json(response)['errors'].first['message']).to eq(error)
+        end
+      end
+    end
+
+    context 'with invalid request' do
+      let(:params) { {} }
+      let(:error) { 'error' }
+
+      it 'returns bad request' do
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(ConnectorsShared::ClientError.new(error))
+
+        basic_authorize 'ent-search', api_key
+        response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(400)
+        expect(json(response)['errors'].first['message']).to eq(error)
+      end
     end
   end
 end

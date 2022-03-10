@@ -47,3 +47,5 @@ ent-search-dev.json
 # vim
 *.un~
 
+#test coverage
+/coverage

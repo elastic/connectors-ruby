@@ -80,16 +80,26 @@ describe ConnectorsSdk::SharePoint::Authorization do
     end
 
     context 'with valid params' do
-      let(:token_hash) do
-        {
-            :access_token => 'access_token',
-            :refresh_token => 'refresh_token'
-        }
+      context 'with valid refresh token' do
+        let(:token_hash) do
+          {
+              :access_token => 'access_token',
+              :refresh_token => 'refresh_token'
+          }
+        end
+
+        it 'returns access token' do
+          allow_any_instance_of(Signet::OAuth2::Client).to receive(:refresh!).and_return(token_hash)
+          expect(described_class.refresh(params)).to eq(token_hash.to_json)
+        end
       end
 
-      it 'returns access token' do
-        allow_any_instance_of(Signet::OAuth2::Client).to receive(:refresh!).and_return(token_hash)
-        expect(described_class.refresh(params)).to eq(token_hash.to_json)
+      context 'with expired refresh token' do
+        let(:error) { 'error' }
+        it 'returns authorization error' do
+          allow_any_instance_of(Signet::OAuth2::Client).to receive(:refresh!).and_raise(Signet::AuthorizationError.new(error))
+          expect { described_class.refresh(params) }.to raise_error(Signet::AuthorizationError)
+        end
       end
     end
   end

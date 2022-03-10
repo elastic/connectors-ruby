@@ -116,22 +116,39 @@ class ConnectorsWebApp < Sinatra::Base
     authorization_uri = ConnectorsSdk::SharePoint::Authorization.authorization_uri(body)
 
     { oauth2redirect: authorization_uri.to_s }.to_json
+  rescue ConnectorsShared::ClientError => e
+    render_exception(400, e.message)
   rescue StandardError => e
-    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(500, e.message)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
-    if params[:refresh_token] # FIXME: hmmmm not sure if it's the best way to move forward
-      ConnectorsSdk::SharePoint::Authorization.refresh(params)
-    else
-      ConnectorsSdk::SharePoint::Authorization.access_token(params)
-    end
+    logger.info "Received payload: #{params}"
+    ConnectorsSdk::SharePoint::Authorization.access_token(params)
+  rescue ConnectorsShared::ClientError => e
+    render_exception(400, e.message)
   rescue StandardError => e
-    status e.is_a?(ConnectorsShared::ClientError) ? 400 : 500
-    { errors: [{ message: e.message }] }.to_json
+    render_exception(500, e.message)
+  end
+
+  post '/oauth2/refresh' do
+    content_type :json
+    params = JSON.parse(request.body.read, symbolize_names: true)
+    logger.info "Received payload: #{params}"
+    ConnectorsSdk::SharePoint::Authorization.refresh(params)
+  rescue ConnectorsShared::ClientError => e
+    render_exception(400, e.message)
+  rescue ::Signet::AuthorizationError => e
+    render_exception(401, e.message)
+  rescue StandardError => e
+    render_exception(500, e.message)
+  end
+
+  def render_exception(status_code, message)
+    status status_code
+    { errors: [{ message: message }] }.to_json
   end
 end
