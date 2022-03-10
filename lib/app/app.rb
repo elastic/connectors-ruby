@@ -57,9 +57,11 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   get '/' do
-    json :version => settings.version,
-         :repository => settings.repository,
-         :revision => settings.revision
+    json(
+      :version => settings.version,
+      :repository => settings.repository,
+      :revision => settings.revision
+    )
   end
 
   get '/health' do
@@ -85,7 +87,10 @@ class ConnectorsWebApp < Sinatra::Base
       params
     )
 
-    json :results => connector.document_batch, :cursor => nil
+    json(
+      :results => connector.document_batch,
+      :cursor => nil
+    )
   end
 
   post '/download' do
