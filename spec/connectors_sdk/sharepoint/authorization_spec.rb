@@ -56,7 +56,7 @@ describe ConnectorsSdk::SharePoint::Authorization do
 
       it 'returns access token' do
         allow_any_instance_of(Signet::OAuth2::Client).to receive(:fetch_access_token).and_return(token_hash)
-        expect(described_class.access_token(params)).to eq(token_hash.to_json)
+        expect(described_class.access_token(params)).to eq(token_hash)
       end
     end
   end
@@ -72,7 +72,7 @@ describe ConnectorsSdk::SharePoint::Authorization do
     end
 
     context 'with invalid params' do
-      %w[client_id client_secret refresh_token redirect_uri].each do |param|
+      %w[client_id client_secret refresh_token].each do |param|
         it "raises ClientError for missing #{param}" do
           expect { described_class.access_token(params.except(param.to_sym)) }.to raise_error(ConnectorsShared::ClientError)
         end
@@ -90,7 +90,7 @@ describe ConnectorsSdk::SharePoint::Authorization do
 
         it 'returns access token' do
           allow_any_instance_of(Signet::OAuth2::Client).to receive(:refresh!).and_return(token_hash)
-          expect(described_class.refresh(params)).to eq(token_hash.to_json)
+          expect(described_class.refresh(params)).to eq(token_hash)
         end
       end
 

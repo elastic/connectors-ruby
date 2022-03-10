@@ -135,7 +135,7 @@ RSpec.describe ConnectorsWebApp do
       let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
       it 'returns tokens' do
-        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:access_token).and_return(token_hash.to_json)
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:access_token).and_return(token_hash)
 
         basic_authorize 'ent-search', api_key
         response = post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -168,7 +168,7 @@ RSpec.describe ConnectorsWebApp do
         let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
         it 'returns tokens' do
-          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_return(token_hash.to_json)
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_return(token_hash)
 
           basic_authorize 'ent-search', api_key
           response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
