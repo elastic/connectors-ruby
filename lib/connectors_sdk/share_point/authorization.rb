@@ -43,7 +43,7 @@ module ConnectorsSdk
 
           params[:grant_type] = 'authorization_code'
           client = oauth_client(params)
-          client.fetch_access_token.to_json
+          client.fetch_access_token
         end
 
         def refresh(params)
@@ -54,7 +54,7 @@ module ConnectorsSdk
 
           params[:grant_type] = 'refresh_token'
           client = oauth_client(params)
-          client.refresh!.to_json
+          client.refresh!
         end
 
         def oauth_client(params)
