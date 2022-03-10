@@ -91,7 +91,7 @@ module ConnectorsSdk
       end
 
       def download(item)
-        download_url = item['download_url']
+        download_url = item[:download_url]
         client.download_item(download_url)
       end
 
@@ -172,12 +172,11 @@ module ConnectorsSdk
         document = generate_document(item)
         download_args =
           if downloadable?(item)
-            download_url = item.fetch('@microsoft.graph.downloadUrl')
             download_args_and_proc(
               id: document.fetch(:id),
               name: item.name,
               size: item[:size],
-              download_args: { :download_url => download_url }
+              download_args: { :download_url => item.fetch('@microsoft.graph.downloadUrl') }
             ) do |args|
               download(args)
             end
