@@ -135,7 +135,7 @@ RSpec.describe ConnectorsWebApp do
       let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
       it 'returns tokens' do
-        allow(Connectors::Sharepoint::Authorization).to receive(:access_token).and_return(token_hash.to_json)
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:access_token).and_return(token_hash.to_json)
 
         basic_authorize 'ent-search', api_key
         response = post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -150,7 +150,7 @@ RSpec.describe ConnectorsWebApp do
       let(:error) { 'error' }
 
       it 'returns bad request' do
-        allow(Connectors::Sharepoint::Authorization).to receive(:access_token).and_raise(ConnectorsShared::ClientError.new(error))
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:access_token).and_raise(ConnectorsShared::ClientError.new(error))
 
         basic_authorize 'ent-search', api_key
         response = post('/oauth2/exchange', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -168,7 +168,7 @@ RSpec.describe ConnectorsWebApp do
         let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
 
         it 'returns tokens' do
-          allow(Connectors::Sharepoint::Authorization).to receive(:refresh).and_return(token_hash.to_json)
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_return(token_hash.to_json)
 
           basic_authorize 'ent-search', api_key
           response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -182,7 +182,7 @@ RSpec.describe ConnectorsWebApp do
         let(:error) { 'error' }
 
         it 'returns 401' do
-          allow(Connectors::Sharepoint::Authorization).to receive(:refresh).and_raise(Signet::AuthorizationError.new(error))
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(Signet::AuthorizationError.new(error))
 
           basic_authorize 'ent-search', api_key
           response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -197,7 +197,7 @@ RSpec.describe ConnectorsWebApp do
       let(:error) { 'error' }
 
       it 'returns bad request' do
-        allow(Connectors::Sharepoint::Authorization).to receive(:refresh).and_raise(ConnectorsShared::ClientError.new(error))
+        allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(ConnectorsShared::ClientError.new(error))
 
         basic_authorize 'ent-search', api_key
         response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })

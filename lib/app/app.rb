@@ -127,7 +127,7 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
-    Connectors::Sharepoint::Authorization.access_token(params)
+    ConnectorsSdk::SharePoint::Authorization.access_token(params)
   rescue ConnectorsShared::ClientError => e
     render_exception(400, e.message)
   rescue StandardError => e
@@ -138,7 +138,7 @@ class ConnectorsWebApp < Sinatra::Base
     content_type :json
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
-    Connectors::Sharepoint::Authorization.refresh(params)
+    ConnectorsSdk::SharePoint::Authorization.refresh(params)
   rescue ConnectorsShared::ClientError => e
     render_exception(400, e.message)
   rescue ::Signet::AuthorizationError => e
