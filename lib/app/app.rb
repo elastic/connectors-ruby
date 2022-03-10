@@ -76,8 +76,10 @@ class ConnectorsWebApp < Sinatra::Base
     status = response_json.error? ? 'FAILURE' : 'OK'
     message = response_json.error? ? response_json.error.message : 'Connected to SharePoint'
 
-    json :extractor => { :name => 'SharePoint' },
-         :contentProvider => { :status => status, :statusCode => response.status, :message => message }
+    json(
+      :extractor => { :name => 'SharePoint' },
+      :contentProvider => { :status => status, :statusCode => response.status, :message => message }
+    )
   end
 
   post '/documents' do
