@@ -174,11 +174,11 @@ module ConnectorsSdk
           if downloadable?(item)
             download_url = item.fetch('@microsoft.graph.downloadUrl')
             download_args_and_proc(
-                id: document.fetch(:id),
-                name: item.name,
-                size:item[:size],
-                download_args: { :download_url => download_url }
-              ) do |args|
+              id: document.fetch(:id),
+              name: item.name,
+              size: item[:size],
+              download_args: { :download_url => download_url }
+            ) do |args|
               download(args)
             end
           else
