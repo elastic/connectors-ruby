@@ -231,8 +231,8 @@ module ConnectorsSdk
         config.cursors != original_cursors
       end
 
-      def download_args_and_proc(id, file_name, file_size, &block)
-        [id, file_name, file_size, block]
+      def download_args_and_proc(id:, name:, size:, download_args:, &block)
+        [id, name, size, download_args, block]
       end
 
       private
