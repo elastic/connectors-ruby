@@ -38,11 +38,15 @@ class ConnectorsWebApp < Sinatra::Base
     e = env['sinatra.error']
     backtrace = "Application error\n#{e}\n#{e.backtrace.join("\n")}"
 
-    { errors: [{
-      message: 'Internal Server Error',
-      code: ConnectorsApp::Errors::INTERNAL_SERVER_ERROR,
-      backtrace: backtrace
-}] }.to_json
+    json(
+      :errors => [
+        {
+          :message => 'Internal Server Error',
+          :code => ConnectorsApp::Errors::INTERNAL_SERVER_ERROR,
+          :backtrace => backtrace
+        }
+      ]
+    )
   end
 
   before do
