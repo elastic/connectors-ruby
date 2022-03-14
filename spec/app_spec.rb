@@ -23,6 +23,22 @@ RSpec.describe ConnectorsWebApp do
     allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
   end
 
+  describe 'Catch all' do
+    it 'returns a 500 in JSON, on any error' do
+      # this will break the Sinatra server on GET /status
+      allow(Faraday).to receive(:get) { raise StandardError }
+
+      allow(ConnectorsWebApp.settings).to receive(:raise_errors).and_return(false)
+      allow(ConnectorsWebApp.settings).to receive(:show_exceptions).and_return(false)
+
+      basic_authorize 'ent-search', api_key
+      response = get '/status'
+      expect(response.status).to eq 500
+      response = json(response)
+      expect(response['errors'][0]['code']).to eq ConnectorsApp::Errors::INTERNAL_SERVER_ERROR
+    end
+  end
+
   describe 'Authorization /' do
     let(:bad_auth) {
       { 'errors' => [
