@@ -67,7 +67,7 @@ module ConnectorsSdk
           end
 
           if break_after_page
-            if config.cursors['pagination'].blank?
+            if config.cursors['page_cursor'].blank?
               config.cursors['last_drive_id'] = config.cursors.delete('current_drive_id')
             end
             break

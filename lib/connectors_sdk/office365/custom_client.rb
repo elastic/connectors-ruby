@@ -113,8 +113,8 @@ module ConnectorsSdk
       def list_items(drive_id, fields: [], break_after_page: false)
         # MSFT Graph API does not have a recursive list items, have to do this dfs style
 
-        if break_after_page && cursors['pagination'].present?
-          stack = cursors.delete('pagination')
+        if break_after_page && cursors['page_cursor'].present?
+          stack = cursors.delete('page_cursor')
         else
           stack = [get_root_item(drive_id, ['id']).id]
         end
@@ -132,7 +132,7 @@ module ConnectorsSdk
 
             yielded += 1
             if break_after_page && yielded >= 100
-              cursors['pagination'] = stack.dup
+              cursors['page_cursor'] = stack.dup
               break
             end
           end
@@ -147,8 +147,8 @@ module ConnectorsSdk
       def list_changes(drive_id:, start_delta_link: nil, last_modified: nil, break_after_page: false)
         query_params = { :'$select' => %w(id content.downloadUrl lastModifiedDateTime lastModifiedBy root deleted file folder package name webUrl createdBy createdDateTime size).join(',') }
         response =
-          if break_after_page && cursors['pagination'].present?
-            request_json(:url => cursors.delete('pagination'))
+          if break_after_page && cursors['page_cursor'].present?
+            request_json(:url => cursors.delete('page_cursor'))
           elsif start_delta_link.nil?
             endpoint = "drives/#{drive_id}/root/delta"
             request_endpoint(:endpoint => endpoint, :query_params => query_params)
@@ -170,7 +170,7 @@ module ConnectorsSdk
           end
 
           if break_after_page && yielded >= 100 && response['@odata.nextLink'].present?
-            cursors['pagination'] = response['@odata.nextLink']
+            cursors['page_cursor'] = response['@odata.nextLink']
             break
           end
 
