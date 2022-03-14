@@ -87,6 +87,7 @@ module ConnectorsShared
   class SecretInvalidError < StandardError; end
   class InvalidIndexingConfigurationError < StandardError; end
   class TokenRefreshFailedError < StandardError; end
+  class TokenExpiredError < StandardError; end
   class ConnectorNotAvailableError < StandardError; end
 
   # For when we want to explicitly set a #cause but can't
