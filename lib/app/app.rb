@@ -106,9 +106,17 @@ class ConnectorsWebApp < Sinatra::Base
       params
     )
 
+    results = connector.document_batch
+
+    new_cursors = if connector.cursors_modified_since_start?
+      connector.cursors
+    else
+      {}
+    end
+
     json(
-      :results => connector.document_batch,
-      :cursor => nil
+      :results => results,
+      :cursors => new_cursors
     )
   end
 

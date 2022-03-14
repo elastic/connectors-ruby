@@ -24,7 +24,7 @@ module ConnectorsSdk
       end
 
       def drives
-        client.share_point_drives(:fields => %w(id owner name driveType))
+        client.share_point_drives(:fields => %w(id owner name driveType)).sort_by(&:id)
       end
     end
   end
