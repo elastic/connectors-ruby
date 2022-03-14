@@ -99,14 +99,13 @@ module ConnectorsSdk
           raise
         rescue StandardError => e
           ConnectorsShared::ExceptionTracking.augment_exception(e)
+          log_warn("Failed to connect in with_auth_tokens_and_retry Reason: #{e.class}: #{e.message} {:message_id => #{e.id}}")
           connection_attempts += 1
           if connection_attempts >= MAX_CONNECTION_ATTEMPTS
-            log_warn("Failed to connect in with_auth_tokens_and_retry Reason: #{e.class}: #{e.message} {:message_id => #{e.id}}")
             log_warn("Retries: #{connection_attempts}/#{MAX_CONNECTION_ATTEMPTS}, giving up.")
             ConnectorsShared::ExceptionTracking.log_exception(e)
             raise e
           else
-            log_warn("Failed to connect in with_auth_tokens_and_retry. Reason: #{e.class}: #{e.message} {:message_id => #{e.id}}")
             log_warn("Retries: #{connection_attempts}/#{MAX_CONNECTION_ATTEMPTS}, trying again.")
             retry
           end
