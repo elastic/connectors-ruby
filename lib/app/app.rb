@@ -32,6 +32,23 @@ class ConnectorsWebApp < Sinatra::Base
     set :deactivate_auth, settings.http['deactivate_auth']
   end
 
+  error do
+    content_type :json
+    status 500
+    e = env['sinatra.error']
+    backtrace = "Application error\n#{e}\n#{e.backtrace.join("\n")}"
+
+    json(
+      :errors => [
+        {
+          :message => 'Internal Server Error',
+          :code => ConnectorsApp::Errors::INTERNAL_SERVER_ERROR,
+          :backtrace => backtrace
+        }
+      ]
+    )
+  end
+
   before do
     Time.zone = ActiveSupport::TimeZone.new('UTC')
     # XXX to be removed
