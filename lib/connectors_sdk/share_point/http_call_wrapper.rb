@@ -47,6 +47,7 @@ module ConnectorsSdk
 
       def cursors_modified_since_start?
         @extractor.cursors_modified_since_start?
+      end
 
       def deleted(ids)
         results = []
