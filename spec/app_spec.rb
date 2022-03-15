@@ -252,7 +252,7 @@ RSpec.describe ConnectorsWebApp do
   end
 
   describe 'POST /download' do
-    let(:http_call_wrapper_mock) { double() }
+    let(:http_call_wrapper_mock) { double }
 
     before(:each) do
       allow(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:new).and_return(http_call_wrapper_mock)
@@ -261,12 +261,12 @@ RSpec.describe ConnectorsWebApp do
 
     context 'when valid parameters are passed' do
       let(:params) { { :a => 'b', :c => 'd' } }
-      let(:file_content) { "this is the file content, right?" }
+      let(:file_content) { 'this is the file content, right?' }
 
       it 'calls HttpCallWrapper.download' do
         expect(http_call_wrapper_mock).to receive(:download)
 
-        response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+        post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
       end
 
       it 'returns a successful response' do
@@ -292,7 +292,7 @@ RSpec.describe ConnectorsWebApp do
       end
 
       it 'raises this error' do
-        expect { post('/download', "", { 'CONTENT_TYPE' => 'application/json' }) }.to raise_error(JSON::ParserError)
+        expect { post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' }) }.to raise_error(JSON::ParserError)
       end
     end
 

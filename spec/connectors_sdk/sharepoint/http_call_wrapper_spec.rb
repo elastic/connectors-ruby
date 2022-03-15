@@ -42,8 +42,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       groups = { value: [{ id: 1234, createdDateTime: Time.now }] }
       drives = { value: [{ id: 4567, driveType: 'documentLibrary' }] }
       drive = { id: 1111, driveType: 'documentLibrary' }
-      children = { value: [{ folder: 'folder', id: 1111,
-                            name: 'item' }] }
+      children = { value: [{ folder: 'folder', id: 1111, name: 'item' }] }
       permissions = {
         value: [
           { id: 666 }
@@ -65,9 +64,8 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
   end
 
   context '.download' do
-    let(:extractor_mock) { double() }
+    let(:extractor_mock) { double }
     let(:call_params) { { :memento => 'mori' } }
-
 
     before(:each) do
       allow(ConnectorsSdk::SharePoint::Extractor).to receive(:new).and_return(extractor_mock)
