@@ -125,6 +125,20 @@ class ConnectorsWebApp < Sinatra::Base
     send_file(file, type: 'image/jpeg', disposition: 'inline')
   end
 
+  post '/deleted' do
+    params = JSON.parse(request.body.read)
+    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(params)
+
+    json :results => connector.deleted(params['ids'])
+  end
+
+  post '/permissions' do
+    params = JSON.parse(request.body.read)
+    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(params)
+
+    json :results => connector.permissions(params['user_id'])
+  end
+
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
     body = JSON.parse(request.body.read, symbolize_names: true)
@@ -135,8 +149,6 @@ class ConnectorsWebApp < Sinatra::Base
     json :oauth2redirect => authorization_uri
   rescue ConnectorsShared::ClientError => e
     render_exception(400, e.message)
-  rescue StandardError => e
-    render_exception(500, e.message)
   end
 
   # XXX remove `oauth2` from the name
@@ -146,8 +158,6 @@ class ConnectorsWebApp < Sinatra::Base
     json ConnectorsSdk::SharePoint::Authorization.access_token(params)
   rescue ConnectorsShared::ClientError => e
     render_exception(400, e.message)
-  rescue StandardError => e
-    render_exception(500, e.message)
   end
 
   post '/oauth2/refresh' do
@@ -158,8 +168,6 @@ class ConnectorsWebApp < Sinatra::Base
     render_exception(400, e.message)
   rescue ::Signet::AuthorizationError => e
     render_exception(401, e.message)
-  rescue StandardError => e
-    render_exception(500, e.message)
   end
 
   def render_exception(status_code, message)

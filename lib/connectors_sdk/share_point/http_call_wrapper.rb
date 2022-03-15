@@ -47,6 +47,19 @@ module ConnectorsSdk
 
       def cursors_modified_since_start?
         @extractor.cursors_modified_since_start?
+
+      def deleted(ids)
+        results = []
+        @extractor.yield_deleted_ids(ids) do |id|
+          results << id
+        end
+        results
+      end
+
+      def permissions(user_id)
+        @extractor.yield_permissions(user_id) do |permissions|
+          return permissions
+        end
       end
     end
   end
