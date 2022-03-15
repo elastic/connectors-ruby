@@ -14,8 +14,8 @@ module ConnectorsSdk
   module SharePoint
     class HttpCallWrapper
       def initialize(params)
-        cursors = params['cursors'] || {}
-        features = params['features'] || {},
+        cursors = params.fetch('cursors', {}) || {}
+        _features = params.fetch('features', {}) || {},
 
         @extractor = ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
@@ -30,7 +30,7 @@ module ConnectorsSdk
       def document_batch
         results = []
 
-        @extractor.yield_document_changes(:break_after_page => true) do |action, doc, _subextractors|
+        @extractor.yield_document_changes(:break_after_page => true, :modified_since => cursors['modified_since']) do |action, doc, _subextractors|
           results << {
             :action => action,
             :document => doc,
@@ -43,10 +43,6 @@ module ConnectorsSdk
 
       def cursors
         @extractor.config.cursors
-      end
-
-      def cursors_modified_since_start?
-        @extractor.cursors_modified_since_start?
       end
 
       def deleted(ids)

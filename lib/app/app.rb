@@ -102,17 +102,19 @@ class ConnectorsWebApp < Sinatra::Base
   post '/documents' do
     params = JSON.parse(request.body.read)
 
+    original_cursors = (params.fetch('cursors', {}) || {}).as_json
+
     connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(
       params
     )
 
     results = connector.document_batch
 
-    new_cursors = if connector.cursors_modified_since_start?
-      connector.cursors
-    else
-      {}
-    end
+    new_cursors = if connector.cursors.as_json != original_cursors
+                    connector.cursors
+                  else
+                    {}
+                  end
 
     json(
       :results => results,

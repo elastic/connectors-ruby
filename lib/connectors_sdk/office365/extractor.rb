@@ -36,11 +36,6 @@ module ConnectorsSdk
 
           config.cursors['current_drive_id'] = drive_id
 
-          modified_since_to_use = [
-            modified_since,
-            config.cursors['modified_since']
-          ].detect(&:present?)
-
           drive_owner_name = drive.dig(:owner, :user, :displayName)
           drive_name = drive.name
 
@@ -54,9 +49,9 @@ module ConnectorsSdk
                 log_warn("Error listing changes with start_delta_link: #{start_delta_link}, falling back to full crawl")
                 yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
               end
-            elsif modified_since_to_use.present?
+            elsif modified_since.present?
               log_debug("Starting an incremental crawl using last_modified (no cursor found) for #{service_type.classify} with drive_id: #{drive_id}")
-              yield_changes(drive_id, :last_modified => modified_since_to_use, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
+              yield_changes(drive_id, :last_modified => modified_since, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
             else
               log_debug("Starting a full crawl #{service_type.classify} with drive_id: #{drive_id}")
               yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)

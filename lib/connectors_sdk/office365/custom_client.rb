@@ -113,11 +113,11 @@ module ConnectorsSdk
       def list_items(drive_id, fields: [], break_after_page: false)
         # MSFT Graph API does not have a recursive list items, have to do this dfs style
 
-        if break_after_page && cursors['page_cursor'].present?
-          stack = cursors.delete('page_cursor')
-        else
-          stack = [get_root_item(drive_id, ['id']).id]
-        end
+        stack = if break_after_page && cursors['page_cursor'].present?
+                  cursors.delete('page_cursor')
+                else
+                  [get_root_item(drive_id, ['id']).id]
+                end
 
         # We rely on the id field below to perform our DFS
         fields_with_id = fields.any? ? fields | ['id'] : fields
