@@ -15,7 +15,7 @@ module ConnectorsSdk
     class HttpCallWrapper
       def initialize(params)
         cursors = params.fetch('cursors', {}) || {}
-        _features = params.fetch('features', {}) || {}
+        features = params.fetch('features', {}) || {}
 
         @extractor = ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
