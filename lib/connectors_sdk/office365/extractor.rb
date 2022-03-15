@@ -125,10 +125,10 @@ module ConnectorsSdk
       def drives_to_index
         @drives_to_index ||= begin
           value = if config.index_all_drives?
-            drives
-          else
-            drives.select { |d| config.drive_ids.include?(d.id) }
-          end
+                    drives
+                  else
+                    drives.select { |d| config.drive_ids.include?(d.id) }
+                  end
 
           log_debug("Found drives to index with ids: #{value.map(&:id).join(', ')}")
 
