@@ -8,14 +8,19 @@
 
 require 'connectors_sdk/office365/config'
 require 'connectors_sdk/share_point/extractor'
+require 'connectors_sdk/share_point/authorization'
 require 'bson'
 
 module ConnectorsSdk
   module SharePoint
+    NAME = 'sharepoint'
+
     class HttpCallWrapper
-      def initialize(params)
+      def extractor(params)
         features = {}
-        @extractor = ConnectorsSdk::SharePoint::Extractor.new(
+
+        # XXX can we cache that class across calls?
+        ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: 'sharepoint_online',
           authorization_data_proc: proc { { access_token: params['access_token'] } },
@@ -25,11 +30,11 @@ module ConnectorsSdk
         )
       end
 
-      def document_batch
+      def document_batch(params)
         results = []
         max = 100
 
-        @extractor.yield_document_changes do |action, doc, _subextractors|
+        extractor(params).yield_document_changes do |action, doc, _subextractors|
           results << {
             :action => action,
             :document => doc,
@@ -41,18 +46,30 @@ module ConnectorsSdk
         results
       end
 
-      def deleted(ids)
+      def deleted(params)
         results = []
-        @extractor.yield_deleted_ids(ids) do |id|
+        extractor(params).yield_deleted_ids(params['ids']) do |id|
           results << id
         end
         results
       end
 
-      def permissions(user_id)
-        @extractor.yield_permissions(user_id) do |permissions|
+      def permissions(params)
+        extractor(params).yield_permissions(params['user_id']) do |permissions|
           return permissions
         end
+      end
+
+      def authorization_uri(body)
+        ConnectorsSdk::SharePoint::Authorization.authorization_uri(body)
+      end
+
+      def access_token(params)
+        ConnectorsSdk::SharePoint::Authorization.access_token(params)
+      end
+
+      def refresh(params)
+        ConnectorsSdk::SharePoint::Authorization.refresh(params)
       end
     end
   end
