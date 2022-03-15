@@ -96,7 +96,9 @@ RSpec.describe ConnectorsWebApp do
 
     it 'returns the connectors metadata' do
       expect(response.status).to eq 200
-      expect(json(response)['version']).to eq ConnectorsApp::VERSION
+      expect(json(response)['connectors_version']).to eq ConnectorsApp::VERSION
+      expect(json(response)['connectors_revision']).to eq ConnectorsApp::Config['revision']
+      expect(json(response)['connectors_repository']).to eq ConnectorsApp::Config['repository']
     end
   end
 

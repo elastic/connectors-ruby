@@ -75,9 +75,9 @@ class ConnectorsWebApp < Sinatra::Base
 
   get '/' do
     json(
-      :version => settings.version,
-      :repository => settings.repository,
-      :revision => settings.revision
+      :connectors_version => settings.version,
+      :connectors_repository => settings.repository,
+      :connectors_revision => settings.revision
     )
   end
 
