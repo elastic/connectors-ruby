@@ -15,15 +15,15 @@ module ConnectorsSdk
     class HttpCallWrapper
       def initialize(params)
         cursors = params.fetch('cursors', {}) || {}
-        _features = params.fetch('features', {}) || {},
+        _features = params.fetch('features', {}) || {}
 
         @extractor = ConnectorsSdk::SharePoint::Extractor.new(
-          content_source_id:       BSON::ObjectId.new,
-          service_type:            'sharepoint_online',
+          content_source_id: BSON::ObjectId.new,
+          service_type: 'sharepoint_online',
           authorization_data_proc: proc { { access_token: params['access_token'] } },
-          client_proc:             proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => cursors) },
-          config:                  ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
-          features:                features
+          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => cursors) },
+          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
+          features: features
         )
       end
 
