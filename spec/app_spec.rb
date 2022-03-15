@@ -115,6 +115,19 @@ RSpec.describe ConnectorsWebApp do
     end
   end
 
+  describe 'POST /deleted' do
+    let(:params) { { :ids => %w[id1 id2], :access_token => 'access token' } }
+
+    it 'returns deleted ids' do
+      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:deleted).and_return(['id1'])
+
+      basic_authorize 'ent-search', api_key
+      response = post('/deleted', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+      expect(response).to be_successful
+      expect(json(response)['results']).to_not be_empty
+    end
+  end
+
   describe 'POST /oauth2/init' do
     context 'with valid request' do
       let(:params) { { :client_id => 'client id' } }

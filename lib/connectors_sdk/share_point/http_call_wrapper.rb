@@ -40,6 +40,14 @@ module ConnectorsSdk
 
         results
       end
+
+      def deleted(ids)
+        results = []
+        @extractor.yield_deleted_ids(ids) do |id|
+          results << id
+        end
+        results
+      end
     end
   end
 end
