@@ -48,6 +48,12 @@ module ConnectorsSdk
         end
         results
       end
+
+      def permissions(user_id)
+        @extractor.yield_permissions(user_id) do |permissions|
+          return permissions
+        end
+      end
     end
   end
 end

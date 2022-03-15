@@ -124,6 +124,13 @@ class ConnectorsWebApp < Sinatra::Base
     json :results => connector.deleted(params['ids'])
   end
 
+  post '/permissions' do
+    params = JSON.parse(request.body.read)
+    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(params)
+
+    json :results => connector.permissions(params['user_id'])
+  end
+
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
     body = JSON.parse(request.body.read, symbolize_names: true)
