@@ -29,7 +29,8 @@ class ConnectorsWebApp < Sinatra::Base
     set :port, settings.http['port']
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
-    set :connector, ConnectorsSdk::Base::REGISTRY.connector('sharepoint')
+    set :connector_name, settings.http['connector']
+    set :connector, ConnectorsSdk::Base::REGISTRY.connector(settings.http['connector'])
   end
 
   error do
