@@ -35,7 +35,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
   end
 
-  subject do
+  let(:extractor) do
     described_class.new(
       :content_source_id => content_source_id,
       :service_type => service_type,
@@ -45,6 +45,8 @@ describe ConnectorsSdk::SharePoint::Extractor do
       :authorization_data_proc => proc { authorization_data }
     )
   end
+
+  subject { extractor }
 
   describe '#drive_ids' do
     let(:status) { 200 }
@@ -236,21 +238,35 @@ describe ConnectorsSdk::SharePoint::Extractor do
       end
 
       it 'does not error' do
-        cursors.merge!('current_drive_id' => '_')
+        cursors['current_drive_id'] = '_'
         expect{ subject }.not_to raise_error
       end
 
       it 'understands last_drive_id' do
-        cursors.merge!('last_drive_id' => '_')
+        cursors['last_drive_id'] = '_'
         expect{ subject }.not_to raise_error
       end
 
       it 'clears cursor on final last_drive_id' do
-        cursors.merge!('last_drive_id' => drive_id)
+        cursors['last_drive_id'] = drive_id
         expect{ subject }.to change { cursors }.to({})
       end
 
-      it 'sets last_drive_id from current_drive_id'
+      it 'sets last_drive_id from current_drive_id' do
+        cursors['current_drive_id'] = drive_id
+        allow(extractor).to receive(:yield_drive_items)
+
+        expect{ subject }.to change { cursors }.from({ 'current_drive_id' => drive_id }).to({ 'last_drive_id' => drive_id })
+      end
+
+      it 'preserves current_drive_id in the presence of a page_cursor' do
+        cursors['current_drive_id'] = drive_id
+        allow(extractor).to receive(:yield_drive_items) do |args|
+          config.cursors['page_cursor'] = '_'
+        end
+
+        expect{ subject }.to change { cursors }.from({ 'current_drive_id' => drive_id }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_' })
+      end
     end
   end
 
