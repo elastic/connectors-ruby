@@ -252,37 +252,21 @@ RSpec.describe ConnectorsWebApp do
   end
 
   describe 'POST /download' do
-    let(:http_call_wrapper_mock) { double }
+    let(:file_content) { 'this is the file content, right?' }
 
     before(:each) do
-      allow(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:new).and_return(http_call_wrapper_mock)
+      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_return(file_content)
       basic_authorize 'ent-search', api_key
     end
 
     context 'when valid parameters are passed' do
       let(:params) { { :a => 'b', :c => 'd' } }
-      let(:file_content) { 'this is the file content, right?' }
-
-      it 'calls HttpCallWrapper.download' do
-        expect(http_call_wrapper_mock).to receive(:download)
-
-        post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
-      end
-
-      it 'returns a successful response' do
-        expect(http_call_wrapper_mock).to receive(:download)
-
-        response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
-
-        expect(response).to be_ok
-      end
 
       it 'returns the result of HttpCallWrapper.download' do
-        allow(http_call_wrapper_mock).to receive(:download).and_return(file_content)
-
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
         expect(response.body).to eq(file_content)
+        expect(response).to be_ok
       end
     end
 
@@ -300,7 +284,7 @@ RSpec.describe ConnectorsWebApp do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
       before(:each) do
-        expect(http_call_wrapper_mock).to receive(:download).and_raise(error_class)
+        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_raise(error_class)
       end
 
       it 'raises this error' do
