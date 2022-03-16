@@ -2,6 +2,7 @@
 version: "8.2.0-SNAPSHOT"
 repository: "https://github.com/elastic/connectors"
 revision: "main"
+
 # web service
 http:
   port: 9292
@@ -9,3 +10,4 @@ http:
   show_exceptions: false
   api_key: secret
   deactivate_auth: true
+  connector: share_point

@@ -13,11 +13,10 @@ require 'sinatra'
 require 'sinatra/config_file'
 require 'sinatra/json'
 
-require 'connectors_sdk/share_point/http_call_wrapper'
-require 'connectors_sdk/share_point/authorization'
 require 'connectors_app/errors'
 require 'connectors_shared'
 require 'connectors_app/config'
+require 'connectors_sdk/base/registry'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
@@ -30,6 +29,8 @@ class ConnectorsWebApp < Sinatra::Base
     set :port, settings.http['port']
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
+    set :connector_name, settings.http['connector']
+    set :connector, ConnectorsSdk::Base::REGISTRY.connector(settings.http['connector'])
   end
 
   error do
@@ -100,14 +101,8 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/documents' do
-    params = JSON.parse(request.body.read)
-
-    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(
-      params
-    )
-
     json(
-      :results => connector.document_batch,
+      :results => settings.connector.document_batch(JSON.parse(request.body.read)),
       :cursor => nil
     )
   end
@@ -118,17 +113,11 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/deleted' do
-    params = JSON.parse(request.body.read)
-    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(params)
-
-    json :results => connector.deleted(params['ids'])
+    json :results => settings.connector.deleted(JSON.parse(request.body.read))
   end
 
   post '/permissions' do
-    params = JSON.parse(request.body.read)
-    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(params)
-
-    json :results => connector.permissions(params['user_id'])
+    json :results => settings.connector.permissions(JSON.parse(request.body.read))
   end
 
   # XXX remove `oauth2` from the name
@@ -136,7 +125,7 @@ class ConnectorsWebApp < Sinatra::Base
     body = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
     logger.info "Received redirect URL: #{body[:redirect_uri]}"
-    authorization_uri = ConnectorsSdk::SharePoint::Authorization.authorization_uri(body)
+    authorization_uri = settings.connector.authorization_uri(body)
 
     json :oauth2redirect => authorization_uri
   rescue ConnectorsShared::ClientError => e
@@ -147,7 +136,7 @@ class ConnectorsWebApp < Sinatra::Base
   post '/oauth2/exchange' do
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
-    json ConnectorsSdk::SharePoint::Authorization.access_token(params)
+    json settings.connector.access_token(params)
   rescue ConnectorsShared::ClientError => e
     render_exception(400, e.message)
   end
@@ -155,7 +144,7 @@ class ConnectorsWebApp < Sinatra::Base
   post '/oauth2/refresh' do
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
-    json ConnectorsSdk::SharePoint::Authorization.refresh(params)
+    json settings.connector.refresh(params)
   rescue ConnectorsShared::ClientError => e
     render_exception(400, e.message)
   rescue ::Signet::AuthorizationError => e
