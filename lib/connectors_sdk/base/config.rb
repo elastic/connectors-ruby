@@ -18,6 +18,10 @@ module ConnectorsSdk
           :cursors => cursors
         }
       end
+
+      def overwrite_cursors!(new_cursors)
+        @cursors = new_cursors
+      end
     end
   end
 end

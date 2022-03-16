@@ -17,24 +17,26 @@ module ConnectorsSdk
 
     class HttpCallWrapper
       def extractor(params)
-        features = {}
+        cursors = params.fetch('cursors', {}) || {}
+        features = params.fetch('features', {}) || {}
 
         # XXX can we cache that class across calls?
         ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: 'sharepoint_online',
           authorization_data_proc: proc { { access_token: params['access_token'] } },
-          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => {}) },
-          config: ConnectorsSdk::Office365::Config.new(:cursors => {}, :drive_ids => 'all'),
+          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => cursors) },
+          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
           features: features
         )
       end
 
       def document_batch(params)
         results = []
-        max = 100
 
-        extractor(params).yield_document_changes do |action, doc, download_args_and_proc|
+        @extractor = extractor(params)
+
+        @extractor.yield_document_changes(:break_after_page => true, :modified_since => @extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
           download_obj = nil
           if download_args_and_proc
             download_obj = {
@@ -50,10 +52,13 @@ module ConnectorsSdk
             :document => doc,
             :download => download_obj
           }
-          break if results.size > max
         end
 
         results
+      end
+
+      def cursors
+        @extractor.config.cursors
       end
 
       def deleted(params)

@@ -35,7 +35,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
   end
 
-  subject do
+  let(:extractor) do
     described_class.new(
       :content_source_id => content_source_id,
       :service_type => service_type,
@@ -45,6 +45,8 @@ describe ConnectorsSdk::SharePoint::Extractor do
       :authorization_data_proc => proc { authorization_data }
     )
   end
+
+  subject { extractor }
 
   describe '#drive_ids' do
     let(:status) { 200 }
@@ -213,6 +215,59 @@ describe ConnectorsSdk::SharePoint::Extractor do
 
         expect(subject.monitor.success_count).to eq(0)
         expect(subject.monitor.total_error_count).to eq(0)
+      end
+    end
+  end
+
+  context 'break_after_page' do
+    describe '#yield_document_changes' do
+      let(:cursors) { {} }
+      let(:block) {
+        lambda do |args|
+          # no-op
+        end
+      }
+      let(:site_id) { 'site_01' }
+      let(:drives) { [{ :id => drive_id, :driveType => 'documentLibrary' }] }
+      let(:drive_id) { 'drive_01' }
+
+      subject { super().yield_document_changes(:break_after_page => true, &block) }
+
+      before(:each) do
+        expect_sites([:id => site_id])
+        expect_groups([])
+        expect_site_drives(site_id, drives)
+      end
+
+      it 'does not error' do
+        cursors['current_drive_id'] = '_'
+        expect { subject }.not_to raise_error
+      end
+
+      it 'understands how to skip to just after last_drive_id' do
+        cursors['last_drive_id'] = drive_id
+        expect { subject }.not_to raise_error
+      end
+
+      it 'clears cursor on final last_drive_id' do
+        cursors['last_drive_id'] = drive_id
+        expect { subject }.to change { cursors }.to({})
+      end
+
+      it 'sets last_drive_id from current_drive_id' do
+        cursors['current_drive_id'] = drive_id
+        allow(extractor).to receive(:yield_drive_items)
+
+        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id }).to({ 'last_drive_id' => drive_id })
+      end
+
+      it 'preserves current_drive_id in the presence of a page_cursor' do
+        cursors['current_drive_id'] = drive_id
+        allow(extractor).to receive(:yield_drive_items) do |_args|
+          config.cursors['page_cursor'] = '_'
+        end
+
+        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_' })
       end
     end
   end

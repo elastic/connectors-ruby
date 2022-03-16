@@ -110,11 +110,18 @@ module ConnectorsSdk
         nil
       end
 
-      def list_items(drive_id, fields: [])
+      def list_items(drive_id, fields: [], break_after_page: false)
         # MSFT Graph API does not have a recursive list items, have to do this dfs style
-        stack = [get_root_item(drive_id, ['id']).id]
+
+        stack = if break_after_page && cursors['page_cursor'].present?
+                  cursors.delete('page_cursor')
+                else
+                  [get_root_item(drive_id, ['id']).id]
+                end
+
         # We rely on the id field below to perform our DFS
         fields_with_id = fields.any? ? fields | ['id'] : fields
+        yielded = 0
         while stack.any?
           folder_id = stack.pop
           item_children(drive_id, folder_id, :fields => fields_with_id) do |item|
@@ -122,8 +129,14 @@ module ConnectorsSdk
               stack << item.id
             end
             yield item
+
+            yielded += 1
           end
 
+          if break_after_page && yielded >= 100
+            cursors['page_cursor'] = stack.dup
+            break
+          end
         end
       end
 
@@ -131,16 +144,19 @@ module ConnectorsSdk
         request_endpoint(:endpoint => "drives/#{drive_id}/items/#{item_id}/permissions").value
       end
 
-      def list_changes(drive_id:, start_delta_link: nil, last_modified: nil)
+      def list_changes(drive_id:, start_delta_link: nil, last_modified: nil, break_after_page: false)
         query_params = { :'$select' => %w(id content.downloadUrl lastModifiedDateTime lastModifiedBy root deleted file folder package name webUrl createdBy createdDateTime size).join(',') }
         response =
-          if start_delta_link.nil?
+          if break_after_page && cursors['page_cursor'].present?
+            request_json(:url => cursors.delete('page_cursor'))
+          elsif start_delta_link.nil?
             endpoint = "drives/#{drive_id}/root/delta"
             request_endpoint(:endpoint => endpoint, :query_params => query_params)
           else
             request_json(:url => start_delta_link, :query_params => query_params)
           end
 
+        yielded = 0
         loop do
           response.value.each do |change|
             # MSFT Graph API does not allow us to view "changes" in chronological order, so if there is no cursor,
@@ -148,7 +164,14 @@ module ConnectorsSdk
             # since to get another cursor, we would have to go through all the changes anyway
             next if last_modified.present? && Time.parse(change.lastModifiedDateTime) < last_modified
             next if change.root # We don't want to index the root of the drive
+
             yield change
+            yielded += 1
+          end
+
+          if break_after_page && yielded >= 100 && response['@odata.nextLink'].present?
+            cursors['page_cursor'] = response['@odata.nextLink']
+            break
           end
 
           break if response['@odata.nextLink'].nil?
