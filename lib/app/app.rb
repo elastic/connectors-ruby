@@ -78,7 +78,8 @@ class ConnectorsWebApp < Sinatra::Base
     json(
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
-      :connectors_revision => settings.revision
+      :connectors_revision => settings.revision,
+      :connector_name => settings.http['connector']
     )
   end
 
