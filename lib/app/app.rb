@@ -123,7 +123,7 @@ class ConnectorsWebApp < Sinatra::Base
 
   post '/download' do
     params = JSON.parse(request.body.read, :symbolize_names => true)
-    settings.connector.download(params[:meta])
+    settings.connector.download(params)
   end
 
   post '/deleted' do

@@ -87,8 +87,8 @@ module ConnectorsSdk
         ConnectorsSdk::SharePoint::Authorization.refresh(params)
       end
 
-      def download(params, metadata)
-        extractor(params).download(metadata)
+      def download(params)
+        extractor(params).download(params[:meta])
       end
     end
   end
