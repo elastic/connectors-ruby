@@ -191,26 +191,28 @@ describe ConnectorsSdk::Office365::CustomClient do
   context 'break_after_page' do
     describe '#list_items' do
       let(:drive_id) { 'drive_01' }
-      let(:block) { -> (item) do
-        # no-op
-      end }
+      let(:block) {
+        lambda do |item|
+          # no-op
+        end
+      }
       let(:folder_ids) { ['folder1', 'folder2'] }
 
-      subject {client.list_items(drive_id, :break_after_page => true, &block)}
+      subject { client.list_items(drive_id, :break_after_page => true, &block) }
 
       before(:each) do
-        client.cursors.merge!('page_cursor' => folder_ids)
+        client.cursors['page_cursor'] = folder_ids
         folder_ids.each do |folder_id|
           stub_request(:get, "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}drives/#{drive_id}/items/#{folder_id}/children").to_return(:status => 200, :body => { 'value' => [] }.to_json)
         end
       end
 
       it 'should not error' do
-        expect{ subject }.not_to raise_error
+        expect { subject }.not_to raise_error
       end
 
       it 'should clear page_cursor' do
-        expect{ subject }.to change { client.cursors }.to({})
+        expect { subject }.to change { client.cursors }.to({})
       end
 
       it 'should break after first folder returns over 100 items' do
@@ -219,40 +221,42 @@ describe ConnectorsSdk::Office365::CustomClient do
         end
         stub_request(:get, "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}drives/#{drive_id}/items/#{folder_ids.last}/children").to_return(:status => 200, :body => { 'value' => value }.to_json)
 
-        expect{ subject }.to change { client.cursors }.to({ 'page_cursor' => Array.wrap(folder_ids.first) })
+        expect { subject }.to change { client.cursors }.to({ 'page_cursor' => Array.wrap(folder_ids.first) })
       end
     end
 
     describe '#list_changes' do
       let(:drive_id) { 'drive_01' }
-      let(:block) { -> (item) do
-        # no-op
-      end }
+      let(:block) {
+        lambda do |item|
+          # no-op
+        end
+      }
       let(:page_cursor_url) { 'https://www.example.com' }
       let(:new_page_cursor_url) { "#{page_cursor_url}/new" }
 
-      subject {client.list_changes(:drive_id => drive_id, :break_after_page => true, &block)}
+      subject { client.list_changes(:drive_id => drive_id, :break_after_page => true, &block) }
 
       before(:each) do
-        client.cursors.merge!('page_cursor' => page_cursor_url)
+        client.cursors['page_cursor'] = page_cursor_url
         stub_request(:get, page_cursor_url).to_return(:status => 200, :body => { 'value' => [] }.to_json)
       end
 
       it 'should not error' do
-        expect{ subject }.not_to raise_error
+        expect { subject }.not_to raise_error
       end
 
       it 'should clear page_cursor' do
-        expect{ subject }.to change { client.cursors['page_cursor'] }.from(page_cursor_url).to(nil)
+        expect { subject }.to change { client.cursors['page_cursor'] }.from(page_cursor_url).to(nil)
       end
 
       it 'should break after the response returns over 100 items' do
-        value = (1..100).to_a.map do |i|
+        value = (1..100).to_a.map do |_i|
           Hashie::Mash.new(:root => false)
         end
         stub_request(:get, page_cursor_url).to_return(:status => 200, :body => { 'value' => value, '@odata.nextLink' => new_page_cursor_url }.to_json)
 
-        expect{ subject }.to change { client.cursors['page_cursor'] }.from(page_cursor_url).to(new_page_cursor_url)
+        expect { subject }.to change { client.cursors['page_cursor'] }.from(page_cursor_url).to(new_page_cursor_url)
       end
     end
   end
