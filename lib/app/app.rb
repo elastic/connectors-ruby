@@ -123,14 +123,7 @@ class ConnectorsWebApp < Sinatra::Base
 
   post '/download' do
     params = JSON.parse(request.body.read, :symbolize_names => true)
-
-    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(
-      {
-        access_token: params[:access_token]
-      }
-    )
-
-    connector.download(params[:meta])
+    settings.connector.download(params)
   end
 
   post '/deleted' do

@@ -66,14 +66,22 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
   context '.download' do
     let(:extractor_mock) { double }
     let(:download_params) { { :memento => 'mori' } }
+    let(:params) do
+      {
+        :access_token => 'access_token',
+        :meta => {
+          :download_url => 'download_url'
+        }
+      }
+    end
 
     before(:each) do
       allow(ConnectorsSdk::SharePoint::Extractor).to receive(:new).and_return(extractor_mock)
     end
 
     it 'calls extractor.download method with same params' do
-      expect(extractor_mock).to receive(:download).with(download_params)
-      backend.download(params, download_params)
+      expect(extractor_mock).to receive(:download).with(:download_url => 'download_url')
+      backend.download(params)
     end
 
     context 'when extractor raises an error' do
@@ -84,7 +92,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       end
 
       it 'does not suppress errors from extractor' do
-        expect { backend.download(params, download_params) }.to raise_error(error_class)
+        expect { backend.download(params) }.to raise_error(error_class)
       end
     end
   end
