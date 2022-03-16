@@ -16,7 +16,7 @@ require 'sinatra/json'
 require 'connectors_app/errors'
 require 'connectors_shared'
 require 'connectors_app/config'
-require 'connectors_sdk/base/connectors'
+require 'connectors_sdk/base/registry'
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
@@ -29,7 +29,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :port, settings.http['port']
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
-    set :connector, ConnectorsSdk::Base::Connectors.factory.connector('sharepoint')
+    set :connector, ConnectorsSdk::Base::REGISTRY.connector('sharepoint')
   end
 
   error do
