@@ -217,6 +217,43 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
   end
 
+  context 'break_after_page' do
+    describe '#yield_document_changes' do
+      let(:cursors) {{}}
+      let(:block) { -> (args) do
+        # no-op
+      end}
+      let(:site_id) { 'site_01' }
+      let(:drives) {[{ :id => drive_id, :driveType => 'documentLibrary' }]}
+      let(:drive_id) { 'drive_01' }
+
+      subject { super().yield_document_changes(:break_after_page => true, &block) }
+
+      before(:each) do
+        expect_sites([:id => site_id])
+        expect_groups([])
+        expect_site_drives(site_id, drives)
+      end
+
+      it 'does not error' do
+        cursors.merge!('current_drive_id' => '_')
+        expect{ subject }.not_to raise_error
+      end
+
+      it 'understands last_drive_id' do
+        cursors.merge!('last_drive_id' => '_')
+        expect{ subject }.not_to raise_error
+      end
+
+      it 'clears cursor on final last_drive_id' do
+        cursors.merge!('last_drive_id' => drive_id)
+        expect{ subject }.to change { cursors }.to({})
+      end
+
+      it 'sets last_drive_id from current_drive_id'
+    end
+  end
+
   def expect_item_children(drive_id, item_id, children)
     stub_request(:get, "#{graph_base_url}drives/#{drive_id}/items/#{item_id}/children")
       .to_return(graph_response({ value: children }))
