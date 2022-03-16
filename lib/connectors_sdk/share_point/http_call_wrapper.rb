@@ -13,7 +13,7 @@ require 'bson'
 
 module ConnectorsSdk
   module SharePoint
-    NAME = 'sharepoint'
+    SERVICE_TYPE = 'sharepoint'
 
     class HttpCallWrapper
       def extractor(params)

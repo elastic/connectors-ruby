@@ -24,9 +24,9 @@ module ConnectorsSdk
 
     REGISTRY = Factory.new
 
-    # loading plugins (might replace this with a directory scan)
+    # loading plugins (might replace this with a directory scan and conventions on names)
     require_relative '../share_point/http_call_wrapper'
 
-    REGISTRY.register(ConnectorsSdk::SharePoint::NAME, ConnectorsSdk::SharePoint::HttpCallWrapper)
+    REGISTRY.register(ConnectorsSdk::SharePoint::SERVICE_TYPE, ConnectorsSdk::SharePoint::HttpCallWrapper)
   end
 end
