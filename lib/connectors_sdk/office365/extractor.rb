@@ -22,19 +22,19 @@ module ConnectorsSdk
             current_drive_id = config.cursors['current_drive_id']
             last_drive_id = config.cursors['last_drive_id']
 
-            if current_drive_id.present? && current_drive_id != drive_id
+            if current_drive_id.present? && current_drive_id < drive_id # they come alpha sorted
               next
             end
 
-            if last_drive_id.present?
+            if last_drive_id.present? && last_drive_id <= drive_id # they come alpha sorted
+              config.cursors.delete('last_drive_id')
               if last_drive_id == drive_id
-                config.cursors.delete('last_drive_id')
+                next
               end
-              next
             end
-          end
 
-          config.cursors['current_drive_id'] = drive_id
+            config.cursors['current_drive_id'] = drive_id
+          end
 
           drive_owner_name = drive.dig(:owner, :user, :displayName)
           drive_name = drive.name

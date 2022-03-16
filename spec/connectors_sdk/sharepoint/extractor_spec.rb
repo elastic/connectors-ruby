@@ -244,8 +244,8 @@ describe ConnectorsSdk::SharePoint::Extractor do
         expect { subject }.not_to raise_error
       end
 
-      it 'understands last_drive_id' do
-        cursors['last_drive_id'] = '_'
+      it 'understands how to skip to just after last_drive_id' do
+        cursors['last_drive_id'] = drive_id
         expect { subject }.not_to raise_error
       end
 
