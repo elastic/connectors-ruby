@@ -108,8 +108,15 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    file = File.join(__dir__, 'cat.jpg')
-    send_file(file, type: 'image/jpeg', disposition: 'inline')
+    params = JSON.parse(request.body.read, :symbolize_names => true)
+
+    connector = ConnectorsSdk::SharePoint::HttpCallWrapper.new(
+      {
+        access_token: params[:access_token]
+      }
+    )
+
+    connector.download(params[:meta])
   end
 
   post '/deleted' do

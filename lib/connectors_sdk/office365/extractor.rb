@@ -90,6 +90,11 @@ module ConnectorsSdk
         end
       end
 
+      def download(item)
+        download_url = item[:download_url]
+        client.download_item(download_url)
+      end
+
       private
 
       def drives
@@ -167,8 +172,13 @@ module ConnectorsSdk
         document = generate_document(item)
         download_args =
           if downloadable?(item)
-            download_args_and_proc(document.fetch(:id), item.name, item[:size]) do
-              client.download_item(item.fetch('@microsoft.graph.downloadUrl'))
+            download_args_and_proc(
+              id: document.fetch(:id),
+              name: item.name,
+              size: item[:size],
+              download_args: { :download_url => item.fetch('@microsoft.graph.downloadUrl') }
+            ) do |args|
+              download(args)
             end
           else
             []

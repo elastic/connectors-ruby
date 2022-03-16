@@ -34,11 +34,21 @@ module ConnectorsSdk
         results = []
         max = 100
 
-        extractor(params).yield_document_changes do |action, doc, _subextractors|
+        extractor(params).yield_document_changes do |action, doc, download_args_and_proc|
+          download_obj = nil
+          if download_args_and_proc
+            download_obj = {
+              id: download_args_and_proc[0],
+              name: download_args_and_proc[1],
+              size: download_args_and_proc[2],
+              download_args: download_args_and_proc[3]
+            }
+          end
+
           results << {
             :action => action,
             :document => doc,
-            :download => nil
+            :download => download_obj
           }
           break if results.size > max
         end
@@ -70,6 +80,10 @@ module ConnectorsSdk
 
       def refresh(params)
         ConnectorsSdk::SharePoint::Authorization.refresh(params)
+      end
+
+      def download(params, metadata)
+        extractor(params).download(metadata)
       end
     end
   end
