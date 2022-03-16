@@ -99,7 +99,7 @@ RSpec.describe ConnectorsWebApp do
       expect(json(response)['connectors_version']).to eq ConnectorsApp::VERSION
       expect(json(response)['connectors_revision']).to eq ConnectorsApp::Config['revision']
       expect(json(response)['connectors_repository']).to eq ConnectorsApp::Config['repository']
-      expect(json(response)['connector_name']).to eq ConnectorsApp::Config['http']['connector']
+      expect(json(response)['connector_name']).to eq 'SharePoint'
     end
   end
 
