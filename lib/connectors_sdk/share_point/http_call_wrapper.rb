@@ -34,7 +34,9 @@ module ConnectorsSdk
       def document_batch(params)
         results = []
 
-        @extractor = extractor(params).yield_document_changes(:break_after_page => true, :modified_since => cursors['modified_since']) do |action, doc, download_args_and_proc|
+        @extractor = extractor(params)
+
+        @extractor.yield_document_changes(:break_after_page => true, :modified_since => @extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
           download_obj = nil
           if download_args_and_proc
             download_obj = {
