@@ -55,6 +55,9 @@ module ConnectorsSdk
           params[:grant_type] = 'refresh_token'
           client = oauth_client(params)
           client.refresh!
+        rescue StandardError => e
+          ConnectorsShared::ExceptionTracking.log_exception(e)
+          raise ConnectorsShared::TokenRefreshFailedError
         end
 
         def oauth_client(params)

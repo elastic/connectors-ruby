@@ -14,7 +14,6 @@ require 'sinatra'
 require 'sinatra/config_file'
 require 'sinatra/json'
 
-require 'connectors_app/errors'
 require 'connectors_shared'
 require 'connectors_app/config'
 require 'connectors_sdk/base/registry'
@@ -37,20 +36,19 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   error do
-    content_type :json
-    status 500
     e = env['sinatra.error']
-    backtrace = "Application error\n#{e}\n#{e.backtrace.join("\n")}"
-
-    json(
-      :errors => [
-        {
-          :message => 'Internal Server Error',
-          :code => ConnectorsApp::Errors::INTERNAL_SERVER_ERROR,
-          :backtrace => backtrace
-        }
-      ]
-    )
+    err = case e
+          when ConnectorsShared::ClientError
+            ConnectorsShared::Error.new(400, 'BAD_REQUEST', e.message)
+          when ConnectorsShared::SecretInvalidError
+            ConnectorsShared::INVALID_ACCESS_TOKEN
+          when ConnectorsShared::TokenRefreshFailedError
+            ConnectorsShared::TOKEN_REFRESH_ERROR
+          else
+            ConnectorsShared::INTERNAL_SERVER_ERROR
+          end
+    status err.status_code
+    json :errors => [err.to_h]
   end
 
   before do
@@ -66,15 +64,9 @@ class ConnectorsWebApp < Sinatra::Base
     return if auth.provided? && auth.basic? && auth.credentials && auth.credentials[1] == settings.api_key
 
     # We only support Basic for now
-    if auth.provided? && auth.scheme != 'basic'
-      code = ConnectorsApp::Errors::UNSUPPORTED_AUTH_SCHEME
-      message = 'Unsupported authorization scheme'
-    else
-      code = ConnectorsApp::Errors::INVALID_API_KEY
-      message = 'Invalid API key'
-    end
-    response = { errors: [{ message: message, code: code }] }.to_json
-    halt(401, { 'Content-Type' => 'application/json' }, response)
+    error = auth.provided? && auth.scheme != 'basic' ? ConnectorsShared::UNSUPPORTED_AUTH_SCHEME : ConnectorsShared::INVALID_API_KEY
+    response = { errors: [error.to_h] }.to_json
+    halt(error.status_code, { 'Content-Type' => 'application/json' }, response)
   end
 
   get '/' do
@@ -146,8 +138,6 @@ class ConnectorsWebApp < Sinatra::Base
     authorization_uri = settings.connector.authorization_uri(body)
 
     json :oauth2redirect => authorization_uri
-  rescue ConnectorsShared::ClientError => e
-    render_exception(400, e.message)
   end
 
   # XXX remove `oauth2` from the name
@@ -155,22 +145,11 @@ class ConnectorsWebApp < Sinatra::Base
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
     json settings.connector.access_token(params)
-  rescue ConnectorsShared::ClientError => e
-    render_exception(400, e.message)
   end
 
   post '/oauth2/refresh' do
     params = JSON.parse(request.body.read, symbolize_names: true)
     logger.info "Received payload: #{params}"
     json settings.connector.refresh(params)
-  rescue ConnectorsShared::ClientError => e
-    render_exception(400, e.message)
-  rescue ::Signet::AuthorizationError => e
-    render_exception(401, e.message)
-  end
-
-  def render_exception(status_code, message)
-    status status_code
-    json :errors => [{ message: message }]
   end
 end

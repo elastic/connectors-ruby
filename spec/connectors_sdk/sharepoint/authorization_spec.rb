@@ -98,7 +98,7 @@ describe ConnectorsSdk::SharePoint::Authorization do
         let(:error) { 'error' }
         it 'returns authorization error' do
           allow_any_instance_of(Signet::OAuth2::Client).to receive(:refresh!).and_raise(Signet::AuthorizationError.new(error))
-          expect { described_class.refresh(params) }.to raise_error(Signet::AuthorizationError)
+          expect { described_class.refresh(params) }.to raise_error(ConnectorsShared::TokenRefreshFailedError)
         end
       end
     end

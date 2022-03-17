@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'app/app'
-require 'connectors_app/errors'
 require 'connectors_app/version'
 
 RSpec.describe ConnectorsWebApp do
@@ -35,23 +34,18 @@ RSpec.describe ConnectorsWebApp do
       response = get '/status'
       expect(response.status).to eq 500
       response = json(response)
-      expect(response['errors'][0]['code']).to eq ConnectorsApp::Errors::INTERNAL_SERVER_ERROR
+      expect(response['errors'][0]['code']).to eq ConnectorsShared::INTERNAL_SERVER_ERROR.code
+      expect(response['errors'][0]['message']).to eq ConnectorsShared::INTERNAL_SERVER_ERROR.message
     end
   end
 
   describe 'Authorization /' do
     let(:bad_auth) {
-      { 'errors' => [
-        { 'code' => ConnectorsApp::Errors::INVALID_API_KEY,
-          'message' => 'Invalid API key' }
-      ] }
+      { 'errors' => [ConnectorsShared::INVALID_API_KEY.to_h] }
     }
 
     let(:unsupported_auth) {
-      { 'errors' => [
-        { 'code' => ConnectorsApp::Errors::UNSUPPORTED_AUTH_SCHEME,
-          'message' => 'Unsupported authorization scheme' }
-      ] }
+      { 'errors' => [ConnectorsShared::UNSUPPORTED_AUTH_SCHEME.to_h] }
     }
 
     it 'returns a 401 when Basic auth misses' do
@@ -224,15 +218,14 @@ RSpec.describe ConnectorsWebApp do
       end
 
       context 'with expired refresh token' do
-        let(:error) { 'error' }
-
         it 'returns 401' do
-          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(Signet::AuthorizationError.new(error))
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(ConnectorsShared::TokenRefreshFailedError)
 
           basic_authorize 'ent-search', api_key
           response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
-          expect(response.status).to eq(401)
-          expect(json(response)['errors'].first['message']).to eq(error)
+          expect(response.status).to eq(ConnectorsShared::TOKEN_REFRESH_ERROR.status_code)
+          expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::TOKEN_REFRESH_ERROR.code)
+          expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::TOKEN_REFRESH_ERROR.message)
         end
       end
     end
@@ -273,11 +266,14 @@ RSpec.describe ConnectorsWebApp do
 
     context 'when JSON.parse raises an error' do
       before(:each) do
-        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        allow(JSON).to receive(:parse).with('{}').and_raise(JSON::ParserError)
       end
 
-      it 'raises this error' do
-        expect { post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' }) }.to raise_error(JSON::ParserError)
+      it 'returns internal server error' do
+        response = post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(500)
+        expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
+        expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
       end
     end
 
@@ -289,7 +285,10 @@ RSpec.describe ConnectorsWebApp do
       end
 
       it 'raises this error' do
-        expect { post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }) }.to raise_error(error_class)
+        response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(500)
+        expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
+        expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
       end
     end
   end

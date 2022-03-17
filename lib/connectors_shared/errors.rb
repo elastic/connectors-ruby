@@ -99,4 +99,27 @@ module ConnectorsShared
   end
 
   class PublishingFailedError < ExplicitlyCausedError; end
+
+  class Error
+    attr_reader :status_code, :code, :message
+
+    def initialize(status_code, code, message)
+      @status_code = status_code
+      @code = code
+      @message = message
+    end
+
+    def to_h
+      {
+        'code' => @code,
+        'message' => @message
+      }
+    end
+  end
+
+  INTERNAL_SERVER_ERROR = ConnectorsShared::Error.new(500, 'INTERNAL_SERVER_ERROR', 'Internal server error')
+  INVALID_API_KEY = ConnectorsShared::Error.new(401, 'INVALID_API_KEY', 'Invalid API key')
+  UNSUPPORTED_AUTH_SCHEME = ConnectorsShared::Error.new(401, 'UNSUPPORTED_AUTH_SCHEME', 'Unsupported authorization scheme')
+  INVALID_ACCESS_TOKEN = ConnectorsShared::Error.new(401, 'INVALID_ACCESS_TOKEN', 'Invalid/expired access token, please refresh the token')
+  TOKEN_REFRESH_ERROR = ConnectorsShared::Error.new(401, 'TOKEN_REFRESH_ERROR', 'Failed to refresh token, please re-authenticate the application')
 end
