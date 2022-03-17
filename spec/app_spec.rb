@@ -249,7 +249,6 @@ RSpec.describe ConnectorsWebApp do
     let(:file_content) { 'this is the file content, right?' }
 
     before(:each) do
-      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_return(file_content)
       basic_authorize 'ent-search', api_key
     end
 
@@ -257,6 +256,7 @@ RSpec.describe ConnectorsWebApp do
       let(:params) { { :a => 'b', :c => 'd' } }
 
       it 'returns the result of HttpCallWrapper.download' do
+        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_return(file_content)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
         expect(response.body).to eq(file_content)
@@ -264,27 +264,12 @@ RSpec.describe ConnectorsWebApp do
       end
     end
 
-    context 'when JSON.parse raises an error' do
-      before(:each) do
-        allow(JSON).to receive(:parse).with('{}').and_raise(JSON::ParserError)
-      end
-
-      it 'returns internal server error' do
-        response = post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' })
-        expect(response.status).to eq(500)
-        expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
-        expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
-      end
-    end
-
     context 'when HttpCallWrapper.download raises an error' do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
-      before(:each) do
-        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_raise(error_class)
-      end
 
       it 'raises this error' do
+        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_raise(error_class)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response.status).to eq(500)
         expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
