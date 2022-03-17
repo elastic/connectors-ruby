@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 describe 'Repository' do
-  let(:gemspecs) { Dir[File.join(__dir__,'../*.gemspec')].to_a }
+  let(:gemspecs) { Dir[File.join(__dir__, '../*.gemspec')].to_a }
 
   context 'NOTICE file' do
     let(:notice_file) { 'NOTICE.txt' }
@@ -53,5 +53,4 @@ describe 'Repository' do
       end
     end
   end
-
 end
