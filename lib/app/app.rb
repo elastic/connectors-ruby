@@ -5,6 +5,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'active_support/inflector'
 require 'faraday'
 require 'hashie'
 require 'json'
@@ -78,7 +79,8 @@ class ConnectorsWebApp < Sinatra::Base
     json(
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
-      :connectors_revision => settings.revision
+      :connectors_revision => settings.revision,
+      :connector_name => ActiveSupport::Inflector.camelize(settings.http['connector'])
     )
   end
 
