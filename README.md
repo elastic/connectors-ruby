@@ -41,6 +41,9 @@ make all
 Consumers will need to use the `api_key` string as the password in
 the Authorization header.
 
+### Sinatra Console
+run `make console`
+
 ### Configuration
 
 By design, we try to avoid duplicating any metadata in the project, like its
