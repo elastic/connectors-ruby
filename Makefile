@@ -37,3 +37,6 @@ credentials:
 
 run:
 	cd lib/app; bundle exec rackup config.ru
+
+console:
+	cd lib/app; bundle exec irb -r ./console.rb

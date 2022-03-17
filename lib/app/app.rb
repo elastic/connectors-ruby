@@ -18,6 +18,8 @@ require 'connectors_shared'
 require 'connectors_app/config'
 require 'connectors_sdk/base/registry'
 
+Dir[File.join(__dir__, 'initializers/**/*.rb')].each { |f| require f }
+
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
