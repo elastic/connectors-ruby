@@ -240,7 +240,12 @@ describe ConnectorsSdk::SharePoint::Extractor do
       end
 
       it 'does not error' do
-        cursors['current_drive_id'] = '_'
+        cursors['current_drive_id'] = ('z' * 100) # sorts after any real id
+        expect { subject }.not_to raise_error
+      end
+
+      it 'understands how to skip to just after last_drive_id' do
+        cursors['last_drive_id'] = ('z' * 100)
         expect { subject }.not_to raise_error
       end
 

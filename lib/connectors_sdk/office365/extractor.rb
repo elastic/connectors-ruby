@@ -22,15 +22,15 @@ module ConnectorsSdk
             current_drive_id = config.cursors['current_drive_id']
             last_drive_id = config.cursors['last_drive_id']
 
-            if current_drive_id.present? && current_drive_id < drive_id # they come alpha sorted
+            if current_drive_id.present? && current_drive_id > drive_id # they come alpha sorted
               next
             end
 
-            if last_drive_id.present? && last_drive_id <= drive_id # they come alpha sorted
-              config.cursors.delete('last_drive_id')
+            if last_drive_id.present? && last_drive_id >= drive_id # they come alpha sorted
               if last_drive_id == drive_id
-                next
+                config.cursors.delete('last_drive_id')
               end
+              next
             end
 
             config.cursors['current_drive_id'] = drive_id
