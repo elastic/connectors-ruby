@@ -1,5 +1,3 @@
-## Closes https://github.com/elastic/enterprise-search-team/issues/###
-or
 ## Closes https://github.com/elastic/connectors/issues/###
 
 
