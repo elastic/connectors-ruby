@@ -29,6 +29,7 @@ install:
 	rbenv install -s
 	- gem install bundler -v 2.2.33
 	bundle install --jobs 1
+	cp -n config/connectors.yml.example config/connectors.yml
 
 run:
 	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
