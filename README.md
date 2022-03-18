@@ -4,19 +4,18 @@ The new home of Elastic Connectors
 ### System Requirements
 - Ruby (see [.ruby-version](.ruby-version))
 - bundler 2.2.29
+- yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
 ### Setup
 1. `make install`
 
-### Lintint
+### Linting
 run `make lint`
 
 ### Testing
 run `make test`
 
 ### Copying artifacts to Enterprise Search
-
-Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, then:
 
 1. run `make build`
 1. cd to your ent-search checkout
@@ -27,15 +26,20 @@ Make sure you have [yq](https://github.com/mikefarah/yq/#install) installed, the
 ### Running a webserver with a Connector
 To run the webserver, several steps need to be made: Java artifacts built, credentials initialized and some other small things work.
 
-First, make sure that you create a unique `api_key` for your service, with:
+First, ensure you have installed necessary dependencies with:
+```shell
+make install
+```
+
+Next, create a unique `api_key` for your service, with:
 ```shell
 make api_key
 ```
 
-Then, you can run all of them for now with a `make` command:
+Then, you can run the server with:
 
 ```shell
-make all
+make run
 ```
 
 Consumers will need to use the `api_key` string as the password in
@@ -63,6 +67,9 @@ but you can provide your own configuration file by using the **CONNECTORS_CONFIG
 ### Where do I report issues with Connectors?
 If something is not working as expected, please open an [issue](https://github.com/elastic/connectors/issues/new).
 
+##### Official Support Services
+If you have an Elastic subscription, you are entitled to Support services. See our welcome page for [working with our support team](https://www.elastic.co/support/welcome). 
+
 ### Where can I go to get help?
 The Workplace Search team at Elastic maintains this library and are happy to help. Try posting your question to the
 [Elastic Workplace Search discuss forums](https://discuss.elastic.co/c/workplace-search). Be sure to mention that you're
@@ -71,12 +78,4 @@ encountering. You can also find us in the `#enterprise-workplace-search` channel
 [Elastic Community Slack](elasticstack.slack.com).
 
 ### Contribute 🚀
-We welcome contributors to the project. Before you begin, a couple notes...
-* Read the [Connectors Contributor's Guide](https://github.com/elastic/connectors/blob/main/CONTRIBUTING.md).
-* Prior to opening a pull request, please:
-    * [Create an issue](https://github.com/elastic/connectors/issues) to discuss the scope of your proposal.
-    * Sign the [Contributor License Agreement](https://www.elastic.co/contributor-agreement/). We are not asking you to
-      assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all
-      contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign
-      the CLA once.
-* Please write simple code and concise documentation, when appropriate.
+We welcome contributors to the project. Before you begin, please read the [Connectors Contributor's Guide](https://github.com/elastic/connectors/blob/main/doc/CONTRIBUTING.md).

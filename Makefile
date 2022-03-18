@@ -1,7 +1,5 @@
 YQ ?= "yq"
 
-all: install credentials run
-
 test:
 	bundle exec rspec spec
 
@@ -32,10 +30,10 @@ install:
 	- gem install bundler -v 2.2.33
 	bundle install --jobs 1
 
-credentials:
-	vaulter read ws-google-drive-service-account --json > ent-search-dev.json
-
 run:
+	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
+	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
+	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
 	cd lib/app; bundle exec rackup config.ru
 
 console:
