@@ -17,15 +17,15 @@ module ConnectorsSdk
 
     class HttpCallWrapper
       def extractor(params)
-        cursors = params.fetch('cursors', {}) || {}
-        features = params.fetch('features', {}) || {}
+        cursors = params.fetch(:cursors, {}) || {}
+        features = params.fetch(:features, {}) || {}
 
         # XXX can we cache that class across calls?
         ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: 'sharepoint_online',
-          authorization_data_proc: proc { { access_token: params['access_token'] } },
-          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params['access_token'], :cursors => cursors) },
+          authorization_data_proc: proc { { access_token: params[:access_token] } },
+          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token], :cursors => cursors) },
           config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
           features: features
         )
@@ -65,7 +65,7 @@ module ConnectorsSdk
 
       def deleted(params)
         results = []
-        extractor(params).yield_deleted_ids(params['ids']) do |id|
+        extractor(params).yield_deleted_ids(params[:ids]) do |id|
           results << id
         end
         results
@@ -74,7 +74,7 @@ module ConnectorsSdk
       end
 
       def permissions(params)
-        extractor(params).yield_permissions(params['user_id']) do |permissions|
+        extractor(params).yield_permissions(params[:user_id]) do |permissions|
           return permissions
         end
       rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
@@ -95,6 +95,18 @@ module ConnectorsSdk
 
       def download(params)
         extractor(params).download(params[:meta])
+      end
+
+      def name
+        'SharePoint'
+      end
+
+      def source_status(access_token)
+        client = ConnectorsSdk::Office365::CustomClient.new(:access_token => access_token)
+        client.me
+        { :status => 'OK', :statusCode => 200, :message => 'Connected to SharePoint' }
+      rescue StandardError => e
+        { :status => 'FAILURE', :statusCode => e.is_a?(ConnectorsSdk::Office365::CustomClient::ClientError) ? e.status_code : 500, :message => e.message }
       end
     end
   end

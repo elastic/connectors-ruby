@@ -78,32 +78,21 @@ class ConnectorsWebApp < Sinatra::Base
     )
   end
 
-  get '/health' do
-    json :healthy => 'yes'
-  end
-
-  get '/status' do
-    # TODO: wait for other refactorings to replace this code in the right spot
-    response = Faraday.get('https://graph.microsoft.com/v1.0/me')
-    response_json = Hashie::Mash.new(JSON.parse(response.body))
-
-    status = response_json.error? ? 'FAILURE' : 'OK'
-    message = response_json.error? ? response_json.error.message : 'Connected to SharePoint'
-
+  post '/status' do
+    connector = settings.connector
+    source_status = connector.source_status(body_params[:access_token])
     json(
-      :extractor => { :name => 'SharePoint' },
-      :contentProvider => { :status => status, :statusCode => response.status, :message => message }
+      :extractor => { :name => connector.name },
+      :contentProvider => source_status
     )
   end
 
   post '/documents' do
-    params = JSON.parse(request.body.read)
-
-    original_cursors = (params.fetch('cursors', {}) || {}).as_json
+    original_cursors = (body_params.fetch(:cursors, {}) || {}).as_json
 
     connector = settings.connector
 
-    results = connector.document_batch(params)
+    results = connector.document_batch(body_params)
 
     new_cursors = if connector.cursors.as_json != original_cursors
                     connector.cursors
@@ -118,38 +107,38 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    params = JSON.parse(request.body.read, :symbolize_names => true)
-    settings.connector.download(params)
+    settings.connector.download(body_params)
   end
 
   post '/deleted' do
-    json :results => settings.connector.deleted(JSON.parse(request.body.read))
+    json :results => settings.connector.deleted(body_params)
   end
 
   post '/permissions' do
-    json :results => settings.connector.permissions(JSON.parse(request.body.read))
+    json :results => settings.connector.permissions(body_params)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
-    body = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
-    logger.info "Received redirect URL: #{body[:redirect_uri]}"
-    authorization_uri = settings.connector.authorization_uri(body)
+    logger.info "Received client ID: #{body_params[:client_id]} and client secret: #{body_params[:client_secret]}"
+    logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
+    authorization_uri = settings.connector.authorization_uri(body_params)
 
     json :oauth2redirect => authorization_uri
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
-    params = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received payload: #{params}"
-    json settings.connector.access_token(params)
+    logger.info "Received payload: #{body_params}"
+    json settings.connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    params = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received payload: #{params}"
-    json settings.connector.refresh(params)
+    logger.info "Received payload: #{body_params}"
+    json settings.connector.refresh(body_params)
+  end
+
+  def body_params
+    @body_params ||= JSON.parse(request.body.read, symbolize_names: true).with_indifferent_access
   end
 end

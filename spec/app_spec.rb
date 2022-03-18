@@ -8,6 +8,7 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
   let(:api_key) { 'api_key' }
+  let(:connector) { ConnectorsSdk::SharePoint::HttpCallWrapper.new }
 
   def expect_json(response, json)
     expect(json(response)).to eq json
@@ -20,6 +21,7 @@ RSpec.describe ConnectorsWebApp do
   before(:each) do
     allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
     allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
+    allow(ConnectorsWebApp.settings).to receive(:connector).and_return(connector)
   end
 
   describe 'Catch all' do
@@ -31,7 +33,7 @@ RSpec.describe ConnectorsWebApp do
       allow(ConnectorsWebApp.settings).to receive(:show_exceptions).and_return(false)
 
       basic_authorize 'ent-search', api_key
-      response = get '/status'
+      response = post '/status'
       expect(response.status).to eq 500
       response = json(response)
       expect(response['errors'][0]['code']).to eq ConnectorsShared::INTERNAL_SERVER_ERROR.code
@@ -97,18 +99,26 @@ RSpec.describe ConnectorsWebApp do
     end
   end
 
-  describe 'GET /status' do
-    let(:response) {
+  describe 'POST /status' do
+    let(:connector_name) { 'SharePoint' }
+    let(:source_status) do
+      {
+        'status' => 'OK',
+        'statusCode' => 200,
+        'message' => 'Connected to SharePoint'
+      }
+    end
+
+    it 'returns source status' do
+      allow(connector).to receive(:name).and_return(connector_name)
+      allow(connector).to receive(:source_status).and_return(source_status)
+
       basic_authorize 'ent-search', api_key
-      get '/status'
-    }
+      response = post('/status', JSON.generate({ :access_token => 'access_token' }), { 'CONTENT_TYPE' => 'application/json' })
 
-    it 'returns status 200 OK' do
-      stub_request(:get, 'https://graph.microsoft.com/v1.0/me')
-        .with { true }
-        .to_return(status: 200, body: JSON.generate({}))
-
-      expect(response.status).to eq 200
+      expect(response).to be_successful
+      expect(json(response)['extractor']['name']).to eq(connector_name)
+      expect(json(response)['contentProvider']).to eq(source_status)
     end
   end
 
@@ -116,7 +126,7 @@ RSpec.describe ConnectorsWebApp do
     let(:params) { { :ids => %w[id1 id2], :access_token => 'access token' } }
 
     it 'returns deleted ids' do
-      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:deleted).and_return(['id1'])
+      allow(connector).to receive(:deleted).and_return(['id1'])
 
       basic_authorize 'ent-search', api_key
       response = post('/deleted', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -129,7 +139,7 @@ RSpec.describe ConnectorsWebApp do
     let(:params) { { :user_id => 'id', :access_token => 'access token' } }
 
     it 'returns deleted ids' do
-      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:permissions).and_return(%w[permission1 permission2])
+      allow(connector).to receive(:permissions).and_return(%w[permission1 permission2])
 
       basic_authorize 'ent-search', api_key
       response = post('/permissions', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -256,7 +266,7 @@ RSpec.describe ConnectorsWebApp do
       let(:params) { { :a => 'b', :c => 'd' } }
 
       it 'returns the result of HttpCallWrapper.download' do
-        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_return(file_content)
+        allow(connector).to receive(:download).and_return(file_content)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
         expect(response.body).to eq(file_content)
@@ -269,7 +279,7 @@ RSpec.describe ConnectorsWebApp do
       let(:error_class) { ArgumentError }
 
       it 'raises this error' do
-        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_raise(error_class)
+        allow(connector).to receive(:download).and_raise(error_class)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
         expect(response.status).to eq(500)
         expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
