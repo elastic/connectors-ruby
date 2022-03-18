@@ -29,9 +29,6 @@ RSpec.describe ConnectorsWebApp do
       # this will break the Sinatra server on GET /status
       allow(Faraday).to receive(:get) { raise StandardError }
 
-      allow(ConnectorsWebApp.settings).to receive(:raise_errors).and_return(false)
-      allow(ConnectorsWebApp.settings).to receive(:show_exceptions).and_return(false)
-
       basic_authorize 'ent-search', api_key
       response = post '/status'
       expect(response.status).to eq 500
