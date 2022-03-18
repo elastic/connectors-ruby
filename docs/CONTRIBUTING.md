@@ -2,6 +2,10 @@
 
 Thank you for your interest in contributing to Connectors!
 
+You may also want to read the [development guide](./DEVELOPING.md).
+
+### Before you start
+
 * Prior to opening a pull request, please:
     * Read the entirety of this document
     * [Create an issue](https://github.com/elastic/connectors/issues) to discuss the scope of your proposal.
@@ -12,29 +16,10 @@ Thank you for your interest in contributing to Connectors!
     * Run all tests locally, and ensure they are all passing  
 * Please write simple code and concise documentation, when appropriate.
 
-### Requirements
-- Ruby (see [.ruby-version](.ruby-version))
-- bundler 2.2.29
-- yq (see [yq installation](https://github.com/mikefarah/yq#install))
-
-### Installing dependencies
-
-From the root level of this repository:
-
-```shell
-make install
-```
-
-### Building
-
-The repository can generate a ruby gem, if needed.
-
-```shell
-# Build
-make build
-```
 
 ### Testing
+
+It is expected that any contribution will include unit tests. The linter and all unit tests must be passing in order to merge any pull request. Ensure that your tests are passing locally _before_ submitting a pull request.
 
 ```shell
 # ensure code standards
@@ -43,8 +28,6 @@ make lint
 # run unit tests
 make test
 ```
-
-It is expected that any contribution will include unit tests. The linter and all unit tests must be passing in order to merge any pull request. Ensure that your tests are passing locally _before_ submitting a pull request.
 
 ### Branching Strategy
 

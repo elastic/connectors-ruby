@@ -15,7 +15,6 @@ api_key:
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
 build:
-	cp config/connectors.yml .saved
 	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
 	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
@@ -23,7 +22,6 @@ build:
 	gem build connectors_sdk.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
-	mv .saved config/connectors.yml
 
 install:
 	rbenv install -s
