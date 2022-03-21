@@ -14,7 +14,6 @@ require 'sinatra'
 require 'sinatra/config_file'
 require 'sinatra/json'
 
-require 'connectors_app/errors'
 require 'connectors_shared'
 require 'connectors_app/config'
 require 'connectors_sdk/base/registry'
@@ -27,8 +26,8 @@ class ConnectorsWebApp < Sinatra::Base
   config_file ConnectorsApp::CONFIG_FILE
 
   configure do
-    set :raise_errors, settings.http['raise_errors']
-    set :show_exceptions, settings.http['show_exceptions']
+    set :raise_errors, false
+    set :show_exceptions, false
     set :port, settings.http['port']
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
@@ -37,20 +36,19 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   error do
-    content_type :json
-    status 500
     e = env['sinatra.error']
-    backtrace = "Application error\n#{e}\n#{e.backtrace.join("\n")}"
-
-    json(
-      :errors => [
-        {
-          :message => 'Internal Server Error',
-          :code => ConnectorsApp::Errors::INTERNAL_SERVER_ERROR,
-          :backtrace => backtrace
-        }
-      ]
-    )
+    err = case e
+          when ConnectorsShared::ClientError
+            ConnectorsShared::Error.new(400, 'BAD_REQUEST', e.message)
+          when ConnectorsShared::SecretInvalidError
+            ConnectorsShared::INVALID_ACCESS_TOKEN
+          when ConnectorsShared::TokenRefreshFailedError
+            ConnectorsShared::TOKEN_REFRESH_ERROR
+          else
+            ConnectorsShared::INTERNAL_SERVER_ERROR
+          end
+    status err.status_code
+    json :errors => [err.to_h]
   end
 
   before do
@@ -66,15 +64,9 @@ class ConnectorsWebApp < Sinatra::Base
     return if auth.provided? && auth.basic? && auth.credentials && auth.credentials[1] == settings.api_key
 
     # We only support Basic for now
-    if auth.provided? && auth.scheme != 'basic'
-      code = ConnectorsApp::Errors::UNSUPPORTED_AUTH_SCHEME
-      message = 'Unsupported authorization scheme'
-    else
-      code = ConnectorsApp::Errors::INVALID_API_KEY
-      message = 'Invalid API key'
-    end
-    response = { errors: [{ message: message, code: code }] }.to_json
-    halt(401, { 'Content-Type' => 'application/json' }, response)
+    error = auth.provided? && auth.scheme != 'basic' ? ConnectorsShared::UNSUPPORTED_AUTH_SCHEME : ConnectorsShared::INVALID_API_KEY
+    response = { errors: [error.to_h] }.to_json
+    halt(error.status_code, { 'Content-Type' => 'application/json' }, response)
   end
 
   get '/' do
@@ -86,32 +78,21 @@ class ConnectorsWebApp < Sinatra::Base
     )
   end
 
-  get '/health' do
-    json :healthy => 'yes'
-  end
-
-  get '/status' do
-    # TODO: wait for other refactorings to replace this code in the right spot
-    response = Faraday.get('https://graph.microsoft.com/v1.0/me')
-    response_json = Hashie::Mash.new(JSON.parse(response.body))
-
-    status = response_json.error? ? 'FAILURE' : 'OK'
-    message = response_json.error? ? response_json.error.message : 'Connected to SharePoint'
-
+  post '/status' do
+    connector = settings.connector
+    source_status = connector.source_status(body_params[:access_token])
     json(
-      :extractor => { :name => 'SharePoint' },
-      :contentProvider => { :status => status, :statusCode => response.status, :message => message }
+      :extractor => { :name => connector.name },
+      :contentProvider => source_status
     )
   end
 
   post '/documents' do
-    params = JSON.parse(request.body.read)
-
-    original_cursors = (params.fetch('cursors', {}) || {}).as_json
+    original_cursors = (body_params.fetch(:cursors, {}) || {}).as_json
 
     connector = settings.connector
 
-    results = connector.document_batch(params)
+    results = connector.document_batch(body_params)
 
     new_cursors = if connector.cursors.as_json != original_cursors
                     connector.cursors
@@ -126,51 +107,38 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    params = JSON.parse(request.body.read, :symbolize_names => true)
-    settings.connector.download(params)
+    settings.connector.download(body_params)
   end
 
   post '/deleted' do
-    json :results => settings.connector.deleted(JSON.parse(request.body.read))
+    json :results => settings.connector.deleted(body_params)
   end
 
   post '/permissions' do
-    json :results => settings.connector.permissions(JSON.parse(request.body.read))
+    json :results => settings.connector.permissions(body_params)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
-    body = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received client ID: #{body[:client_id]} and client secret: #{body[:client_secret]}"
-    logger.info "Received redirect URL: #{body[:redirect_uri]}"
-    authorization_uri = settings.connector.authorization_uri(body)
+    logger.info "Received client ID: #{body_params[:client_id]} and client secret: #{body_params[:client_secret]}"
+    logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
+    authorization_uri = settings.connector.authorization_uri(body_params)
 
     json :oauth2redirect => authorization_uri
-  rescue ConnectorsShared::ClientError => e
-    render_exception(400, e.message)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
-    params = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received payload: #{params}"
-    json settings.connector.access_token(params)
-  rescue ConnectorsShared::ClientError => e
-    render_exception(400, e.message)
+    logger.info "Received payload: #{body_params}"
+    json settings.connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    params = JSON.parse(request.body.read, symbolize_names: true)
-    logger.info "Received payload: #{params}"
-    json settings.connector.refresh(params)
-  rescue ConnectorsShared::ClientError => e
-    render_exception(400, e.message)
-  rescue ::Signet::AuthorizationError => e
-    render_exception(401, e.message)
+    logger.info "Received payload: #{body_params}"
+    json settings.connector.refresh(body_params)
   end
 
-  def render_exception(status_code, message)
-    status status_code
-    json :errors => [{ message: message }]
+  def body_params
+    @body_params ||= JSON.parse(request.body.read, symbolize_names: true).with_indifferent_access
   end
 end

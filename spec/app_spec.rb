@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'app/app'
-require 'connectors_app/errors'
 require 'connectors_app/version'
 
 RSpec.describe ConnectorsWebApp do
@@ -9,6 +8,7 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
   let(:api_key) { 'api_key' }
+  let(:connector) { ConnectorsSdk::SharePoint::HttpCallWrapper.new }
 
   def expect_json(response, json)
     expect(json(response)).to eq json
@@ -21,6 +21,7 @@ RSpec.describe ConnectorsWebApp do
   before(:each) do
     allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
     allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
+    allow(ConnectorsWebApp.settings).to receive(:connector).and_return(connector)
   end
 
   describe 'Catch all' do
@@ -28,30 +29,22 @@ RSpec.describe ConnectorsWebApp do
       # this will break the Sinatra server on GET /status
       allow(Faraday).to receive(:get) { raise StandardError }
 
-      allow(ConnectorsWebApp.settings).to receive(:raise_errors).and_return(false)
-      allow(ConnectorsWebApp.settings).to receive(:show_exceptions).and_return(false)
-
       basic_authorize 'ent-search', api_key
-      response = get '/status'
+      response = post '/status'
       expect(response.status).to eq 500
       response = json(response)
-      expect(response['errors'][0]['code']).to eq ConnectorsApp::Errors::INTERNAL_SERVER_ERROR
+      expect(response['errors'][0]['code']).to eq ConnectorsShared::INTERNAL_SERVER_ERROR.code
+      expect(response['errors'][0]['message']).to eq ConnectorsShared::INTERNAL_SERVER_ERROR.message
     end
   end
 
   describe 'Authorization /' do
     let(:bad_auth) {
-      { 'errors' => [
-        { 'code' => ConnectorsApp::Errors::INVALID_API_KEY,
-          'message' => 'Invalid API key' }
-      ] }
+      { 'errors' => [ConnectorsShared::INVALID_API_KEY.to_h] }
     }
 
     let(:unsupported_auth) {
-      { 'errors' => [
-        { 'code' => ConnectorsApp::Errors::UNSUPPORTED_AUTH_SCHEME,
-          'message' => 'Unsupported authorization scheme' }
-      ] }
+      { 'errors' => [ConnectorsShared::UNSUPPORTED_AUTH_SCHEME.to_h] }
     }
 
     it 'returns a 401 when Basic auth misses' do
@@ -103,18 +96,26 @@ RSpec.describe ConnectorsWebApp do
     end
   end
 
-  describe 'GET /status' do
-    let(:response) {
+  describe 'POST /status' do
+    let(:connector_name) { 'SharePoint' }
+    let(:source_status) do
+      {
+        'status' => 'OK',
+        'statusCode' => 200,
+        'message' => 'Connected to SharePoint'
+      }
+    end
+
+    it 'returns source status' do
+      allow(connector).to receive(:name).and_return(connector_name)
+      allow(connector).to receive(:source_status).and_return(source_status)
+
       basic_authorize 'ent-search', api_key
-      get '/status'
-    }
+      response = post('/status', JSON.generate({ :access_token => 'access_token' }), { 'CONTENT_TYPE' => 'application/json' })
 
-    it 'returns status 200 OK' do
-      stub_request(:get, 'https://graph.microsoft.com/v1.0/me')
-        .with { true }
-        .to_return(status: 200, body: JSON.generate({}))
-
-      expect(response.status).to eq 200
+      expect(response).to be_successful
+      expect(json(response)['extractor']['name']).to eq(connector_name)
+      expect(json(response)['contentProvider']).to eq(source_status)
     end
   end
 
@@ -122,7 +123,7 @@ RSpec.describe ConnectorsWebApp do
     let(:params) { { :ids => %w[id1 id2], :access_token => 'access token' } }
 
     it 'returns deleted ids' do
-      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:deleted).and_return(['id1'])
+      allow(connector).to receive(:deleted).and_return(['id1'])
 
       basic_authorize 'ent-search', api_key
       response = post('/deleted', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -135,7 +136,7 @@ RSpec.describe ConnectorsWebApp do
     let(:params) { { :user_id => 'id', :access_token => 'access token' } }
 
     it 'returns deleted ids' do
-      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:permissions).and_return(%w[permission1 permission2])
+      allow(connector).to receive(:permissions).and_return(%w[permission1 permission2])
 
       basic_authorize 'ent-search', api_key
       response = post('/permissions', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
@@ -224,15 +225,14 @@ RSpec.describe ConnectorsWebApp do
       end
 
       context 'with expired refresh token' do
-        let(:error) { 'error' }
-
         it 'returns 401' do
-          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(Signet::AuthorizationError.new(error))
+          allow(ConnectorsSdk::SharePoint::Authorization).to receive(:refresh).and_raise(ConnectorsShared::TokenRefreshFailedError)
 
           basic_authorize 'ent-search', api_key
           response = post('/oauth2/refresh', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
-          expect(response.status).to eq(401)
-          expect(json(response)['errors'].first['message']).to eq(error)
+          expect(response.status).to eq(ConnectorsShared::TOKEN_REFRESH_ERROR.status_code)
+          expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::TOKEN_REFRESH_ERROR.code)
+          expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::TOKEN_REFRESH_ERROR.message)
         end
       end
     end
@@ -256,7 +256,6 @@ RSpec.describe ConnectorsWebApp do
     let(:file_content) { 'this is the file content, right?' }
 
     before(:each) do
-      allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_return(file_content)
       basic_authorize 'ent-search', api_key
     end
 
@@ -264,6 +263,7 @@ RSpec.describe ConnectorsWebApp do
       let(:params) { { :a => 'b', :c => 'd' } }
 
       it 'returns the result of HttpCallWrapper.download' do
+        allow(connector).to receive(:download).and_return(file_content)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
         expect(response.body).to eq(file_content)
@@ -273,23 +273,35 @@ RSpec.describe ConnectorsWebApp do
 
     context 'when JSON.parse raises an error' do
       before(:each) do
-        allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+        times_called = 0
+        allow(JSON).to receive(:parse).and_wrap_original do |m, str|
+          if times_called == 0
+            times_called += 1
+            raise JSON::ParserError
+          else
+            m.call(str)
+          end
+        end
       end
 
       it 'raises this error' do
-        expect { post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' }) }.to raise_error(JSON::ParserError)
+        response = post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(500)
+        expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
+        expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
       end
     end
 
     context 'when HttpCallWrapper.download raises an error' do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
-      before(:each) do
-        allow_any_instance_of(ConnectorsSdk::SharePoint::HttpCallWrapper).to receive(:download).and_raise(error_class)
-      end
 
       it 'raises this error' do
-        expect { post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' }) }.to raise_error(error_class)
+        allow(connector).to receive(:download).and_raise(error_class)
+        response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(500)
+        expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
+        expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
       end
     end
   end
