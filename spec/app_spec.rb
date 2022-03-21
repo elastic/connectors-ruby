@@ -271,6 +271,27 @@ RSpec.describe ConnectorsWebApp do
       end
     end
 
+    context 'when JSON.parse raises an error' do
+      before(:each) do
+        times_called = 0
+        allow(JSON).to receive(:parse).and_wrap_original do |m, str|
+          if times_called == 0
+            times_called += 1
+            raise JSON::ParserError
+          else
+            m.call(str)
+          end
+        end
+      end
+
+      it 'raises this error' do
+        response = post('/download', '{}', { 'CONTENT_TYPE' => 'application/json' })
+        expect(response.status).to eq(500)
+        expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
+        expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
+      end
+    end
+
     context 'when HttpCallWrapper.download raises an error' do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
