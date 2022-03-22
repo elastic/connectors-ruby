@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   }
   s.files       = Dir.glob("lib/connectors_sdk/**/*", File::FNM_DOTMATCH) +
     Dir.glob("lib/connectors_shared/**/*", File::FNM_DOTMATCH) +
-    ['LICENSE', 'lib/connectors_sdk.rb', 'lib/connectors_shared.rb']
+    ['LICENSE', 'NOTICE.txt', 'lib/connectors_sdk.rb', 'lib/connectors_shared.rb']
   s.license       = 'Elastic-2.0'
 
   # TODO: figure out how to pin versions without harming ent-search repo

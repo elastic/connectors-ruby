@@ -1,9 +1,10 @@
-# frozen_string_literal: true
 #
 # Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
+
+# frozen_string_literal: true
 
 require 'active_support/inflector'
 require 'faraday'
@@ -56,7 +57,7 @@ class ConnectorsWebApp < Sinatra::Base
     # XXX to be removed
     return if settings.deactivate_auth
 
-    raise StandardError.new 'You need to set an API key in the config file' if settings.environment != :test && settings.api_key == 'secret'
+    raise StandardError.new 'You need to set an API key in the config file' if settings.environment != :test && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
 
     auth = Rack::Auth::Basic::Request.new(request.env)
 

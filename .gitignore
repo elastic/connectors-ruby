@@ -29,9 +29,10 @@ hs_err_pid*
 # maven
 target
 
-# temp folders for build artifacts
+# temp files/folders for build artifacts
 .gems
 coverage
+connectors.yml
 
 # bundler state
 /.bundle

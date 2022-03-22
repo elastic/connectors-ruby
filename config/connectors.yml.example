@@ -6,6 +6,6 @@ revision: "main"
 # web service
 http:
   port: 9292
-  api_key: secret
-  deactivate_auth: true
+  api_key: changeme
+  deactivate_auth: false
   connector: share_point

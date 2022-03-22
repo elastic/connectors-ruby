@@ -10,6 +10,7 @@ module ConnectorsApp
   # - CONNECTORS_CONFIG environement variable
   # - here: /../../config/connectors.yml
   CONFIG_FILE = ENV['CONNECTORS_CONFIG'] || File.join(__dir__, '../..', 'config', 'connectors.yml')
+  DEFAULT_PASSWORD = 'changeme'
 
   Config = YAML.load_file(CONFIG_FILE)
 end
