@@ -73,7 +73,6 @@ module ConnectorsSdk
       end
 
       def yield_deleted_ids(ids)
-        log_info("asdfasdfadsfa = #{existing_drive_item_ids.inspect} - adfadadsf #{ids}")
         ids.each do |id|
           yield id unless existing_drive_item_ids.include?(id)
         end
