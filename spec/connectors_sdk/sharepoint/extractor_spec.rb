@@ -203,8 +203,8 @@ describe ConnectorsSdk::SharePoint::Extractor do
 
         it 'yields document' do
           site = expect_sites([random_site]).first
-          drive = expect_site_drives(site[:id], [random_drive.tap { |drive| drive[:id] = drive_id }]).first
-          expect_delta(drive[:id], [random_change.tap { |drive| drive[:id] = drive_id }])
+          drive = expect_site_drives(site[:id], [random_drive.tap { |d| d[:id] = drive_id }]).first
+          expect_delta(drive[:id], [random_change.tap { |d| d[:id] = drive_id }])
 
           subject.document_changes { |c| c }
           expect(subject.monitor.success_count).to eq(1)
