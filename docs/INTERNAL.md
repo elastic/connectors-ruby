@@ -59,6 +59,6 @@ Any time that changes are made to the connectors repo, that would impact the `co
 - [ ] run `make test`
 - [ ] run `make run`, ensure it doesn't crash
 - [ ] run `curl -u elastic:changeme http://localhost:9292 | jq` and validate API key error
-- [ ] run `curl -u elastic:generated_api_key http://localhost:9292 | jq` and validate 200 OK
+- [ ] run `curl -u elastic:$CONNECTOR_API_KEY http://localhost:9292 | jq` and validate 200 OK
 - [ ] run `make build` and copy the resulting gemfile to ent-search using the process defined in [the above section](#copying-artifacts-to-enterprise-search).
 - [ ] create a new content source using the external connector. Validate that it syncs, and that there are no errors in the ent-search or connectors logs.
