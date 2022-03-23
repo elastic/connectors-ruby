@@ -259,4 +259,32 @@ describe ConnectorsSdk::Base::Extractor do
       end
     end
   end
+
+  context '#deleted_ids' do
+    let(:ids) { 10.times.collect { |i| "id_#{i}" } }
+
+    context 'with removed item' do
+      it 'yields the deleted item id' do
+        allow(subject).to receive(:yield_deleted_ids).and_yield(ids.first)
+        expect { |blk| subject.deleted_ids(ids, &blk) }.to yield_successive_args(ids.first)
+      end
+    end
+
+    context 'with no item removed' do
+      it 'yields nothing' do
+        allow(subject).to receive(:yield_deleted_ids)
+        expect { |blk| subject.deleted_ids(ids, &blk) }.to yield_successive_args
+      end
+    end
+  end
+
+  context '#permissions' do
+    let(:id) { 'id' }
+    let(:permissions) { %w[permission1 permissions2] }
+
+    it 'yields permissions' do
+      allow(subject).to receive(:yield_permissions).and_yield(permissions)
+      expect { |blk| subject.permissions(id, &blk) }.to yield_successive_args(permissions)
+    end
+  end
 end

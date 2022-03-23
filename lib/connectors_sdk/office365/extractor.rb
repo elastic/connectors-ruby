@@ -73,6 +73,7 @@ module ConnectorsSdk
       end
 
       def yield_deleted_ids(ids)
+        log_info("asdfasdfadsfa = #{existing_drive_item_ids.inspect} - adfadadsf #{ids}")
         ids.each do |id|
           yield id unless existing_drive_item_ids.include?(id)
         end
@@ -189,6 +190,7 @@ module ConnectorsSdk
 
       def yield_changes(drive_id, drive_owner_name:, drive_name:, start_delta_link: nil, last_modified: nil, break_after_page: false, &block)
         client.list_changes(:drive_id => drive_id, :start_delta_link => start_delta_link, :last_modified => last_modified, :break_after_page => break_after_page) do |item|
+          log_info("item = #{item.inspect}")
           yield_single_document_change(:identifier => "Office365 change: #{item&.id} (#{Office365::Adapter::GraphItem.get_path(item)})") do
             item.drive_owner_name = drive_owner_name
             item.drive_name = drive_name
