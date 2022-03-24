@@ -1,4 +1,4 @@
-require 'lib/connectors_app/config'
+require_relative 'lib/connectors_app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_sdk'
@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   }
   s.files       = Dir.glob("lib/connectors_sdk/**/*", File::FNM_DOTMATCH) +
     Dir.glob("lib/connectors_shared/**/*", File::FNM_DOTMATCH) +
+    Dir.glob("lib/connectors_app/config.rb", File::FNM_DOTMATCH) +
     ['LICENSE', 'NOTICE.txt', 'lib/connectors_sdk.rb', 'lib/connectors_shared.rb']
   s.license       = 'Elastic-2.0'
 
