@@ -11,4 +11,11 @@ module ConnectorsShared
     ALLOW_FIELD = '_allow_permissions'.freeze
     DENY_FIELD = '_deny_permissions'.freeze
   end
+
+  class ConfigMetadata
+    # general metadata
+    VERSION = "8.2.0-SNAPSHOT".freeze
+    REPOSITORY = "https://github.com/elastic/connectors".freeze
+    REVISION = "main".freeze
+  end
 end

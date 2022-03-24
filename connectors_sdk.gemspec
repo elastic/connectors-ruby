@@ -1,16 +1,16 @@
-require 'lib/connectors_app/config'
+require_relative 'lib/connectors_shared/constants'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_sdk'
-  s.version     = ConnectorsApp::Config['version']
+  s.version     = ConnectorsShared::ConfigMetadata::VERSION
   s.homepage    = "https://github.com/elastic/connectors"
   s.summary     = 'Gem containing apis used by Enterprise Search and implementations of Connectors'
   s.description = ''
   s.authors     = ['Elastic']
   s.email       = 'ent-search-dev@elastic.co'
   s.metadata    = {
-    "revision" => ConnectorsApp::Config['revision'],
-    "repository" => ConnectorsApp::Config['repository']
+    "revision" => ConnectorsShared::ConfigMetadata::REVISION,
+    "repository" => ConnectorsShared::ConfigMetadata::REPOSITORY
   }
   s.files       = Dir.glob("lib/connectors_sdk/**/*", File::FNM_DOTMATCH) +
     Dir.glob("lib/connectors_shared/**/*", File::FNM_DOTMATCH) +
