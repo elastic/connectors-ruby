@@ -119,9 +119,9 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
     end
 
     context 'with invalid access token' do
-      it 'raise SecretInvalidError' do
+      it 'raise InvalidTokenError' do
         allow(extractor_mock).to receive(:yield_deleted_ids).with(ids).and_raise(ConnectorsSdk::Office365::CustomClient::ClientError.new(401, nil))
-        expect { backend.deleted(params) }.to raise_error(ConnectorsShared::SecretInvalidError)
+        expect { backend.deleted(params) }.to raise_error(ConnectorsShared::InvalidTokenError)
       end
     end
   end
@@ -149,9 +149,9 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
     end
 
     context 'with invalid access token' do
-      it 'raise SecretInvalidError' do
+      it 'raise InvalidTokenError' do
         allow(extractor_mock).to receive(:yield_permissions).with(user_id).and_raise(ConnectorsSdk::Office365::CustomClient::ClientError.new(401, nil))
-        expect { backend.permissions(params) }.to raise_error(ConnectorsShared::SecretInvalidError)
+        expect { backend.permissions(params) }.to raise_error(ConnectorsShared::InvalidTokenError)
       end
     end
   end
