@@ -78,4 +78,23 @@ describe ConnectorsSdk::Base::CustomClient do
       end
     end
   end
+
+  describe '#request_with_throttling' do
+    let(:url) { '/test' }
+
+    context 'when request is successful' do
+      it 'returns 200' do
+        stub_request(:get, "#{base_url}#{url}").to_return(:status => 200)
+        response = client.send(:request_with_throttling, :get, url)
+        expect(response).to be_success
+      end
+    end
+
+    context 'when rate limit is reached' do
+      it 'raises ThrottlingError' do
+        stub_request(:get, "#{base_url}#{url}").to_return(:status => 429, :headers => { 'Retry-After': 0 })
+        expect { client.send(:request_with_throttling, :get, url) }.to raise_error(ConnectorsShared::ThrottlingError)
+      end
+    end
+  end
 end

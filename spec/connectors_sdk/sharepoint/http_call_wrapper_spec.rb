@@ -96,4 +96,83 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       end
     end
   end
+
+  context '.deleted' do
+    let(:extractor_mock) { double }
+    let(:ids) { 10.times.collect { random_string } }
+    let(:params) do
+      {
+          :access_token => 'access_token',
+          :ids => ids
+      }
+    end
+
+    before(:each) do
+      allow(ConnectorsSdk::SharePoint::Extractor).to receive(:new).and_return(extractor_mock)
+    end
+
+    context 'with valid access token' do
+      it 'returns deleted ids' do
+        allow(extractor_mock).to receive(:yield_deleted_ids).with(ids).and_yield(ids.first).and_yield(ids.second)
+        expect(backend.deleted(params)).to eq ids[0, 2]
+      end
+    end
+
+    context 'with invalid access token' do
+      it 'raise InvalidTokenError' do
+        allow(extractor_mock).to receive(:yield_deleted_ids).with(ids).and_raise(ConnectorsSdk::Office365::CustomClient::ClientError.new(401, nil))
+        expect { backend.deleted(params) }.to raise_error(ConnectorsShared::InvalidTokenError)
+      end
+    end
+  end
+
+  context '.permissions' do
+    let(:extractor_mock) { double }
+    let(:user_id) { 'user_id' }
+    let(:params) do
+      {
+          :access_token => 'access_token',
+          :user_id => user_id
+      }
+    end
+
+    before(:each) do
+      allow(ConnectorsSdk::SharePoint::Extractor).to receive(:new).and_return(extractor_mock)
+    end
+
+    context 'with valid access token' do
+      let(:permissions) { %w[permissions1 permission2] }
+      it 'returns permissions' do
+        allow(extractor_mock).to receive(:yield_permissions).with(user_id).and_yield(permissions)
+        expect(backend.permissions(params)).to eq permissions
+      end
+    end
+
+    context 'with invalid access token' do
+      it 'raise InvalidTokenError' do
+        allow(extractor_mock).to receive(:yield_permissions).with(user_id).and_raise(ConnectorsSdk::Office365::CustomClient::ClientError.new(401, nil))
+        expect { backend.permissions(params) }.to raise_error(ConnectorsShared::InvalidTokenError)
+      end
+    end
+  end
+
+  context '.source_status' do
+    let(:access_token) { 'access token' }
+
+    context 'remote source is up' do
+      it 'returns OK status' do
+        allow_any_instance_of(ConnectorsSdk::Office365::CustomClient).to receive(:me).and_return({})
+        response = backend.source_status(access_token)
+        expect(response[:status]).to eq 'OK'
+      end
+    end
+
+    context 'remote source is down' do
+      it 'returns FAILURE status' do
+        allow_any_instance_of(ConnectorsSdk::Office365::CustomClient).to receive(:me).and_raise(StandardError)
+        response = backend.source_status(access_token)
+        expect(response[:status]).to eq 'FAILURE'
+      end
+    end
+  end
 end
