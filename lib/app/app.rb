@@ -41,7 +41,7 @@ class ConnectorsWebApp < Sinatra::Base
     err = case e
           when ConnectorsShared::ClientError
             ConnectorsShared::Error.new(400, 'BAD_REQUEST', e.message)
-          when ConnectorsShared::SecretInvalidError
+          when ConnectorsShared::InvalidTokenError
             ConnectorsShared::INVALID_ACCESS_TOKEN
           when ConnectorsShared::TokenRefreshFailedError
             ConnectorsShared::TOKEN_REFRESH_ERROR

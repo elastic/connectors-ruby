@@ -86,6 +86,7 @@ module ConnectorsShared
   class JobCannotBeUpdatedError < StandardError; end
   class SecretInvalidError < StandardError; end
   class InvalidIndexingConfigurationError < StandardError; end
+  class InvalidTokenError < StandardError; end
   class TokenRefreshFailedError < StandardError; end
   class ConnectorNotAvailableError < StandardError; end
 
