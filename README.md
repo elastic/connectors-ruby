@@ -1,7 +1,6 @@
 # Elastic Enterprise Search Connectors 
 
-.. image:: logo-enterprise-search.png
-
+![logo](logo-enterprise-search.png)
 
 The home of Elastic Enterprise Connector Packages. 
 Use connector packages to customize connectors such as Workplace Search Content Sources for advanced use cases. 
