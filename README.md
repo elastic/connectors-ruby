@@ -10,12 +10,19 @@ Note: The connector framework is a tech preview feature. Tech preview features a
 
 ### System Requirements
 
-You can run the application using Docker or directly on your system.
+Under Linux or Macos, you can run the application using Docker or directly on your system.
 
 For the latter you will need:
 - Ruby (see [.ruby-version](.ruby-version))
 - bundler 2.2.29
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
+
+### Windows support
+
+We provide an experimental support for Window 10.
+
+You can run the `win32\install.bat` script to have an unattended installation of Ruby
+and the tools we use. Once installed, you can run the `specs` using `make.bat`
 
 ### Running a webserver with a Connector
 To run the webserver, several steps need to be taken.
