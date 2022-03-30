@@ -185,11 +185,39 @@ describe ConnectorsSdk::SharePoint::Extractor do
         end
       end
 
+      context 'incremental sync' do
+        let(:modified_since) { Time.parse('2017-01-01T00:00:06Z') }
+
+        it 'yields document' do
+          expect_site_with_documents
+
+          subject.document_changes(:modified_since => modified_since) { |c| c }
+          expect(subject.monitor.success_count).to eq(1)
+          expect(subject.monitor.total_error_count).to eq(0)
+        end
+      end
+
+      context 'with cursor' do
+        let(:drive_id) { random_string }
+        let(:cursors) { { 'drive_ids' => { drive_id => "#{graph_base_url}drives/#{drive_id}/root/delta" } } }
+
+        it 'yields document' do
+          site = expect_sites([random_site]).first
+          drive = expect_site_drives(site[:id], [random_drive.tap { |d| d[:id] = drive_id }]).first
+          expect_delta(drive[:id], [random_change.tap { |d| d[:id] = drive_id }])
+
+          subject.document_changes { |c| c }
+          expect(subject.monitor.success_count).to eq(1)
+          expect(subject.monitor.total_error_count).to eq(0)
+        end
+      end
+
       def expect_site_with_documents
         site = expect_sites([random_site]).first
         drive = expect_site_drives(site[:id], [random_drive]).first
         root = expect_root_item(drive[:id], random_item)
         expect_item_children(drive[:id], root[:id], [random_document])
+        expect_delta(drive[:id], [random_change])
       end
     end
 
@@ -215,6 +243,34 @@ describe ConnectorsSdk::SharePoint::Extractor do
 
         expect(subject.monitor.success_count).to eq(0)
         expect(subject.monitor.total_error_count).to eq(0)
+      end
+    end
+  end
+
+  describe '#yield_deleted_ids' do
+    let(:document_id) { 'document_id' }
+
+    before(:each) do
+      site = expect_sites([random_site]).first
+      drive = expect_site_drives(site[:id], [random_drive]).first
+      root = expect_root_item(drive[:id], random_item)
+      expect_groups([])
+      expect_item_children(drive[:id], root[:id], [random_document.tap { |document| document[:id] = document_id }])
+    end
+
+    context 'with removed item' do
+      let(:ids) { [subject.send(:convert_id_to_fp_id, 'removed_id')] }
+
+      it 'yields the deleted item id' do
+        expect { |blk| subject.yield_deleted_ids(ids, &blk) }.to yield_successive_args(ids.first)
+      end
+    end
+
+    context 'with no item removed' do
+      let(:ids) { [subject.send(:convert_id_to_fp_id, document_id)] }
+
+      it 'yields nothing' do
+        expect { |blk| subject.yield_deleted_ids(ids, &blk) }.to yield_successive_args
       end
     end
   end
@@ -321,6 +377,12 @@ describe ConnectorsSdk::SharePoint::Extractor do
     drives
   end
 
+  def expect_delta(drive_id, drives)
+    stub_request(:get, "#{graph_base_url}drives/#{drive_id}/root/delta?$select=id,content.downloadUrl,lastModifiedDateTime,lastModifiedBy,root,deleted,file,folder,package,name,webUrl,createdBy,createdDateTime,size")
+      .to_return(graph_response(:value => drives))
+    drives
+  end
+
   def graph_response(body)
     {
       :status => 200,
@@ -388,6 +450,15 @@ describe ConnectorsSdk::SharePoint::Extractor do
           :displayName => random_string
         }
       }
+    }
+  end
+
+  def random_change
+    {
+      :id => random_string,
+      :lastModifiedDateTime => Time.now,
+      :name => 'foo.txt',
+      :file => {}
     }
   end
 

@@ -56,7 +56,7 @@ module ConnectorsSdk
 
         results
       rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
-        raise e.status_code == 401 ? ConnectorsShared::SecretInvalidError : e
+        raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
       end
 
       def cursors
@@ -70,7 +70,7 @@ module ConnectorsSdk
         end
         results
       rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
-        raise e.status_code == 401 ? ConnectorsShared::SecretInvalidError : e
+        raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
       end
 
       def permissions(params)
@@ -78,7 +78,7 @@ module ConnectorsSdk
           return permissions
         end
       rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
-        raise e.status_code == 401 ? ConnectorsShared::SecretInvalidError : e
+        raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
       end
 
       def authorization_uri(body)
