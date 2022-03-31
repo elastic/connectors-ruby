@@ -6,27 +6,28 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/office365/config'
-require 'connectors_sdk/share_point/extractor'
-require 'connectors_sdk/share_point/authorization'
+require 'connectors_sdk/atlassian/config'
+require 'connectors_sdk/confluence_cloud/extractor'
+require 'connectors_sdk/confluence_cloud/authorization'
 require 'bson'
 
 module ConnectorsSdk
-  module SharePoint
-    SERVICE_TYPE = 'share_point'
+  module ConfluenceCloud
+    SERVICE_TYPE = 'confluence_cloud'
 
     class HttpCallWrapper
       def extractor(params)
         cursors = params.fetch(:cursors, {}) || {}
         features = params.fetch(:features, {}) || {}
+        cloud_id = params.fetch(:cloud_id, nil)
 
         # XXX can we cache that class across calls?
-        ConnectorsSdk::SharePoint::Extractor.new(
+        ConnectorsSdk::ConfluenceCloud::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: SERVICE_TYPE,
           authorization_data_proc: proc { { access_token: params[:access_token] } },
-          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token], :cursors => cursors) },
-          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
+          client_proc: proc { ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(cloud_id), :access_token => params[:access_token]) },
+          config: ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(cloud_id), :cursors => cursors),
           features: features
         )
       end
@@ -36,7 +37,7 @@ module ConnectorsSdk
 
         @extractor = extractor(params)
 
-        @extractor.yield_document_changes(:break_after_page => true, :modified_since => @extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
+        @extractor.yield_document_changes(:modified_since => @extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
           download_obj = nil
           if download_args_and_proc
             download_obj = {
@@ -55,12 +56,8 @@ module ConnectorsSdk
         end
 
         results
-      rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
+      rescue ConnectorsSdk::Atlassian::CustomClient::ClientError => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
-      end
-
-      def cursors
-        @extractor.config.cursors
       end
 
       def deleted(params)
@@ -69,7 +66,7 @@ module ConnectorsSdk
           results << id
         end
         results
-      rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
+      rescue ConnectorsSdk::Atlassian::CustomClient::ClientError => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
       end
 
@@ -77,20 +74,20 @@ module ConnectorsSdk
         extractor(params).yield_permissions(params[:user_id]) do |permissions|
           return permissions
         end
-      rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
+      rescue ConnectorsSdk::Atlassian::CustomClient::ClientError => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
       end
 
       def authorization_uri(body)
-        ConnectorsSdk::SharePoint::Authorization.authorization_uri(body)
+        ConnectorsSdk::ConfluenceCloud::Authorization.authorization_uri(body)
       end
 
       def access_token(params)
-        ConnectorsSdk::SharePoint::Authorization.access_token(params)
+        ConnectorsSdk::ConfluenceCloud::Authorization.access_token(params)
       end
 
       def refresh(params)
-        ConnectorsSdk::SharePoint::Authorization.refresh(params)
+        ConnectorsSdk::ConfluenceCloud::Authorization.refresh(params)
       end
 
       def download(params)
@@ -98,15 +95,22 @@ module ConnectorsSdk
       end
 
       def name
-        'SharePoint'
+        'Confluence Cloud'
       end
 
       def source_status(params)
-        client = ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token])
+        cloud_id = params.fetch(:cloud_id, nil)
+        client = ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(cloud_id), :access_token => params[:access_token])
         client.me
-        { :status => 'OK', :statusCode => 200, :message => 'Connected to SharePoint' }
+        { :status => 'OK', :statusCode => 200, :message => 'Connected to Confluence Cloud' }
       rescue StandardError => e
-        { :status => 'FAILURE', :statusCode => e.is_a?(ConnectorsSdk::Office365::CustomClient::ClientError) ? e.status_code : 500, :message => e.message }
+        { :status => 'FAILURE', :statusCode => e.is_a?(ConnectorsSdk::Atlassian::CustomClient::ClientError) ? e.status_code : 500, :message => e.message }
+      end
+
+      private
+
+      def base_url(cloud_id)
+        "https://api.atlassian.com/ex/confluence/#{cloud_id}"
       end
     end
   end
