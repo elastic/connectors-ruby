@@ -191,7 +191,7 @@ DEPENDENCIES
   sinatra
   sinatra-contrib
   timecop
-  tzinfo-data
+  tzinfo-data (= 1.2022.1)
   webmock
 
 BUNDLED WITH

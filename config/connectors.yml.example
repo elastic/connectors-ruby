@@ -1,0 +1,12 @@
+# general metadata
+version: "8.2.0-SNAPSHOT"
+repository: "https://github.com/elastic/connectors"
+revision: "main"
+
+# web service
+http:
+  host: 0.0.0.0
+  port: 9292
+  api_key: changeme
+  deactivate_auth: false
+  connector: share_point
