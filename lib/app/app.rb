@@ -29,6 +29,7 @@ class ConnectorsWebApp < Sinatra::Base
   configure do
     set :raise_errors, false
     set :show_exceptions, false
+    set :bind, settings.http['host']
     set :port, settings.http['port']
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
