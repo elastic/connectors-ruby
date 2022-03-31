@@ -42,6 +42,16 @@ eshPipeline(
             match_on_all_branches: true,
        ],
        [
+            name: 'Docker',
+            type: 'script',
+            script: {
+                eshWithRbenv {
+                  sh 'make build-docker'
+                }
+            },
+            match_on_all_branches: true,
+       ],
+       [
            name: 'Packaging',
            type: 'script',
            script: {
