@@ -30,7 +30,6 @@ refresh_config:
 	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
 
-
 exec_app:
 	cd lib/app; bundle exec rackup config.ru
 
