@@ -4,6 +4,7 @@ repository: "git@github.com:elastic/connectors.git"
 revision: "48e7312286983c0197f7c3027487c4bfd6833090"
 # web service
 http:
+  host: 0.0.0.0
   port: 9292
   api_key: changeme
   deactivate_auth: false
