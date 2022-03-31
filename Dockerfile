@@ -18,7 +18,7 @@ RUN echo 'eval "$(rbenv init -)"' >> .bashrc
 RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh # or /etc/profile
 
 # run the make file to generate an api key an install the app
-RUN make api_key install
+RUN make install api_key
 
 
 EXPOSE 9292
