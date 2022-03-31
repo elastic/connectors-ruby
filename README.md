@@ -12,7 +12,7 @@ Note: The connector framework is a tech preview feature. Tech preview features a
 
 You can run the application using Docker or directly on your system.
 
-For the later you will need:
+For the latter you will need:
 - Ruby (see [.ruby-version](.ruby-version))
 - bundler 2.2.29
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
@@ -38,7 +38,7 @@ make run
 Consumers will need to use the `api_key` string as the password in
 the basic Authorization header.
 
-### Running with Docker
+### Running a with Docker
 You can run the web server using our Dockerfile.
 
 First, build the Docker image with:
@@ -48,7 +48,7 @@ make build-docker
 
 The stdout will display the generated API key.
 
-Then, you can run the server within docker with:
+Then, you can run the server within Docker with:
 ```shell
 make run-docker
 ```
