@@ -24,7 +24,10 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
   end
 
   let(:params) do
-    { 'access_token' => 'something' }
+    {
+      'access_token' => 'something',
+      'index_permissions' => false
+    }
   end
 
   def mock_endpoint(path, data)
