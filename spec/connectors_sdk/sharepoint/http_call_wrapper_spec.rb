@@ -157,12 +157,12 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
   end
 
   context '.source_status' do
-    let(:access_token) { 'access token' }
+    let(:params) { { :access_token => 'access_token' } }
 
     context 'remote source is up' do
       it 'returns OK status' do
         allow_any_instance_of(ConnectorsSdk::Office365::CustomClient).to receive(:me).and_return({})
-        response = backend.source_status(access_token)
+        response = backend.source_status(params)
         expect(response[:status]).to eq 'OK'
       end
     end
@@ -170,7 +170,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
     context 'remote source is down' do
       it 'returns FAILURE status' do
         allow_any_instance_of(ConnectorsSdk::Office365::CustomClient).to receive(:me).and_raise(StandardError)
-        response = backend.source_status(access_token)
+        response = backend.source_status(params)
         expect(response[:status]).to eq 'FAILURE'
       end
     end
