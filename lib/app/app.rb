@@ -82,7 +82,7 @@ class ConnectorsWebApp < Sinatra::Base
 
   post '/status' do
     connector = settings.connector
-    source_status = connector.source_status(body_params[:access_token])
+    source_status = connector.source_status(body_params)
     json(
       :extractor => { :name => connector.name },
       :contentProvider => source_status
