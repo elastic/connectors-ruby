@@ -25,8 +25,8 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
 
   let(:params) do
     {
-      'access_token' => 'something',
-      'index_permissions' => false
+      :access_token => 'something',
+      :index_permissions => true
     }
   end
 
@@ -63,6 +63,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       mock_endpoint('drives/4567/items/1111/permissions', permissions)
 
       expect(backend.document_batch(params).size).to eq 100
+      expect(backend.extractor(params).config.index_permissions).to be_truthy
     end
   end
 
