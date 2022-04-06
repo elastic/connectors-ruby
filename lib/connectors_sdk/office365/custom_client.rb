@@ -50,6 +50,7 @@ module ConnectorsSdk
       def initialize(access_token:, cursors: {}, ensure_fresh_auth: nil)
         @access_token = access_token
         @cursors = cursors || {}
+        @cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY] ||= {}
         super(:ensure_fresh_auth => ensure_fresh_auth)
       end
 
@@ -124,7 +125,7 @@ module ConnectorsSdk
         yielded = 0
         while stack.any?
           folder_id = stack.pop
-          item_children(drive_id, folder_id, :fields => fields_with_id) do |item|
+          item_children(drive_id, folder_id, :fields => fields_with_id, break_after_page: break_after_page) do |item|
             if item.folder
               stack << item.id
             end
@@ -134,6 +135,9 @@ module ConnectorsSdk
           end
 
           if break_after_page && yielded >= 100
+            if cursors['item_children_next_link'].present?
+              stack << folder_id
+            end
             cursors['page_cursor'] = stack.dup
             break
           end
@@ -178,11 +182,11 @@ module ConnectorsSdk
           response = request_json(:url => response['@odata.nextLink'])
         end
 
-        cursors[drive_id] = response['@odata.deltaLink']
+        cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY][drive_id] = response['@odata.deltaLink']
       end
 
       def get_latest_delta_link(drive_id)
-        cursors[drive_id] || exhaustively_get_delta_link(drive_id)
+        cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY][drive_id] || exhaustively_get_delta_link(drive_id)
       end
 
       def exhaustively_get_delta_link(drive_id)
@@ -255,15 +259,30 @@ module ConnectorsSdk
         request_endpoint(:endpoint => "drives/#{drive_id}/root", :query_params => query_params)
       end
 
-      def item_children(drive_id, item_id, fields: [], &block)
-        endpoint = "drives/#{drive_id}/items/#{item_id}/children"
-        query_params = transform_fields_to_request_query_params(fields)
-        response = request_endpoint(:endpoint => endpoint, :query_params => query_params)
+      def item_children(drive_id, item_id, fields: [], break_after_page: false, &block)
+        next_link = cursors.delete('item_children_next_link') if break_after_page
 
+        response = if next_link.present?
+                     request_json(:url => next_link)
+                   else
+                     endpoint = "drives/#{drive_id}/items/#{item_id}/children"
+                     query_params = transform_fields_to_request_query_params(fields)
+                     request_endpoint(:endpoint => endpoint, :query_params => query_params)
+                   end
+
+        yielded = 0
         loop do
           response.value.each(&block)
           next_link = response['@odata.nextLink']
+
           break if next_link.nil?
+
+          yielded += response.value.size
+          if break_after_page && yielded >= 100
+            cursors['item_children_next_link'] = next_link
+            break
+          end
+
           response = request_json(:url => next_link)
         end
       end

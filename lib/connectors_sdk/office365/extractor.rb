@@ -69,6 +69,10 @@ module ConnectorsSdk
           end
         end
 
+        if config.cursors.as_json == { DRIVE_IDS_CURSOR_KEY => {} } # We can remove this once there's an explicit signal for end-of-data
+          config.cursors.delete(DRIVE_IDS_CURSOR_KEY)
+        end
+
         nil
       end
 
@@ -107,12 +111,6 @@ module ConnectorsSdk
           yield []
         else
           raise
-        end
-      end
-
-      def client
-        @client ||= super.tap do |client|
-          client.cursors = config.cursors&.fetch(DRIVE_IDS_CURSOR_KEY, {}) || {}
         end
       end
 
