@@ -23,10 +23,10 @@ module ConnectorsSdk
         # XXX can we cache that class across calls?
         ConnectorsSdk::SharePoint::Extractor.new(
           content_source_id: BSON::ObjectId.new,
-          service_type: 'sharepoint_online',
+          service_type: SERVICE_TYPE,
           authorization_data_proc: proc { { access_token: params[:access_token] } },
           client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token], :cursors => cursors) },
-          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
+          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all', :index_permissions => params[:index_permissions] || false),
           features: features
         )
       end
@@ -101,8 +101,8 @@ module ConnectorsSdk
         'SharePoint'
       end
 
-      def source_status(access_token)
-        client = ConnectorsSdk::Office365::CustomClient.new(:access_token => access_token)
+      def source_status(params)
+        client = ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token])
         client.me
         { :status => 'OK', :statusCode => 200, :message => 'Connected to SharePoint' }
       rescue StandardError => e
