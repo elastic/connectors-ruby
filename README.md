@@ -92,6 +92,18 @@ Not seeing the connector you want there, either? We encourage community contirub
 ### Sinatra Console
 run `make console`
 
+### Updating configuration values
+
+You can update the git branch, revision and project version in the `connectors.yml` file to your current values by
+running this command:
+
+```
+make refresh_config
+```
+
+This command is also included in every `make run`, so when you re-run the app using the makefile, these values are updated, too.
+They are exposed in the root endpoint mentioned above. 
+
 ### Configuration
 
 By design, we try to avoid duplicating any metadata in the project, like its
