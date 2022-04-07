@@ -134,7 +134,7 @@ module ConnectorsSdk
             yielded += 1
           end
 
-          if break_after_page && yielded >= 100
+          if break_after_page && yielded >= 100 && stack.any?
             cursors['page_cursor'] = stack.dup
             break
           end
