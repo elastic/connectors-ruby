@@ -15,9 +15,6 @@ api_key:
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
 build:
-	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
-	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
-	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
 	mkdir -p .gems
 	gem build connectors_sdk.gemspec
 	rm -f .gems/*
@@ -27,9 +24,8 @@ install:
 	rbenv install -s
 	- gem install bundler -v 2.2.33 && rbenv rehash
 	bundle install --jobs 1
-	cp -n config/connectors.yml.example config/connectors.yml || true
 
-run:
+refresh_config:
 	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
 	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
@@ -40,6 +36,11 @@ build-docker:
 
 run-docker:
 	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
+
+exec_app:
+	cd lib/app; bundle exec rackup config.ru
+
+run: | refresh_config exec_app
 
 console:
 	cd lib/app; bundle exec irb -r ./console.rb
