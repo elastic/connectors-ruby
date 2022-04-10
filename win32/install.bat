@@ -14,7 +14,7 @@ setlocal
 
 echo "Set HOME, PATH and RBENV_ROOT"
 
-set /p RUBY_VERSION=<..\ruby-version
+set /p RUBY_VERSION=<..\.ruby-version
 set instpath="%USERPROFILE%\.rbenv-win"
 set RBENV_ROOT="%instpath%"
 set HOME=%~dp0
