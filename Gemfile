@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 # Pin the version of bundle we support
-gem 'bundler', '2.2.33'
+gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
 gem 'activesupport', '5.2.6'
