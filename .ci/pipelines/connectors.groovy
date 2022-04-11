@@ -18,7 +18,12 @@ eshPipeline(
             type: 'script',
             script: {
                 eshWithRbenv {
-                  sh 'make install test'
+                  if (isUnix()) {
+                    sh('make install test')
+                  } else {
+                    bat('win32\\install.bat')
+                    bat('make.bat')
+                  }
                 }
                 publishHTML (target: [
                     allowMissing: true,
@@ -29,6 +34,7 @@ eshPipeline(
                     reportName: 'Coverage Report'
                 ])
             },
+            nodes: ['linux', 'windows'],
             match_on_all_branches: true,
        ],
        [
@@ -36,7 +42,7 @@ eshPipeline(
             type: 'script',
             script: {
                 eshWithRbenv {
-                  sh 'make install lint'
+                  sh('make install lint')
                 }
             },
             match_on_all_branches: true,
@@ -46,7 +52,7 @@ eshPipeline(
             type: 'script',
             script: {
                 eshWithRbenv {
-                  sh 'make build-docker'
+                  sh('make build-docker')
                 }
             },
             match_on_all_branches: true,
@@ -56,9 +62,13 @@ eshPipeline(
            type: 'script',
            script: {
                eshWithRbenv {
-                 sh 'curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
-                 sh 'chmod +x yq'
-                 sh 'YQ=`realpath yq` make install build'
+                 if (isUnix()) {
+                   sh('curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64')
+                   sh('chmod +x yq')
+                   sh('YQ=`realpath yq` make install build')
+                 } else {
+                   bat('make install build')
+                 }
                }
            },
            artifacts: [[pattern: 'app/.gems/*.gem']],
