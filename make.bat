@@ -10,8 +10,11 @@ setlocal
 set instpath="%USERPROFILE%\.rbenv-win"
 set RBENV_ROOT="%instpath%"
 set HOME=%~dp0
-set /p RUBY_VERSION=<..\.ruby-version
-set /p BUNDLER_VERSION=<..\.bundler-version
+
+for /f "delims=" %%x in (%~dp0.ruby-version) do set RUBY_VERSION=%%x
+for /f "delims=" %%x in (%~dp0.bundler-version) do set BUNDLER_VERSION=%%x
+echo "Ruby %RUBY_VERSION% - Bundler %BUNDLER_VERSION%"
+
 set PATH=C:\MSYS2\usr\bin;C:\MSYS2\usr\local\bin;%instpath%\versions\%RUBY_VERSION%\bin;%instpath%\bin;%instpath%\shims;%PATH%
 
 echo "Install gem dependencies..."
