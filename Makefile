@@ -37,7 +37,7 @@ run-docker:
 	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
 
 exec_app:
-	cd lib/app; bundle exec rackup config.ru
+	cd lib/app; bundle exec rackup config.ru -p ${PORT}
 
 run: | refresh_config exec_app
 
