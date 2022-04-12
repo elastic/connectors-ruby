@@ -50,6 +50,7 @@ module ConnectorsSdk
       def initialize(access_token:, cursors: {}, ensure_fresh_auth: nil)
         @access_token = access_token
         @cursors = cursors || {}
+        @cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY] ||= {}
         super(:ensure_fresh_auth => ensure_fresh_auth)
       end
 
@@ -133,7 +134,7 @@ module ConnectorsSdk
             yielded += 1
           end
 
-          if break_after_page && yielded >= 100
+          if break_after_page && yielded >= 100 && stack.any?
             cursors['page_cursor'] = stack.dup
             break
           end
@@ -178,11 +179,11 @@ module ConnectorsSdk
           response = request_json(:url => response['@odata.nextLink'])
         end
 
-        cursors[drive_id] = response['@odata.deltaLink']
+        cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY][drive_id] = response['@odata.deltaLink']
       end
 
       def get_latest_delta_link(drive_id)
-        cursors[drive_id] || exhaustively_get_delta_link(drive_id)
+        cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY][drive_id] || exhaustively_get_delta_link(drive_id)
       end
 
       def exhaustively_get_delta_link(drive_id)

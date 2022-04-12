@@ -17,6 +17,7 @@ module ConnectorsSdk
 
       def initialize(drive_ids:, cursors:, index_permissions: false)
         super(:cursors => cursors)
+        @cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY] ||= {}
         @drive_ids = drive_ids
         @index_permissions = index_permissions
       end

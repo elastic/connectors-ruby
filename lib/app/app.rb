@@ -90,21 +90,14 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/documents' do
-    original_cursors = (body_params.fetch(:cursors, {}) || {}).as_json
-
     connector = settings.connector
 
     results = connector.document_batch(body_params)
 
-    new_cursors = if connector.cursors.as_json != original_cursors
-                    connector.cursors
-                  else
-                    {}
-                  end
-
     json(
       :results => results,
-      :cursors => new_cursors
+      :cursors => connector.cursors,
+      :completed => connector.completed?
     )
   end
 

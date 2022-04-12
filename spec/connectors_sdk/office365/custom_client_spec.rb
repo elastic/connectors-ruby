@@ -212,7 +212,7 @@ describe ConnectorsSdk::Office365::CustomClient do
       end
 
       it 'should clear page_cursor' do
-        expect { subject }.to change { client.cursors }.to({})
+        expect { subject }.to change { client.cursors }.to({ 'drive_ids' => {} })
       end
 
       it 'should break after first folder returns over 100 items' do
@@ -221,7 +221,7 @@ describe ConnectorsSdk::Office365::CustomClient do
         end
         stub_request(:get, "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}drives/#{drive_id}/items/#{folder_ids.last}/children").to_return(:status => 200, :body => { 'value' => value }.to_json)
 
-        expect { subject }.to change { client.cursors }.to({ 'page_cursor' => Array.wrap(folder_ids.first) })
+        expect { subject }.to change { client.cursors }.to({ 'drive_ids' => {}, 'page_cursor' => Array.wrap(folder_ids.first) })
       end
     end
 
