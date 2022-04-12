@@ -59,7 +59,7 @@ module ConnectorsSdk
         if break_after_page && config.cursors['page_cursor'].blank?
           @completed = true
           config.overwrite_cursors!(retrieve_latest_cursors)
-          log_info("Completed #{modified_since.nil? ? 'full' : 'incremental'} extraction")
+          log_debug("Completed #{modified_since.nil? ? 'full' : 'incremental'} extraction")
         end
 
         nil

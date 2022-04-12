@@ -309,6 +309,13 @@ describe ConnectorsSdk::SharePoint::Extractor do
 
         expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id, 'drive_ids' => {} }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_', 'drive_ids' => {} })
       end
+
+      it 'sets completed to true in the absence of a page_cursor' do
+        cursors['current_drive_id'] = drive_id
+        allow(extractor).to receive(:yield_drive_items)
+
+        expect { subject }.to change { extractor.completed }.from(false).to(true)
+      end
     end
   end
 
