@@ -168,7 +168,7 @@ DEPENDENCIES
   activesupport (= 5.2.6)
   attr_extras
   bson (~> 4.2.2)
-  bundler (= 2.2.33)
+  bundler (= 2.3.10)
   debase (= 0.2.5.beta2)
   faraday
   forwardable
@@ -199,4 +199,4 @@ RUBY VERSION
    ruby 2.6.9p207
 
 BUNDLED WITH
-   2.2.33
+   2.3.10
