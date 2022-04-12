@@ -125,7 +125,7 @@ module ConnectorsSdk
         yielded = 0
         while stack.any?
           folder_id = stack.pop
-          item_children(drive_id, folder_id, :fields => fields_with_id, break_after_page: break_after_page) do |item|
+          item_children(drive_id, folder_id, :fields => fields_with_id, :break_after_page => break_after_page) do |item|
             if item.folder
               stack << item.id
             end
