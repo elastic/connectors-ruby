@@ -26,8 +26,6 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
-  puts "Using port: #{[ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)}"
-
   configure do
     set :raise_errors, false
     set :show_exceptions, false

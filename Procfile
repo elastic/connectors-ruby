@@ -1,1 +1,1 @@
-web: make exec_app
+web: cd lib/app; bundle exec rackup config.ru -p ${PORT}
