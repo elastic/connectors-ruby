@@ -20,19 +20,9 @@ module ConnectorsSdk
 
           if break_after_page
             current_drive_id = config.cursors['current_drive_id']
-            last_drive_id = config.cursors['last_drive_id']
-
             if current_drive_id.present? && current_drive_id > drive_id # they come alpha sorted
               next
             end
-
-            if last_drive_id.present? && last_drive_id >= drive_id # they come alpha sorted
-              if last_drive_id == drive_id
-                config.cursors.delete('last_drive_id')
-              end
-              next
-            end
-
             config.cursors['current_drive_id'] = drive_id
           end
 
@@ -61,12 +51,15 @@ module ConnectorsSdk
             capture_exception(e)
           end
 
-          if break_after_page
-            if config.cursors['page_cursor'].blank?
-              config.cursors['last_drive_id'] = config.cursors.delete('current_drive_id')
-            end
+          if break_after_page && config.cursors['page_cursor'].present?
             break
           end
+        end
+
+        if break_after_page && config.cursors['page_cursor'].blank?
+          @completed = true
+          config.overwrite_cursors!(retrieve_latest_cursors)
+          log_debug("Completed #{modified_since.nil? ? 'full' : 'incremental'} extraction")
         end
 
         nil
@@ -107,12 +100,6 @@ module ConnectorsSdk
           yield []
         else
           raise
-        end
-      end
-
-      def client
-        @client ||= super.tap do |client|
-          client.cursors = config.cursors&.fetch(DRIVE_IDS_CURSOR_KEY, {}) || {}
         end
       end
 

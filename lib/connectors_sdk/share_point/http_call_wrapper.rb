@@ -63,6 +63,10 @@ module ConnectorsSdk
         @extractor.config.cursors
       end
 
+      def completed?
+        @extractor.completed
+      end
+
       def deleted(params)
         results = []
         extractor(params).yield_deleted_ids(params[:ids]) do |id|
