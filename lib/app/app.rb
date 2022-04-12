@@ -30,7 +30,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :raise_errors, false
     set :show_exceptions, false
     set :bind, settings.http['host']
-    set :port, settings.http['port']
+    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
     set :connector_name, settings.http['connector']

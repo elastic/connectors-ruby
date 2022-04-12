@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+
+ruby `cat .ruby-version`.strip
+
 # Pull gem index from rubygems
 source 'https://rubygems.org'
 
