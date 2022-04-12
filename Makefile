@@ -1,4 +1,5 @@
 YQ ?= "yq"
+.phony: test lint autocorrect api_key update_config build release build_gem install refresh_config build-docker run-docker exec_app
 
 test:
 	bundle exec rspec spec
@@ -14,21 +15,32 @@ api_key:
 
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
-build:
+update_config_dev:
+	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
+	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
+	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
+
+update_config:
+	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
+	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
+	${YQ} e ".version = \"$(shell cat VERSION)\"" -i config/connectors.yml
+
+build: update_config_dev build_gem
+
+release: update_config build_gem
+
+build_gem:
 	mkdir -p .gems
 	gem build connectors_sdk.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
-
+	
 install:
 	rbenv install -s
 	- gem install bundler -v 2.2.33 && rbenv rehash
 	bundle install --jobs 1
 
-refresh_config:
-	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
-	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
-	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
+refresh_config: update_config
 	cd lib/app; bundle exec rackup --host 0.0.0.0 config.ru
 
 build-docker:
