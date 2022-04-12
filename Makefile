@@ -22,7 +22,7 @@ build:
 
 install:
 	rbenv install -s
-	- gem install bundler -v 2.2.33 && rbenv rehash
+	- gem install bundler -v `cat .bundler-version` && rbenv rehash
 	bundle install --jobs 1
 
 refresh_config:
