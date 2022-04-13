@@ -1,40 +1,50 @@
 YQ ?= "yq"
-.phony: test lint autocorrect api_key update_config build release build_gem install refresh_config build-docker run-docker exec_app
+.phony: test lint autocorrect api_key update_config build release build_gem install refresh_config build-docker run-docker exec_app tag
 
-test:
+config/connectors.yml:
+	cp config/connectors.yml.example config/connectors.yml
+
+test: config/connectors.yml
 	bundle exec rspec spec
 
-lint:
+lint: config/connectors.yml
 	bundle exec rubocop lib spec
 
-autocorrect:
+autocorrect: config/connectors.yml
 	bundle exec rubocop lib spec -a
 
-api_key:
+api_key: config/connectors.yml
 	${YQ} e ".http.api_key = \"$(shell uuidgen | tr -d '-')\"" -i config/connectors.yml
 
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
-update_config_dev:
+update_config_dev: config/connectors.yml
 	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
 	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	${YQ} e ".version = \"$(shell script/version.sh)\"" -i config/connectors.yml
 
-update_config:
+update_config: config/connectors.yml
 	${YQ} e ".revision = \"$(shell git rev-parse HEAD)\"" -i config/connectors.yml
 	${YQ} e ".repository = \"$(shell git config --get remote.origin.url)\"" -i config/connectors.yml
 	${YQ} e ".version = \"$(shell cat VERSION)\"" -i config/connectors.yml
 
 build: update_config_dev build_gem
 
-release: update_config build_gem
+release: update_config tag build_gem push_gem tag
+
+tag:
+	git tag $(shell cat VERSION)
+	git push --tags
 
 build_gem:
 	mkdir -p .gems
 	gem build connectors_sdk.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
-	
+
+push_gem:
+	gem push .gems/*
+
 install:
 	rbenv install -s
 	- gem install bundler -v 2.2.33 && rbenv rehash
