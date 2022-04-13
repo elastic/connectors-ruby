@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
+require 'connectors_shared/extraction_utils'
+require 'nokogiri'
+
 module ConnectorsSdk
   module Confluence
     class Adapter < ConnectorsSdk::Base::Adapter
+
       MAX_CONTENT_COMMENTS_TO_INDEX = 50
       LEADING_SLASH_REGEXP = /\A\//
 
@@ -159,7 +163,7 @@ module ConnectorsSdk
         private
 
         def text_from_html(raw_html)
-          ExtractorUtils.node_descendant_text(Nokogiri::HTML(raw_html))
+          ConnectorsShared::ExtractionUtils.node_descendant_text(Nokogiri::HTML(raw_html))
         end
       end
 

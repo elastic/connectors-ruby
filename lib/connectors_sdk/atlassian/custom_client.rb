@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'faraday_middleware'
+require 'connectors_shared/middleware/restrict_hostnames'
+require 'connectors_shared/middleware/bearer_auth'
+
 module ConnectorsSdk
   module Atlassian
     class CustomClient < ConnectorsSdk::Base::CustomClient
@@ -31,7 +35,7 @@ module ConnectorsSdk
 
       def additional_middleware
         [
-            FaradayMiddleware::FollowRedirects,
+            ::FaradayMiddleware::FollowRedirects,
             [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }],
             [ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }]
         ]
