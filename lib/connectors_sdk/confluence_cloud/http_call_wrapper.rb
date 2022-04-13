@@ -9,6 +9,7 @@
 require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/confluence_cloud/extractor'
 require 'connectors_sdk/confluence_cloud/authorization'
+require 'connectors_sdk/confluence_cloud/custom_client'
 require 'bson'
 
 module ConnectorsSdk
@@ -58,6 +59,14 @@ module ConnectorsSdk
         results
       rescue ConnectorsSdk::Atlassian::CustomClient::ClientError => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
+      end
+
+      def cursors
+        @extractor.config.cursors
+      end
+
+      def completed?
+        true
       end
 
       def deleted(params)

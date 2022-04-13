@@ -10,6 +10,7 @@ gem 'activesupport', '5.2.6'
 gem 'bson', '~> 4.2.2'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data', '= 1.2022.1'
+gem 'nokogiri', '>= 1.13.4', :require => false
 
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
@@ -35,6 +36,7 @@ gem 'sinatra-contrib'
 gem 'rack'
 gem 'forwardable'
 gem 'faraday'
+gem 'faraday_middleware', '= 1.0.0'
 gem 'httpclient'
 gem 'attr_extras'
 gem 'hashie'

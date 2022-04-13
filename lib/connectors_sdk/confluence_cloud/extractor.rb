@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'connectors_sdk/confluence/extractor'
+
 module ConnectorsSdk
   module ConfluenceCloud
     class Extractor < ConnectorsSdk::Confluence::Extractor
@@ -41,11 +43,10 @@ module ConnectorsSdk
         yield user_permissions.flatten.uniq.sort
       end
 
-      private
-
-      def download_attachment_binary(attachment_api_content)
-        parent_id = attachment_api_content.dig('container', 'id')
-        client.download("#{client.base_url}/wiki/rest/api/content/#{parent_id}/child/attachment/#{attachment_api_content['id']}/download").body
+      def download(item)
+        content = item[:content]
+        parent_id = content.dig('container', 'id')
+        client.download("#{client.base_url}/wiki/rest/api/content/#{parent_id}/child/attachment/#{content['id']}/download").body
       end
     end
   end

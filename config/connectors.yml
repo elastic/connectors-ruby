@@ -1,11 +1,11 @@
 # general metadata
-version: "8.2.0-1648721082"
+version: "8.3.0-1649837652"
 repository: "git@github.com:elastic/connectors.git"
-revision: "48e7312286983c0197f7c3027487c4bfd6833090"
+revision: "cbbdc6738ba45eb655415170217a1123f009c524"
 # web service
 http:
   host: 0.0.0.0
   port: 9292
-  api_key: EC689157C66D4A26902CCCFBD69BAA93
+  api_key: foobar
   deactivate_auth: false
-  connector: share_point
+  connector: confluence_cloud
