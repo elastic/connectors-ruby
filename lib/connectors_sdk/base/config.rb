@@ -7,15 +7,17 @@
 module ConnectorsSdk
   module Base
     class Config
-      attr_reader :cursors
+      attr_reader :cursors, :index_permissions
 
-      def initialize(cursors:)
+      def initialize(cursors:, index_permissions: false)
         @cursors = cursors || {}
+        @index_permissions = index_permissions
       end
 
       def to_h
         {
-          :cursors => cursors
+          :cursors => cursors,
+          :index_permissions => index_permissions
         }
       end
 

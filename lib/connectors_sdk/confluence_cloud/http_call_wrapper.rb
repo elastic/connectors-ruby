@@ -9,6 +9,7 @@
 require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/confluence_cloud/extractor'
 require 'connectors_sdk/confluence_cloud/authorization'
+require 'connectors_sdk/confluence_cloud/custom_client'
 require 'bson'
 
 module ConnectorsSdk
@@ -20,16 +21,35 @@ module ConnectorsSdk
         cursors = params.fetch(:cursors, {}) || {}
         features = params.fetch(:features, {}) || {}
         cloud_id = params.fetch(:cloud_id, nil)
+        base_url = params.fetch(:base_url, nil)
+        if base_url.nil?
+          base_url = api_base_url(cloud_id)
+        end
 
         # XXX can we cache that class across calls?
         ConnectorsSdk::ConfluenceCloud::Extractor.new(
           content_source_id: BSON::ObjectId.new,
           service_type: SERVICE_TYPE,
-          authorization_data_proc: proc { { access_token: params[:access_token] } },
-          client_proc: proc { ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(cloud_id), :access_token => params[:access_token]) },
-          config: ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(cloud_id), :cursors => cursors),
+          authorization_data_proc: proc {
+            {
+              access_token: params[:access_token],
+              basic_auth_token: params[:basic_auth_token]
+            }
+          },
+          client_proc: proc {
+            ConnectorsSdk::ConfluenceCloud::CustomClient.new(
+              :base_url => base_url,
+              :access_token => params[:access_token],
+              :basic_auth_token => params[:basic_auth_token]
+            )
+          },
+          config: ConnectorsSdk::Atlassian::Config.new(:base_url => base_url, :cursors => cursors),
           features: features
         )
+      end
+
+      def cursors
+        @extractor.config.cursors
       end
 
       def document_batch(params)
@@ -100,7 +120,12 @@ module ConnectorsSdk
 
       def source_status(params)
         cloud_id = params.fetch(:cloud_id, nil)
-        client = ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(cloud_id), :access_token => params[:access_token])
+        base_url = params.fetch(:base_url, nil)
+        client = ConnectorsSdk::ConfluenceCloud::CustomClient.new(
+          :base_url => base_url.nil? ? api_base_url(cloud_id) : base_url,
+          :access_token => params[:access_token],
+          :basic_auth_token => params[:basic_auth_token]
+        )
         client.me
         { :status => 'OK', :statusCode => 200, :message => 'Connected to Confluence Cloud' }
       rescue StandardError => e
@@ -109,7 +134,7 @@ module ConnectorsSdk
 
       private
 
-      def base_url(cloud_id)
+      def api_base_url(cloud_id)
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
       end
     end

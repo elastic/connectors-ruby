@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+require 'nokogiri'
+require 'connectors_sdk/base/adapter'
+require 'connectors_sdk/base/extraction_utils'
 
 module ConnectorsSdk
   module Confluence
@@ -159,7 +162,7 @@ module ConnectorsSdk
         private
 
         def text_from_html(raw_html)
-          ExtractorUtils.node_descendant_text(Nokogiri::HTML(raw_html))
+          ExtractionUtils.node_descendant_text(Nokogiri::HTML(raw_html))
         end
       end
 

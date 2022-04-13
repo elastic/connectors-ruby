@@ -25,7 +25,8 @@ module ConnectorsSdk
     REGISTRY = Factory.new
 
     # loading plugins (might replace this with a directory scan and conventions on names)
-    require_relative '../share_point/http_call_wrapper'
+    # require_relative '../share_point/http_call_wrapper'
+    require_relative '../confluence_cloud/http_call_wrapper'
 
     #REGISTRY.register(ConnectorsSdk::SharePoint::SERVICE_TYPE, ConnectorsSdk::SharePoint::HttpCallWrapper)
     REGISTRY.register(ConnectorsSdk::ConfluenceCloud::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::HttpCallWrapper)

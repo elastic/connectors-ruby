@@ -13,12 +13,11 @@ module ConnectorsSdk
     class Config < ConnectorsSdk::Base::Config
       ALL_DRIVE_IDS = 'all'.freeze
 
-      attr_reader :drive_ids, :index_permissions
+      attr_reader :drive_ids
 
       def initialize(drive_ids:, cursors:, index_permissions: false)
-        super(:cursors => cursors)
+        super(:cursors => cursors, :index_permissions => index_permissions)
         @drive_ids = drive_ids
-        @index_permissions = index_permissions
       end
 
       def index_all_drives?

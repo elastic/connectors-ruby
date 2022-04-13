@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+require 'connectors_sdk/base/extractor'
+require 'connectors_sdk/atlassian/custom_client'
+require 'connectors_sdk/confluence/adapter'
 
 module ConnectorsSdk
   module Confluence

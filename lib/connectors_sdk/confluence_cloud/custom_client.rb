@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'connectors_sdk/confluence/custom_client'
 
 module ConnectorsSdk
   module ConfluenceCloud

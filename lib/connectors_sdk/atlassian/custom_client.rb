@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+require 'connectors_sdk/base/custom_client'
+require 'connectors_shared/middleware/restrict_hostnames'
+require 'connectors_shared/middleware/bearer_auth'
+require 'connectors_shared/middleware/basic_auth'
+require 'faraday_middleware'
 
 module ConnectorsSdk
   module Atlassian
@@ -20,8 +25,9 @@ module ConnectorsSdk
 
       attr_reader :base_url, :access_token
 
-      def initialize(base_url:, access_token:, ensure_fresh_auth: nil)
+      def initialize(base_url:, access_token:, basic_auth_token:, ensure_fresh_auth: nil)
         @access_token = access_token
+        @basic_auth_token = basic_auth_token
         super(:base_url => base_url, :ensure_fresh_auth => ensure_fresh_auth)
       end
 
@@ -30,19 +36,14 @@ module ConnectorsSdk
       end
 
       def additional_middleware
-        [
-            FaradayMiddleware::FollowRedirects,
-            [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }],
-            [ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }]
+        result = [
+          FaradayMiddleware::FollowRedirects,
+          [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }],
         ]
-      end
-
-      def update_auth_data!(new_access_token)
-        @access_token = new_access_token
-        middleware!
-        http_client! # force a new client to pick up new middleware
-
-        self
+        if @access_token.present?
+          return result.push([ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }])
+        end
+        result.push([ConnectorsShared::Middleware::BasicAuth, { :basic_auth_token => @basic_auth_token }])
       end
 
       def download(url)

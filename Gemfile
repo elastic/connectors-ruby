@@ -34,9 +34,11 @@ gem 'sinatra-contrib'
 gem 'rack'
 gem 'forwardable'
 gem 'faraday'
+gem 'faraday_middleware'
 gem 'httpclient'
 gem 'attr_extras'
 gem 'hashie'
+gem 'nokogiri'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'
