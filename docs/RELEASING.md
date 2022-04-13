@@ -21,6 +21,17 @@ To release Connectors:
 
 A Gem file will be created in the `.gem` directory, that needs to be embed in Enterprise Search.
 
+Immediately update ent-search's gem dependency with the released version:
+
+- update the Gem in vendor/cache
+- update Gemfile
+
+Last, take care of the branching:
+
+- Increment the VERSION on main to match the next release
+- create a new maintenance branch if it's a new MINOR
+
+
 ## In-Between releases
 
 Sometimes, we need to release Connectors independantly from Enterprise Search.
