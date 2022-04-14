@@ -223,6 +223,15 @@ describe ConnectorsSdk::Office365::CustomClient do
 
         expect { subject }.to change { client.cursors }.to({ 'drive_ids' => {}, 'page_cursor' => Array.wrap(folder_ids.first) })
       end
+
+      it 'will save current folder for next request in presence of item_children_next_link' do
+        value = (1..100).to_a.map do |i|
+          Hashie::Mash.new(:id => i, :folder => false)
+        end
+        stub_request(:get, "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}drives/#{drive_id}/items/#{folder_ids.last}/children").to_return(:status => 200, :body => { 'value' => value, '@odata.nextLink' => '_' }.to_json)
+
+        expect { subject }.to change { client.cursors }.to({ 'drive_ids' => {}, 'page_cursor' => folder_ids, 'item_children_next_link' => '_' })
+      end
     end
 
     describe '#list_changes' do
