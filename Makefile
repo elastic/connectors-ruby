@@ -44,6 +44,7 @@ build_gem:
 	gem build connectors_sdk.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
+	echo "DO NOT FORGET TO UPDATE ENT-SEARCH"
 
 push_gem:
 	gem push .gems/*
