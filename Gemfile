@@ -38,6 +38,7 @@ gem 'faraday'
 gem 'httpclient'
 gem 'attr_extras'
 gem 'hashie'
+gem 'puma'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'
