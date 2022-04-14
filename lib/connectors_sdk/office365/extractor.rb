@@ -51,12 +51,12 @@ module ConnectorsSdk
             capture_exception(e)
           end
 
-          if break_after_page && config.cursors['page_cursor'].present?
+          if break_after_page && (config.cursors['page_cursor'].present? || config.cursors['item_children_next_link'].present?)
             break
           end
         end
 
-        if break_after_page && config.cursors['page_cursor'].blank?
+        if break_after_page && config.cursors['page_cursor'].blank? && config.cursors['item_children_next_link'].blank?
           @completed = true
           config.overwrite_cursors!(retrieve_latest_cursors)
           log_debug("Completed #{modified_since.nil? ? 'full' : 'incremental'} extraction")
