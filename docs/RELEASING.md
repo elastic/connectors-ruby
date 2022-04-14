@@ -2,7 +2,7 @@
 
 The Connectors project is packaged as a Gem that is added in the Enterprise Search distribution.
 
-The version scheme we use is **MAJOR.MINOR.PATCH.BUILD** and stored in the `VERSION` file 
+The version scheme we use is **MAJOR.MINOR.PATCH.BUILD** and stored in the [VERSION](VERSION) file
 at the root of this repository.
 
 ## RubyGem Account
