@@ -49,3 +49,5 @@ ent-search-dev.json
 
 #test coverage
 /coverage
+
+config/connectors.yml
