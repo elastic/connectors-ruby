@@ -7,5 +7,5 @@ http:
   host: 0.0.0.0
   port: 9292
   api_key: foobar
-  deactivate_auth: false
+  deactivate_auth: true
   connector: confluence_cloud

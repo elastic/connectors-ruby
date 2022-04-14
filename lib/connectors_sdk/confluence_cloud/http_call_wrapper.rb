@@ -43,7 +43,11 @@ module ConnectorsSdk
               :basic_auth_token => params[:basic_auth_token]
             )
           },
-          config: ConnectorsSdk::Atlassian::Config.new(:base_url => base_url, :cursors => cursors),
+          config: ConnectorsSdk::Atlassian::Config.new(
+            :base_url => base_url,
+            :cursors => cursors,
+            :index_permissions => params.fetch(:index_permissions, false)
+          ),
           features: features
         )
       end
