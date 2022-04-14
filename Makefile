@@ -30,10 +30,10 @@ update_config: config/connectors.yml
 
 build: update_config_dev build_gem
 
-release: update_config tag build_gem push_gem tag
+release: update_config build_gem push_gem tag
 
 tag:
-	git tag $(shell cat VERSION)
+	git tag v$(shell cat VERSION)
 	git push --tags
 
 build_gem:
