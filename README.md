@@ -2,10 +2,13 @@
 
 ![logo](logo-enterprise-search.png)
 
-The home of Elastic Enterprise Connector Packages. 
-Use connector packages to customize connectors such as Workplace Search Content Sources for advanced use cases. 
+The home of Elastic Enterprise Connector Packages. Use connector packages to
+customize connectors such as Workplace Search Content Sources for advanced use
+cases.
 
-Note: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.
+Note: The connector framework is a tech preview feature. Tech preview features
+are subject to change and are not covered by the support SLA of general release
+(GA) features. Elastic plans to promote this feature to GA in a future release.
 
 
 ### System Requirements
@@ -134,6 +137,7 @@ We welcome contributors to the project. Before you begin, please read the [Conne
 
 - [Code of Conduct](https://www.elastic.co/community/codeofconduct)
 - [Getting Support](./docs/SUPPORT.md)
+- [Releasing](./docs/RELEASING.mg)
 - [Developer guide](./docs/DEVELOPING.md)
 - [Security Policy](./docs/SECURITY.md)
 - [Elastic-internal guide](./docs/INTERNAL.md)
