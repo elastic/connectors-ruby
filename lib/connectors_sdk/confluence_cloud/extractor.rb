@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative '../confluence/extractor'
+require 'connectors_sdk/confluence/extractor'
 
 module ConnectorsSdk
   module ConfluenceCloud
