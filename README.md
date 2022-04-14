@@ -9,9 +9,20 @@ Note: The connector framework is a tech preview feature. Tech preview features a
 
 
 ### System Requirements
+
+Under Linux or Macos, you can run the application using Docker or directly on your system.
+
+For the latter you will need:
 - Ruby (see [.ruby-version](.ruby-version))
 - bundler 2.2.29
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
+
+### Windows support
+
+We provide an experimental support for Window 10.
+
+You can run the `win32\install.bat` script to have an unattended installation of Ruby
+and the tools we use. Once installed, you can run the `specs` using `make.bat`
 
 ### Running a webserver with a Connector
 To run the webserver, several steps need to be taken.
@@ -33,6 +44,21 @@ make run
 
 Consumers will need to use the `api_key` string as the password in
 the basic Authorization header.
+
+### Running a with Docker
+You can run the web server using our Dockerfile.
+
+First, build the Docker image with:
+```shell
+make build-docker
+```
+
+The stdout will display the generated API key.
+
+Then, you can run the server within Docker with:
+```shell
+make run-docker
+```
 
 ### Validating your webserver
 You can use any REST client library, or `curl` to hit your webserver once it is up and running. Try:
@@ -72,6 +98,18 @@ Not seeing the connector you want there, either? We encourage community contirub
 
 ### Sinatra Console
 run `make console`
+
+### Updating configuration values
+
+You can update the git branch, revision and project version in the `connectors.yml` file to your current values by
+running this command:
+
+```
+make refresh_config
+```
+
+This command is also included in every `make run`, so when you re-run the app using the makefile, these values are updated, too.
+They are exposed in the root endpoint mentioned above. 
 
 ### Configuration
 

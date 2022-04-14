@@ -39,11 +39,11 @@ module ConnectorsShared
         no_match = requested_ips.all? { |ip| !@allowed_ips.include?(ip) }
         return false unless no_match
         ConnectorsShared::Logger.warn("Requested url #{env[:url]} with resolved ip addresses #{requested_ips} does not match " \
-                                "allowed hosts #{@allowed_hosts} with resolved ip addresses #{@allowed_ips}. Retrying.")
+                                  "allowed hosts #{@allowed_hosts} with resolved ip addresses #{@allowed_ips}. Retrying.")
         @allowed_ips = ips_from_hosts(@allowed_hosts) # maybe the IP has changed for an allowed host. Re-do allowed_hosts DNS lookup
         no_match = requested_ips.all? { |ip| !@allowed_ips.include?(ip) }
         ConnectorsShared::Logger.error("Requested url #{env[:url]} with resolved ip addresses #{requested_ips} does not match " \
-                                "allowed hosts #{@allowed_hosts} with resolved ip addresses #{@allowed_ips}") if no_match
+                                  "allowed hosts #{@allowed_hosts} with resolved ip addresses #{@allowed_ips}") if no_match
         no_match
       end
 

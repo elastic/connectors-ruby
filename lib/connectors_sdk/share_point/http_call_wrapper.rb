@@ -26,7 +26,7 @@ module ConnectorsSdk
           service_type: SERVICE_TYPE,
           authorization_data_proc: proc { { access_token: params[:access_token] } },
           client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token], :cursors => cursors) },
-          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all'),
+          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all', :index_permissions => params[:index_permissions] || false),
           features: features
         )
       end
@@ -61,6 +61,10 @@ module ConnectorsSdk
 
       def cursors
         @extractor.config.cursors
+      end
+
+      def completed?
+        @extractor.completed
       end
 
       def deleted(params)

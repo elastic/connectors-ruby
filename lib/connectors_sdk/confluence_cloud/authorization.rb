@@ -43,7 +43,8 @@ module ConnectorsSdk
 
           params[:grant_type] = 'authorization_code'
           client = oauth_client(params)
-          client.fetch_access_token
+          tokens = client.fetch_access_token
+          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token']))
         end
 
         def refresh(params)
@@ -73,16 +74,35 @@ module ConnectorsSdk
         def oauth_scope
           %w[
             offline_access
-            read:content-details:confluence
-            read:content:confluence
-            read:attachment:confluence
-            read:user:confluence
-            read:group:confluence
+
+            read:confluence-content.all
+            read:confluence-content.summary
+            read:confluence-props
+            read:confluence-space.summary
+            read:confluence-user
+            readonly:content.attachment:confluence
+            search:confluence
           ]
         end
 
         def missing_fields(params, required = [])
           Array.wrap(required).select { |field| params[field.to_sym].nil? }
+        end
+
+        private
+
+        def fetch_cloud_id(access_token)
+          response = HTTPClient.new.get(
+            'https://api.atlassian.com/oauth/token/accessible-resources',
+            nil,
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer #{access_token}"
+          )
+          raise 'unable to fetch cloud id' unless HTTP::Status.successful?(response.status)
+          json = JSON.parse(response.body)
+
+          site = json.find { |sites| sites['url'] == 'https://workplace-search.atlassian.net' } || {}
+          site.fetch('id') { raise 'unable to fetch cloud id' }
         end
       end
     end

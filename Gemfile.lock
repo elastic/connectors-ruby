@@ -160,6 +160,8 @@ GEM
     timecop (0.9.4)
     tzinfo (1.2.9)
       thread_safe (~> 0.1)
+    tzinfo-data (1.2022.1)
+      tzinfo (>= 1.0.0)
     unicode-display_width (2.1.0)
     webmock (3.14.0)
       addressable (>= 2.8.0)
@@ -169,6 +171,7 @@ GEM
 PLATFORMS
   universal-darwin-21
   universal-java-11
+  x86-mingw32
   x86_64-darwin-20
 
 DEPENDENCIES
@@ -201,6 +204,7 @@ DEPENDENCIES
   sinatra
   sinatra-contrib
   timecop
+  tzinfo-data (= 1.2022.1)
   webmock
 
 BUNDLED WITH

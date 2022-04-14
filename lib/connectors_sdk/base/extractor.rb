@@ -30,7 +30,7 @@ module ConnectorsSdk
         ]
       )
 
-      attr_reader :content_source_id, :config, :features, :original_cursors, :service_type
+      attr_reader :content_source_id, :config, :features, :original_cursors, :service_type, :completed
       attr_accessor :monitor, :client_proc
 
       def initialize(content_source_id:,
@@ -48,6 +48,7 @@ module ConnectorsSdk
         @authorization_data_proc = authorization_data_proc
         @original_cursors = config.cursors.deep_dup
         @monitor = monitor
+        @completed = false
       end
 
       def authorization_data!

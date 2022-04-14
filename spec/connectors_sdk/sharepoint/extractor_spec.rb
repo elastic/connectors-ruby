@@ -293,33 +293,12 @@ describe ConnectorsSdk::SharePoint::Extractor do
         expect_sites([:id => site_id])
         expect_groups([])
         expect_site_drives(site_id, drives)
+        allow(extractor).to receive(:retrieve_latest_cursors).and_return({ described_class::DRIVE_IDS_CURSOR_KEY => {} })
       end
 
       it 'does not error' do
         cursors['current_drive_id'] = ('z' * 100) # sorts after any real id
         expect { subject }.not_to raise_error
-      end
-
-      it 'understands how to skip to just after last_drive_id' do
-        cursors['last_drive_id'] = ('z' * 100)
-        expect { subject }.not_to raise_error
-      end
-
-      it 'understands how to skip to just after last_drive_id' do
-        cursors['last_drive_id'] = drive_id
-        expect { subject }.not_to raise_error
-      end
-
-      it 'clears cursor on final last_drive_id' do
-        cursors['last_drive_id'] = drive_id
-        expect { subject }.to change { cursors }.to({})
-      end
-
-      it 'sets last_drive_id from current_drive_id' do
-        cursors['current_drive_id'] = drive_id
-        allow(extractor).to receive(:yield_drive_items)
-
-        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id }).to({ 'last_drive_id' => drive_id })
       end
 
       it 'preserves current_drive_id in the presence of a page_cursor' do
@@ -328,7 +307,14 @@ describe ConnectorsSdk::SharePoint::Extractor do
           config.cursors['page_cursor'] = '_'
         end
 
-        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_' })
+        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id, 'drive_ids' => {} }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_', 'drive_ids' => {} })
+      end
+
+      it 'sets completed to true in the absence of a page_cursor' do
+        cursors['current_drive_id'] = drive_id
+        allow(extractor).to receive(:yield_drive_items)
+
+        expect { subject }.to change { extractor.completed }.from(false).to(true)
       end
     end
   end

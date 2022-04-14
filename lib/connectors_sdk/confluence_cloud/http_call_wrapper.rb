@@ -48,10 +48,6 @@ module ConnectorsSdk
         )
       end
 
-      def cursors
-        @extractor.config.cursors
-      end
-
       def document_batch(params)
         results = []
 
@@ -78,6 +74,14 @@ module ConnectorsSdk
         results
       rescue ConnectorsSdk::Atlassian::CustomClient::ClientError => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
+      end
+
+      def cursors
+        @extractor.config.cursors
+      end
+
+      def completed?
+        true
       end
 
       def deleted(params)

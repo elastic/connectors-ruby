@@ -162,7 +162,7 @@ module ConnectorsSdk
         private
 
         def text_from_html(raw_html)
-          ExtractionUtils.node_descendant_text(Nokogiri::HTML(raw_html))
+          ConnectorsShared::ExtractionUtils.node_descendant_text(Nokogiri::HTML(raw_html))
         end
       end
 
