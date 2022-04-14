@@ -6,13 +6,13 @@ config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml
 
 test: config/connectors.yml
-	bundle exec rspec spec
+	bundle _$(shell cat .bundler-version)_ exec rspec spec
 
 lint: config/connectors.yml
-	bundle exec rubocop lib spec
+	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec
 
 autocorrect: config/connectors.yml
-	bundle exec rubocop lib spec -a
+	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -a
 
 api_key: config/connectors.yml
 	${YQ} e ".http.api_key = \"$(shell uuidgen | tr -d '-')\"" -i config/connectors.yml
@@ -51,11 +51,11 @@ push_gem:
 
 install:
 	rbenv install -s
-	- gem install bundler -v 2.2.33 && rbenv rehash
-	bundle install --jobs 1
+	- gem install bundler -v $(shell cat .bundler-version) && rbenv rehash
+	bundle _$(shell cat .bundler-version)_ install --jobs 1
 
 refresh_config: update_config
-	cd lib/app; bundle exec rackup --host 0.0.0.0 config.ru
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec rackup --host 0.0.0.0 config.ru
 
 build-docker:
 	docker build -t connectors .
@@ -64,9 +64,9 @@ run-docker:
 	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
 
 exec_app:
-	cd lib/app; bundle exec rackup config.ru
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec rackup config.ru
 
 run: | refresh_config exec_app
 
 console:
-	cd lib/app; bundle exec irb -r ./console.rb
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec irb -r ./console.rb
