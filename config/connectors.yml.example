@@ -1,5 +1,5 @@
 # general metadata
-version: "${VERSION}-${TIMESTAMP}"
+version: "CHANGEME"
 repository: "https://github.com/elastic/connectors"
 revision: "main"
 
