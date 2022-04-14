@@ -35,13 +35,17 @@ Last, take care of the branching:
 ## In-Between releases
 
 Sometimes, we need to release Connectors independantly from Enterprise Search.
-For instance, if someone wants to use the project as an HTTP Service.
+For instance, if someone wants to use the project as an HTTP Service and we have a
+bug fix we want them to have as soon as possible.
 
 In that case, we increment the **BUILD** number, and follow the same release
 process than for the unified release, except that this gem won't ship with Enterprise Search.
 
 So `8.1.2.1`, `8.1.2.2` etc. On the next unified release, the version will be bumped to
 the next **PATCH** value, and **BUILD** set to `0`
+
+**In-Between releases should never introduce new features since they will eventually be
+merged into the next PATCH release. New features are always done in Developer previews**
 
 ## Developer preview releases
 
