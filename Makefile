@@ -1,5 +1,6 @@
 YQ ?= "yq"
-.phony: test lint autocorrect api_key update_config build release build_gem install refresh_config build-docker run-docker exec_app tag
+.phony: test lint autocorrect api_key update_config build 
+.phony: release_dev release build_gem install refresh_config build-docker run-docker exec_app tag
 
 config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml
@@ -31,6 +32,8 @@ update_config: config/connectors.yml
 build: update_config_dev build_gem
 
 release: update_config build_gem push_gem tag
+
+release_dev: update_config_dev build_gem push_gem
 
 tag:
 	git tag v$(shell cat VERSION)
