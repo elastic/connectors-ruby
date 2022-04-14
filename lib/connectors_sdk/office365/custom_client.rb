@@ -138,8 +138,10 @@ module ConnectorsSdk
             if cursors['item_children_next_link'].present?
               stack << folder_id
             end
-            cursors['page_cursor'] = stack.dup
-            break
+            if stack.present?
+              cursors['page_cursor'] = stack.dup
+              break
+            end
           end
         end
       end
