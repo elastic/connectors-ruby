@@ -39,6 +39,10 @@ Last, take care of the branching:
 - Increment the VERSION on main to match the next release
 - Create a new maintenance branch if it's a new MINOR
 
+After the Elastic unified release is complete
+
+- Update the **BUILD** version ([example PR](https://github.com/elastic/connectors/pull/81)). Note that the Connectors project does not immediately bump to the next **PATCH** version. That wont happen until that patch release's FF date.
+
 ## In-Between releases
 
 Sometimes, we need to release Connectors independantly from Enterprise Search.
