@@ -13,7 +13,7 @@ module ConnectorsSdk
 
       ConnectorsSdk::Base::Extractor::TRANSIENT_SERVER_ERROR_CLASSES << Atlassian::CustomClient::ServiceUnavailableError
 
-      def yield_document_changes(modified_since: nil)
+      def yield_document_changes(modified_since: nil, break_after_page: nil)
         @space_permissions_cache = {}
         @content_restriction_cache = {}
         yield_spaces do |space|
@@ -42,6 +42,11 @@ module ConnectorsSdk
             else
               yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_content(content, content_base_url, restrictions)
             end
+          end
+
+          if break_after_page
+            @completed = true
+            break
           end
         end
       end

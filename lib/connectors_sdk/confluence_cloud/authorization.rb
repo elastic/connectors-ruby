@@ -6,69 +6,25 @@
 
 # frozen_string_literal: true
 
-require 'connectors_shared'
-require 'signet'
-require 'signet/oauth_2'
-require 'signet/oauth_2/client'
+require 'connectors_sdk/base/authorization'
 
 module ConnectorsSdk
   module ConfluenceCloud
-    class Authorization
+    class Authorization < ConnectorsSdk::Base::Authorization
       class << self
+        def access_token(params)
+          tokens = super
+          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token']))
+        end
+
+        private
+
         def authorization_url
           'https://auth.atlassian.com/authorize'
         end
 
         def token_credential_uri
           'https://auth.atlassian.com/oauth/token'
-        end
-
-        def authorization_uri(params)
-          missing = missing_fields(params, %w[client_id])
-          unless missing.blank?
-            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
-          end
-
-          params[:response_type] = 'code'
-          params[:additional_parameters] = { :prompt => 'consent', :audience => 'api.atlassian.com' }
-          client = oauth_client(params)
-          client.authorization_uri.to_s
-        end
-
-        def access_token(params)
-          missing = missing_fields(params, %w[client_id client_secret code redirect_uri])
-          unless missing.blank?
-            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
-          end
-
-          params[:grant_type] = 'authorization_code'
-          client = oauth_client(params)
-          tokens = client.fetch_access_token
-          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token']))
-        end
-
-        def refresh(params)
-          missing = missing_fields(params, %w[client_id client_secret refresh_token])
-          unless missing.blank?
-            raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
-          end
-
-          params[:grant_type] = 'refresh_token'
-          client = oauth_client(params)
-          client.refresh!
-        rescue StandardError => e
-          ConnectorsShared::ExceptionTracking.log_exception(e)
-          raise ConnectorsShared::TokenRefreshFailedError
-        end
-
-        def oauth_client(params)
-          options = params.merge(
-            :authorization_uri => authorization_url,
-            :token_credential_uri => token_credential_uri,
-            :scope => oauth_scope
-          )
-          options[:state] = JSON.dump(options[:state]) if options[:state]
-          Signet::OAuth2::Client.new(options)
         end
 
         def oauth_scope
@@ -85,11 +41,9 @@ module ConnectorsSdk
           ]
         end
 
-        def missing_fields(params, required = [])
-          Array.wrap(required).select { |field| params[field.to_sym].nil? }
+        def additional_parameters
+          { :prompt => 'consent', :audience => 'api.atlassian.com' }
         end
-
-        private
 
         def fetch_cloud_id(access_token)
           response = HTTPClient.new.get(
