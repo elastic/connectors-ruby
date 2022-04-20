@@ -54,6 +54,8 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   before do
+    @connector = settings.connector_class.new
+
     Time.zone = ActiveSupport::TimeZone.new('UTC')
     # XXX to be removed
     return if settings.deactivate_auth
@@ -81,16 +83,15 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/status' do
-    connector = settings.connector_class.new
-    source_status = connector.source_status(body_params)
+    source_status = @connector.source_status(body_params)
     json(
-      :extractor => { :name => connector.name },
+      :extractor => { :name => @connector.name },
       :contentProvider => source_status
     )
   end
 
   post '/documents' do
-    results, cursors, completed = settings.connector_class.new.document_batch(body_params)
+    results, cursors, completed = @connector.document_batch(body_params)
 
     json(
       :results => results,
@@ -100,22 +101,22 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    settings.connector_class.new.download(body_params)
+    @connector.download(body_params)
   end
 
   post '/deleted' do
-    json :results => settings.connector_class.new.deleted(body_params)
+    json :results => @connector.deleted(body_params)
   end
 
   post '/permissions' do
-    json :results => settings.connector_class.new.permissions(body_params)
+    json :results => @connector.permissions(body_params)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
     logger.info "Received client ID: #{body_params[:client_id]} and client secret: #{body_params[:client_secret]}"
     logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
-    authorization_uri = settings.connector_class.new.authorization_uri(body_params)
+    authorization_uri = @connector.authorization_uri(body_params)
 
     json :oauth2redirect => authorization_uri
   end
@@ -123,12 +124,12 @@ class ConnectorsWebApp < Sinatra::Base
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
     logger.info "Received payload: #{body_params}"
-    json settings.connector_class.new.access_token(body_params)
+    json @connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
     logger.info "Received payload: #{body_params}"
-    json settings.connector_class.new.refresh(body_params)
+    json @connector.refresh(body_params)
   end
 
   def body_params
