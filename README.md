@@ -16,7 +16,7 @@ are subject to change and are not covered by the support SLA of general release
 Under Linux or Macos, you can run the application using Docker or directly on your system.
 
 For the latter you will need:
-- Ruby (see [.ruby-version](.ruby-version))
+- rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
 - bundler 2.2.29
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
