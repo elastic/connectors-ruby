@@ -63,7 +63,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       mock_endpoint('drives/4567/items/1111/permissions', permissions)
 
       extractor = backend.extractor(params)
-      results, cursors, completed = backend.document_batch(params)
+      results, _cursors, _completed = backend.document_batch(params)
 
       expect(results.size).to eq 100
       expect(extractor.config.index_permissions).to be_truthy

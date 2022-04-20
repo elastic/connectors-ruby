@@ -54,7 +54,7 @@ module ConnectorsSdk
           }
         end
 
-        return results, extractor.config.cursors, extractor.completed
+        [results, extractor.config.cursors, extractor.completed]
       rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
       end
