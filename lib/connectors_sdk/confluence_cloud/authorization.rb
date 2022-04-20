@@ -14,7 +14,7 @@ module ConnectorsSdk
       class << self
         def access_token(params)
           tokens = super
-          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token']))
+          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token'], params[:base_url]))
         end
 
         private
@@ -45,7 +45,7 @@ module ConnectorsSdk
           { :prompt => 'consent', :audience => 'api.atlassian.com' }
         end
 
-        def fetch_cloud_id(access_token)
+        def fetch_cloud_id(access_token, base_url)
           response = HTTPClient.new.get(
             'https://api.atlassian.com/oauth/token/accessible-resources',
             nil,
@@ -55,7 +55,7 @@ module ConnectorsSdk
           raise 'unable to fetch cloud id' unless HTTP::Status.successful?(response.status)
           json = JSON.parse(response.body)
 
-          site = json.find { |sites| sites['url'] == 'https://workplace-search.atlassian.net' } || {}
+          site = json.find { |sites| sites['url'] == base_url } || {}
           site.fetch('id') { raise 'unable to fetch cloud id' }
         end
       end

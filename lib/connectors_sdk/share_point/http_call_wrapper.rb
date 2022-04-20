@@ -13,9 +13,9 @@ require 'connectors_sdk/base/http_call_wrapper'
 
 module ConnectorsSdk
   module SharePoint
-    SERVICE_TYPE = 'share_point'
-
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+      SERVICE_TYPE = 'share_point'
+
       def name
         'SharePoint'
       end
@@ -48,6 +48,10 @@ module ConnectorsSdk
           :drive_ids => 'all',
           :index_permissions => params[:index_permissions] || false
         )
+      end
+
+      def health_check(params)
+        client(params).me
       end
     end
   end

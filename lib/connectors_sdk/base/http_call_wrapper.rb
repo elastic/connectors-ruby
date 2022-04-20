@@ -13,7 +13,7 @@ module ConnectorsSdk
     class HttpCallWrapper
       def extractor(params)
         extractor_class.new(
-          content_source_id: BSON::ObjectId.new,
+          content_source_id: params[:content_source_id] || "GENERATED-#{BSON::ObjectId.new}",
           service_type: service_type,
           authorization_data_proc: proc { { access_token: params[:access_token] } },
           client_proc: proc { client(params) },
@@ -93,7 +93,7 @@ module ConnectorsSdk
       end
 
       def source_status(params)
-        client(params).me
+        health_check(params)
         { :status => 'OK', :statusCode => 200, :message => "Connected to #{name}" }
       rescue StandardError => e
         { :status => 'FAILURE', :statusCode => e.is_a?(custom_client_error) ? e.status_code : 500, :message => e.message }
@@ -104,7 +104,7 @@ module ConnectorsSdk
       end
 
       def service_type
-        raise 'Not implemented for this connector'
+        self.class::SERVICE_TYPE
       end
 
       private
@@ -126,6 +126,10 @@ module ConnectorsSdk
       end
 
       def config(params)
+        raise 'Not implemented for this connector'
+      end
+
+      def health_check(params)
         raise 'Not implemented for this connector'
       end
     end

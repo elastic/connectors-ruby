@@ -14,9 +14,9 @@ require 'connectors_sdk/base/http_call_wrapper'
 
 module ConnectorsSdk
   module ConfluenceCloud
-    SERVICE_TYPE = 'confluence_cloud'
-
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+      SERVICE_TYPE = 'confluence_cloud'
+
       def name
         'Confluence Cloud'
       end
@@ -45,6 +45,10 @@ module ConnectorsSdk
 
       def config(params)
         ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(params[:cloud_id]), :cursors => params.fetch(:cursors, {}) || {})
+      end
+
+      def health_check(params)
+        client(params).me
       end
 
       def base_url(cloud_id)
