@@ -1,4 +1,7 @@
 # frozen_string_literal: true
+
+ruby File.read(File.join(__dir__, '.ruby-version')).strip
+
 # Pull gem index from rubygems
 source 'https://rubygems.org'
 
@@ -30,14 +33,14 @@ group :test do
 end
 
 # Dependencies for the HTTP service
-gem 'sinatra'
-gem 'sinatra-contrib'
-gem 'rack'
-gem 'forwardable'
-gem 'faraday'
-gem 'httpclient'
-gem 'attr_extras'
-gem 'hashie'
+gem 'sinatra', '~> 2.1.0'
+gem 'sinatra-contrib', '~> 2.1.0'
+gem 'rack', '~> 2.2.3'
+gem 'forwardable', '~> 1.3.2'
+gem 'faraday', '~> 1.10.0'
+gem 'httpclient', '~> 2.8.3'
+gem 'attr_extras', '~> 6.2.5'
+gem 'hashie', '~> 5.0.0'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'

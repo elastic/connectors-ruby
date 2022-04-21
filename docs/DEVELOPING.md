@@ -6,7 +6,7 @@ After you've made your changes, if you'd like to contribute back, please see the
 
 ### Requirements
 - rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
-- bundler 2.2.29
+- bundler (for version, see [.bundler-version](./.bundler-version))
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
 ### Setup

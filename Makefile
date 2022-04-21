@@ -1,6 +1,6 @@
 YQ ?= "yq"
 .phony: test lint autocorrect api_key update_config build 
-.phony: release_dev release build_gem install refresh_config build-docker run-docker exec_app tag
+.phony: release_dev release build_gem install build-docker run-docker exec_app tag
 
 config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml
@@ -54,9 +54,6 @@ install:
 	- gem install bundler -v $(shell cat .bundler-version) && rbenv rehash
 	bundle _$(shell cat .bundler-version)_ install --jobs 1
 
-refresh_config: update_config
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec rackup --host 0.0.0.0 config.ru
-
 build-docker:
 	docker build -t connectors .
 
@@ -66,7 +63,7 @@ run-docker:
 exec_app:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec rackup config.ru
 
-run: | refresh_config exec_app
+run: | update_config_dev exec_app
 
 console:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec irb -r ./console.rb

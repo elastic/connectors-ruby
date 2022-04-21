@@ -30,7 +30,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :raise_errors, false
     set :show_exceptions, false
     set :bind, settings.http['host']
-    set :port, settings.http['port']
+    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
     set :api_key, settings.http['api_key']
     set :deactivate_auth, settings.http['deactivate_auth']
     set :connector_name, settings.http['connector']
@@ -60,7 +60,7 @@ class ConnectorsWebApp < Sinatra::Base
     # XXX to be removed
     return if settings.deactivate_auth
 
-    raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(settings.environment) && api_key == ConnectorsApp::DEFAULT_PASSWORD
+    raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(settings.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
 
     auth = Rack::Auth::Basic::Request.new(request.env)
 
