@@ -21,7 +21,7 @@ describe ConnectorsSdk::Base::Factory do
     end
 
     factory.register('sharepoint', MyConnector)
-    instance = factory.connector('sharepoint')
-    expect(instance.works).to eq 'works'
+    connector_class = factory.connector_class('sharepoint')
+    expect(connector_class.new.works).to eq 'works'
   end
 end
