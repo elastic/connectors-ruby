@@ -17,8 +17,8 @@ module ConnectorsSdk
         @connectors[name] = klass
       end
 
-      def connector(name)
-        @connectors[name].new
+      def connector_class(name)
+        @connectors[name]
       end
     end
 
