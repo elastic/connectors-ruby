@@ -22,7 +22,7 @@ module ConnectorsSdk
       def yield_document_changes(modified_since: nil, break_after_page: false)
         @space_permissions_cache = {}
         @content_restriction_cache = {}
-        yield_spaces(:break_after_page => break_after_page) do |space|
+        yield_spaces do |space|
           yield_single_document_change(:identifier => "Confluence Space: #{space&.fetch(:key)} (#{space&.webui})") do
             permissions = config.index_permissions ? get_space_permissions(space) : []
             yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_space(space, content_base_url, permissions)
@@ -49,9 +49,12 @@ module ConnectorsSdk
               yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_content(content, content_base_url, restrictions)
             end
           end
+
+          if break_after_page
+            @completed = true
+            break
+          end
         end
-        @completed = true
-        nil
       end
 
       def yield_deleted_ids(ids)
@@ -82,24 +85,17 @@ module ConnectorsSdk
 
       private
 
-      def download_attachment_binary(attachment_api_content)
-        client.download("#{attachment_api_content._links.base}#{attachment_api_content._links.download}").body
-      end
-
       def content_base_url
         'https://workplace-search.atlassian.net/wiki'
       end
 
-      def yield_spaces(break_after_page: false)
+      def yield_spaces
         @space_cursor ||= 0
         loop do
           response = client.spaces(:start_at => @space_cursor, :include_permissions => config.index_permissions)
           response.results.each do |space|
             yield space
             @space_cursor += 1
-
-            # only extract the first space for now
-            return if break_after_page
           end
           break unless should_continue_looping?(response)
           log_info("Requesting more spaces with cursor: #{@space_cursor}")

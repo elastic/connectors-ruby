@@ -25,6 +25,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
 
   let(:params) do
     {
+      :cursors => {},
       :access_token => 'something',
       :index_permissions => true
     }
@@ -51,6 +52,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
           { id: 666 }
         ]
       }
+      delta = { '@odata.deltaLink' => 'link' }
 
       mock_endpoint('sites/?$select=id&search=&top=10', sites)
       mock_endpoint('groups/?$select=id,createdDateTime', groups)
@@ -61,6 +63,7 @@ RSpec.describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       mock_endpoint('drives/4567/root?$select=id', drive)
       mock_endpoint('drives/4567/items/1111/children', children)
       mock_endpoint('drives/4567/items/1111/permissions', permissions)
+      mock_endpoint('drives/4567/root/delta?$select=id', delta)
 
       extractor = backend.extractor(params)
       results, _cursors, _completed = backend.document_batch(params)

@@ -38,13 +38,13 @@ module ConnectorsSdk
         }
         if expand.present?
           params[:expand] = case expand
-          when Array
-            expand.join(',')
-          when String
-            expand
-          else
-            expand.to_s
-          end
+                            when Array
+                              expand.join(',')
+                            when String
+                              expand
+                            else
+                              expand.to_s
+                            end
         end
         response = get('rest/api/user', params)
         Hashie::Mash.new(parse_and_raise_if_necessary!(response))

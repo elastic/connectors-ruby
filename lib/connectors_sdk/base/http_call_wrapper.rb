@@ -109,7 +109,7 @@ module ConnectorsSdk
         raise 'Not implemented for this connector'
       end
 
-      def client(params)
+      def client(*)
         raise 'Not implemented for this connector'
       end
 
@@ -117,11 +117,11 @@ module ConnectorsSdk
         raise 'Not implemented for this connector'
       end
 
-      def config(params)
+      def config(*)
         raise 'Not implemented for this connector'
       end
 
-      def health_check(params)
+      def health_check(*)
         raise 'Not implemented for this connector'
       end
     end
