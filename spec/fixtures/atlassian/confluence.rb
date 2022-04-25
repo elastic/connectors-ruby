@@ -14,7 +14,7 @@ module ConnectorsSdk
           {
             :results => [
               {
-                :id => 655361,
+                :id => 655_361,
                 :key => 'SWPRJ',
                 :name => 'Demo Project Home',
                 :type => 'global',
@@ -68,7 +68,7 @@ module ConnectorsSdk
                 :status => 'current',
                 :title => 'Backups Playbook',
                 :space => {
-                  :id => 3440644,
+                  :id => 3_440_644,
                   :key => 'eng',
                   :name => 'Engineering',
                   :type => 'global',
@@ -124,7 +124,7 @@ module ConnectorsSdk
             :status => 'current',
             :title => 'Backups Playbook',
             :space => {
-              :id => 3440644,
+              :id => 3_440_644,
               :key => 'eng',
               :name => 'Engineering',
               :type => 'global',
@@ -325,7 +325,7 @@ module ConnectorsSdk
 
         def expanded_space_response
           {
-            :id => 655361,
+            :id => 655_361,
             :key => 'SWPRJ',
             :name => 'Demo Project Home',
             :type => 'global',
@@ -350,7 +350,7 @@ module ConnectorsSdk
             :status => 'current',
             :title => 'cake.jpg',
             :space => {
-              :id => 98306,
+              :id => 98_306,
               :key => 'TS',
               :name => 'Test Space',
               :type => 'global',
@@ -463,7 +463,7 @@ module ConnectorsSdk
               :macroRenderedOutput => {
               },
               :extensions => {
-                :position => 430931086
+                :position => 430_931_086
               },
               :archivableDescendantsCount => 0,
               :_expandable => {
@@ -516,7 +516,7 @@ module ConnectorsSdk
             },
             :extensions => {
               :mediaType => 'image/jpeg',
-              :fileSize => 14638,
+              :fileSize => 14_638,
               :comment => '',
               :mediaTypeDescription => 'JPEG Image',
               :fileId => '08c2aed5-0a99-4d23-b53e-ad791e6f2336',
@@ -545,13 +545,13 @@ module ConnectorsSdk
           {
               :results => [
                   {
-                      :id => 1952055299,
+                      :id => 1_952_055_299,
                       :key => '716',
                       :name => '7.16',
                       :type => 'global',
                       :permissions => [
                           {
-                              :id => 1952055499,
+                              :id => 1_952_055_499,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -593,7 +593,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055493,
+                              :id => 1_952_055_493,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -635,7 +635,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055487,
+                              :id => 1_952_055_487,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -677,7 +677,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055481,
+                              :id => 1_952_055_481,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -719,7 +719,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055475,
+                              :id => 1_952_055_475,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -761,7 +761,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055469,
+                              :id => 1_952_055_469,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -803,7 +803,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055463,
+                              :id => 1_952_055_463,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -845,7 +845,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055457,
+                              :id => 1_952_055_457,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -887,7 +887,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055451,
+                              :id => 1_952_055_451,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -929,7 +929,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055445,
+                              :id => 1_952_055_445,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -971,7 +971,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055428,
+                              :id => 1_952_055_428,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -1013,7 +1013,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055427,
+                              :id => 1_952_055_427,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1040,7 +1040,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055426,
+                              :id => 1_952_055_426,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1067,7 +1067,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055424,
+                              :id => 1_952_055_424,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -1109,7 +1109,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055423,
+                              :id => 1_952_055_423,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1136,7 +1136,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055422,
+                              :id => 1_952_055_422,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -1178,7 +1178,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055421,
+                              :id => 1_952_055_421,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1205,7 +1205,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055420,
+                              :id => 1_952_055_420,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1232,7 +1232,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055419,
+                              :id => 1_952_055_419,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1259,7 +1259,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055418,
+                              :id => 1_952_055_418,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1286,7 +1286,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055417,
+                              :id => 1_952_055_417,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1313,7 +1313,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055416,
+                              :id => 1_952_055_416,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1340,7 +1340,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055415,
+                              :id => 1_952_055_415,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1367,7 +1367,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055414,
+                              :id => 1_952_055_414,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1394,7 +1394,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055413,
+                              :id => 1_952_055_413,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1421,7 +1421,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055412,
+                              :id => 1_952_055_412,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -1463,7 +1463,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055411,
+                              :id => 1_952_055_411,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1490,7 +1490,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055410,
+                              :id => 1_952_055_410,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -1532,7 +1532,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055409,
+                              :id => 1_952_055_409,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1559,7 +1559,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055406,
+                              :id => 1_952_055_406,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1586,7 +1586,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055404,
+                              :id => 1_952_055_404,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1613,7 +1613,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055403,
+                              :id => 1_952_055_403,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1640,7 +1640,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055401,
+                              :id => 1_952_055_401,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1667,7 +1667,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055400,
+                              :id => 1_952_055_400,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1694,7 +1694,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055399,
+                              :id => 1_952_055_399,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1721,7 +1721,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055398,
+                              :id => 1_952_055_398,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1748,7 +1748,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055397,
+                              :id => 1_952_055_397,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1775,7 +1775,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055395,
+                              :id => 1_952_055_395,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1802,7 +1802,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055394,
+                              :id => 1_952_055_394,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1829,7 +1829,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055393,
+                              :id => 1_952_055_393,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1856,7 +1856,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055392,
+                              :id => 1_952_055_392,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1883,7 +1883,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055391,
+                              :id => 1_952_055_391,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1910,7 +1910,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055390,
+                              :id => 1_952_055_390,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1937,7 +1937,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055388,
+                              :id => 1_952_055_388,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1964,7 +1964,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055387,
+                              :id => 1_952_055_387,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -1991,7 +1991,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055386,
+                              :id => 1_952_055_386,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2018,7 +2018,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055384,
+                              :id => 1_952_055_384,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2045,7 +2045,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055383,
+                              :id => 1_952_055_383,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2072,7 +2072,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055382,
+                              :id => 1_952_055_382,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2099,7 +2099,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055381,
+                              :id => 1_952_055_381,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2126,7 +2126,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055380,
+                              :id => 1_952_055_380,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -2168,7 +2168,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055379,
+                              :id => 1_952_055_379,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2195,7 +2195,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055378,
+                              :id => 1_952_055_378,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2222,7 +2222,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055377,
+                              :id => 1_952_055_377,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2249,7 +2249,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055376,
+                              :id => 1_952_055_376,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2276,7 +2276,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055375,
+                              :id => 1_952_055_375,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2303,7 +2303,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055374,
+                              :id => 1_952_055_374,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2330,7 +2330,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055373,
+                              :id => 1_952_055_373,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2357,7 +2357,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055372,
+                              :id => 1_952_055_372,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2384,7 +2384,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055371,
+                              :id => 1_952_055_371,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2411,7 +2411,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055370,
+                              :id => 1_952_055_370,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2438,7 +2438,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055369,
+                              :id => 1_952_055_369,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2465,7 +2465,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055367,
+                              :id => 1_952_055_367,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2492,7 +2492,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055365,
+                              :id => 1_952_055_365,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2519,7 +2519,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055364,
+                              :id => 1_952_055_364,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2546,7 +2546,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055363,
+                              :id => 1_952_055_363,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -2588,7 +2588,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055362,
+                              :id => 1_952_055_362,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2615,7 +2615,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055361,
+                              :id => 1_952_055_361,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2642,7 +2642,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055360,
+                              :id => 1_952_055_360,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -2684,7 +2684,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055359,
+                              :id => 1_952_055_359,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2711,7 +2711,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055358,
+                              :id => 1_952_055_358,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2738,7 +2738,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055357,
+                              :id => 1_952_055_357,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2765,7 +2765,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055356,
+                              :id => 1_952_055_356,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2792,7 +2792,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055355,
+                              :id => 1_952_055_355,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2819,7 +2819,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055353,
+                              :id => 1_952_055_353,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2846,7 +2846,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055352,
+                              :id => 1_952_055_352,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2873,7 +2873,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055351,
+                              :id => 1_952_055_351,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2900,7 +2900,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055350,
+                              :id => 1_952_055_350,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2927,7 +2927,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055348,
+                              :id => 1_952_055_348,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2954,7 +2954,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055347,
+                              :id => 1_952_055_347,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -2981,7 +2981,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055346,
+                              :id => 1_952_055_346,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3008,7 +3008,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055345,
+                              :id => 1_952_055_345,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3035,7 +3035,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055344,
+                              :id => 1_952_055_344,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -3077,7 +3077,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055343,
+                              :id => 1_952_055_343,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3104,7 +3104,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055342,
+                              :id => 1_952_055_342,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -3146,7 +3146,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055341,
+                              :id => 1_952_055_341,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3173,7 +3173,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055340,
+                              :id => 1_952_055_340,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3200,7 +3200,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055338,
+                              :id => 1_952_055_338,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3227,7 +3227,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055336,
+                              :id => 1_952_055_336,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3254,7 +3254,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055335,
+                              :id => 1_952_055_335,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3281,7 +3281,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055334,
+                              :id => 1_952_055_334,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3308,7 +3308,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055333,
+                              :id => 1_952_055_333,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3335,7 +3335,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055332,
+                              :id => 1_952_055_332,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3362,7 +3362,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055330,
+                              :id => 1_952_055_330,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3389,7 +3389,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055328,
+                              :id => 1_952_055_328,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -3431,7 +3431,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055327,
+                              :id => 1_952_055_327,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3458,7 +3458,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055326,
+                              :id => 1_952_055_326,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3485,7 +3485,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055325,
+                              :id => 1_952_055_325,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3512,7 +3512,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055324,
+                              :id => 1_952_055_324,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3539,7 +3539,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055323,
+                              :id => 1_952_055_323,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3566,7 +3566,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055322,
+                              :id => 1_952_055_322,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3593,7 +3593,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055321,
+                              :id => 1_952_055_321,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -3635,7 +3635,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055320,
+                              :id => 1_952_055_320,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3662,7 +3662,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055318,
+                              :id => 1_952_055_318,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3689,7 +3689,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055317,
+                              :id => 1_952_055_317,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -3731,7 +3731,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055316,
+                              :id => 1_952_055_316,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3758,7 +3758,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055315,
+                              :id => 1_952_055_315,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3785,7 +3785,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055314,
+                              :id => 1_952_055_314,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3812,7 +3812,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055313,
+                              :id => 1_952_055_313,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3839,7 +3839,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055312,
+                              :id => 1_952_055_312,
                               :subjects => {
                                   :user => {
                                       :results => [
@@ -3881,7 +3881,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055311,
+                              :id => 1_952_055_311,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3908,7 +3908,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055310,
+                              :id => 1_952_055_310,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3935,7 +3935,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055309,
+                              :id => 1_952_055_309,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3962,7 +3962,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055308,
+                              :id => 1_952_055_308,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -3989,7 +3989,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055307,
+                              :id => 1_952_055_307,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -4016,7 +4016,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055306,
+                              :id => 1_952_055_306,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -4043,7 +4043,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055305,
+                              :id => 1_952_055_305,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -4070,7 +4070,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055304,
+                              :id => 1_952_055_304,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -4097,7 +4097,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055303,
+                              :id => 1_952_055_303,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -4124,7 +4124,7 @@ module ConnectorsSdk
                               :unlicensedAccess => false
                           },
                           {
-                              :id => 1952055301,
+                              :id => 1_952_055_301,
                               :subjects => {
                                   :group => {
                                       :results => [
@@ -4188,7 +4188,7 @@ module ConnectorsSdk
               :status => 'current',
               :title => 'Restricted Page',
               :space => {
-                  :id => 1952055299,
+                  :id => 1_952_055_299,
                   :key => '716',
                   :name => '7.16',
                   :type => 'global',
@@ -4339,7 +4339,7 @@ module ConnectorsSdk
                   }
               },
               :container => {
-                  :id => 1952055299,
+                  :id => 1_952_055_299,
                   :key => '716',
                   :name => '7.16',
                   :type => 'global',
@@ -4386,7 +4386,7 @@ module ConnectorsSdk
                   }
               },
               :extensions => {
-                  :position => 222367857
+                  :position => 222_367_857
               },
               :restrictions => {
                   :read => {
@@ -4502,7 +4502,7 @@ module ConnectorsSdk
               :status => 'current',
               :title => '7.16 Home',
               :space => {
-                  :id => 1952055299,
+                  :id => 1_952_055_299,
                   :key => '716',
                   :name => '7.16',
                   :type => 'global',
@@ -4619,7 +4619,7 @@ module ConnectorsSdk
                   }
               },
               :container => {
-                  :id => 1952055299,
+                  :id => 1_952_055_299,
                   :key => '716',
                   :name => '7.16',
                   :type => 'global',
