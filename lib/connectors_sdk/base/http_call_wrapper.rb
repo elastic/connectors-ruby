@@ -25,9 +25,9 @@ module ConnectorsSdk
       def document_batch(params)
         results = []
 
-        @extractor = extractor(params)
+        extractor = extractor(params)
 
-        @extractor.yield_document_changes(:break_after_page => true, :modified_since => @extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
+        extractor.yield_document_changes(:break_after_page => true, :modified_since => extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
           download_obj = nil
           if download_args_and_proc
             download_obj = {
@@ -45,17 +45,9 @@ module ConnectorsSdk
           }
         end
 
-        results
+        [results, extractor.config.cursors, extractor.completed]
       rescue custom_client_error => e
         raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
-      end
-
-      def cursors
-        @extractor.config.cursors
-      end
-
-      def completed?
-        @extractor.completed
       end
 
       def deleted(params)
