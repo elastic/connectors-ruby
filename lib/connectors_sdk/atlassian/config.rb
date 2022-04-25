@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/base/config'
+
 module ConnectorsSdk
   module Atlassian
     class Config < ConnectorsSdk::Base::Config

@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/base/adapter'
 require 'connectors_shared/extraction_utils'
 require 'nokogiri'
 

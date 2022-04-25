@@ -8,6 +8,7 @@
 
 require 'connectors_sdk/atlassian/custom_client'
 require 'connectors_sdk/confluence/adapter'
+require 'connectors_sdk/base/extractor'
 
 module ConnectorsSdk
   module Confluence

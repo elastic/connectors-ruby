@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/atlassian/custom_client'
+
 module ConnectorsSdk
   module Confluence
     class CustomClient < ConnectorsSdk::Atlassian::CustomClient
