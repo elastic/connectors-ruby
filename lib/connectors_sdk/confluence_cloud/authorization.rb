@@ -17,16 +17,6 @@ module ConnectorsSdk
           tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token'], params[:base_url]))
         end
 
-        private
-
-        def authorization_url
-          'https://auth.atlassian.com/authorize'
-        end
-
-        def token_credential_uri
-          'https://auth.atlassian.com/oauth/token'
-        end
-
         def oauth_scope
           %w[
             offline_access
@@ -39,6 +29,16 @@ module ConnectorsSdk
             readonly:content.attachment:confluence
             search:confluence
           ]
+        end
+
+        private
+
+        def authorization_url
+          'https://auth.atlassian.com/authorize'
+        end
+
+        def token_credential_uri
+          'https://auth.atlassian.com/oauth/token'
         end
 
         def additional_parameters

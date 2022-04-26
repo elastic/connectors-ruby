@@ -66,6 +66,10 @@ module ConnectorsSdk
           Array.wrap(required).select { |field| params[field.to_sym].nil? }
         end
 
+        def oauth_scope
+          raise 'Not implemented for this connector'
+        end
+
         private
 
         def authorization_url
@@ -73,10 +77,6 @@ module ConnectorsSdk
         end
 
         def token_credential_uri
-          raise 'Not implemented for this connector'
-        end
-
-        def oauth_scope
           raise 'Not implemented for this connector'
         end
 

@@ -12,17 +12,6 @@ module ConnectorsSdk
   module SharePoint
     class Authorization < ConnectorsSdk::Base::Authorization
       class << self
-
-        private
-
-        def authorization_url
-          'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
-        end
-
-        def token_credential_uri
-          'https://login.microsoftonline.com/common/oauth2/v2.0/token'
-        end
-
         def oauth_scope
           %w[
             User.ReadBasic.All
@@ -33,6 +22,16 @@ module ConnectorsSdk
             Sites.Read.All
             offline_access
           ]
+        end
+
+        private
+
+        def authorization_url
+          'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+        end
+
+        def token_credential_uri
+          'https://login.microsoftonline.com/common/oauth2/v2.0/token'
         end
 
         def additional_parameters
