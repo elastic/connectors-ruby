@@ -12,7 +12,6 @@ require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/share_point/extractor'
 
 describe ConnectorsSdk::Base::HttpCallWrapper do
-
   let(:wrapper_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
   let(:extractor_class) { ConnectorsSdk::SharePoint::Extractor }
   let(:custom_client_error) { ConnectorsSdk::Office365::CustomClient::ClientError }

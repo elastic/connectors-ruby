@@ -7,7 +7,6 @@
 # frozen_string_literal: true
 
 describe ConnectorsSdk::Base::Authorization do
-
   subject do
     ConnectorsSdk::SharePoint::Authorization
   end
