@@ -14,7 +14,7 @@ module ConnectorsSdk
       class << self
         def access_token(params)
           tokens = super
-          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token'], params[:base_url]))
+          tokens.merge(:cloud_id => fetch_cloud_id(tokens['access_token'], params[:external_connector_base_url]))
         end
 
         def oauth_scope
