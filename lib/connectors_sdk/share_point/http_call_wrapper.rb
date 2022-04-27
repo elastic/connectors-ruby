@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/base/http_call_wrapper'
 require 'connectors_sdk/office365/config'
 require 'connectors_sdk/share_point/extractor'
 require 'connectors_sdk/share_point/authorization'
@@ -15,7 +16,7 @@ module ConnectorsSdk
   module SharePoint
     SERVICE_TYPE = 'share_point'
 
-    class HttpCallWrapper
+    class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       def extractor(params)
         cursors = params.fetch(:cursors, {}) || {}
         features = params.fetch(:features, {}) || {}
@@ -95,6 +96,10 @@ module ConnectorsSdk
 
       def name
         'SharePoint'
+      end
+
+      def is_oauth
+        true
       end
 
       def source_status(params)

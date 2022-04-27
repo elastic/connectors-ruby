@@ -90,6 +90,10 @@ class ConnectorsWebApp < Sinatra::Base
     )
   end
 
+  get '/describe' do
+    json @connector.describe
+  end
+
   post '/documents' do
     results, cursors, completed = @connector.document_batch(body_params)
 
