@@ -10,12 +10,14 @@ require 'connectors_sdk/base/http_call_wrapper'
 
 module ConnectorsSdk
   module FakeConnector
-    SERVICE_TYPE = 'fake_connector'
-
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+      SERVICE_TYPE = 'fake_connector'
+
       def name
         'Fake Connector'
       end
+
+      private
 
       def configurable_fields
         [
@@ -30,8 +32,8 @@ module ConnectorsSdk
         ]
       end
 
-      def source_status(_params)
-        { :status => 'OK', :statusCode => 200, :message => 'Connected to FakeConnector' }
+      def health_check(_params)
+        true
       end
 
       def document_batch(_params)

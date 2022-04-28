@@ -21,11 +21,28 @@ module ConnectorsSdk
         'Confluence Cloud'
       end
 
-      def service_type
-        SERVICE_TYPE
+      private
+
+      def connection_requires_redirect
+        true
       end
 
-      private
+      def configurable_fields
+        [
+          {
+            'key' => 'base_url',
+            'label' => 'Base URL'
+          },
+          {
+            'key' => 'client_id',
+            'label' => 'Client ID'
+          },
+          {
+            'key' => 'client_secret',
+            'label' => 'Client Secret'
+          },
+        ]
+      end
 
       def extractor_class
         ConnectorsSdk::ConfluenceCloud::Extractor
@@ -53,14 +70,6 @@ module ConnectorsSdk
 
       def base_url(cloud_id)
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
-      end
-
-      def connection_requires_redirect
-        true
-      end
-
-      def configurable_fields
-        []
       end
     end
   end

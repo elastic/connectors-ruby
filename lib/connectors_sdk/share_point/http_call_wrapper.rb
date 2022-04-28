@@ -21,11 +21,24 @@ module ConnectorsSdk
         'SharePoint'
       end
 
-      def service_type
-        SERVICE_TYPE
+      private
+
+      def connection_requires_redirect
+        true
       end
 
-      private
+      def configurable_fields
+        [
+          {
+            'key' => 'client_id',
+            'label' => 'Client ID'
+          },
+          {
+            'key' => 'client_secret',
+            'label' => 'Client Secret'
+          },
+        ]
+      end
 
       def extractor_class
         ConnectorsSdk::SharePoint::Extractor
@@ -53,14 +66,6 @@ module ConnectorsSdk
 
       def health_check(params)
         client(params).me
-      end
-
-      def connection_requires_redirect
-        true
-      end
-
-      def configurable_fields
-        []
       end
     end
   end

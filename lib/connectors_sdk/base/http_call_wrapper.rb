@@ -109,6 +109,14 @@ module ConnectorsSdk
 
       private
 
+      def connection_requires_redirect
+        false
+      end
+
+      def configurable_fields
+        []
+      end
+
       def convert_third_party_errors
         yield
       rescue custom_client_error => e
@@ -137,14 +145,6 @@ module ConnectorsSdk
 
       def health_check(*)
         raise 'Not implemented for this connector'
-      end
-
-      def connection_requires_redirect
-        false
-      end
-
-      def configurable_fields
-        []
       end
     end
   end
