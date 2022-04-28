@@ -99,6 +99,14 @@ module ConnectorsSdk
         self.class::SERVICE_TYPE
       end
 
+      def describe
+        {
+          :name => name,
+          :connection_requires_redirect => connection_requires_redirect,
+          :configurable_fields => configurable_fields
+        }
+      end
+
       private
 
       def convert_third_party_errors
@@ -129,14 +137,6 @@ module ConnectorsSdk
 
       def health_check(*)
         raise 'Not implemented for this connector'
-      end
-
-      def describe
-        {
-          :name => name,
-          :connection_requires_redirect => connection_requires_redirect,
-          :configurable_fields => configurable_fields
-        }
       end
 
       def connection_requires_redirect
