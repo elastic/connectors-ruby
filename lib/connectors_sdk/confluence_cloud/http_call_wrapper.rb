@@ -6,19 +6,19 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/http_call_wrapper'
-require 'connectors_sdk/office365/config'
-require 'connectors_sdk/share_point/extractor'
-require 'connectors_sdk/share_point/authorization'
+require 'connectors_sdk/atlassian/config'
+require 'connectors_sdk/confluence_cloud/extractor'
+require 'connectors_sdk/confluence_cloud/authorization'
+require 'connectors_sdk/confluence_cloud/custom_client'
 require 'connectors_sdk/base/http_call_wrapper'
 
 module ConnectorsSdk
-  module SharePoint
+  module ConfluenceCloud
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
-      SERVICE_TYPE = 'share_point'
+      SERVICE_TYPE = 'confluence_cloud'
 
       def name
-        'SharePoint'
+        'Confluence Cloud'
       end
 
       def service_type
@@ -28,31 +28,31 @@ module ConnectorsSdk
       private
 
       def extractor_class
-        ConnectorsSdk::SharePoint::Extractor
+        ConnectorsSdk::ConfluenceCloud::Extractor
       end
 
       def authorization
-        ConnectorsSdk::SharePoint::Authorization
+        ConnectorsSdk::ConfluenceCloud::Authorization
       end
 
       def client(params)
-        ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token], :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(params[:cloud_id]), :access_token => params[:access_token])
       end
 
       def custom_client_error
-        ConnectorsSdk::Office365::CustomClient::ClientError
+        ConnectorsSdk::Atlassian::CustomClient::ClientError
       end
 
       def config(params)
-        ConnectorsSdk::Office365::Config.new(
-          :cursors => params.fetch(:cursors, {}) || {},
-          :drive_ids => 'all',
-          :index_permissions => params[:index_permissions] || false
-        )
+        ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(params[:cloud_id]), :cursors => params.fetch(:cursors, {}) || {})
       end
 
       def health_check(params)
         client(params).me
+      end
+
+      def base_url(cloud_id)
+        "https://api.atlassian.com/ex/confluence/#{cloud_id}"
       end
 
       def connection_requires_redirect
