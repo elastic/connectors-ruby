@@ -70,6 +70,10 @@ module ConnectorsSdk
           raise 'Not implemented for this connector'
         end
 
+        def basic_auth_token(params)
+          raise 'Not implemented for this connector'
+        end
+
         private
 
         def authorization_url

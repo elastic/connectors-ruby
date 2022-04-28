@@ -15,7 +15,10 @@ module ConnectorsSdk
         extractor_class.new(
           content_source_id: params[:content_source_id] || "GENERATED-#{BSON::ObjectId.new}",
           service_type: service_type,
-          authorization_data_proc: proc { { access_token: params[:access_token] } },
+          authorization_data_proc: proc { {
+            access_token: params[:access_token],
+            basic_auth_token: params[:basic_auth_token]
+          } },
           client_proc: proc { client(params) },
           config: config(params),
           features: params.fetch(:features, {}) || {}
@@ -78,6 +81,10 @@ module ConnectorsSdk
 
       def refresh(params)
         authorization.refresh(params)
+      end
+
+      def basic_auth_token(params)
+        authorization.basic_auth_token(params)
       end
 
       def download(params)

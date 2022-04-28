@@ -29,7 +29,7 @@ module ConnectorsSdk
 
       MEDIA_API_BASE_URL = 'https://api.media.atlassian.com'
 
-      attr_reader :base_url, :access_token
+      attr_reader :base_url, :access_token, :basic_auth_token
 
       def initialize(base_url:, access_token:, basic_auth_token:, ensure_fresh_auth: nil)
         @access_token = access_token

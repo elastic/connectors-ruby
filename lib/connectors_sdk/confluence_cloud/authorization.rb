@@ -31,6 +31,10 @@ module ConnectorsSdk
           ]
         end
 
+        def basic_auth_token(params)
+          params[:basic_auth_token]
+        end
+
         private
 
         def authorization_url
