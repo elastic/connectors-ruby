@@ -1,11 +1,19 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
 # frozen_string_literal: true
-require 'nokogiri'
+
 require 'connectors_sdk/base/adapter'
 require 'connectors_shared/extraction_utils'
+require 'nokogiri'
 
 module ConnectorsSdk
   module Confluence
     class Adapter < ConnectorsSdk::Base::Adapter
+
       MAX_CONTENT_COMMENTS_TO_INDEX = 50
       LEADING_SLASH_REGEXP = /\A\//
 

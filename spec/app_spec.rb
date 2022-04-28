@@ -8,7 +8,9 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
   let(:api_key) { 'api_key' }
-  let(:connector) { ConnectorsSdk::SharePoint::HttpCallWrapper.new }
+  let(:connector_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
+  let(:connector) { connector_class.new }
+  let(:connector_name) { 'SharePoint' }
 
   def expect_json(response, json)
     expect(json(response)).to eq json
@@ -21,7 +23,9 @@ RSpec.describe ConnectorsWebApp do
   before(:each) do
     allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
     allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
-    allow(ConnectorsWebApp.settings).to receive(:connector).and_return(connector)
+    allow(ConnectorsWebApp.settings).to receive(:connector_class).and_return(connector_class)
+    allow(connector_class).to receive(:new).and_return(connector)
+    allow(ConnectorsWebApp.settings).to receive(:http).and_return({ 'connector' => connector_name })
   end
 
   describe 'Catch all' do
@@ -92,12 +96,11 @@ RSpec.describe ConnectorsWebApp do
       expect(json(response)['connectors_version']).to eq ConnectorsApp::VERSION
       expect(json(response)['connectors_revision']).to eq ConnectorsApp::Config['revision']
       expect(json(response)['connectors_repository']).to eq ConnectorsApp::Config['repository']
-      expect(json(response)['connector_name']).to eq 'SharePoint'
+      expect(json(response)['connector_name']).to eq connector_name
     end
   end
 
   describe 'POST /status' do
-    let(:connector_name) { 'SharePoint' }
     let(:source_status) do
       {
         'status' => 'OK',

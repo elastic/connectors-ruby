@@ -1,7 +1,14 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
 # frozen_string_literal: true
-require 'connectors_sdk/base/extractor'
+
 require 'connectors_sdk/atlassian/custom_client'
 require 'connectors_sdk/confluence/adapter'
+require 'connectors_sdk/base/extractor'
 
 module ConnectorsSdk
   module Confluence
@@ -13,7 +20,7 @@ module ConnectorsSdk
 
       ConnectorsSdk::Base::Extractor::TRANSIENT_SERVER_ERROR_CLASSES << Atlassian::CustomClient::ServiceUnavailableError
 
-      def yield_document_changes(modified_since: nil)
+      def yield_document_changes(modified_since: nil, break_after_page: false)
         @space_permissions_cache = {}
         @content_restriction_cache = {}
         yield_spaces do |space|
@@ -42,6 +49,11 @@ module ConnectorsSdk
             else
               yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_content(content, content_base_url, restrictions)
             end
+          end
+
+          if break_after_page
+            @completed = true
+            break
           end
         end
       end
@@ -74,12 +86,8 @@ module ConnectorsSdk
 
       private
 
-      def download_attachment_binary(attachment_api_content)
-        client.download("#{attachment_api_content._links.base}#{attachment_api_content._links.download}").body
-      end
-
       def content_base_url
-        config.base_url
+        'https://workplace-search.atlassian.net/wiki'
       end
 
       def yield_spaces

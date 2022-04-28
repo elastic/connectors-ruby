@@ -17,8 +17,8 @@ module ConnectorsSdk
         @connectors[name] = klass
       end
 
-      def connector(name)
-        @connectors[name].new
+      def connector_class(name)
+        @connectors[name]
       end
     end
 
@@ -28,7 +28,7 @@ module ConnectorsSdk
     require_relative '../share_point/http_call_wrapper'
     require_relative '../confluence_cloud//http_call_wrapper'
 
-    #REGISTRY.register(ConnectorsSdk::SharePoint::SERVICE_TYPE, ConnectorsSdk::SharePoint::HttpCallWrapper)
-    REGISTRY.register(ConnectorsSdk::ConfluenceCloud::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::HttpCallWrapper)
+    REGISTRY.register(ConnectorsSdk::SharePoint::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::SharePoint::HttpCallWrapper)
+    REGISTRY.register(ConnectorsSdk::ConfluenceCloud::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::HttpCallWrapper)
   end
 end

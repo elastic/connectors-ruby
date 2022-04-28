@@ -1,9 +1,15 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
 # frozen_string_literal: true
-require 'connectors_sdk/base/custom_client'
+
+require 'faraday_middleware'
 require 'connectors_shared/middleware/restrict_hostnames'
 require 'connectors_shared/middleware/bearer_auth'
-require 'connectors_shared/middleware/basic_auth'
-require 'faraday_middleware'
+require 'connectors_sdk/base/custom_client'
 
 module ConnectorsSdk
   module Atlassian
@@ -44,6 +50,14 @@ module ConnectorsSdk
           return result.push([ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }])
         end
         result.push([ConnectorsShared::Middleware::BasicAuth, { :basic_auth_token => @basic_auth_token }])
+      end
+
+      def update_auth_data!(new_access_token)
+        @access_token = new_access_token
+        middleware!
+        http_client! # force a new client to pick up new middleware
+
+        self
       end
 
       def download(url)

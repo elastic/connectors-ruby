@@ -5,8 +5,8 @@ So you want to modify some connectors code? Well, you've come to the right place
 After you've made your changes, if you'd like to contribute back, please see the [contributing guide](./CONTRIBUTING.md).
 
 ### Requirements
-- Ruby (see [.ruby-version](../.ruby-version))
-- bundler 2.2.29
+- rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
+- bundler (for version, see [.bundler-version](./.bundler-version))
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
 ### Setup

@@ -8,6 +8,7 @@ Any time that changes are made to the connectors repo, that would impact the `co
 1. cd to your ent-search checkout
 1. run  `gem uninstall connectors_sdk`
 1. copy the artifacts in the `.gems` directory to the `vendor/cache` directory in Enterprise Search repository.
+1. update the ent-search `Gemfile` with the new `connectors_sdk` gem build version.
 1. run `script/bundle install`
 
 ### Testing locally with Enterprise Search and Kibana

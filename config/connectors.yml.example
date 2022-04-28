@@ -1,5 +1,5 @@
 # general metadata
-version: "8.3.0-SNAPSHOT"
+version: "CHANGEME"
 repository: "https://github.com/elastic/connectors"
 revision: "main"
 
