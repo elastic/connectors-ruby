@@ -36,7 +36,11 @@ module ConnectorsSdk
       end
 
       def client(params)
-        ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(params[:cloud_id]), :access_token => params[:access_token])
+        ConnectorsSdk::ConfluenceCloud::CustomClient.new(
+          :base_url => params[:base_url].present? ? params[:base_url] : base_url(params[:cloud_id]),
+          :access_token => params[:access_token],
+          :basic_auth_token => params[:basic_auth_token]
+        )
       end
 
       def custom_client_error
@@ -44,7 +48,11 @@ module ConnectorsSdk
       end
 
       def config(params)
-        ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(params[:cloud_id]), :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::Atlassian::Config.new(
+          :base_url => base_url(params[:cloud_id]),
+          :cursors => params.fetch(:cursors, {}) || {},
+          :index_permissions => params[:index_permissions] || false
+        )
       end
 
       def health_check(params)

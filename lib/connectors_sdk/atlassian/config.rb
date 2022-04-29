@@ -11,12 +11,11 @@ require 'connectors_sdk/base/config'
 module ConnectorsSdk
   module Atlassian
     class Config < ConnectorsSdk::Base::Config
-      attr_reader :base_url, :index_permissions
+      attr_reader :base_url
 
-      def initialize(cursors:, base_url:, index_permissions: false)
-        super(:cursors => cursors)
+      def initialize(cursors:, base_url:, index_permissions:)
+        super(:cursors => cursors, :index_permissions => index_permissions)
         @base_url = base_url
-        @index_permissions = index_permissions
       end
 
       def to_h

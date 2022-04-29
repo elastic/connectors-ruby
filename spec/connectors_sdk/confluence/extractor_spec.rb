@@ -29,14 +29,16 @@ describe ConnectorsSdk::Confluence::Extractor do
   let(:config) do
     ConnectorsSdk::Atlassian::Config.new(
       :cursors => cursors,
-      :base_url => base_url
+      :base_url => base_url,
+      :index_permissions => false
     )
   end
   let(:client_proc) do
     proc do
       ConnectorsSdk::ConfluenceCloud::CustomClient.new(
         :base_url => api_url,
-        :access_token => access_token
+        :access_token => access_token,
+        :basic_auth_token => nil
       )
     end
   end
