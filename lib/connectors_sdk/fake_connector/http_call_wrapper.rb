@@ -17,8 +17,6 @@ module ConnectorsSdk
         'Fake Connector'
       end
 
-      private
-
       def configurable_fields
         [
           {
