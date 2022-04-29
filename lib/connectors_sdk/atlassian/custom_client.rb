@@ -24,7 +24,9 @@ module ConnectorsSdk
           @message = message
         end
       end
+
       class ServiceUnavailableError < ClientError; end
+
       class ContentConvertibleError < ClientError; end
 
       MEDIA_API_BASE_URL = 'https://api.media.atlassian.com'
@@ -44,12 +46,13 @@ module ConnectorsSdk
       def additional_middleware
         result = [
           FaradayMiddleware::FollowRedirects,
-          [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }],
+          [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }]
         ]
         if @access_token.present?
-          return result.push([ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }])
+          result.append([ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }])
+        else
+          result.append([ConnectorsShared::Middleware::BasicAuth, { :basic_auth_token => @basic_auth_token }])
         end
-        result.push([ConnectorsShared::Middleware::BasicAuth, { :basic_auth_token => @basic_auth_token }])
       end
 
       def update_auth_data!(new_access_token)
