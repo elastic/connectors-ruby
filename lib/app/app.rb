@@ -93,7 +93,7 @@ class ConnectorsWebApp < Sinatra::Base
     )
   end
 
-  post '/asdf' do
+  post '/documents_async' do
     job_id = body_params[:job_id]
     docs = []
 
