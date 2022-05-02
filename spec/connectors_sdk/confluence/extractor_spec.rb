@@ -6,6 +6,9 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/confluence/extractor'
+require 'connectors_sdk/confluence_cloud/custom_client'
+require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/helpers/atlassian_time_formatter'
 require 'fixtures/atlassian/confluence'
 
@@ -20,11 +23,15 @@ describe ConnectorsSdk::Confluence::Extractor do
   let(:max_documents_to_extract_for_job) { 1_000_000 }
   let(:headers) { { 'Content-Type' => 'application/json' } }
   let(:access_token) { 'confluence_is_shit' }
+  let(:basic_auth_token) { 'confluence_is_basic' }
   let(:authorization_data) { { 'access_token' => access_token, 'base_url' => base_url, 'cloud_id' => 'abc123' } }
+  let(:basic_auth_data) { { 'basic_auth_token' => basic_auth_token, 'base_url' => base_url } }
   let(:oauth_config) { { :client_id => 'client_id', :client_secret => 'client_secret', :base_url => base_url } }
+
   let!(:token_request) do
     stub_request(:get, "#{api_url}/rest/api/user/current").to_return(:status => 200)
   end
+
   let(:service_type) { 'confluence_cloud' }
   let(:config) do
     ConnectorsSdk::Atlassian::Config.new(

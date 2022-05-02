@@ -34,7 +34,7 @@ module ConnectorsSdk
 
       attr_reader :base_url, :access_token, :basic_auth_token
 
-      def initialize(base_url:, access_token:, basic_auth_token:, ensure_fresh_auth: nil)
+      def initialize(base_url:, access_token:, basic_auth_token: nil, ensure_fresh_auth: nil)
         @access_token = access_token
         @basic_auth_token = basic_auth_token
         super(:base_url => base_url, :ensure_fresh_auth => ensure_fresh_auth)

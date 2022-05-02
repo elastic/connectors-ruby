@@ -1,7 +1,7 @@
 # general metadata
-version: "8.3.0.0-20220429T103037Z"
+version: "8.3.0.0-20220429T155054Z"
 repository: "git@github.com:elastic/connectors.git"
-revision: "a6d15d99a58a8d0e79ca1f77ceed78e734f394db"
+revision: "0e21b5745124afd30894324602739d44764b4393"
 # web service
 http:
   host: 0.0.0.0

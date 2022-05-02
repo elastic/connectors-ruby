@@ -13,7 +13,7 @@ module ConnectorsSdk
     class Config < ConnectorsSdk::Base::Config
       attr_reader :base_url
 
-      def initialize(cursors:, base_url:, index_permissions:)
+      def initialize(cursors:, base_url:, index_permissions: false)
         super(:cursors => cursors, :index_permissions => index_permissions)
         @base_url = base_url
       end

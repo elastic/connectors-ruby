@@ -6,7 +6,11 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/confluence_cloud/extractor'
+require 'connectors_sdk/confluence_cloud/custom_client'
+require 'connectors_sdk/atlassian/config'
 require 'fixtures/atlassian/confluence'
+
 
 describe ConnectorsSdk::ConfluenceCloud::Extractor do
   include ConnectorsSdk::Fixtures::Atlassian::Confluence

@@ -12,6 +12,7 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'date'
 require 'active_support/all'
+require 'stubs/connectors' unless defined?(Rails)
 require 'stubs/connectors/stats' unless defined?(Rails)
 
 module ConnectorsSdk
