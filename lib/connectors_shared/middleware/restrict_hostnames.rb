@@ -5,6 +5,7 @@
 #
 
 # frozen_string_literal: true
+
 require 'faraday/middleware'
 require 'resolv'
 

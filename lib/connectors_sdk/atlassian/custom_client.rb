@@ -25,9 +25,7 @@ module ConnectorsSdk
           @message = message
         end
       end
-
       class ServiceUnavailableError < ClientError; end
-
       class ContentConvertibleError < ClientError; end
 
       MEDIA_API_BASE_URL = 'https://api.media.atlassian.com'
