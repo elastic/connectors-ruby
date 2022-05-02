@@ -19,6 +19,7 @@ require 'sinatra/json'
 require 'connectors_shared'
 require 'connectors_app/config'
 require 'connectors_sdk/base/registry'
+require 'connectors_async'
 
 Dir[File.join(__dir__, 'initializers/**/*.rb')].sort.each { |f| require f }
 
@@ -36,6 +37,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :deactivate_auth, settings.http['deactivate_auth']
     set :connector_name, settings.http['connector']
     set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
+    set :job_runner, ConnectorsAsync::JobRunner.new
   end
 
   error do
@@ -88,6 +90,25 @@ class ConnectorsWebApp < Sinatra::Base
     json(
       :extractor => { :name => @connector.name },
       :contentProvider => source_status
+    )
+  end
+
+  post '/asdf' do
+    job_id = body_params[:job_id]
+    docs = []
+
+    if job_id
+      status = settings.job_runner.fetch_job_status(job_id)
+      docs = settings.job_runner.fetch_job_results(job_id)
+    else
+      job_id = settings.job_runner.start_job(connector: @connector, access_token: body_params[:access_token])
+      status = settings.job_runner.fetch_job_status(job_id)
+    end
+
+    json(
+      :job_id => job_id,
+      :status => status,
+      :docs => docs
     )
   end
 
