@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 require 'support/shared_examples'
 require 'fixtures/atlassian/confluence'
+require 'connectors_sdk/confluence/adapter'
 
 describe ConnectorsSdk::Confluence::Adapter do
   include ConnectorsSdk::Fixtures::Atlassian::Confluence
