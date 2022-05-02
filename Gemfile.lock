@@ -189,7 +189,6 @@ DEPENDENCIES
   nokogiri (>= 1.13.4)
   pry-nav
   pry-remote
-  puma
   rack (~> 2.2.3)
   rack-test
   rspec-collection_matchers (~> 1.2.0)
