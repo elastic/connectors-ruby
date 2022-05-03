@@ -1,5 +1,5 @@
 YQ ?= "yq"
-.phony: test lint autocorrect api_key update_config build 
+.phony: test lint autocorrect api_key update_config build
 .phony: release_dev release build_gem install build-docker run-docker exec_app tag
 
 config/connectors.yml:

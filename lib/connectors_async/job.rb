@@ -29,12 +29,17 @@ module ConnectorsAsync
     end
 
     def store_batch(batch)
+      puts "storing a batch of #{batch.size} items"
+
       batch.each do |item|
         @data[:documents] << item
       end
+
+      puts "Now have #{@data[:documents].size} docs"
     end
 
-    def pop_batch(up_to: 20)
+    def pop_batch(up_to: 50)
+      puts "popping some items from existing batch"
       results = []
 
       for i in 1..up_to do
@@ -42,6 +47,8 @@ module ConnectorsAsync
 
         results << @data[:documents].pop
       end
+
+      puts "Now have #{@data[:documents].size} docs"
 
       results
     end
