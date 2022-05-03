@@ -61,7 +61,7 @@ run-docker:
 	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
 
 exec_app:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec rackup config.ru
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec puma --control-url tcp://0.0.0.0:9191 --control-token foo config.ru -C puma.rb
 
 run: | update_config_dev exec_app
 

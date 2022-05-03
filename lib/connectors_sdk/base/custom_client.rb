@@ -12,6 +12,8 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'date'
 require 'active_support/all'
+require 'typhoeus'
+require 'typhoeus/adapters/faraday'
 
 module ConnectorsSdk
   module Base
@@ -75,7 +77,8 @@ module ConnectorsSdk
             faraday.use(*middleware_config)
           end
 
-          faraday.adapter(:httpclient)
+          faraday.adapter :typhoeus
+          faraday.adapter :httpclient
         end
       end
 
