@@ -22,7 +22,7 @@ RSpec.describe ConnectorsWebApp do
 
   before(:each) do
     allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
-    allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
+    allow(ConnectorsWebApp.settings).to receive(:api_token).and_return(api_key)
     allow(ConnectorsWebApp.settings).to receive(:connector_class).and_return(connector_class)
     allow(connector_class).to receive(:new).and_return(connector)
     allow(ConnectorsWebApp.settings).to receive(:http).and_return({ 'connector' => connector_name })
