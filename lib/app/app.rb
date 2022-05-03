@@ -101,7 +101,7 @@ class ConnectorsWebApp < Sinatra::Base
       status = settings.job_runner.fetch_job_status(job_id)
       docs = settings.job_runner.fetch_job_results(job_id)
     else
-      job_id = settings.job_runner.start_job(connector: @connector, access_token: body_params[:access_token])
+      job_id = settings.job_runner.start_job(connector: @connector, modified_since: body_params[:modified_since], access_token: body_params[:access_token])
       status = settings.job_runner.fetch_job_status(job_id)
     end
 
