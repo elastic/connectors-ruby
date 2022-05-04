@@ -78,7 +78,10 @@ class ConnectorsWebApp < Sinatra::Base
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
       :connectors_revision => settings.revision,
-      :connector_name => ActiveSupport::Inflector.camelize(settings.http['connector'])
+      :connector_name => ActiveSupport::Inflector.camelize(settings.connector_name),
+      :display_name => @connector.name,
+      :configurable_fields => @connector.configurable_fields,
+      :connection_requires_redirect => @connector.connection_requires_redirect,
     )
   end
 
@@ -88,10 +91,6 @@ class ConnectorsWebApp < Sinatra::Base
       :extractor => { :name => @connector.name },
       :contentProvider => source_status
     )
-  end
-
-  get '/describe' do
-    json @connector.describe
   end
 
   post '/documents' do

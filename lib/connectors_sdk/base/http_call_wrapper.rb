@@ -99,16 +99,6 @@ module ConnectorsSdk
         self.class::SERVICE_TYPE
       end
 
-      def describe
-        {
-          :name => name,
-          :connection_requires_redirect => connection_requires_redirect,
-          :configurable_fields => configurable_fields
-        }
-      end
-
-      private
-
       def connection_requires_redirect
         false
       end
@@ -116,6 +106,8 @@ module ConnectorsSdk
       def configurable_fields
         []
       end
+
+      private
 
       def convert_third_party_errors
         yield
