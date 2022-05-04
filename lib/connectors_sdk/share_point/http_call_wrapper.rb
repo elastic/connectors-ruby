@@ -35,12 +35,12 @@ module ConnectorsSdk
         )
       end
 
-      def document_batch(params)
+      def extract(params, &block)
         results = []
 
         extractor = extractor(params)
 
-        extractor.yield_document_changes(:modified_since => extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
+        extractor.yield_document_changes(:modified_since => extractor.config.cursors[:modified_since]) do |action, doc, download_args_and_proc|
           download_obj = nil
           if download_args_and_proc
             download_obj = {
@@ -56,8 +56,6 @@ module ConnectorsSdk
             :document => doc,
             :download => download_obj
           }
-
-          puts "yielding doc"
 
           yield doc
         end
