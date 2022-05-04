@@ -7,8 +7,8 @@
 # frozen_string_literal: true
 
 require 'connectors_sdk/base/http_call_wrapper'
-require 'connectors_sdk/gitlab_connector/config'
-require 'connectors_sdk/gitlab_connector/custom_client'
+require 'connectors_sdk/gitlab/config'
+require 'connectors_sdk/gitlab/custom_client'
 
 module ConnectorsSdk
   module GitLab
@@ -22,8 +22,12 @@ module ConnectorsSdk
       def configurable_fields
         [
           {
-            'key' => 'bearer_token',
-            'label' => 'Bearer Token'
+            'key' => 'api_token',
+            'label' => 'API Token'
+          },
+          {
+            'key' => 'base_url',
+            'label' => 'Base URL'
           }
         ]
       end
@@ -37,7 +41,7 @@ module ConnectorsSdk
 
       def health_check(_params)
         # let's do a simple call
-        response = client.get(:user)
+        response = client(_params).get('user')
         response.present? && response.status == 200
       end
 
@@ -49,9 +53,13 @@ module ConnectorsSdk
           :order_by => :id,
           :sort => :desc
         }
-        results_list = get_json(_params, :url => :projects, :query_params => query_params)
+        results_list = JSON.parse(client(_params).get('projects', { :params => query_params }).body)
         # for now let's just take one page
-        [ { :results => results_list } , {}, true]
+        [
+          Hashie::Mash.new({ :results => results_list }),
+          {},  # not passing the cursors yet
+          true # we're saying it's the last page
+        ]
       end
 
       def deleted(_params)
@@ -60,11 +68,6 @@ module ConnectorsSdk
 
       def permissions(_params)
         []
-      end
-
-      def get_json(_params, url:, query_params: nil, &block)
-        response = client(_params).get(url.to_s, { :params => query_params }, &block)
-        Hashie::Array.new(JSON.parse(response.body))
       end
     end
   end

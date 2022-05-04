@@ -26,7 +26,7 @@ module ConnectorsSdk
 
     # loading plugins (might replace this with a directory scan and conventions on names)
 
-    require_relative '../gitlab_connector/http_call_wrapper'
+    require_relative '../gitlab/http_call_wrapper'
     REGISTRY.register(ConnectorsSdk::GitLab::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::GitLab::HttpCallWrapper)
 
     require_relative '../fake_connector/http_call_wrapper'
