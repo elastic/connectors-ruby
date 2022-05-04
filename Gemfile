@@ -43,7 +43,7 @@ gem 'faraday_middleware', '= 1.0.0'
 gem 'httpclient', '~> 2.8.3'
 gem 'attr_extras', '~> 6.2.5'
 gem 'hashie', '~> 5.0.0'
-gem 'concurrent-ruby'
+gem 'concurrent-ruby', '~> 1.1.9'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'
