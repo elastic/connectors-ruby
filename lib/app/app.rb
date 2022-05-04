@@ -93,7 +93,7 @@ class ConnectorsWebApp < Sinatra::Base
     )
   end
 
-  post '/documents_async' do
+  post '/documents' do
     job_id = body_params[:job_id]
     docs = []
 
@@ -109,16 +109,6 @@ class ConnectorsWebApp < Sinatra::Base
       :job_id => job_id,
       :status => status,
       :docs => docs
-    )
-  end
-
-  post '/documents' do
-    results, cursors, completed = @connector.document_batch(body_params)
-
-    json(
-      :results => results,
-      :cursors => cursors,
-      :completed => completed
     )
   end
 
