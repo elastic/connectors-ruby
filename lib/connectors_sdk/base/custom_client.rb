@@ -61,15 +61,7 @@ module ConnectorsSdk
       ].each do |http_verb|
         define_method http_verb do |*args, &block|
           ensure_fresh_auth.call(self) if ensure_fresh_auth.present?
-          m_start = Time.now
-          result = http_client.public_send(http_verb, *args, &block)
-          m_end = Time.now
-
-          #LOUD
-          puts "=============================================================="
-          puts "Took #{m_end-m_start} to do a #{http_verb} to #{args[0]}"
-          puts "=============================================================="
-          result
+          http_client.public_send(http_verb, *args, &block)
         end
       end
 
@@ -84,7 +76,6 @@ module ConnectorsSdk
             faraday.use(*middleware_config)
           end
 
-          faraday.adapter :typhoeus
           faraday.adapter :httpclient
         end
       end

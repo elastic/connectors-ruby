@@ -26,29 +26,20 @@ module ConnectorsAsync
       @data[:status] = ConnectorsAsync::JobStatus::FAILED
       @data[:error] = e
       puts e.to_json
+      puts e.backtrace
     end
 
-    def store_batch(batch)
-      puts "storing a batch of #{batch.size} items"
-
-      batch.each do |item|
-        @data[:documents] << item
-      end
-
-      puts "Now have #{@data[:documents].size} docs"
+    def store(item)
+      @data[:documents] << item
     end
 
     def pop_batch(up_to: 50)
-      puts "popping some items from existing batch"
       results = []
 
       for i in 1..up_to do
         break if @data[:documents].empty?
-
         results << @data[:documents].pop
       end
-
-      puts "Now have #{@data[:documents].size} docs"
 
       results
     end

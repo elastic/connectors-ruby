@@ -3,7 +3,7 @@ require 'concurrent'
 module ConnectorsAsync
   class JobRunner
     def initialize
-      @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: 1, max_queue: 0)
+      @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: 4, max_queue: 0)
       @job_store = ConnectorsAsync::JobStore.new
     end
 
@@ -14,20 +14,16 @@ module ConnectorsAsync
         begin
           Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
 
-          puts("Running Job #{job.id} in a thread")
-          puts("modified_since is #{modified_since}")
           job.update_status(JobStatus::RUNNING)
 
           cursors = { :modified_since => modified_since }
-          connector.document_batch({:access_token => access_token, :cursors => cursors}) do |doc|
-            puts "got doc!"
-            job.store_batch([ doc ])
+          connector.extract({:access_token => access_token, :cursors => cursors }) do |doc|
+            job.store( doc )
           end
 
           job.update_status(JobStatus::FINISHED)
         rescue StandardError => e
           job.fail(e)
-          puts e.backtrace
         end
       end
 
