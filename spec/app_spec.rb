@@ -98,6 +98,9 @@ RSpec.describe ConnectorsWebApp do
       expect(json(response)['connectors_revision']).to eq ConnectorsApp::Config['revision']
       expect(json(response)['connectors_repository']).to eq ConnectorsApp::Config['repository']
       expect(json(response)['connector_name']).to eq service_type
+      expect(json(response)['display_name']).to eq display_name
+      expect(json(response)['configurable_fields'].map{ |f| f['key'] }).to eq ['client_id', 'client_secret']
+      expect(json(response)['connection_requires_redirect']).to eq true
     end
   end
 
@@ -106,7 +109,7 @@ RSpec.describe ConnectorsWebApp do
       {
         'status' => 'OK',
         'statusCode' => 200,
-        'message' => 'Connected to SharePoint'
+        'message' => 'Connected to SharePoint Online'
       }
     end
 
