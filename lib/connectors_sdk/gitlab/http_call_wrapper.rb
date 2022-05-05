@@ -7,8 +7,8 @@
 # frozen_string_literal: true
 
 require 'connectors_sdk/base/http_call_wrapper'
-require 'connectors_sdk/gitlab/config'
 require 'connectors_sdk/gitlab/custom_client'
+require 'connectors_sdk/gitlab/adapter'
 
 module ConnectorsSdk
   module GitLab
@@ -47,16 +47,22 @@ module ConnectorsSdk
 
       def document_batch(_params)
         query_params = {
-          :simple => 1,
+          :simple => true,
           :pagination => :keyset,
           :per_page => 100, # max
           :order_by => :id,
           :sort => :desc
         }
-        results_list = JSON.parse(client(_params).get('projects', { :params => query_params }).body)
+        results_list = JSON.parse(client(_params).get('projects', query_params).body).map do |doc|
+          {
+            :action => :create_or_update,
+            :document => ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc.with_indifferent_access),
+            :download => nil
+          }
+        end
         # for now let's just take one page
         [
-          Hashie::Mash.new({ :results => results_list }),
+          Hashie::Array.new(results_list),
           {},  # not passing the cursors yet
           true # we're saying it's the last page
         ]

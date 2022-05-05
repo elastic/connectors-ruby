@@ -1,0 +1,28 @@
+# frozen_string_literal: true
+
+require 'hashie/mash'
+require 'connectors_sdk/gitlab/adapter'
+
+describe ConnectorsSdk::GitLab::Adapter do
+
+  let(:project_hash) { Hashie::Mash.new(JSON.parse(connectors_fixture_raw('gitlab/simple_project.json'))) }
+
+  context '#to_es_document' do
+    it 'correctly produced the Enterprise Search ID' do
+      new_id = described_class.gitlab_id_to_fp_id(project_hash.id)
+      expect(project_hash.id.to_s).to be_in(new_id)
+      expect('gitlab').to be_in(new_id)
+    end
+
+    it 'fills in all the other data' do
+      adapted = described_class.to_es_document(:project, project_hash)
+      expect(adapted[:type]).to eq(:project)
+      expect(adapted[:url]).to eq(project_hash[:web_url])
+      expect(adapted[:body]).to eq(project_hash[:description])
+      expect(adapted[:title]).to eq(project_hash[:name])
+      expect(adapted[:namespace]).to eq(project_hash[:namespace][:name])
+      expect(adapted[:created_at]).to eq(project_hash[:created_at])
+      expect(adapted[:last_modified_at]).to eq(project_hash[:last_activity_at])
+    end
+  end
+end
