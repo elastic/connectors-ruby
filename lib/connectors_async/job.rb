@@ -1,12 +1,22 @@
-require 'concurrent'
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
 
+require 'connectors_shared/job_status'
+
+# The class is actually supported for single-threaded usage EXCEPT for :documents field
+# :documents are a Queue that's stated to be safe in a threaded environment
 module ConnectorsAsync
   class Job
+    class StatusUpdateError < StandardError; end
     def initialize(job_id)
-      @data = Concurrent::Hash.new
-      @data[:job_id] = job_id
-      @data[:status] = ConnectorsAsync::JobStatus::CREATED
-      @data[:documents] = Queue.new
+      @data = {
+        :job_id => job_id,
+        :status => ConnectorsShared::JobStatus::CREATED,
+        :documents => Queue.new
+      }
     end
 
     def id
@@ -17,16 +27,25 @@ module ConnectorsAsync
       @data[:status]
     end
 
+    def has_error?
+      @data.has_key?(:error)
+    end
+
+    def error
+      @data[:error]
+    end
+
     def update_status(new_status)
       # add state machine logic here?
+      raise StatusUpdateError if is_finished?
+
       @data[:status] = new_status
     end
 
     def fail(e)
-      @data[:status] = ConnectorsAsync::JobStatus::FAILED
+      update_status(ConnectorsShared::JobStatus::FAILED)
+
       @data[:error] = e
-      puts e.to_json
-      puts e.backtrace
     end
 
     def store(item)
@@ -42,6 +61,12 @@ module ConnectorsAsync
       end
 
       results
+    end
+
+    def is_finished?
+      status = @data[:status]
+
+      status == ConnectorsShared::JobStatus::FINISHED || status == ConnectorsShared::JobStatus::FAILED
     end
   end
 end
