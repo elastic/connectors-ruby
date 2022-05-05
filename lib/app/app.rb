@@ -114,7 +114,7 @@ class ConnectorsWebApp < Sinatra::Base
 
     docs = job.pop_batch
 
-    #TODO: send error cause???
+    # TODO: send error cause???
     json(
       :job_id => job.id,
       :status => job.status,

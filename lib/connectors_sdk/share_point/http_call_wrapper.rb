@@ -35,9 +35,7 @@ module ConnectorsSdk
         )
       end
 
-      def extract(params, &block)
-        results = []
-
+      def extract(params)
         extractor = extractor(params)
 
         extractor.yield_document_changes(:modified_since => extractor.config.cursors[:modified_since]) do |action, doc, download_args_and_proc|

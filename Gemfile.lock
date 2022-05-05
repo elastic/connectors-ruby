@@ -216,7 +216,7 @@ DEPENDENCIES
   sinatra (~> 2.1.0)
   sinatra-contrib (~> 2.1.0)
   timecop
-  typhoeus
+  typhoeus (~> 1.4.0)
   tzinfo-data (= 1.2022.1)
   webmock
 
