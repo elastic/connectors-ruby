@@ -99,7 +99,7 @@ class ConnectorsWebApp < Sinatra::Base
 
     if job_id
       job = settings.job_store.fetch_job(job_id)
-      status = job.status(job_id)
+      status = job.status
       docs = job.pop_batch
     else
       job = settings.job_store.create_job
@@ -114,7 +114,7 @@ class ConnectorsWebApp < Sinatra::Base
 
     #TODO: send error cause???
     json(
-      :job_id => job_id,
+      :job_id => job.id,
       :status => job.status,
       :docs => docs
     )

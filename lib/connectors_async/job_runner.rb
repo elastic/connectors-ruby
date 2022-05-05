@@ -18,6 +18,7 @@ module ConnectorsAsync
     def start_job(job:, connector:, modified_since:, access_token:)
       @pool.post do
         begin
+          # log_info("Running the job #{job.id}")
           Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
 
           job.update_status(ConnectorsShared::JobStatus::RUNNING)
@@ -28,8 +29,10 @@ module ConnectorsAsync
           end
 
           job.update_status(ConnectorsShared::JobStatus::FINISHED)
+          # log_info("Job #{job.id} has finished successfully")
         rescue StandardError => e
           job.fail(e)
+          # log_error("Job #{job.id} failed: #{e.message}")
         end
       end
     end
