@@ -5,6 +5,8 @@
 #
 
 require 'faraday'
+require 'typhoeus'
+require 'typhoeus/adapters/faraday'
 require 'httpclient'
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/numeric/time'
@@ -77,6 +79,7 @@ module ConnectorsSdk
           end
 
           faraday.adapter :httpclient
+          faraday.adapter :typhoeus
         end
       end
 

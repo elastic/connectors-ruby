@@ -21,6 +21,8 @@ GEM
     debase-ruby_core_source (0.10.14)
     diff-lcs (1.5.0)
     docile (1.4.0)
+    ethon (0.15.0)
+      ffi (>= 1.15.0)
     faraday (1.10.0)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
@@ -48,6 +50,7 @@ GEM
       faraday (~> 1.0)
     ffi (1.15.5)
     ffi (1.15.5-java)
+    ffi (1.15.5-x86-mingw32)
     forwardable (1.3.2)
     hashdiff (1.0.1)
     hashie (5.0.0)
@@ -164,6 +167,8 @@ GEM
     thread_safe (0.3.6-java)
     tilt (2.0.10)
     timecop (0.9.4)
+    typhoeus (1.4.0)
+      ethon (>= 0.9.0)
     tzinfo (1.2.9)
       thread_safe (~> 0.1)
     tzinfo-data (1.2022.1)
@@ -211,6 +216,7 @@ DEPENDENCIES
   sinatra (~> 2.1.0)
   sinatra-contrib (~> 2.1.0)
   timecop
+  typhoeus
   tzinfo-data (= 1.2022.1)
   webmock
 
