@@ -19,10 +19,10 @@ describe ConnectorsAsync::JobStore do
     end
 
     it 'returns a job with unique id' do
-      job_1 = job_store.create_job
-      job_2 = job_store.create_job
+      job1 = job_store.create_job
+      job2 = job_store.create_job
 
-      expect(job_1.id).to_not eq(job_2.id)
+      expect(job1.id).to_not eq(job2.id)
     end
   end
 

@@ -55,7 +55,7 @@ module ConnectorsAsync
     def pop_batch(up_to: 50)
       results = []
 
-      for i in 1..up_to do
+      up_to.times do
         break if @data[:documents].empty?
         results << @data[:documents].pop
       end
@@ -66,7 +66,7 @@ module ConnectorsAsync
     def is_finished?
       status = @data[:status]
 
-      status == ConnectorsShared::JobStatus::FINISHED || status == ConnectorsShared::JobStatus::FAILED
+      [ConnectorsShared::JobStatus::FINISHED, ConnectorsShared::JobStatus::FAILED].include?(status)
     end
   end
 end

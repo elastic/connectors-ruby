@@ -84,10 +84,10 @@ describe ConnectorsAsync::Job do
     end
   end
 
-  context '#has_error?' do
+  context '#is_failed?' do
     context 'when job hasn\'t failed before' do
       it 'returns false' do
-        expect(job.has_error?).to eq(false)
+        expect(job.is_failed?).to eq(false)
       end
     end
 
@@ -97,7 +97,7 @@ describe ConnectorsAsync::Job do
       end
 
       it 'returns true' do
-        expect(job.has_error?).to eq(true)
+        expect(job.is_failed?).to eq(true)
       end
     end
   end
