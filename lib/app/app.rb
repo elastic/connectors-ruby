@@ -37,6 +37,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :deactivate_auth, settings.http['deactivate_auth']
     set :connector_name, settings.http['connector']
     set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
+    set :job_store, ConnectorsAsync::JobStore.new
     set :job_runner, ConnectorsAsync::JobRunner.new
   end
 
@@ -98,16 +99,24 @@ class ConnectorsWebApp < Sinatra::Base
     docs = []
 
     if job_id
-      status = settings.job_runner.fetch_job_status(job_id)
-      docs = settings.job_runner.fetch_job_results(job_id)
+      job = settings.job_store.fetch_job(job_id)
+      status = job.status(job_id)
+      docs = job.pop_batch
     else
-      job_id = settings.job_runner.start_job(connector: @connector, modified_since: body_params[:modified_since], access_token: body_params[:access_token])
-      status = settings.job_runner.fetch_job_status(job_id)
+      job = settings.job_store.create_job
+
+      settings.job_runner.start_job(
+        job: job,
+        connector: @connector,
+        modified_since: body_params[:modified_since],
+        access_token: body_params[:access_token]
+      )
     end
 
+    #TODO: send error cause???
     json(
       :job_id => job_id,
-      :status => status,
+      :status => job.status,
       :docs => docs
     )
   end

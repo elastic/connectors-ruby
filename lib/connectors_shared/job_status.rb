@@ -4,6 +4,11 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'connectors_async/job_runner'
-require 'connectors_async/job_store'
-require 'connectors_async/job'
+module ConnectorsShared
+  class JobStatus
+    CREATED = 'created'
+    RUNNING = 'running'
+    FINISHED = 'finished'
+    FAILED = 'failed'
+  end
+end
