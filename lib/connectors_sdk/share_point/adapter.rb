@@ -13,16 +13,16 @@ module ConnectorsSdk
     class Adapter < Office365::Adapter
       generate_id_helpers :share_point, 'share_point'
 
-      def self.swiftype_document_from_file(file)
-        FileGraphItem.new(file).to_swiftype_document
+      def self.es_document_from_file(file)
+        FileGraphItem.new(file).to_es_document
       end
 
-      def self.swiftype_document_from_folder(folder)
-        FolderGraphItem.new(folder).to_swiftype_document
+      def self.es_document_from_folder(folder)
+        FolderGraphItem.new(folder).to_es_document
       end
 
-      def self.swiftype_document_from_package(package)
-        PackageGraphItem.new(package).to_swiftype_document
+      def self.es_document_from_package(package)
+        PackageGraphItem.new(package).to_es_document
       end
 
       class FileGraphItem < Office365::Adapter::FileGraphItem

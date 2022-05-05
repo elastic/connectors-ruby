@@ -15,7 +15,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
     expect(described_class.singleton_methods).to include(:es_id_to_share_point_id)
   end
 
-  describe 'conversions to swiftype documents' do
+  describe 'conversions to es documents' do
     let(:created_by) { 'creator' }
     let(:created_at) { '2017-01-20T22:27:28Z' }
     let(:created_at_rfc3339) { ConnectorsSdk::Base::Adapter.normalize_date(created_at) }
@@ -81,7 +81,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
         }.merge(expected_fields).compact
       end
 
-      let(:document) { described_class.public_send(swiftype_document_method, item_in_response) }
+      let(:document) { described_class.public_send(es_document_method, item_in_response) }
 
       it 'should have the correct fields' do
         expect(document).to eq(expected_converted_hash)
@@ -98,8 +98,8 @@ describe ConnectorsSdk::SharePoint::Adapter do
       end
     end
 
-    describe '.swiftype_document_from_file' do
-      let(:swiftype_document_method) { :swiftype_document_from_file }
+    describe '.es_document_from_file' do
+      let(:es_document_method) { :es_document_from_file }
       let(:type) { 'file' }
       let(:expected_fields) do
         {
@@ -112,8 +112,8 @@ describe ConnectorsSdk::SharePoint::Adapter do
       it_behaves_like(:graph_item)
     end
 
-    describe '.swiftype_document_from_folder' do
-      let(:swiftype_document_method) { :swiftype_document_from_folder }
+    describe '.es_document_from_folder' do
+      let(:es_document_method) { :es_document_from_folder }
       let(:type) { 'folder' }
       let(:expected_fields) do
         {
@@ -124,8 +124,8 @@ describe ConnectorsSdk::SharePoint::Adapter do
       it_behaves_like(:graph_item)
     end
 
-    describe '.swiftype_document_from_package' do
-      let(:swiftype_document_method) { :swiftype_document_from_package }
+    describe '.es_document_from_package' do
+      let(:es_document_method) { :es_document_from_package }
       let(:type) { 'oneNote' }
       let(:item_in_response) do
         Hashie::Mash.new(
@@ -177,7 +177,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
         }.compact
       end
 
-      let(:document) { described_class.public_send(swiftype_document_method, item_in_response) }
+      let(:document) { described_class.public_send(es_document_method, item_in_response) }
 
       it 'should have the correct fields and correctly convert type from oneNote to onenote' do
         expect(document).to eq(expected_converted_hash)

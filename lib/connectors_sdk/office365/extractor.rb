@@ -210,11 +210,11 @@ module ConnectorsSdk
 
       def generate_document(item)
         if item.file
-          adapter.swiftype_document_from_file(item)
+          adapter.es_document_from_file(item)
         elsif item.folder
-          adapter.swiftype_document_from_folder(item)
+          adapter.es_document_from_folder(item)
         elsif item.package
-          adapter.swiftype_document_from_package(item)
+          adapter.es_document_from_package(item)
         else
           raise "Unexpected Office 365 item type for item #{item}"
         end

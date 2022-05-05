@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-module Swiftype
+module EnterpriseSearch
   class ExceptionTracking
     def self.capture_message(message, context = {})
       AppConfig.connectors_logger.error { "Error: #{message}. Context: #{context.inspect}" }

@@ -26,7 +26,7 @@ module ConnectorsSdk
         yield_spaces do |space|
           yield_single_document_change(:identifier => "Confluence Space: #{space&.fetch(:key)} (#{space&.webui})") do
             permissions = config.index_permissions ? get_space_permissions(space) : []
-            yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_space(space, content_base_url, permissions)
+            yield :create_or_update, Confluence::Adapter.es_document_from_confluence_space(space, content_base_url, permissions)
           end
 
           yield_content_for_space(
@@ -36,7 +36,7 @@ module ConnectorsSdk
           ) do |content|
             restrictions = config.index_permissions ? get_content_restrictions(content) : []
             if content.type == 'attachment'
-              document = Confluence::Adapter.swiftype_document_from_confluence_attachment(content, content_base_url, restrictions)
+              document = Confluence::Adapter.es_document_from_confluence_attachment(content, content_base_url, restrictions)
               download_args = download_args_and_proc(
                 id: document.fetch(:id),
                 name: content.title,
@@ -47,7 +47,7 @@ module ConnectorsSdk
               end
               yield :create_or_update, document, download_args
             else
-              yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_content(content, content_base_url, restrictions)
+              yield :create_or_update, Confluence::Adapter.es_document_from_confluence_content(content, content_base_url, restrictions)
             end
           end
 

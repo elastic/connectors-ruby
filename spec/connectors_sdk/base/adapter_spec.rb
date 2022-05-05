@@ -73,7 +73,7 @@ describe ConnectorsSdk::Base::Adapter do
     end
   end
 
-  describe 'swiftype_document_from_configured_object_base' do
+  describe 'es_document_from_configured_object_base' do
     let(:object_type) { 'animal' }
     let(:field_remote) { 'RemoteFieldName' }
     let(:field_target) { 'target_field_name' }

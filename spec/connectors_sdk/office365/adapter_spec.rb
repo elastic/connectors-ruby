@@ -10,6 +10,6 @@ require 'connectors_sdk/office365/adapter'
 
 describe ConnectorsSdk::Office365::Adapter do
   it 'is not a concrete class' do
-    expect { described_class.swiftype_document_from_folder(nil) }.to raise_error(NotImplementedError)
+    expect { described_class.es_document_from_folder(nil) }.to raise_error(NotImplementedError)
   end
 end
