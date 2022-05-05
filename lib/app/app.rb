@@ -58,10 +58,10 @@ class ConnectorsWebApp < Sinatra::Base
 
   before do
     Time.zone = ActiveSupport::TimeZone.new('UTC')
-    # XXX to be removed
-    return if settings.deactivate_auth
 
     @connector = settings.connector_class.new
+    # XXX to be removed
+    return if settings.deactivate_auth
 
     raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(settings.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
 
