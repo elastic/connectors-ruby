@@ -26,20 +26,20 @@ module ConnectorsSdk
       end
 
       class FileGraphItem < Office365::Adapter::FileGraphItem
-        def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
       end
 
       class FolderGraphItem < Office365::Adapter::FolderGraphItem
-        def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
       end
 
       class PackageGraphItem < Office365::Adapter::PackageGraphItem
-        def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
       end
     end

@@ -81,7 +81,7 @@ module ConnectorsSdk
 
       class SpaceNode < Node
         def id
-          Confluence::Adapter.confluence_space_id_to_fp_id(node.fetch('key'))
+          Confluence::Adapter.confluence_space_id_to_es_id(node.fetch('key'))
         end
 
         def type
@@ -107,7 +107,7 @@ module ConnectorsSdk
 
       class ContentNode < Node
         def id
-          Confluence::Adapter.confluence_content_id_to_fp_id(node.id)
+          Confluence::Adapter.confluence_content_id_to_es_id(node.id)
         end
 
         def type
@@ -176,7 +176,7 @@ module ConnectorsSdk
 
       class AttachmentNode < ContentNode
         def id
-          Confluence::Adapter.confluence_attachment_id_to_fp_id(node.id)
+          Confluence::Adapter.confluence_attachment_id_to_es_id(node.id)
         end
 
         def type

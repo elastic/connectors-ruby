@@ -60,11 +60,11 @@ module ConnectorsSdk
 
       def yield_deleted_ids(ids)
         id_groups = ids.group_by do |id|
-          if Confluence::Adapter.fp_id_is_confluence_space_id?(id)
+          if Confluence::Adapter.es_id_is_confluence_space_id?(id)
             :space
-          elsif Confluence::Adapter.fp_id_is_confluence_content_id?(id)
+          elsif Confluence::Adapter.es_id_is_confluence_content_id?(id)
             :content
-          elsif Confluence::Adapter.fp_id_is_confluence_attachment_id?(id)
+          elsif Confluence::Adapter.es_id_is_confluence_attachment_id?(id)
             :attachment
           else
             :unknown
@@ -72,9 +72,9 @@ module ConnectorsSdk
         end
 
         %i(space content attachment).each do |group|
-          confluence_ids = Array(id_groups[group]).map { |id| Confluence::Adapter.public_send("fp_id_to_confluence_#{group}_id", id) }
+          confluence_ids = Array(id_groups[group]).map { |id| Confluence::Adapter.public_send("es_id_to_confluence_#{group}_id", id) }
           get_ids_for_deleted(confluence_ids, group).each do |deleted_id|
-            yield Confluence::Adapter.public_send("confluence_#{group}_id_to_fp_id", deleted_id)
+            yield Confluence::Adapter.public_send("confluence_#{group}_id_to_es_id", deleted_id)
           end
         end
       end

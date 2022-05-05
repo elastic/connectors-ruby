@@ -11,8 +11,8 @@ require 'support/shared_examples'
 
 describe ConnectorsSdk::SharePoint::Adapter do
   it 'should have id conversion functions set by generate_id_helpers' do
-    expect(described_class.singleton_methods).to include(:share_point_id_to_fp_id)
-    expect(described_class.singleton_methods).to include(:fp_id_to_share_point_id)
+    expect(described_class.singleton_methods).to include(:share_point_id_to_es_id)
+    expect(described_class.singleton_methods).to include(:es_id_to_share_point_id)
   end
 
   describe 'conversions to swiftype documents' do

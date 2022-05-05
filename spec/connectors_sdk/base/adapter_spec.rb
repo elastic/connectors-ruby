@@ -18,24 +18,24 @@ describe ConnectorsSdk::Base::Adapter do
 
     context 'inherited class methods based on class name' do
       it 'should convert id to fp id' do
-        expect(Dummy.dummy_id_to_fp_id('1')).to eq('dummy_1')
+        expect(Dummy.dummy_id_to_es_id('1')).to eq('dummy_1')
       end
 
       it 'should convert an fp id to a dummy id' do
-        expect(Dummy.fp_id_to_dummy_id('dummy_1')).to eq('1')
+        expect(Dummy.es_id_to_dummy_id('dummy_1')).to eq('1')
       end
 
       it 'should have predicate method' do
-        expect(Dummy.fp_id_is_dummy_id?('dummy_1')).to eq(true)
+        expect(Dummy.es_id_is_dummy_id?('dummy_1')).to eq(true)
       end
     end
 
     it 'should throw an error if the fp id is invalid' do
-      expect { Dummy.fp_id_to_dummy_id('invalid_id') }.to raise_error(ArgumentError)
+      expect { Dummy.es_id_to_dummy_id('invalid_id') }.to raise_error(ArgumentError)
     end
 
     it 'should throw an error if the fp id does not match the expected format' do
-      expect { Dummy.fp_id_to_dummy_id('dummy_') }.to raise_error(ArgumentError)
+      expect { Dummy.es_id_to_dummy_id('dummy_') }.to raise_error(ArgumentError)
     end
   end
 
@@ -108,7 +108,7 @@ describe ConnectorsSdk::Base::Adapter do
       ]
     end
 
-    subject { described_class.swiftype_document_from_configured_object_base(:object_type => object_type, :object => object, :fields => fields) }
+    subject { described_class.es_document_from_configured_object_base(:object_type => object_type, :object => object, :fields => fields) }
 
     it 'sets the object type' do
       expect(subject).to match(hash_including(:type => 'animal'))

@@ -26,7 +26,7 @@ module ConnectorsSdk
           @item = item
         end
 
-        def self.convert_id_to_fp_id(_id)
+        def self.convert_id_to_es_id(_id)
           raise NotImplementedError
         end
 
@@ -44,7 +44,7 @@ module ConnectorsSdk
         def to_swiftype_document
           {
             :_fields_to_preserve => ConnectorsSdk::Office365::Adapter.fields_to_preserve,
-            :id => self.class.convert_id_to_fp_id(item.id),
+            :id => self.class.convert_id_to_es_id(item.id),
             :path => get_path(item),
             :title => item.name,
             :url => item.webUrl,
@@ -96,7 +96,7 @@ module ConnectorsSdk
       end
 
       class FileGraphItem < GraphItem
-        def self.convert_id_to_fp_id(_id)
+        def self.convert_id_to_es_id(_id)
           raise NotImplementedError
         end
 
@@ -132,7 +132,7 @@ module ConnectorsSdk
       end
 
       class PackageGraphItem < GraphItem
-        def self.convert_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
           raise NotImplementedError
         end
 

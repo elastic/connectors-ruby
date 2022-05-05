@@ -132,7 +132,7 @@ module ConnectorsSdk
         @existing_drive_item_ids ||= Set.new.tap do |ids|
           drives_to_index.each do |drive|
             client.list_items(drive.id) do |item|
-              ids << convert_id_to_fp_id(item.id)
+              ids << convert_id_to_es_id(item.id)
             end
           end
         end
@@ -142,7 +142,7 @@ module ConnectorsSdk
         raise NotImplementedError
       end
 
-      def convert_id_to_fp_id(_id)
+      def convert_id_to_es_id(_id)
         raise NotImplementedError
       end
 
@@ -170,7 +170,7 @@ module ConnectorsSdk
         if item.deleted.nil?
           yield_create_or_update(drive_id, item, &block)
         else
-          yield :delete, convert_id_to_fp_id(item.id)
+          yield :delete, convert_id_to_es_id(item.id)
         end
       end
 
