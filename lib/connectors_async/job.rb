@@ -27,8 +27,8 @@ module ConnectorsAsync
       @data[:status]
     end
 
-    def has_error?
-      @data.has_key?(:error)
+    def is_failed?
+      @data[:status] == ConnectorsShared::JobStatus::FAILED
     end
 
     def error

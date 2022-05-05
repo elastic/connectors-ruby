@@ -57,11 +57,11 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   before do
-    @connector = settings.connector_class.new
-
     Time.zone = ActiveSupport::TimeZone.new('UTC')
     # XXX to be removed
     return if settings.deactivate_auth
+
+    @connector = settings.connector_class.new
 
     raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(settings.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
 
@@ -95,12 +95,9 @@ class ConnectorsWebApp < Sinatra::Base
 
   post '/documents' do
     job_id = body_params[:job_id]
-    docs = []
 
     if job_id
       job = settings.job_store.fetch_job(job_id)
-      status = job.status
-      docs = job.pop_batch
     else
       job = settings.job_store.create_job
 
@@ -111,6 +108,10 @@ class ConnectorsWebApp < Sinatra::Base
         access_token: body_params[:access_token]
       )
     end
+
+    raise job.error if job.is_failed?
+
+    docs = job.pop_batch
 
     #TODO: send error cause???
     json(
