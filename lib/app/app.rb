@@ -26,16 +26,14 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
-  configure do
-    set :raise_errors, false
-    set :show_exceptions, false
-    set :bind, settings.http['host']
-    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
-    set :api_key, settings.http['api_key']
-    set :deactivate_auth, settings.http['deactivate_auth']
-    set :connector_name, settings.http['connector']
-    set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
-  end
+  set :raise_errors, false
+  set :show_exceptions, false
+  set :bind, settings.http['host']
+  set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
+  set :api_key, settings.http['api_key']
+  set :deactivate_auth, settings.http['deactivate_auth']
+  set :connector_name, settings.http['connector']
+  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
 
   error do
     e = env['sinatra.error']
@@ -78,8 +76,8 @@ class ConnectorsWebApp < Sinatra::Base
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
       :connectors_revision => settings.revision,
-      :connector_name => ActiveSupport::Inflector.camelize(settings.connector_name),
-      :display_name => @connector.name,
+      :connector_name => settings.connector_name,
+      :display_name => @connector.display_name,
       :configurable_fields => @connector.configurable_fields,
       :connection_requires_redirect => @connector.connection_requires_redirect,
     )
@@ -88,7 +86,7 @@ class ConnectorsWebApp < Sinatra::Base
   post '/status' do
     source_status = @connector.source_status(body_params)
     json(
-      :extractor => { :name => @connector.name },
+      :extractor => { :name => @connector.display_name },
       :contentProvider => source_status
     )
   end

@@ -16,11 +16,9 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'share_point'
 
-      def name
-        'SharePoint'
+      def display_name
+        'SharePoint Online'
       end
-
-      private
 
       def connection_requires_redirect
         true
@@ -38,6 +36,8 @@ module ConnectorsSdk
           },
         ]
       end
+
+      private
 
       def extractor_class
         ConnectorsSdk::SharePoint::Extractor
