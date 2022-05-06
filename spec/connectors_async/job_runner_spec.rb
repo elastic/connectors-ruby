@@ -18,6 +18,7 @@ describe ConnectorsAsync::JobRunner do
     let(:job) { double }
     let(:thread_executor_mock) { double }
     let(:extraction_time) { 0 }
+    let(:connector_class) { double }
 
     before(:each) do
       allow(job).to receive(:update_status)
@@ -25,6 +26,8 @@ describe ConnectorsAsync::JobRunner do
       allow(connector).to receive(:extract) do
         sleep(extraction_time)
       end
+
+      allow(connector_class).to receive(:new).and_return(connector)
     end
 
     context 'extractor takes a long time to complete' do
@@ -35,7 +38,7 @@ describe ConnectorsAsync::JobRunner do
 
         job_runner.start_job(
           job: job,
-          connector: connector,
+          connector_class: connector_class,
           modified_since: modified_since,
           access_token: access_token
         )
