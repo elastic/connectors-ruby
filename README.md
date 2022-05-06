@@ -137,7 +137,7 @@ We welcome contributors to the project. Before you begin, please read the [Conne
 
 - [Code of Conduct](https://www.elastic.co/community/codeofconduct)
 - [Getting Support](./docs/SUPPORT.md)
-- [Releasing](./docs/RELEASING.mg)
+- [Releasing](./docs/RELEASING.md)
 - [Developer guide](./docs/DEVELOPING.md)
 - [Security Policy](./docs/SECURITY.md)
 - [Elastic-internal guide](./docs/INTERNAL.md)
