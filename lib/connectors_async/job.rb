@@ -57,10 +57,14 @@ module ConnectorsAsync
 
       up_to.times do
         break if @data[:documents].empty?
-        results << @data[:documents].pop
+
+        results << @data[:documents].pop(true)
       end
 
-      results
+    rescue ThreadError => e
+      puts "Attempt to access an empty queue happened, when the queue was not supposed to be empty"
+    ensure
+      []
     end
 
     def is_finished?
