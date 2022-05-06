@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/base/authorization'
+
 describe ConnectorsSdk::Base::Authorization do
   subject do
     ConnectorsSdk::SharePoint::Authorization

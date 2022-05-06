@@ -96,9 +96,14 @@ class ConnectorsWebApp < Sinatra::Base
   post '/documents' do
     job_id = body_params[:job_id]
 
+    job = nil
+
     if job_id
       job = settings.job_store.fetch_job(job_id)
-    else
+    end
+
+    unless job
+      # two cases are included here - job was not started yet, or connector crashed and restarted
       job = settings.job_store.create_job
 
       settings.job_runner.start_job(
