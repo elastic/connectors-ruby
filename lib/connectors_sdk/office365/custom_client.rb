@@ -77,12 +77,11 @@ module ConnectorsSdk
         # recently created groups (new Private Team site will be there) to reduce friction and index this site
         # earlier.
         # See: https://github.com/elastic/ent-search/pull/3581
-        share_point_sites = (sites(:fields => %w[id]) + recent_share_point_group_sites(:fields => %[id]))
+        share_point_sites = (sites(:fields => %w[id,name]) + recent_share_point_group_sites(:fields => %w[id,name]))
 
         share_point_sites
-          .map(&:id)
-          .uniq
-          .map { |site_id| site_drives(site_id, :fields => fields) }
+          .uniq(&:id)
+          .map { |site| site_drives(site, :fields => fields) }
           .flatten
           .compact
       end
@@ -104,10 +103,13 @@ module ConnectorsSdk
         request_all(:endpoint => 'sites/', :fields => fields, :additional_query_params => { :search => '', :top => 10 })
       end
 
-      def site_drives(site_id, fields: [])
+      def site_drives(site, fields: [])
         document_libraries(
-          request_all(:endpoint => "sites/#{site_id}/drives/", :fields => fields)
-        )
+          request_all(:endpoint => "sites/#{site.id}/drives/", :fields => fields)
+        ).map do |drive|
+          drive.site_name = site.name
+          drive
+        end
       rescue ClientError => e
         ConnectorsShared::Logger.info("Received response of #{e.status_code} trying to get drive for Site with Id = #{site_id}: #{e.message}")
         nil
@@ -236,7 +238,7 @@ module ConnectorsSdk
 
         groups(:fields => %w(id createdDateTime))
           .select { |group| group.createdDateTime > created_date_time_threshold }
-          .map { |group| group_root_site(group.id, :fields => %w[id]) }.compact
+          .map { |group| group_root_site(group.id, :fields => fields) }.compact
       end
 
       def document_libraries(drives)

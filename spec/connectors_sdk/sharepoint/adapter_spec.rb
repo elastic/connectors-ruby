@@ -28,6 +28,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
     let(:drive_owner_name) { 'drive owner' }
     let(:parent_folder) { 'parent_folder' }
     let(:parent_path) { "/drives/eac871c1371902ee/root:/#{parent_folder}" }
+    let(:site_name) { 'test_site' }
 
     shared_examples_for(:graph_item) do
       let(:item_in_response) do
@@ -63,7 +64,8 @@ describe ConnectorsSdk::SharePoint::Adapter do
             'path' => parent_path
           },
           'size' => 10_880,
-          'drive_owner_name' => drive_owner_name
+          'drive_owner_name' => drive_owner_name,
+          'site_name' => site_name
         )
       end
 
@@ -71,7 +73,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
         {
           :_fields_to_preserve => described_class.fields_to_preserve,
           :id => 'share_point_01E4DADQ55RSOGGR4HDJA2R2VN6LQRFAUK',
-          :path => "/#{parent_folder}/#{title}",
+          :path => "/sites/#{site_name}/#{parent_folder}/#{title}",
           :url => url,
           :type => type,
           :created_by => created_by,
@@ -94,7 +96,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
         let(:parent_path) { '/drives/eac871c1371902ee/root:' }
 
         it 'should correctly handle when the parent is the root' do
-          expect(document[:path]).to eq("/#{title}")
+          expect(document[:path]).to eq("/sites/#{site_name}/#{title}")
         end
       end
     end
@@ -158,7 +160,8 @@ describe ConnectorsSdk::SharePoint::Adapter do
             'path' => parent_path
           },
           'size' => 5519,
-          'drive_owner_name' => drive_owner_name
+          'drive_owner_name' => drive_owner_name,
+          'site_name' => site_name
         )
       end
 
@@ -166,7 +169,7 @@ describe ConnectorsSdk::SharePoint::Adapter do
         {
           :_fields_to_preserve => described_class.fields_to_preserve,
           :id => 'share_point_01Q7HJRADY5KQSPST46REJQUOXTXHNYTE5',
-          :path => "/#{parent_folder}/#{title}",
+          :path => "/sites/#{site_name}/#{parent_folder}/#{title}",
           :title => title,
           :url => url,
           :type => 'onenote',

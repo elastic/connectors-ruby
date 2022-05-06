@@ -29,17 +29,35 @@ module ConnectorsSdk
         def self.convert_id_to_es_id(id)
           ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
+
+        private
+
+        def get_path(item)
+          item.site_name.present? ? "/sites/#{item.site_name}#{super}" : super
+        end
       end
 
       class FolderGraphItem < Office365::Adapter::FolderGraphItem
         def self.convert_id_to_es_id(id)
           ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
+
+        private
+
+        def get_path(item)
+          item.site_name.present? ? "/sites/#{item.site_name}#{super}" : super
+        end
       end
 
       class PackageGraphItem < Office365::Adapter::PackageGraphItem
         def self.convert_id_to_es_id(id)
           ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
+        end
+
+        private
+
+        def get_path(item)
+          item.site_name.present? ? "/sites/#{item.site_name}#{super}" : super
         end
       end
     end
