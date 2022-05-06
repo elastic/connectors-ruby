@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'stubs/enterprise_search/exception_tracking' unless defined?(Rails)
 require 'bson'
 require 'connectors_shared/logger'
+require 'stubs/enterprise_search/exception_tracking'
 
 module ConnectorsShared
   class ExceptionTracking
