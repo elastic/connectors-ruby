@@ -61,10 +61,11 @@ module ConnectorsAsync
         results << @data[:documents].pop(true)
       end
 
+      results
+
     rescue ThreadError => e
       puts "Attempt to access an empty queue happened, when the queue was not supposed to be empty"
-    ensure
-      []
+      return []
     end
 
     def is_finished?
