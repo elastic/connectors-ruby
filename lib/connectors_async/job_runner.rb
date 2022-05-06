@@ -25,7 +25,7 @@ module ConnectorsAsync
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
         cursors = { :modified_since => modified_since }
-        connector.extract({ :access_token => access_token, :cursors => cursors }) do |doc|
+        connector.extract({ :cursors => cursors }) do |doc|
           job.store(doc)
         end
 
