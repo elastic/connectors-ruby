@@ -59,8 +59,6 @@ class ConnectorsWebApp < Sinatra::Base
 
   before do
     Time.zone = ActiveSupport::TimeZone.new('UTC')
-
-    @connector = settings.connector_class.new
     # XXX to be removed
     return if settings.deactivate_auth
 
@@ -87,9 +85,11 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/status' do
-    source_status = @connector.source_status(body_params)
+    connector = settings.connector_class.new
+
+    source_status = connector.source_status(body_params)
     json(
-      :extractor => { :name => @connector.name },
+      :extractor => { :name => connector.name },
       :contentProvider => source_status
     )
   end
@@ -104,7 +104,7 @@ class ConnectorsWebApp < Sinatra::Base
 
       settings.job_runner.start_job(
         job: job,
-        connector: @connector,
+        connector_class: settings.connector_class,
         modified_since: body_params[:modified_since],
         access_token: body_params[:access_token]
       )
@@ -123,33 +123,45 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    @connector.download(body_params)
+    connector = settings.connector_class.new
+
+    connector.download(body_params)
   end
 
   post '/deleted' do
-    json :results => @connector.deleted(body_params)
+    connector = settings.connector_class.new
+
+    json :results => connector.deleted(body_params)
   end
 
   post '/permissions' do
-    json :results => @connector.permissions(body_params)
+    connector = settings.connector_class.new
+
+    json :results => connector.permissions(body_params)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
+    connector = settings.connector_class.new
+
     logger.info "Received client ID: #{body_params[:client_id]}"
     logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
-    authorization_uri = @connector.authorization_uri(body_params)
+    authorization_uri = connector.authorization_uri(body_params)
 
     json :oauth2redirect => authorization_uri
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
-    json @connector.access_token(body_params)
+    connector = settings.connector_class.new
+
+    json connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    json @connector.refresh(body_params)
+    connector = settings.connector_class.new
+
+    json connector.refresh(body_params)
   end
 
   def body_params
