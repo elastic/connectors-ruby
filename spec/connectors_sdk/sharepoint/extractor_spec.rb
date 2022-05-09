@@ -170,6 +170,17 @@ describe ConnectorsSdk::SharePoint::Extractor do
         expect(subject.monitor.total_error_count).to eq(0)
       end
 
+      it 'has sites prefix in path' do
+        site = expect_sites([random_site]).first
+        drive = expect_site_drives(site[:id], [random_drive]).first
+        root = expect_root_item(drive[:id], random_item)
+        expect_item_children(drive[:id], root[:id], [random_document])
+
+        subject.yield_document_changes do |_action, document, _subextractors|
+          expect(document[:path]).to start_with("/sites/#{site[:name]}/")
+        end
+      end
+
       context 'documents fail' do
         before(:each) do
           subject.monitor = ConnectorsShared::Monitor.new(:connector => subject, :max_error_ratio => 1)
