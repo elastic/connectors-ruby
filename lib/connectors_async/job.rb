@@ -35,11 +35,19 @@ module ConnectorsAsync
       @data[:error]
     end
 
+    def cursors
+      @data[:cursors]
+    end
+
     def update_status(new_status)
       # add state machine logic here?
       raise StatusUpdateError if is_finished?
 
       @data[:status] = new_status
+    end
+
+    def update_cursors(new_cursors)
+      @data[:cursors] = new_cursors
     end
 
     def fail(e)

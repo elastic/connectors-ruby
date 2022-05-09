@@ -45,6 +45,8 @@ module ConnectorsSdk
 
             yield doc
           end
+
+          extractor.config.to_h[:cursors]
         end
       end
 
