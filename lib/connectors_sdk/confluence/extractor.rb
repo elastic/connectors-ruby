@@ -26,7 +26,7 @@ module ConnectorsSdk
         yield_spaces do |space|
           yield_single_document_change(:identifier => "Confluence Space: #{space&.fetch(:key)} (#{space&.webui})") do
             permissions = config.index_permissions ? get_space_permissions(space) : []
-            yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_space(space, content_base_url, permissions)
+            yield :create_or_update, Confluence::Adapter.es_document_from_confluence_space(space, content_base_url, permissions)
           end
 
           yield_content_for_space(
@@ -36,7 +36,7 @@ module ConnectorsSdk
           ) do |content|
             restrictions = config.index_permissions ? get_content_restrictions(content) : []
             if content.type == 'attachment'
-              document = Confluence::Adapter.swiftype_document_from_confluence_attachment(content, content_base_url, restrictions)
+              document = Confluence::Adapter.es_document_from_confluence_attachment(content, content_base_url, restrictions)
               download_args = download_args_and_proc(
                 id: document.fetch(:id),
                 name: content.title,
@@ -47,7 +47,7 @@ module ConnectorsSdk
               end
               yield :create_or_update, document, download_args
             else
-              yield :create_or_update, Confluence::Adapter.swiftype_document_from_confluence_content(content, content_base_url, restrictions)
+              yield :create_or_update, Confluence::Adapter.es_document_from_confluence_content(content, content_base_url, restrictions)
             end
           end
 
@@ -60,11 +60,11 @@ module ConnectorsSdk
 
       def yield_deleted_ids(ids)
         id_groups = ids.group_by do |id|
-          if Confluence::Adapter.fp_id_is_confluence_space_id?(id)
+          if Confluence::Adapter.es_id_is_confluence_space_id?(id)
             :space
-          elsif Confluence::Adapter.fp_id_is_confluence_content_id?(id)
+          elsif Confluence::Adapter.es_id_is_confluence_content_id?(id)
             :content
-          elsif Confluence::Adapter.fp_id_is_confluence_attachment_id?(id)
+          elsif Confluence::Adapter.es_id_is_confluence_attachment_id?(id)
             :attachment
           else
             :unknown
@@ -72,9 +72,9 @@ module ConnectorsSdk
         end
 
         %i(space content attachment).each do |group|
-          confluence_ids = Array(id_groups[group]).map { |id| Confluence::Adapter.public_send("fp_id_to_confluence_#{group}_id", id) }
+          confluence_ids = Array(id_groups[group]).map { |id| Confluence::Adapter.public_send("es_id_to_confluence_#{group}_id", id) }
           get_ids_for_deleted(confluence_ids, group).each do |deleted_id|
-            yield Confluence::Adapter.public_send("confluence_#{group}_id_to_fp_id", deleted_id)
+            yield Confluence::Adapter.public_send("confluence_#{group}_id_to_es_id", deleted_id)
           end
         end
       end

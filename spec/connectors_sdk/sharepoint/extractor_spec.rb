@@ -259,7 +259,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
 
     context 'with removed item' do
-      let(:ids) { [subject.send(:convert_id_to_fp_id, 'removed_id')] }
+      let(:ids) { [subject.send(:convert_id_to_es_id, 'removed_id')] }
 
       it 'yields the deleted item id' do
         expect { |blk| subject.yield_deleted_ids(ids, &blk) }.to yield_successive_args(ids.first)
@@ -267,7 +267,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
 
     context 'with no item removed' do
-      let(:ids) { [subject.send(:convert_id_to_fp_id, document_id)] }
+      let(:ids) { [subject.send(:convert_id_to_es_id, document_id)] }
 
       it 'yields nothing' do
         expect { |blk| subject.yield_deleted_ids(ids, &blk) }.to yield_successive_args
