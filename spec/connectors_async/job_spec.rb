@@ -66,6 +66,19 @@ describe ConnectorsAsync::Job do
         expect(job.pop_batch).to be_empty
       end
     end
+
+    context 'when less than up_to documents were stored' do
+      let(stored_document_count) { 15 }
+      before(:each) do
+        stored_document_count.times do
+          job.store({})
+        end
+      end
+
+      it 'returns all stored docs' do
+        expect(job.pop_batch(99)).to have_size(stored_document_count)
+      end
+    end
   end
 
   context '#fail' do

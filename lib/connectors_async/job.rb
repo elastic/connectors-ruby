@@ -64,7 +64,7 @@ module ConnectorsAsync
       results
     rescue ThreadError
       puts 'Attempt to access an empty queue happened, when the queue was not supposed to be empty'
-      []
+      results
     end
 
     def is_finished?
