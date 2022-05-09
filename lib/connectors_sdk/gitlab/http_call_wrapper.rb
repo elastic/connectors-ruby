@@ -9,6 +9,7 @@
 require 'connectors_sdk/base/http_call_wrapper'
 require 'connectors_sdk/gitlab/custom_client'
 require 'connectors_sdk/gitlab/adapter'
+require 'rack/utils'
 
 module ConnectorsSdk
   module GitLab
@@ -53,18 +54,30 @@ module ConnectorsSdk
           :order_by => :id,
           :sort => :desc
         }
-        results_list = JSON.parse(client(_params).get('projects', query_params).body).map do |doc|
+        cursors = _params[:cursors]
+        unless cursors.nil? || cursors.empty?
+          if (matcher = /(https?:[^>]*)/.match(cursors))
+            clean_query = URI.parse(matcher.captures[0]).query
+            query_params = Rack::Utils.parse_query(clean_query)
+          else
+            raise "Next page link has unexpected format: #{cursors}"
+          end
+        end
+        response = client(_params).get('projects', query_params)
+
+        results_list = JSON.parse(response.body).map do |doc|
           {
             :action => :create_or_update,
             :document => ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc.with_indifferent_access),
             :download => nil
           }
         end
-        # for now let's just take one page
+        next_page = response.headers['Link'] || {}
+        # paging is defined by what came in the next_page
         [
           Hashie::Array.new(results_list),
-          {},  # not passing the cursors yet
-          true # we're saying it's the last page
+          next_page,
+          next_page.empty? # we're saying it's the last page
         ]
       end
 

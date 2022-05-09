@@ -3,7 +3,11 @@
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
+require 'faraday_middleware/response/follow_redirects'
 require 'connectors_sdk/base/custom_client'
+require 'connectors_shared/middleware/bearer_auth'
+require 'connectors_shared/middleware/basic_auth'
+require 'connectors_shared/middleware/restrict_hostnames'
 
 module ConnectorsSdk
   module GitLab
