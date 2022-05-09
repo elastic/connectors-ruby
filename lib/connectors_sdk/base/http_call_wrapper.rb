@@ -22,31 +22,29 @@ module ConnectorsSdk
         )
       end
 
-      def document_batch(params)
+      def extract(params)
         convert_third_party_errors do
-          results = []
-
           extractor = extractor(params)
 
-          extractor.yield_document_changes(:break_after_page => true, :modified_since => extractor.config.cursors['modified_since']) do |action, doc, download_args_and_proc|
+          extractor.yield_document_changes(:modified_since => extractor.config.cursors[:modified_since]) do |action, doc, download_args_and_proc|
             download_obj = nil
             if download_args_and_proc
               download_obj = {
-                  id: download_args_and_proc[0],
-                  name: download_args_and_proc[1],
-                  size: download_args_and_proc[2],
-                  download_args: download_args_and_proc[3]
+                id: download_args_and_proc[0],
+                name: download_args_and_proc[1],
+                size: download_args_and_proc[2],
+                download_args: download_args_and_proc[3]
               }
             end
 
-            results << {
-                :action => action,
-                :document => doc,
-                :download => download_obj
+            doc = {
+              :action => action,
+              :document => doc,
+              :download => download_obj
             }
-          end
 
-          [results, extractor.config.cursors, extractor.completed]
+            yield doc
+          end
         end
       end
 

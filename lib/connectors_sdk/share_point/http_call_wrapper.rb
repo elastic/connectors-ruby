@@ -20,47 +20,6 @@ module ConnectorsSdk
         'SharePoint'
       end
 
-      def extractor(params)
-        cursors = params.fetch(:cursors, {}) || {}
-        features = params.fetch(:features, {}) || {}
-
-        # XXX can we cache that class across calls?
-        ConnectorsSdk::SharePoint::Extractor.new(
-          content_source_id: BSON::ObjectId.new,
-          service_type: SERVICE_TYPE,
-          authorization_data_proc: proc { { access_token: params[:access_token] } },
-          client_proc: proc { ConnectorsSdk::Office365::CustomClient.new(:access_token => params[:access_token], :cursors => cursors) },
-          config: ConnectorsSdk::Office365::Config.new(:cursors => cursors, :drive_ids => 'all', :index_permissions => params[:index_permissions] || false),
-          features: features
-        )
-      end
-
-      def extract(params)
-        extractor = extractor(params)
-
-        extractor.yield_document_changes(:modified_since => extractor.config.cursors[:modified_since]) do |action, doc, download_args_and_proc|
-          download_obj = nil
-          if download_args_and_proc
-            download_obj = {
-              id: download_args_and_proc[0],
-              name: download_args_and_proc[1],
-              size: download_args_and_proc[2],
-              download_args: download_args_and_proc[3]
-            }
-          end
-
-          doc = {
-            :action => action,
-            :document => doc,
-            :download => download_obj
-          }
-
-          yield doc
-        end
-      rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
-        raise e.status_code == 401 ? ConnectorsShared::InvalidTokenError : e
-      end
-
       def service_type
         SERVICE_TYPE
       end
