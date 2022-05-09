@@ -55,14 +55,23 @@ module ConnectorsSdk
           :sort => :desc
         }
         cursors = _params[:cursors]
-        unless cursors.nil? || cursors.empty?
-          if (matcher = /(https?:[^>]*)/.match(cursors))
+        next_cursors = {}
+
+        if cursors.present? && cursors[:next_page].present?
+          if (matcher = /(https?:[^>]*)/.match(cursors[:next_page]))
             clean_query = URI.parse(matcher.captures[0]).query
             query_params = Rack::Utils.parse_query(clean_query)
           else
             raise "Next page link has unexpected format: #{cursors}"
           end
         end
+
+        # looks like it's an incremental sync
+        if cursors.present? && cursors[:modified_since].present?
+          query_params[:last_activity_after] = Time.parse(cursors[:modified_since].to_s).iso8601
+          next_cursors[:modified_since] = cursors[:modified_since]
+        end
+
         response = client(_params).get('projects', query_params)
 
         results_list = JSON.parse(response.body).map do |doc|
@@ -72,11 +81,13 @@ module ConnectorsSdk
             :download => nil
           }
         end
-        next_page = response.headers['Link'] || {}
+
+        next_page = response.headers['Link'] || ""
+
         # paging is defined by what came in the next_page
         [
           Hashie::Array.new(results_list),
-          next_page,
+          next_page.empty? ? next_cursors : next_cursors.merge({ :next_page => next_page }),
           next_page.empty? # we're saying it's the last page
         ]
       end
