@@ -68,6 +68,10 @@ module ConnectorsSdk
         end
       end
 
+      def download(params)
+        extractor(params).download(params[:meta])
+      end
+
       def authorization_uri(params)
         authorization.authorization_uri(params)
       end
@@ -78,10 +82,6 @@ module ConnectorsSdk
 
       def refresh(params)
         authorization.refresh(params)
-      end
-
-      def download(params)
-        extractor(params).download(params[:meta])
       end
 
       def source_status(params)

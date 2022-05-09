@@ -38,6 +38,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
     set :job_store, ConnectorsAsync::JobStore.new
     set :job_runner, ConnectorsAsync::JobRunner.new
+    set :secret_storage, ConnectorsAsync::SecretStorage.new
   end
 
   error do
@@ -106,11 +107,13 @@ class ConnectorsWebApp < Sinatra::Base
       # two cases are included here - job was not started yet, or connector crashed and restarted
       job = settings.job_store.create_job
 
+      settings.secret_storage.store_secret({ access_token: body_params[:access_token] })
+
       settings.job_runner.start_job(
         job: job,
         connector_class: settings.connector_class,
-        modified_since: body_params[:modified_since],
-        access_token: body_params[:access_token]
+        secret_storage: settings.secret_storage,
+        modified_since: body_params[:modified_since]
       )
     end
 
@@ -129,19 +132,19 @@ class ConnectorsWebApp < Sinatra::Base
   post '/download' do
     connector = settings.connector_class.new
 
-    connector.download(body_params)
+    connector.download(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   post '/deleted' do
     connector = settings.connector_class.new
 
-    json :results => connector.deleted(body_params)
+    json :results => connector.deleted(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   post '/permissions' do
     connector = settings.connector_class.new
 
-    json :results => connector.permissions(body_params)
+    json :results => connector.permissions(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   # XXX remove `oauth2` from the name
@@ -159,15 +162,19 @@ class ConnectorsWebApp < Sinatra::Base
   post '/oauth2/exchange' do
     connector = settings.connector_class.new
 
-    logger.info "Received payload: #{body_params}"
+    puts "Received payload: #{body_params}"
     json connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
     connector = settings.connector_class.new
 
-    logger.info "Received payload: #{body_params}"
-    json connector.refresh(body_params)
+    puts "Received payload: #{body_params}"
+    refresh_result = connector.refresh(body_params)
+
+    settings.secret_storage.store_secret({ access_token: refresh_result['access_token'] } )
+
+    json refresh_result
   end
 
   def body_params
