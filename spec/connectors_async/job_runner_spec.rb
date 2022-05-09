@@ -9,7 +9,7 @@
 require 'connectors_async/job_runner'
 
 describe ConnectorsAsync::JobRunner do
-  let(:job_runner) { described_class.new }
+  let(:job_runner) { described_class.new(max_threads: 4) }
 
   context '#start_job' do
     let(:connector) { double }
