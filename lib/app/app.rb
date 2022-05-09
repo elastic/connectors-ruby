@@ -38,7 +38,7 @@ class ConnectorsWebApp < Sinatra::Base
     set :connector_name, settings.http['connector']
     set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
     set :job_store, ConnectorsAsync::JobStore.new
-    set :job_runner, ConnectorsAsync::JobRunner.new
+    set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
   end
 
   error do

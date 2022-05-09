@@ -10,3 +10,6 @@ http:
   api_key: changeme
   deactivate_auth: false
   connector: share_point
+
+worker:
+  max_thread_count: 4

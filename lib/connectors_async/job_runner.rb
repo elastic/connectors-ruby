@@ -6,13 +6,14 @@
 
 require 'concurrent'
 
+require 'connectors_app/config'
 require 'connectors_async/job_store'
 require 'connectors_shared/job_status'
 
 module ConnectorsAsync
   class JobRunner
-    def initialize
-      @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: 4, max_queue: 0)
+    def initialize(max_threads:)
+      @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: max_threads, max_queue: 0)
     end
 
     def start_job(job:, connector_class:, modified_since:, access_token:)
