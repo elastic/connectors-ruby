@@ -6,6 +6,10 @@
 
 # frozen_string_literal: true
 
+require 'nokogiri'
+
+require 'connectors_shared/extraction_utils'
+
 describe ConnectorsShared::ExtractionUtils do
   describe '.node_descendant_text' do
     it 'should raise an error unless given a node object' do

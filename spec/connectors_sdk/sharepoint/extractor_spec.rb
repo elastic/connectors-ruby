@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/share_point/extractor'
-require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/office365/config'
+require 'connectors_sdk/office365/custom_client'
+require 'connectors_sdk/share_point/extractor'
 
 describe ConnectorsSdk::SharePoint::Extractor do
   let(:content_source_id) { BSON::ObjectId.new }
