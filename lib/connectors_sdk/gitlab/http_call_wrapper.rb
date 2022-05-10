@@ -75,9 +75,13 @@ module ConnectorsSdk
         response = client(_params).get('projects', query_params)
 
         results_list = JSON.parse(response.body).map do |doc|
+          doc = doc.with_indifferent_access
+          if _params[:index_permissions]
+            doc = doc.merge(project_permissions(_params, doc[:id], doc[:visibility]))
+          end
           {
             :action => :create_or_update,
-            :document => ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc.with_indifferent_access),
+            :document => ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc),
             :download => nil
           }
         end
@@ -111,7 +115,52 @@ module ConnectorsSdk
       end
 
       def permissions(_params)
-        []
+        result = []
+        if _params[:user_id].present?
+          id = _params[:user_id]
+
+          result.push("user:#{id.to_s}")
+          client = client(_params)
+
+          user_response = client.get("users/#{id}")
+          if user_response.success?
+            username = JSON.parse(user_response.body).with_indifferent_access[:username]
+            external_response = client.get("users", { :external => true, :username => username })
+            if external_response.success?
+              external_users = Hashie::Array.new(JSON.parse(external_response.body))
+              if external_users.size == 0
+                # the user is not external
+                result.push('type:internal')
+              end
+            else
+              raise "Could not check external user status by ID: #{id}"
+            end
+          else
+            raise "User isn't found by ID: #{id}"
+          end
+        end
+        result
+      end
+
+      private
+
+      def project_permissions(_params, id, visibility)
+        result = []
+        if visibility.to_sym == :public
+          # visible-to-all
+          return {}
+        end
+        if visibility.to_sym == :external
+          result.push('type:internal')
+        end
+        response = client(_params).get("projects/#{id}/members/all")
+        if response.success?
+          members = Hashie::Array.new(JSON.parse(response.body))
+          result = result.concat(members.map { |user| "user:#{user[:id]}" })
+        else
+          raise "Could not get project members by project ID: #{id}, response code: #{response.status}, response: #{response.body}"
+        end
+        { :_allow_permissions => result }
       end
     end
   end

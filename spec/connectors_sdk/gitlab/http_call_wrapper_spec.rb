@@ -7,6 +7,9 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
 
   let(:projects_json) { connectors_fixture_raw('gitlab/projects_list.json') }
   let(:project_json) { connectors_fixture_raw('gitlab/project.json') }
+  let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
+  let(:external_user_json) { connectors_fixture_raw('gitlab/external_user.json') }
+  let(:external_users_json) { connectors_fixture_raw('gitlab/external_users.json') }
   let(:base_url) { 'https://www.example.com' }
 
   context '#document_batch' do
@@ -108,5 +111,34 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
       result = subject.deleted({ :ids => ids, :base_url => base_url })
       expect(result).to eq(non_existing_ids)
     end
+  end
+
+  context '#permissions' do
+    let(:user_id) { 1 }
+    let(:user_name) { 'sytses' }
+    let(:external_user_id) { 11422639 }
+    let(:external_user_name) { 'PCHINC1' }
+
+    before do
+      stub_request(:get, "#{base_url}/users/#{external_user_id}").to_return(:body => external_user_json)
+      stub_request(:get, "#{base_url}/users/#{user_id}").to_return(:body => user_json)
+      stub_request(:get, "#{base_url}/users?external=true&username=#{external_user_name}").to_return(:body => external_users_json)
+      stub_request(:get, "#{base_url}/users?external=true&username=#{user_name}").to_return(:body => '[]')
+    end
+
+    it 'correctly sets permissions for internal user' do
+      permissions = subject.permissions({ :base_url => base_url, :user_id => user_id })
+      expect(permissions).to_not be_empty
+      expect(permissions).to include("user:#{user_id}")
+      expect(permissions).to include("type:internal")
+    end
+
+    it 'correctly sets permissions for external user' do
+      permissions = subject.permissions({ :base_url => base_url, :user_id => external_user_id })
+      expect(permissions).to_not be_empty
+      expect(permissions).to include("user:#{external_user_id}")
+      expect(permissions).to_not include("type:internal")
+    end
+
   end
 end
