@@ -8,7 +8,7 @@
 
 require 'connectors_shared/errors'
 require 'stubs/app_config' unless defined?(Rails)
-require 'stubs/swiftype/exception_tracking' unless defined?(Rails)
+require 'stubs/enterprise_search/exception_tracking' unless defined?(Rails)
 
 module ConnectorsShared
   class Monitor
@@ -44,8 +44,8 @@ module ConnectorsShared
     end
 
     def note_error(error, id: Time.now.to_i)
-      stack_trace = Swiftype::ExceptionTracking.generate_stack_trace(error)
-      error_message = Swiftype::ExceptionTracking.generate_error_message(error, nil, nil)
+      stack_trace = EnterpriseSearch::ExceptionTracking.generate_stack_trace(error)
+      error_message = EnterpriseSearch::ExceptionTracking.generate_error_message(error, nil, nil)
       @connector.log_debug("Message id: #{id} - #{error_message}\n#{stack_trace}")
       @total_error_count += 1
       @consecutive_error_count += 1

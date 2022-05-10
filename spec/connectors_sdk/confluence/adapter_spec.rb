@@ -13,9 +13,9 @@ describe ConnectorsSdk::Confluence::Adapter do
 
   let(:base_url) { 'https://swiftypedevelopment.atlassian.net/wiki' }
 
-  describe '.swiftype_document_from_confluence_space' do
+  describe '.es_document_from_confluence_space' do
     let(:json) { Hashie::Mash.new(expanded_space_response) }
-    let(:document) { described_class.swiftype_document_from_confluence_space(json, base_url) }
+    let(:document) { described_class.es_document_from_confluence_space(json, base_url) }
 
     it 'should work' do
       expect(document[:url]).to eq('https://swiftypedevelopment.atlassian.net/wiki/spaces/SWPRJ')
@@ -28,9 +28,9 @@ describe ConnectorsSdk::Confluence::Adapter do
     it_behaves_like 'does not populate updated_at'
   end
 
-  describe '.swiftype_document_from_confluence_content' do
+  describe '.es_document_from_confluence_content' do
     let(:json) { Hashie::Mash.new(expanded_content_response) }
-    let(:document) { described_class.swiftype_document_from_confluence_content(json, base_url) }
+    let(:document) { described_class.es_document_from_confluence_content(json, base_url) }
 
     it 'should work' do
       expect(document[:url]).to eq('https://swiftypedevelopment.atlassian.net/wiki/display/eng/Backups+Playbook')
@@ -43,9 +43,9 @@ describe ConnectorsSdk::Confluence::Adapter do
     it_behaves_like 'does not populate updated_at'
   end
 
-  describe '.swiftype_document_from_confluence_attachment' do
+  describe '.es_document_from_confluence_attachment' do
     let(:json) { Hashie::Mash.new(expanded_attachment_response) }
-    let(:document) { described_class.swiftype_document_from_confluence_attachment(json, base_url) }
+    let(:document) { described_class.es_document_from_confluence_attachment(json, base_url) }
 
     it 'should work' do
       expect(document[:url]).to eq('https://swiftypedevelopment.atlassian.net/wiki/spaces/TS/pages/32989/This+my+first+page?preview=%2F32989%2F33012%2Fcake.jpg')

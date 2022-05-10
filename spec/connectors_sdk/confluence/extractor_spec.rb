@@ -175,13 +175,13 @@ describe ConnectorsSdk::Confluence::Extractor do
 
   describe '#yield_deleted_ids' do
     let(:fp_space_ids) { ['confluence_space_1234_delete_me', 'confluence_space_1234_keep_me'] }
-    let(:space_ids) { fp_space_ids.map { |id| ConnectorsSdk::Confluence::Adapter.fp_id_to_confluence_space_id(id) } }
+    let(:space_ids) { fp_space_ids.map { |id| ConnectorsSdk::Confluence::Adapter.es_id_to_confluence_space_id(id) } }
     let(:fp_content_ids) { ['confluence_content_1234_delete_me', 'confluence_content_1234_keep_me'] }
-    let(:content_ids) { fp_content_ids.map { |id| ConnectorsSdk::Confluence::Adapter.fp_id_to_confluence_content_id(id) } }
+    let(:content_ids) { fp_content_ids.map { |id| ConnectorsSdk::Confluence::Adapter.es_id_to_confluence_content_id(id) } }
     let(:fp_attachment_ids) { ['confluence_attachment_1234_delete_me', 'confluence_attachment_1234_keep_me'] }
-    let(:attachment_ids) { fp_attachment_ids.map { |id| ConnectorsSdk::Confluence::Adapter.fp_id_to_confluence_attachment_id(id) } }
+    let(:attachment_ids) { fp_attachment_ids.map { |id| ConnectorsSdk::Confluence::Adapter.es_id_to_confluence_attachment_id(id) } }
 
-    let(:fp_ids) { fp_space_ids + fp_content_ids + fp_attachment_ids }
+    let(:es_ids) { fp_space_ids + fp_content_ids + fp_attachment_ids }
 
     before do
       allow(subject).to receive(:get_ids_for_deleted).with([], anything).and_return([])
@@ -204,7 +204,7 @@ describe ConnectorsSdk::Confluence::Extractor do
     end
 
     it 'yields a mix of ids' do
-      expect { |blk| subject.yield_deleted_ids(fp_ids, &blk) }.to yield_successive_args(fp_space_ids.first, fp_content_ids.first, fp_attachment_ids.first)
+      expect { |blk| subject.yield_deleted_ids(es_ids, &blk) }.to yield_successive_args(fp_space_ids.first, fp_content_ids.first, fp_attachment_ids.first)
     end
   end
 end

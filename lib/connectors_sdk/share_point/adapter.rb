@@ -13,33 +13,33 @@ module ConnectorsSdk
     class Adapter < Office365::Adapter
       generate_id_helpers :share_point, 'share_point'
 
-      def self.swiftype_document_from_file(file)
-        FileGraphItem.new(file).to_swiftype_document
+      def self.es_document_from_file(file)
+        FileGraphItem.new(file).to_es_document
       end
 
-      def self.swiftype_document_from_folder(folder)
-        FolderGraphItem.new(folder).to_swiftype_document
+      def self.es_document_from_folder(folder)
+        FolderGraphItem.new(folder).to_es_document
       end
 
-      def self.swiftype_document_from_package(package)
-        PackageGraphItem.new(package).to_swiftype_document
+      def self.es_document_from_package(package)
+        PackageGraphItem.new(package).to_es_document
       end
 
       class FileGraphItem < Office365::Adapter::FileGraphItem
-        def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
       end
 
       class FolderGraphItem < Office365::Adapter::FolderGraphItem
-        def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
       end
 
       class PackageGraphItem < Office365::Adapter::PackageGraphItem
-        def self.convert_id_to_fp_id(id)
-          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_fp_id(id)
+        def self.convert_id_to_es_id(id)
+          ConnectorsSdk::SharePoint::Adapter.share_point_id_to_es_id(id)
         end
       end
     end
