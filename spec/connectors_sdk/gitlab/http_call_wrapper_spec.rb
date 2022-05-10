@@ -6,6 +6,7 @@ require 'connectors_sdk/gitlab/http_call_wrapper'
 describe ConnectorsSdk::GitLab::HttpCallWrapper do
 
   let(:projects_json) { connectors_fixture_raw('gitlab/projects_list.json') }
+  let(:project_json) { connectors_fixture_raw('gitlab/project.json') }
   let(:base_url) { 'https://www.example.com' }
 
   context '#document_batch' do
@@ -90,6 +91,22 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
         expect(result[1]).to eq({ :modified_since => modified_since })
         expect(result[2]).to eq(true)
       end
+    end
+  end
+
+  context '#deleted' do
+    let(:existing_id) { 36029109 }
+    let(:non_existing_ids) { [123, 234, 345] }
+
+    it 'correctly gets non-existing ids' do
+      ids = non_existing_ids.dup.push(existing_id)
+
+      non_existing_ids.each { |id| stub_request(:get, "#{base_url}/projects/#{id}").to_return(:status => 404) }
+      stub_request(:get, "#{base_url}/projects/#{existing_id}")
+        .to_return(:status => 200, :body => project_json)
+
+      result = subject.deleted({ :ids => ids, :base_url => base_url })
+      expect(result).to eq(non_existing_ids)
     end
   end
 end

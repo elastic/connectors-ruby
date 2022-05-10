@@ -93,7 +93,21 @@ module ConnectorsSdk
       end
 
       def deleted(_params)
-        []
+        result = []
+        if _params[:ids].present?
+          _params[:ids].each do |id|
+            response = client(_params).get("projects/#{id}")
+            if response.status == 404
+              # not found - assume deleted
+              result.push(id)
+            else
+              unless response.success?
+                raise "Could not get a project by ID: #{id}, response code: #{response.status}, response: #{response.body}"
+              end
+            end
+          end
+        end
+        result
       end
 
       def permissions(_params)
