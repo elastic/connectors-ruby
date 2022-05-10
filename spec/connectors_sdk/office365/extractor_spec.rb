@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'active_support/core_ext/array'
+
 require 'connectors_sdk/office365/config'
 require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/office365/extractor'

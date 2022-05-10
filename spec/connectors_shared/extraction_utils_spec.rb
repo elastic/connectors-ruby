@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'benchmark'
 require 'nokogiri'
 
 require 'connectors_shared/extraction_utils'

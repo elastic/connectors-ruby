@@ -10,7 +10,6 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'connectors_shared/extension_mapping_util'
 require 'date'
-require 'active_support/all'
 require 'mime-types'
 
 module ConnectorsSdk

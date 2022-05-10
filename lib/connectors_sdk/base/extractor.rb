@@ -10,7 +10,6 @@ require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/object/deep_dup'
 require 'date'
-require 'active_support/all'
 
 require 'connectors_shared'
 require 'stubs/connectors/stats' unless defined?(Rails)
