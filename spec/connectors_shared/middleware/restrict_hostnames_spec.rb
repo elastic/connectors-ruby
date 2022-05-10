@@ -6,6 +6,10 @@
 
 # frozen_string_literal: true
 
+require 'faraday_middleware'
+
+require 'connectors_shared/middleware/restrict_hostnames'
+
 describe ConnectorsShared::Middleware::RestrictHostnames do
   let(:localhost_ipv4_url) do
     { :url => Addressable::URI.parse('http://127.0.0.1') }

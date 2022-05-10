@@ -6,6 +6,10 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/atlassian/config'
+require 'connectors_sdk/confluence_cloud/custom_client'
+require 'connectors_sdk/confluence_cloud/extractor'
+
 require 'fixtures/atlassian/confluence'
 
 describe ConnectorsSdk::ConfluenceCloud::Extractor do
