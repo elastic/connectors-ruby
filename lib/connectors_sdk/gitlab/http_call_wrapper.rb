@@ -150,7 +150,7 @@ module ConnectorsSdk
           # visible-to-all
           return {}
         end
-        if visibility.to_sym == :external
+        if visibility.to_sym == :internal
           result.push('type:internal')
         end
         response = client(_params).get("projects/#{id}/members/all")

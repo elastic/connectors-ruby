@@ -29,7 +29,8 @@ module ConnectorsSdk
                           nil
                         else
                           source_doc[:namespace][:name]
-                        end
+                        end,
+          :_allow_permissions => source_doc[:_allow_permissions]
         }
       end
     end

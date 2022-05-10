@@ -10,6 +10,7 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:external_user_json) { connectors_fixture_raw('gitlab/external_user.json') }
   let(:external_users_json) { connectors_fixture_raw('gitlab/external_users.json') }
+  let(:project_members_json) { connectors_fixture_raw('gitlab/project_members.json') }
   let(:base_url) { 'https://www.example.com' }
 
   context '#document_batch' do
@@ -20,7 +21,6 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
 
       expect(result).to_not be_nil
       list = result[0]
-      expect(list).to_not be_empty
       expect(list.size).to eq(100)
 
       expect(result[1]).to eq({})
@@ -61,11 +61,89 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
         )
         expect(result).to_not be_nil
         list = result[0]
-        expect(list).to_not be_empty
         expect(list.size).to eq(100)
 
         expect(result[1]).to eq({})
         expect(result[2]).to eq(true)
+      end
+
+      context 'with permissions' do
+        let(:params) { { :base_url => base_url, :index_permissions => true } }
+
+        context 'public projects' do
+          let(:projects) do
+            [
+              { :id => 1, :visibility => :public },
+              { :id => 2, :visibility => :public }
+            ]
+          end
+          it 'returns empty permissions' do
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+              .to_return(:status => 200, :body => JSON.dump(projects))
+
+            result = subject.document_batch(params)
+
+            expect(result).to_not be_nil
+            list = result[0]
+            expect(list.size).to eq(2)
+
+            expect(list[0][:_allow_permissions]).to_not be_present
+            expect(list[1][:_allow_permissions]).to_not be_present
+          end
+        end
+
+        context 'internal projects' do
+          let(:projects) do
+            [
+              { :id => 1, :visibility => :internal }
+            ]
+          end
+
+          it 'returns internal in permissions' do
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+              .to_return(:status => 200, :body => JSON.dump(projects))
+            stub_request(:get, "#{base_url}/projects/1/members/all")
+              .to_return(:status => 200, :body => '[]')
+
+            result = subject.document_batch(params)
+
+            expect(result).to_not be_nil
+            list = result[0]
+            expect(list.size).to eq(1)
+
+            permissions = list[0][:document][:_allow_permissions]
+            expect(permissions).to be_present
+            expect(permissions.size).to eq(1)
+            expect(permissions).to include('type:internal')
+          end
+        end
+
+        context 'private projects' do
+          let(:projects) do
+            [
+              { :id => 1, :visibility => :private }
+            ]
+          end
+
+          it 'returns actual users in permissions' do
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+              .to_return(:status => 200, :body => JSON.dump(projects))
+            stub_request(:get, "#{base_url}/projects/1/members/all")
+              .to_return(:status => 200, :body => project_members_json)
+
+            result = subject.document_batch(params)
+
+            expect(result).to_not be_nil
+            list = result[0]
+            expect(list.size).to eq(1)
+
+            permissions = list[0][:document][:_allow_permissions]
+            expect(permissions).to be_present
+            expect(permissions.size).to eq(3)
+            expect(permissions).to_not include('type:internal')
+            expect(permissions).to_not include('user:11', 'user:22', 'user:33')
+          end
+        end
       end
     end
 
