@@ -19,6 +19,7 @@ describe ConnectorsAsync::JobRunner do
     let(:thread_executor_mock) { double }
     let(:extraction_time) { 0 }
     let(:connector_class) { double }
+    let(:cursors) { {} }
 
     before(:each) do
       allow(job).to receive(:update_status)
@@ -40,7 +41,8 @@ describe ConnectorsAsync::JobRunner do
           job: job,
           connector_class: connector_class,
           modified_since: modified_since,
-          access_token: access_token
+          access_token: access_token,
+          cursors: cursors
         )
 
         end_time = Time.now
