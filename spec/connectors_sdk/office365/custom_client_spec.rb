@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'timecop'
+
 require 'connectors_sdk/office365/custom_client'
 
 describe ConnectorsSdk::Office365::CustomClient do

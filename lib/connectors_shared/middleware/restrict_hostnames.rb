@@ -9,6 +9,9 @@
 require 'faraday/middleware'
 require 'resolv'
 
+require 'connectors_shared/errors'
+require 'connectors_shared/logger'
+
 module ConnectorsShared
   module Middleware
     class RestrictHostnames < Faraday::Middleware

@@ -5,6 +5,9 @@
 #
 
 # frozen_string_literal: true
+
+require 'connectors_sdk/confluence/adapter'
+
 require 'support/shared_examples'
 require 'fixtures/atlassian/confluence'
 

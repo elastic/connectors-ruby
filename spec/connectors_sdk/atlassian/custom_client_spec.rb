@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/atlassian/custom_client'
+
 describe ConnectorsSdk::Atlassian::CustomClient do
   let(:auth_token) { 'auth_token' }
   let(:base_url) { 'http://localhost' }

@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/confluence_cloud/custom_client'
+
 describe ConnectorsSdk::ConfluenceCloud::CustomClient do
   let(:client) do
     ConnectorsSdk::ConfluenceCloud::CustomClient.new(

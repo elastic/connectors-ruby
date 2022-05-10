@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'active_support/inflector'
+require 'active_support/core_ext/time/zones'
 require 'faraday'
 require 'hashie'
 require 'json'

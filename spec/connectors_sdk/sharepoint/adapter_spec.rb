@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors_sdk/share_point/adapter'
+
 require 'support/shared_examples'
 
 describe ConnectorsSdk::SharePoint::Adapter do

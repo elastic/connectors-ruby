@@ -6,7 +6,10 @@
 
 # frozen_string_literal: true
 
+require 'faraday'
+
 require 'connectors_sdk/base/config'
+require 'connectors_sdk/base/custom_client'
 require 'connectors_sdk/base/extractor'
 
 describe ConnectorsSdk::Base::Extractor do
