@@ -26,7 +26,7 @@ module ConnectorsAsync
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
         cursors ||= {}
-        cursors[:modified_since] = modified_since
+        cursors[:modified_since] = modified_since if modified_since
 
         new_cursors = connector.extract({ :cursors => cursors, :access_token => access_token }) do |doc|
           job.store(doc)

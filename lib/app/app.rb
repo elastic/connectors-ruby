@@ -97,6 +97,12 @@ class ConnectorsWebApp < Sinatra::Base
   post '/start_sync' do
     job = settings.job_store.create_job
 
+    #LOUD
+    puts "=============================================================="
+    puts "BODY PARAMS ARE:"
+    puts body_params
+    puts "=============================================================="
+
     settings.job_runner.start_job(
       job: job,
       connector_class: settings.connector_class,
