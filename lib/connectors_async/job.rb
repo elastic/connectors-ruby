@@ -35,6 +35,10 @@ module ConnectorsAsync
       @data[:error]
     end
 
+    def has_cursors?
+      @data.has_key?(:cursors)
+    end
+
     def cursors
       @data[:cursors]
     end

@@ -97,12 +97,6 @@ class ConnectorsWebApp < Sinatra::Base
   post '/start_sync' do
     job = settings.job_store.create_job
 
-    #LOUD
-    puts "=============================================================="
-    puts "BODY PARAMS ARE:"
-    puts body_params
-    puts "=============================================================="
-
     settings.job_runner.start_job(
       job: job,
       connector_class: settings.connector_class,
@@ -120,15 +114,20 @@ class ConnectorsWebApp < Sinatra::Base
   post '/documents' do
     job = settings.job_store.fetch_job(body_params[:job_id])
 
+    # TODO: is it an ugly way to send cursors?
     raise job.error if job.is_failed?
 
     docs = job.pop_batch
 
-    # TODO: send error cause???
-    json(
+    response = {
       :status => job.status,
-      :docs => docs,
-      :cursors => job.cursors
+      :docs => docs
+    }
+
+    response[:cursors] = job.cursors if job.has_cursors?
+
+    json(
+      response
     )
   end
 
