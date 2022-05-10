@@ -11,8 +11,6 @@ require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'date'
-require 'typhoeus'
-require 'typhoeus/adapters/faraday'
 
 module ConnectorsSdk
   module Base
