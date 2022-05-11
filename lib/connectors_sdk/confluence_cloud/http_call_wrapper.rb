@@ -17,11 +17,9 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'confluence_cloud'
 
-      def name
+      def display_name
         'Confluence Cloud'
       end
-
-      private
 
       def connection_requires_redirect
         true
@@ -43,6 +41,8 @@ module ConnectorsSdk
           },
         ]
       end
+
+      private
 
       def extractor_class
         ConnectorsSdk::ConfluenceCloud::Extractor

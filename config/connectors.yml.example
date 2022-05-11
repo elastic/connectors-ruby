@@ -9,4 +9,4 @@ http:
   port: 9292
   api_key: changeme
   deactivate_auth: false
-  connector: share_point
+  connector: fake_connector

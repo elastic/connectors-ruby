@@ -13,7 +13,7 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'fake_connector'
 
-      def name
+      def display_name
         'Fake Connector'
       end
 

@@ -86,28 +86,18 @@ module ConnectorsSdk
 
       def source_status(params)
         health_check(params)
-        { :status => 'OK', :statusCode => 200, :message => "Connected to #{name}" }
+        { :status => 'OK', :statusCode => 200, :message => "Connected to #{display_name}" }
       rescue StandardError => e
         { :status => 'FAILURE', :statusCode => e.is_a?(custom_client_error) ? e.status_code : 500, :message => e.message }
       end
 
-      def name
+      def display_name
         raise 'Not implemented for this connector'
       end
 
       def service_type
         self.class::SERVICE_TYPE
       end
-
-      def describe
-        {
-          :name => name,
-          :connection_requires_redirect => connection_requires_redirect,
-          :configurable_fields => configurable_fields
-        }
-      end
-
-      private
 
       def connection_requires_redirect
         false
@@ -116,6 +106,8 @@ module ConnectorsSdk
       def configurable_fields
         []
       end
+
+      private
 
       def convert_third_party_errors
         yield
