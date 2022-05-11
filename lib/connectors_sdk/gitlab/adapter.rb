@@ -17,7 +17,7 @@ module ConnectorsSdk
       generate_id_helpers :gitlab, 'gitlab'
 
       def self.to_es_document(type, source_doc)
-        {
+        result = {
           :id => self.gitlab_id_to_es_id(source_doc[:id]),
           :type => type,
           :url => source_doc[:web_url],
@@ -29,9 +29,12 @@ module ConnectorsSdk
                           nil
                         else
                           source_doc[:namespace][:name]
-                        end,
-          :_allow_permissions => source_doc[:_allow_permissions]
+                        end
         }
+        if source_doc[:_allow_permissions].present?
+          result[:_allow_permissions] = source_doc[:_allow_permissions]
+        end
+        result
       end
     end
   end

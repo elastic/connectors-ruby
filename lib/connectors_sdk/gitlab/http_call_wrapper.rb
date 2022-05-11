@@ -146,7 +146,7 @@ module ConnectorsSdk
 
       def project_permissions(_params, id, visibility)
         result = []
-        if visibility.to_sym == :public
+        if visibility.to_sym == :public || !(_params[:index_permissions] || false)
           # visible-to-all
           return {}
         end
