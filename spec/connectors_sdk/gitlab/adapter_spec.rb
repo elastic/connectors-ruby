@@ -24,5 +24,15 @@ describe ConnectorsSdk::GitLab::Adapter do
       expect(adapted[:created_at]).to eq(project_hash[:created_at])
       expect(adapted[:last_modified_at]).to eq(project_hash[:last_activity_at])
     end
+
+    context 'with permissions' do
+      let(:permissions) { { :_allow_permissions => %w[something something_else] } }
+      let(:project_with_permissions) { project_hash.merge(permissions) }
+
+      it 'fills in permissions' do
+        adapted = described_class.to_es_document(:project, project_with_permissions)
+        expect(adapted[:_allow_permissions]).to eq(permissions[:_allow_permissions])
+      end
+    end
   end
 end
