@@ -9,10 +9,11 @@ require 'httpclient'
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/object/deep_dup'
-require 'connectors_shared'
 require 'date'
-require 'active_support/all'
+
+require 'connectors_shared'
 require 'stubs/connectors/stats' unless defined?(Rails)
+require 'stubs/connectors' unless defined?(Rails)
 
 module ConnectorsSdk
   module Base

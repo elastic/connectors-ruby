@@ -6,23 +6,23 @@
 
 # frozen_string_literal: true
 
-require 'stubs/swiftype/exception_tracking' unless defined?(Rails)
 require 'bson'
 require 'connectors_shared/logger'
+require 'stubs/enterprise_search/exception_tracking'
 
 module ConnectorsShared
   class ExceptionTracking
     class << self
       def capture_message(message, context = {})
-        Swiftype::ExceptionTracking.capture_message(message, context)
+        EnterpriseSearch::ExceptionTracking.capture_message(message, context)
       end
 
       def capture_exception(exception, context = {})
-        Swiftype::ExceptionTracking.log_exception(exception, :context => context)
+        EnterpriseSearch::ExceptionTracking.log_exception(exception, :context => context)
       end
 
       def log_exception(exception, message = nil)
-        Swiftype::ExceptionTracking.log_exception(exception, message, :logger => ConnectorsShared::Logger.logger)
+        EnterpriseSearch::ExceptionTracking.log_exception(exception, message, :logger => ConnectorsShared::Logger.logger)
       end
 
       def augment_exception(exception)

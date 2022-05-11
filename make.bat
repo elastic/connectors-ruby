@@ -25,4 +25,4 @@ call rbenv rehash
 echo "Running tests..."
 copy config\connectors.yml.example config\connectors.yml
 
-call %instpath%\versions\%RUBY_VERSION%\bin\bundle exec %instpath%\versions\%RUBY_VERSION%\bin\rspec spec
+call %instpath%\versions\%RUBY_VERSION%\bin\bundle exec %instpath%\versions\%RUBY_VERSION%\bin\rspec spec --order rand

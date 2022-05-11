@@ -7,8 +7,9 @@
 # frozen_string_literal: true
 
 require 'faraday_middleware'
-require 'connectors_shared/middleware/restrict_hostnames'
+
 require 'connectors_shared/middleware/bearer_auth'
+require 'connectors_shared/middleware/restrict_hostnames'
 require 'connectors_sdk/base/custom_client'
 
 module ConnectorsSdk

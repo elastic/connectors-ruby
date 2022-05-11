@@ -10,7 +10,6 @@ require 'active_support/core_ext/object/deep_dup'
 require 'connectors_shared'
 require 'connectors_shared/extension_mapping_util'
 require 'date'
-require 'active_support/all'
 require 'mime-types'
 
 module ConnectorsSdk
@@ -25,19 +24,19 @@ module ConnectorsSdk
       end
 
       def self.generate_id_helpers(method_prefix, id_prefix)
-        define_singleton_method("#{method_prefix}_id_to_fp_id") do |id|
+        define_singleton_method("#{method_prefix}_id_to_es_id") do |id|
           "#{id_prefix}_#{id}"
         end
 
-        define_singleton_method("fp_id_is_#{method_prefix}_id?") do |fp_id|
-          regex_match = /#{id_prefix}_(.+)$/.match(fp_id)
+        define_singleton_method("es_id_is_#{method_prefix}_id?") do |es_id|
+          regex_match = /#{id_prefix}_(.+)$/.match(es_id)
           regex_match.present? && regex_match.size == 2
         end
 
-        define_singleton_method("fp_id_to_#{method_prefix}_id") do |fp_id|
-          regex_match = /#{id_prefix}_(.+)$/.match(fp_id)
+        define_singleton_method("es_id_to_#{method_prefix}_id") do |es_id|
+          regex_match = /#{id_prefix}_(.+)$/.match(es_id)
 
-          raise ArgumentError, "Invalid id #{fp_id} for source with method prefix #{method_prefix}." if regex_match.nil? || regex_match.length != 2
+          raise ArgumentError, "Invalid id #{es_id} for source with method prefix #{method_prefix}." if regex_match.nil? || regex_match.length != 2
           regex_match[1]
         end
       end
@@ -92,7 +91,7 @@ module ConnectorsSdk
         nil
       end
 
-      def self.swiftype_document_from_configured_object_base(object_type:, object:, fields:)
+      def self.es_document_from_configured_object_base(object_type:, object:, fields:)
         object_as_json = object.as_json
 
         adapted_object = {

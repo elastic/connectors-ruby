@@ -6,7 +6,7 @@ config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml
 
 test: config/connectors.yml
-	bundle _$(shell cat .bundler-version)_ exec rspec spec
+	bundle _$(shell cat .bundler-version)_ exec rspec spec --order rand
 
 lint: config/connectors.yml
 	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec

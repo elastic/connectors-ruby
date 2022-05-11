@@ -21,16 +21,16 @@ module ConnectorsSdk
       generate_id_helpers :confluence_content, 'confluence_content'
       generate_id_helpers :confluence_attachment, 'confluence_attachment'
 
-      def self.swiftype_document_from_confluence_space(space, base_url, permissions = [])
-        SpaceNode.new(:node => space, :base_url => base_url, :permissions => permissions).to_swiftype_document
+      def self.es_document_from_confluence_space(space, base_url, permissions = [])
+        SpaceNode.new(:node => space, :base_url => base_url, :permissions => permissions).to_es_document
       end
 
-      def self.swiftype_document_from_confluence_content(content, base_url, restrictions = [])
-        ContentNode.new(:node => content, :base_url => base_url, :permissions => restrictions).to_swiftype_document
+      def self.es_document_from_confluence_content(content, base_url, restrictions = [])
+        ContentNode.new(:node => content, :base_url => base_url, :permissions => restrictions).to_es_document
       end
 
-      def self.swiftype_document_from_confluence_attachment(attachment, base_url, restrictions = [])
-        AttachmentNode.new(:node => attachment, :base_url => base_url, :permissions => restrictions).to_swiftype_document
+      def self.es_document_from_confluence_attachment(attachment, base_url, restrictions = [])
+        AttachmentNode.new(:node => attachment, :base_url => base_url, :permissions => restrictions).to_es_document
       end
 
       class Node
@@ -43,7 +43,7 @@ module ConnectorsSdk
           @permissions = permissions
         end
 
-        def to_swiftype_document
+        def to_es_document
           {
             :id => id,
             :title => title,
@@ -81,7 +81,7 @@ module ConnectorsSdk
 
       class SpaceNode < Node
         def id
-          Confluence::Adapter.confluence_space_id_to_fp_id(node.fetch('key'))
+          Confluence::Adapter.confluence_space_id_to_es_id(node.fetch('key'))
         end
 
         def type
@@ -107,7 +107,7 @@ module ConnectorsSdk
 
       class ContentNode < Node
         def id
-          Confluence::Adapter.confluence_content_id_to_fp_id(node.id)
+          Confluence::Adapter.confluence_content_id_to_es_id(node.id)
         end
 
         def type
@@ -176,7 +176,7 @@ module ConnectorsSdk
 
       class AttachmentNode < ContentNode
         def id
-          Confluence::Adapter.confluence_attachment_id_to_fp_id(node.id)
+          Confluence::Adapter.confluence_attachment_id_to_es_id(node.id)
         end
 
         def type
@@ -207,7 +207,7 @@ module ConnectorsSdk
           end
         end
 
-        def to_swiftype_document
+        def to_es_document
           super.merge(:_fields_to_preserve => ConnectorsSdk::Confluence::Adapter.fields_to_preserve)
         end
       end

@@ -6,10 +6,10 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/share_point/http_call_wrapper'
 require 'connectors_sdk/base/http_call_wrapper'
 require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/share_point/extractor'
+require 'connectors_sdk/share_point/http_call_wrapper'
 
 describe ConnectorsSdk::Base::HttpCallWrapper do
   let(:wrapper_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }

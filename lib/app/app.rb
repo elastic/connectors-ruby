@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'active_support/inflector'
+require 'active_support/core_ext/time/zones'
 require 'faraday'
 require 'hashie'
 require 'json'
@@ -118,7 +119,7 @@ class ConnectorsWebApp < Sinatra::Base
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
-    logger.info "Received client ID: #{body_params[:client_id]} and client secret: #{body_params[:client_secret]}"
+    logger.info "Received client ID: #{body_params[:client_id]}"
     logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
     authorization_uri = @connector.authorization_uri(body_params)
 
@@ -127,12 +128,10 @@ class ConnectorsWebApp < Sinatra::Base
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
-    logger.info "Received payload: #{body_params}"
     json @connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    logger.info "Received payload: #{body_params}"
     json @connector.refresh(body_params)
   end
 

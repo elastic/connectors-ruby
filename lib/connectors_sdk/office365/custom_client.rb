@@ -6,9 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/custom_client'
-require 'connectors_shared'
 require 'hashie/mash'
+
+require 'connectors_sdk/base/custom_client'
+require 'connectors_sdk/office365/extractor'
+require 'connectors_shared'
 
 module ConnectorsSdk
   module Office365

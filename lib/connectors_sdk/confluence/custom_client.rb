@@ -6,6 +6,11 @@
 
 # frozen_string_literal: true
 
+require 'active_support/json'
+require 'active_support/core_ext/array'
+require 'active_support/core_ext/object'
+require 'hashie/mash'
+
 require 'connectors_sdk/atlassian/custom_client'
 
 module ConnectorsSdk

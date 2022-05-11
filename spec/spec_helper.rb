@@ -2,14 +2,9 @@
 
 require 'webmock/rspec'
 require 'rack/test'
-require 'hashie/mash'
-require 'active_support/core_ext/array/wrap'
-require 'active_support/core_ext/numeric/time'
-require 'active_support/core_ext/object/deep_dup'
-require 'timecop'
-require 'connectors_shared'
-require 'date'
-require 'active_support/all'
+require 'active_support/time_with_zone'
+require 'active_support/values/time_zone'
+require 'active_support/core_ext/time/zones'
 require 'simplecov'
 require 'simplecov-material'
 
