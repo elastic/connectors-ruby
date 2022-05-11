@@ -130,7 +130,7 @@ class ConnectorsWebApp < Sinatra::Base
       json(response)
     rescue ConnectorsAsync::JobStore::JobNotFoundError => e
       status 404
-      json(:errors => "Job with id #{body_params.fetch(:job_id)} not found")
+      json(:errors => [ "Job with id #{body_params.fetch(:job_id)} not found" ])
     end
   end
 
