@@ -9,7 +9,7 @@ describe ConnectorsSdk::GitLab::Adapter do
 
   context '#to_es_document' do
     it 'correctly produced the Enterprise Search ID' do
-      new_id = described_class.gitlab_id_to_fp_id(project_hash.id)
+      new_id = described_class.gitlab_id_to_es_id(project_hash.id)
       expect(project_hash.id.to_s).to be_in(new_id)
       expect('gitlab').to be_in(new_id)
     end

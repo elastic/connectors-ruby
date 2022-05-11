@@ -18,7 +18,7 @@ module ConnectorsSdk
 
       def self.to_es_document(type, source_doc)
         {
-          :id => self.gitlab_id_to_fp_id(source_doc[:id]),
+          :id => self.gitlab_id_to_es_id(source_doc[:id]),
           :type => type,
           :url => source_doc[:web_url],
           :body => source_doc[:description],
