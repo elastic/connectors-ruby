@@ -16,7 +16,7 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'gitlab'
 
-      def name
+      def display_name
         'GitLab Connector'
       end
 
