@@ -18,10 +18,11 @@ module ConnectorsAsync
 
     def start_job(job:, connector_class:, cursors:, modified_since:, access_token:)
       @pool.post do
+        Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
+
         connector = connector_class.new
 
         log("Running the job #{job.id}")
-        Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
 
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
