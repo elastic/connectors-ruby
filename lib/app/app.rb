@@ -112,7 +112,7 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/documents' do
-    job = settings.job_store.fetch_job(body_params[:job_id])
+    job = settings.job_store.fetch_job(body_params.fetch(:job_id))
 
     # TODO: is it an ugly way to send cursors?
     raise job.error if job.is_failed?
