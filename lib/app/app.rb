@@ -112,23 +112,26 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/documents' do
-    job = settings.job_store.fetch_job(body_params.fetch(:job_id))
+    begin
+      job_id = body_params.fetch(:job_id)
+      job = settings.job_store.fetch_job(job_id)
 
-    # TODO: is it an ugly way to send cursors?
-    raise job.error if job.is_failed?
+      response = {
+        :status => job.status
+      }
 
-    docs = job.pop_batch
+      if job.is_failed?
+        response[:errors] = [ job.error ]
+      else
+        response[:docs] = job.pop_batch
+        response[:cursors] = job.cursors if job.has_cursors?
+      end
 
-    response = {
-      :status => job.status,
-      :docs => docs
-    }
-
-    response[:cursors] = job.cursors if job.has_cursors?
-
-    json(
-      response
-    )
+      json(response)
+    rescue ConnectorsAsync::JobStore::JobNotFoundError => e
+      status 404
+      json(:errors => "Job with id #{body_params.fetch(:job_id)} not found")
+    end
   end
 
   post '/download' do
