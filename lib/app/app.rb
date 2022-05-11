@@ -112,26 +112,24 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/documents' do
-    begin
-      job_id = body_params.fetch(:job_id)
-      job = settings.job_store.fetch_job(job_id)
+    job_id = body_params.fetch(:job_id)
+    job = settings.job_store.fetch_job(job_id)
 
-      response = {
-        :status => job.status
-      }
+    response = {
+      :status => job.status
+    }
 
-      if job.is_failed?
-        response[:errors] = [ job.error ]
-      else
-        response[:docs] = job.pop_batch
-        response[:cursors] = job.cursors if job.has_cursors?
-      end
-
-      json(response)
-    rescue ConnectorsAsync::JobStore::JobNotFoundError => e
-      status 404
-      json(:errors => [ "Job with id #{body_params.fetch(:job_id)} not found" ])
+    if job.is_failed?
+      response[:errors] = [job.error]
+    else
+      response[:docs] = job.pop_batch
+      response[:cursors] = job.cursors if job.has_cursors?
     end
+
+    json(response)
+  rescue ConnectorsAsync::JobStore::JobNotFoundError
+    status 404
+    json(:errors => ["Job with id #{body_params.fetch(:job_id)} not found"])
   end
 
   post '/download' do
