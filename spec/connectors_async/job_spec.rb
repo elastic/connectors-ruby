@@ -43,6 +43,12 @@ describe ConnectorsAsync::Job do
         expect { job.update_status(ConnectorsShared::JobStatus::RUNNING) }.to raise_error(ConnectorsAsync::Job::StatusUpdateError)
       end
     end
+
+    context 'when passed status is invalid' do
+      it 'raises an error' do
+        expect { job.update_status('cactus') }.to raise_error(ConnectorsAsync::Job::InvalidStatusError)
+      end
+    end
   end
 
   context '#store' do
@@ -102,7 +108,6 @@ describe ConnectorsAsync::Job do
             raise ThreadError
           end
           times_called += 1
-
           docs[times_called - 1]
         end
       end

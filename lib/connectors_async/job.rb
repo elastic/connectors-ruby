@@ -11,6 +11,8 @@ require 'connectors_shared/job_status'
 module ConnectorsAsync
   class Job
     class StatusUpdateError < StandardError; end
+    class InvalidStatusError < StandardError; end
+
     def initialize(job_id)
       @data = {
         :job_id => job_id,
@@ -44,8 +46,8 @@ module ConnectorsAsync
     end
 
     def update_status(new_status)
-      # add state machine logic here?
       raise StatusUpdateError if is_finished?
+      raise InvalidStatusError unless ConnectorsShared::JobStatus.is_valid?(new_status)
 
       @data[:status] = new_status
     end

@@ -10,5 +10,9 @@ module ConnectorsShared
     RUNNING = 'running'
     FINISHED = 'finished'
     FAILED = 'failed'
+
+    def self.is_valid?(status)
+      [ CREATED, RUNNING, FINISHED, FAILED ].include? status
+    end
   end
 end
