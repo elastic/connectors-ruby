@@ -23,6 +23,12 @@ module ConnectorsSdk
           :order_by => :id,
           :sort => :desc
         }
+        # # looks like it's an incremental sync
+        if modified_since.present?
+          date_since = modified_since.is_a?(Time) ? modified_since : Time.new(modified_since)
+          query_params[:last_activity_after] = date_since.iso8601
+        end
+
         cursors = config.cursors
         next_cursors = {}
 
@@ -33,11 +39,6 @@ module ConnectorsSdk
           else
             raise "Next page link has unexpected format: #{cursors}"
           end
-        end
-
-        # looks like it's an incremental sync
-        if modified_since.present?
-          query_params[:last_activity_after] = modified_since.iso8601
         end
 
         response = client.get('projects', query_params)

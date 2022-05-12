@@ -35,6 +35,8 @@ module ConnectorsSdk
         ]
       end
 
+      private
+
       def client(params)
         ConnectorsSdk::GitLab::CustomClient.new(
           :base_url => params[:base_url] || ConnectorsSdk::GitLab::API_BASE_URL,
@@ -49,20 +51,18 @@ module ConnectorsSdk
         )
       end
 
-      def health_check(params)
-        # let's do a simple call
-        response = client(params).get('user')
-        response.present? && response.status == 200
+      def extractor_class
+        ConnectorsSdk::GitLab::Extractor
       end
 
       def custom_client_error
         ConnectorsSdk::GitLab::CustomClient::ClientError
       end
 
-      private
-
-      def extractor_class
-        ConnectorsSdk::GitLab::Extractor
+      def health_check(params)
+        # let's do a simple call
+        response = client(params).get('user')
+        response.present? && response.status == 200
       end
     end
   end
