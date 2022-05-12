@@ -15,11 +15,12 @@ require 'rack/utils'
 module ConnectorsSdk
   module GitLab
     class Extractor < ConnectorsSdk::Base::Extractor
+      PAGE_SIZE = 10 # max is 100
 
       def yield_document_changes(modified_since: nil, break_after_page: false)
         query_params = {
           :pagination => :keyset,
-          :per_page => 100, # max
+          :per_page => PAGE_SIZE,
           :order_by => :id,
           :sort => :desc
         }

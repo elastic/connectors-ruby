@@ -10,8 +10,8 @@ describe ConnectorsSdk::GitLab::Adapter do
   context '#to_es_document' do
     it 'correctly produced the Enterprise Search ID' do
       new_id = described_class.gitlab_id_to_es_id(project_hash.id)
-      expect(project_hash.id.to_s).to be_in(new_id)
-      expect('gitlab').to be_in(new_id)
+      expect(new_id).to include(project_hash.id.to_s)
+      expect(new_id).to include('gitlab')
     end
 
     it 'fills in all the other data' do
@@ -23,6 +23,7 @@ describe ConnectorsSdk::GitLab::Adapter do
       expect(adapted[:namespace]).to eq(project_hash[:namespace][:name])
       expect(adapted[:created_at]).to eq(project_hash[:created_at])
       expect(adapted[:last_modified_at]).to eq(project_hash[:last_activity_at])
+      expect(adapted[:visibility]).to eq(project_hash[:visibility])
     end
 
     context 'with permissions' do

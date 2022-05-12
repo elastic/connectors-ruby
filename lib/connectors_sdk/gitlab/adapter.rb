@@ -25,6 +25,7 @@ module ConnectorsSdk
           :title => source_doc[:name],
           :created_at => source_doc[:created_at],
           :last_modified_at => source_doc[:last_activity_at],
+          :visibility => source_doc[:visibility],
           :namespace => if source_doc[:namespace].nil?
                           nil
                         else
