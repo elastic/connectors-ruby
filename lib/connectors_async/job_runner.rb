@@ -45,6 +45,7 @@ module ConnectorsAsync
     end
 
     def log(str)
+      # TODO: use proper logging
       puts("[#{Time.now.to_i}] [Thread #{Thread.current.object_id}] #{str}")
     end
 
