@@ -6,7 +6,6 @@
 
 # frozen_string_literal: true
 
-
 require 'connectors_async/job_runner'
 require 'connectors_sdk/base/adapter'
 
@@ -152,7 +151,7 @@ describe ConnectorsAsync::JobRunner do
     context 'when extractor calls ConnectorsSdk::Base::Adapter.normalize_data' do
       before(:each) do
         allow(connector).to receive(:extract) do
-          ConnectorsSdk::Base::Adapter.normalize_date("2014-12-04T11:02:37Z")
+          ConnectorsSdk::Base::Adapter.normalize_date('2014-12-04T11:02:37Z')
         end
       end
 
