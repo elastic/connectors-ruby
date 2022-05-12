@@ -8,29 +8,32 @@ describe ConnectorsSdk::GitLab::HttpCallWrapper do
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { 'https://www.example.com' }
 
-  context '#health_check' do
+  context '#source_status' do
     it 'correctly returns true on 200' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 200, :body => user_json)
-      result = subject.health_check({ :base_url => base_url })
+      result = subject.source_status({ :base_url => base_url })
 
-      expect(result).to be_truthy
+      expect(result).to_not be_nil
+      expect(result[:status]).to eq('OK')
     end
 
     it 'correctly returns false on 401' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 401, :body => '{ "error": "wrong token" }')
-      result = subject.health_check({ :base_url => base_url })
+      result = subject.source_status({ :base_url => base_url })
 
-      expect(result).to be_falsey
+      expect(result).to_not be_nil
+      expect(result[:status]).to eq('FAILURE')
     end
 
     it 'correctly returns false on 400' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 401, :body => '{ "error": "wrong token" }')
-      result = subject.health_check({ :base_url => base_url })
+      result = subject.source_status({ :base_url => base_url })
 
-      expect(result).to be_falsey
+      expect(result).to_not be_nil
+      expect(result[:status]).to eq('FAILURE')
     end
   end
 end

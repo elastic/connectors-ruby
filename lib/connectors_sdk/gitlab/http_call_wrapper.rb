@@ -62,7 +62,9 @@ module ConnectorsSdk
       def health_check(params)
         # let's do a simple call
         response = client(params).get('user')
-        response.present? && response.status == 200
+        unless response.present? && response.status == 200
+          raise "Health check failed with response status #{response.status} and body #{response.body}"
+        end
       end
     end
   end
