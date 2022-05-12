@@ -17,6 +17,14 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'confluence_cloud'
 
+      def secrets(params)
+        missing_secrets?(params)
+
+        {
+          :equivalent => params[:secret] == params[:other_secret]
+        }
+      end
+
       def display_name
         'Confluence Cloud'
       end

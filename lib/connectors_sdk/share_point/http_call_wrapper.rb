@@ -16,6 +16,17 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'share_point'
 
+      def secrets(params)
+        missing_secrets?(params)
+
+        previous_user = client(:access_token => params[:other_secret][:access_token]).me
+        equivalent = previous_user.nil? ? false : previous_user.id == client(:access_token => params[:secret][:access_token]).me&.id
+
+        {
+          :equivalent => equivalent
+        }
+      end
+
       def display_name
         'SharePoint Online'
       end

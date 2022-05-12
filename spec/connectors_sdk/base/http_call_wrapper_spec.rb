@@ -184,4 +184,30 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
       end
     end
   end
+
+  context '.secrets' do
+    context 'when secret is missing' do
+      let(:params) { { :other_secret => 'other_secret' } }
+
+      it 'raises ClientError' do
+        expect { backend.secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+      end
+    end
+
+    context 'when other_secret is missing' do
+      let(:params) { { :secret => 'secret' } }
+
+      it 'raises ClientError' do
+        expect { backend.secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+      end
+    end
+
+    context 'when params is empty' do
+      let(:params) { {} }
+
+      it 'raises ClientError' do
+        expect { backend.secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+      end
+    end
+  end
 end
