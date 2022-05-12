@@ -121,7 +121,7 @@ describe ConnectorsAsync::JobRunner do
 
       context 'when extractor raises an error' do
         let(:error_message) { 'lol here we are' }
-        let(:error) { StandardError.new(error_message)}
+        let(:error) { StandardError.new(error_message) }
 
         before(:each) do
           allow(connector).to receive(:extract).and_raise(error)
@@ -145,6 +145,7 @@ describe ConnectorsAsync::JobRunner do
   end
 
   def idle_a_bit
+    # not perfect, can be changed to poll the job status actually if starts to fail
     sleep 0.1
   end
 end

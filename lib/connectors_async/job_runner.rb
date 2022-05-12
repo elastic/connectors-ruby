@@ -48,7 +48,8 @@ module ConnectorsAsync
       puts("[#{Time.now.to_i}] [Thread #{Thread.current.object_id}] #{str}")
     end
 
-  private
+    private
+
     def init_thread
       Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
     end
