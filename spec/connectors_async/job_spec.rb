@@ -13,12 +13,12 @@ describe ConnectorsAsync::Job do
   let(:job_id) { 12345 }
   let(:job) { described_class.new(job_id) }
 
-  context 'job was just created' do
-    it 'has CREATED status' do
+  context '#initialize' do
+    it 'sets CREATED status' do
       expect(job.status).to eq(ConnectorsShared::JobStatus::CREATED)
     end
 
-    it 'has the same id that was passed into the constructor' do
+    it 'sets the same id that was passed into the constructor' do
       expect(job.id).to eq(job_id)
     end
   end
@@ -79,6 +79,42 @@ describe ConnectorsAsync::Job do
         expect(job.pop_batch(up_to: 99).size).to eq(stored_document_count)
       end
     end
+
+    context 'when a threading error occurs' do
+      let(:queue_mock) { double }
+      let(:docs) do
+        [
+          { :take => 'five' },
+          { :art => 'pepper' },
+          { :bad => 'not good' },
+          { :gonna => 'throw error before this one' }
+        ]
+      end
+
+      before(:each) do
+        allow(Queue).to receive(:new).and_return(queue_mock)
+
+        allow(queue_mock).to receive(:empty?).and_return(false)
+
+        times_called = 0
+        allow(queue_mock).to receive(:pop) do
+          if times_called == 3
+            raise ThreadError
+          end
+          times_called += 1
+
+          docs[times_called - 1]
+        end
+      end
+
+      it 'does not throw the ThreadingError' do
+        expect { job.pop_batch }.to_not raise_error
+      end
+
+      it 'returns the results that got out before the error' do
+        expect(job.pop_batch).to eq(docs[0..2])
+      end
+    end
   end
 
   context '#fail' do
@@ -111,6 +147,34 @@ describe ConnectorsAsync::Job do
 
       it 'returns true' do
         expect(job.is_failed?).to eq(true)
+      end
+    end
+  end
+
+  context '#update_cursors' do
+    it 'updates cursors' do
+      new_cursors = { :foxtrot => 'charlie' }
+
+      job.update_cursors(new_cursors)
+
+      expect(job.cursors).to eq(new_cursors)
+    end
+  end
+
+  context '#has_cursors?' do
+    context 'when no cursors were set' do
+      it 'returns false' do
+        expect(job.has_cursors?).to eq(false)
+      end
+    end
+
+    context 'when cursors were set' do
+      before(:each) do
+        job.update_cursors({ :something => 'something' })
+      end
+
+      it 'returns true' do
+        expect(job.has_cursors?).to eq(true)
       end
     end
   end
