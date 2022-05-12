@@ -74,7 +74,7 @@ module ConnectorsSdk
             faraday.use(*middleware_config)
           end
 
-          faraday.adapter(:httpclient)
+          faraday.adapter :httpclient
         end
       end
 

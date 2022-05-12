@@ -210,6 +210,7 @@ module ConnectorsSdk
       def download_item(download_url)
         request(:url => download_url) do |request|
           request.options.params_encoder = Office365DownloadParamsEncoder
+          request.options.timeout = 30
         end.body
       end
 
