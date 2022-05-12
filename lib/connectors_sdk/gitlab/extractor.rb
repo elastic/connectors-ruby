@@ -16,7 +16,7 @@ module ConnectorsSdk
   module GitLab
     class Extractor < ConnectorsSdk::Base::Extractor
 
-      def yield_document_changes(modified_since: nil)
+      def yield_document_changes(break_after_page: false, modified_since: nil)
         query_params = {
           :simple => true,
           :pagination => :keyset,

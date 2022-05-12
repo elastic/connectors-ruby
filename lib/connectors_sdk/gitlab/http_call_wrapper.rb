@@ -55,6 +55,10 @@ module ConnectorsSdk
         response.present? && response.status == 200
       end
 
+      def custom_client_error
+        ConnectorsSdk::GitLab::CustomClient::ClientError
+      end
+
       private
 
       def extractor_class
