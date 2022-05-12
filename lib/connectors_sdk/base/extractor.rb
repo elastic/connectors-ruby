@@ -115,7 +115,7 @@ module ConnectorsSdk
         end
       end
 
-      def yield_document_changes(modified_since: nil)
+      def yield_document_changes(modified_since: nil, break_after_page: false)
         raise NotImplementedError
       end
 

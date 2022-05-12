@@ -41,7 +41,7 @@ describe ConnectorsSdk::GitLab::Extractor do
 
   context '#document_changes' do
     it 'correctly produces one page of documents' do
-      stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+      stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
         .to_return(:status => 200, :body => projects_json)
       result = subject.document_changes.to_a
 
@@ -57,10 +57,10 @@ describe ConnectorsSdk::GitLab::Extractor do
     end
 
     context 'for multi-page results' do
-      let(:link_header) { '<https://gitlab.com/api/v4/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&simple=true&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false>; rel="next"' }
+      let(:link_header) { '<https://gitlab.com/api/v4/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false>; rel="next"' }
 
       it 'passes the next page into the cursors when needed' do
-        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
           .to_return(
             :status => 200,
             :body => projects_json,
@@ -80,7 +80,7 @@ describe ConnectorsSdk::GitLab::Extractor do
         let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => { :next_page => link_header }) }
 
         it 'uses the cursor link from parameters' do
-          stub_request(:get, "#{base_url}/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&simple=true&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false")
+          stub_request(:get, "#{base_url}/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false")
             .to_return(
               :status => 200,
               :body => projects_json
@@ -109,7 +109,7 @@ describe ConnectorsSdk::GitLab::Extractor do
             ]
           end
           it 'returns empty permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
 
             result = subject.document_changes.to_a
@@ -130,7 +130,7 @@ describe ConnectorsSdk::GitLab::Extractor do
           end
 
           it 'returns internal in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => '[]')
@@ -155,7 +155,7 @@ describe ConnectorsSdk::GitLab::Extractor do
           end
 
           it 'returns actual users in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => project_members_json)
@@ -181,7 +181,7 @@ describe ConnectorsSdk::GitLab::Extractor do
       it 'uses the modified after date' do
         date_param = CGI.escape(modified_since.iso8601)
 
-        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&simple=true&sort=desc&last_activity_after=#{date_param}")
+        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc&last_activity_after=#{date_param}")
           .to_return(:status => 200, :body => projects_json)
 
         result = subject.document_changes(:modified_since => modified_since).to_a
