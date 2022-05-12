@@ -49,9 +49,9 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
         ]
       }
 
-      mock_endpoint('sites/?$select=id&search=&top=10', sites)
+      mock_endpoint('sites/?$select=id,name&search=&top=10', sites)
       mock_endpoint('groups/?$select=id,createdDateTime', groups)
-      mock_endpoint('groups/1234/sites/root?$select=id', sites)
+      mock_endpoint('groups/1234/sites/root?$select=id,name', sites)
       mock_endpoint('sites/4567/drives/?$select=id,owner,name,driveType', drives)
       # ??
       mock_endpoint('sites//drives/?$select=id,owner,name,driveType', drives)
