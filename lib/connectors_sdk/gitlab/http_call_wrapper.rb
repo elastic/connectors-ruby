@@ -49,9 +49,9 @@ module ConnectorsSdk
         )
       end
 
-      def health_check(_params)
+      def health_check(params)
         # let's do a simple call
-        response = client(_params).get('user')
+        response = client(params).get('user')
         response.present? && response.status == 200
       end
 
