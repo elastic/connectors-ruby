@@ -6,7 +6,9 @@
 
 # frozen_string_literal: true
 
+
 require 'connectors_async/job_runner'
+require 'connectors_sdk/base/adapter'
 
 describe ConnectorsAsync::JobRunner do
   let(:job_runner) { described_class.new(max_threads: 4) }
@@ -140,6 +142,33 @@ describe ConnectorsAsync::JobRunner do
 
           idle_a_bit
         end
+      end
+    end
+
+    # A little context here - the method normalize_date uses Time.zome.parse
+    # that requires Time.zone to be initialized. When the actual thread starts,
+    # we need to initialize it, therefore this test is here.
+    # If normalize_date stops using Time.zone
+    context 'when extractor calls ConnectorsSdk::Base::Adapter.normalize_data' do
+      before(:each) do
+        allow(connector).to receive(:extract) do
+          ConnectorsSdk::Base::Adapter.normalize_date("2014-12-04T11:02:37Z")
+        end
+      end
+
+      it 'does not raise an error' do
+        expect(job).to_not receive(:fail)
+        expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
+
+        job_runner.start_job(
+          job: job,
+          connector_class: connector_class,
+          modified_since: modified_since,
+          access_token: access_token,
+          cursors: cursors
+        )
+
+        idle_a_bit
       end
     end
   end
