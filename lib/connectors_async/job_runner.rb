@@ -9,6 +9,7 @@ require 'concurrent'
 require 'connectors_app/config'
 require 'connectors_async/job_store'
 require 'connectors_shared/job_status'
+require 'connectors_shared/logger'
 
 module ConnectorsAsync
   class JobRunner
@@ -18,7 +19,7 @@ module ConnectorsAsync
 
     def start_job(job:, connector_class:, cursors:, modified_since:, access_token:)
       @pool.post do
-        Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
+        init_thread
 
         connector = connector_class.new
 
@@ -35,6 +36,7 @@ module ConnectorsAsync
 
         job.update_status(ConnectorsShared::JobStatus::FINISHED)
         job.update_cursors(new_cursors)
+
         log("Job #{job.id} has finished successfully")
       rescue StandardError => e
         job.fail(e)
@@ -44,6 +46,11 @@ module ConnectorsAsync
 
     def log(str)
       puts("[#{Time.now.to_i}] [Thread #{Thread.current.object_id}] #{str}")
+    end
+
+  private
+    def init_thread
+      Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
     end
   end
 end

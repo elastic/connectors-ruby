@@ -20,13 +20,16 @@ describe ConnectorsAsync::JobRunner do
     let(:extraction_time) { 0 }
     let(:connector_class) { double }
     let(:cursors) { {} }
+    let(:cursors_after_extraction) { { :canyon => 'crayons' } }
 
     before(:each) do
+      allow(job).to receive(:id).and_return(1)
       allow(job).to receive(:update_status)
+      allow(job).to receive(:update_cursors)
 
       allow(connector).to receive(:extract) do
-        sleep(extraction_time)
-      end
+        sleep(extraction_time) if extraction_time > 0
+      end.and_return(cursors_after_extraction)
 
       allow(connector_class).to receive(:new).and_return(connector)
     end
@@ -50,5 +53,98 @@ describe ConnectorsAsync::JobRunner do
         expect(end_time - start_time).to be < 0.01
       end
     end
+
+    context 'when extractor completes immediately' do
+      let(:extraction_time) { 0 }
+
+      it 'updates the job status throughout the run' do
+        expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::RUNNING)
+        expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
+
+        job_runner.start_job(
+          job: job,
+          connector_class: connector_class,
+          modified_since: modified_since,
+          access_token: access_token,
+          cursors: cursors
+        )
+
+        idle_a_bit
+      end
+
+      it 'updates the cursors with cursors received from extractor' do
+        expect(job).to receive(:update_cursors).with(cursors_after_extraction)
+
+        job_runner.start_job(
+          job: job,
+          connector_class: connector_class,
+          modified_since: modified_since,
+          access_token: access_token,
+          cursors: cursors
+        )
+
+        idle_a_bit
+      end
+
+      context 'when extractor returns results' do
+        let(:docs) do
+          [
+            { :golden => 'cobra' },
+            { :polar => 'bear' },
+            { :stick => 'shift' }
+          ]
+        end
+
+        before(:each) do
+          expectation = allow(connector).to receive(:extract)
+          docs.each do |doc|
+            expectation = expectation.and_yield(doc)
+          end
+        end
+
+        it 'stores docs in the job' do
+          docs.each do |doc|
+            expect(job).to receive(:store).with(doc)
+          end
+
+          job_runner.start_job(
+            job: job,
+            connector_class: connector_class,
+            modified_since: modified_since,
+            access_token: access_token,
+            cursors: cursors
+          )
+
+          idle_a_bit
+        end
+      end
+
+      context 'when extractor raises an error' do
+        let(:error_message) { 'lol here we are' }
+        let(:error) { StandardError.new(error_message)}
+
+        before(:each) do
+          allow(connector).to receive(:extract).and_raise(error)
+        end
+
+        it 'fails job' do
+          expect(job).to receive(:fail).with(error)
+
+          job_runner.start_job(
+            job: job,
+            connector_class: connector_class,
+            modified_since: modified_since,
+            access_token: access_token,
+            cursors: cursors
+          )
+
+          idle_a_bit
+        end
+      end
+    end
+  end
+
+  def idle_a_bit
+    sleep 0.1
   end
 end
