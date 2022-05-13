@@ -7,7 +7,6 @@ require 'connectors_sdk/gitlab/custom_client'
 require 'connectors_sdk/gitlab/http_call_wrapper'
 
 describe ConnectorsSdk::GitLab::Extractor do
-
   let(:projects_json) { connectors_fixture_raw('gitlab/projects_list.json') }
   let(:project_json) { connectors_fixture_raw('gitlab/project.json') }
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
@@ -99,7 +98,7 @@ describe ConnectorsSdk::GitLab::Extractor do
       end
 
       context 'with permissions' do
-        let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => {}, :index_permissions => true ) }
+        let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => {}, :index_permissions => true) }
 
         context 'public projects' do
           let(:projects) do
@@ -225,15 +224,14 @@ describe ConnectorsSdk::GitLab::Extractor do
       permissions = subject.permissions(user_id).to_a
       expect(permissions).to_not be_empty
       expect(permissions).to include("user:#{user_id}")
-      expect(permissions).to include("type:internal")
+      expect(permissions).to include('type:internal')
     end
 
     it 'correctly sets permissions for external user' do
       permissions = subject.permissions(external_user_id).to_a
       expect(permissions).to_not be_empty
       expect(permissions).to include("user:#{external_user_id}")
-      expect(permissions).to_not include("type:internal")
+      expect(permissions).to_not include('type:internal')
     end
-
   end
 end

@@ -4,7 +4,6 @@ require 'hashie/mash'
 require 'connectors_sdk/gitlab/adapter'
 
 describe ConnectorsSdk::GitLab::Adapter do
-
   let(:project_hash) { Hashie::Mash.new(JSON.parse(connectors_fixture_raw('gitlab/simple_project.json'))) }
 
   context '#to_es_document' do

@@ -4,7 +4,6 @@ require 'hashie/mash'
 require 'connectors_sdk/gitlab/http_call_wrapper'
 
 describe ConnectorsSdk::GitLab::HttpCallWrapper do
-
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { 'https://www.example.com' }
 

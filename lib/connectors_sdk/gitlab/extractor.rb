@@ -52,7 +52,7 @@ module ConnectorsSdk
           yield :create_or_update, ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc), nil
         end
 
-        next_page = response.headers['Link'] || ""
+        next_page = response.headers['Link'] || ''
 
         config.overwrite_cursors!(next_page.empty? ? next_cursors : next_cursors.merge({ :next_page => next_page }))
       end
@@ -76,16 +76,16 @@ module ConnectorsSdk
       def yield_permissions(source_user_id)
         result = []
         if source_user_id.present?
-          result.push("user:#{source_user_id.to_s}")
+          result.push("user:#{source_user_id}")
 
           user_response = client.get("users/#{source_user_id}")
           if user_response.success?
             username = JSON.parse(user_response.body).with_indifferent_access[:username]
             query = { :external => true, :username => username }
-            external_response = client.get("users", query)
+            external_response = client.get('users', query)
             if external_response.success?
               external_users = Hashie::Array.new(JSON.parse(external_response.body))
-              if external_users.size == 0
+              if external_users.empty?
                 # the user is not external
                 result.push('type:internal')
               end
@@ -113,7 +113,7 @@ module ConnectorsSdk
         response = client.get("projects/#{id}/members/all")
         if response.success?
           members = Hashie::Array.new(JSON.parse(response.body))
-          result = result.concat(members.map { |user| "user:#{user[:id]}" })
+          result.concat(members.map { |user| "user:#{user[:id]}" })
         else
           raise "Could not get project members by project ID: #{id}, response code: #{response.status}, response: #{response.body}"
         end
