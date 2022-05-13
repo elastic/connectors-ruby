@@ -15,7 +15,7 @@ require 'rack/utils'
 module ConnectorsSdk
   module GitLab
     class Extractor < ConnectorsSdk::Base::Extractor
-      PAGE_SIZE = 10 # max is 100
+      PAGE_SIZE = 100 # max is 100
 
       def yield_document_changes(modified_since: nil, break_after_page: false)
         query_params = {
