@@ -97,6 +97,31 @@ describe ConnectorsSdk::GitLab::Extractor do
         end
       end
 
+      context 'without permissions' do
+        context 'private projects' do
+          let(:projects) do
+            [
+              { :id => 1, :visibility => :private }
+            ]
+          end
+
+          it 'returns nothing in permissions' do
+            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+              .to_return(:status => 200, :body => JSON.dump(projects))
+            stub_request(:get, "#{base_url}/projects/1/members/all")
+              .to_return(:status => 200, :body => project_members_json)
+
+            result = subject.document_changes.to_a
+
+            expect(result).to_not be_nil
+            expect(result.size).to eq(1)
+
+            permissions = result[0][1][:_allow_permissions]
+            expect(permissions).to_not be_present
+          end
+        end
+      end
+
       context 'with permissions' do
         let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => {}, :index_permissions => true) }
 
