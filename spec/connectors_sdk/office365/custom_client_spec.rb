@@ -129,7 +129,7 @@ describe ConnectorsSdk::Office365::CustomClient do
       stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'groups/?$select=id,createdDateTime')
         .to_return(:status => status, :body => groups_mapped_body)
 
-      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'groups/ed5f8403-cc9b-40bf-9adc-5642238447ab/sites/root?$select=id')
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'groups/ed5f8403-cc9b-40bf-9adc-5642238447ab/sites/root?$select=id,name')
         .to_return(:status => status, :body => private_group_site_id_body)
 
       stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/enterprisesearch.sharepoint.com,afb9d6f1-1ae4-422a-aea6-ea1965f7b854,91dd91fc-e210-4be2-b41f-7f1dbedb969c/drives/')
@@ -143,7 +143,7 @@ describe ConnectorsSdk::Office365::CustomClient do
       let(:site_ids_body) { connectors_fixture_raw(directory + 'sites_select_ids_before_permission_sync.json') }
 
       before(:each) do
-        stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/?$select=id&search=&top=10')
+        stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/?$select=id,name&search=&top=10')
           .to_return(:status => status, :body => site_ids_body)
       end
 
@@ -162,7 +162,7 @@ describe ConnectorsSdk::Office365::CustomClient do
       let(:site_ids_body) { connectors_fixture_raw(directory + 'sites_select_ids_after_permission_sync.json') }
 
       before(:each) do
-        stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/?$select=id&search=&top=10')
+        stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'sites/?$select=id,name&search=&top=10')
           .to_return(:status => status, :body => site_ids_body)
       end
 

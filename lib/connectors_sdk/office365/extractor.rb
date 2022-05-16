@@ -28,23 +28,24 @@ module ConnectorsSdk
 
           drive_owner_name = drive.dig(:owner, :user, :displayName)
           drive_name = drive.name
+          site_name = drive.site_name
 
           drive_id_to_delta_link = config.cursors.fetch(DRIVE_IDS_CURSOR_KEY, {})
           begin
             if start_delta_link = drive_id_to_delta_link[drive_id]
               log_debug("Starting an incremental crawl with cursor for #{service_type.classify} with drive_id: #{drive_id}")
               begin
-                yield_changes(drive_id, :start_delta_link => start_delta_link, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
+                yield_changes(drive_id, :start_delta_link => start_delta_link, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :site_name => site_name, :break_after_page => break_after_page, &block)
               rescue ConnectorsSdk::Office365::CustomClient::Office365InvalidCursorsError
                 log_warn("Error listing changes with start_delta_link: #{start_delta_link}, falling back to full crawl")
-                yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
+                yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :site_name => site_name, :break_after_page => break_after_page, &block)
               end
             elsif modified_since.present?
               log_debug("Starting an incremental crawl using last_modified (no cursor found) for #{service_type.classify} with drive_id: #{drive_id}")
-              yield_changes(drive_id, :last_modified => modified_since, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
+              yield_changes(drive_id, :last_modified => modified_since, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :site_name => site_name, :break_after_page => break_after_page, &block)
             else
               log_debug("Starting a full crawl #{service_type.classify} with drive_id: #{drive_id}")
-              yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :break_after_page => break_after_page, &block)
+              yield_drive_items(drive_id, :drive_owner_name => drive_owner_name, :drive_name => drive_name, :site_name => site_name, :break_after_page => break_after_page, &block)
             end
           rescue ConnectorsSdk::Office365::CustomClient::ClientError => e
             log_warn("Error searching and listing drive #{drive_id}")
@@ -156,11 +157,12 @@ module ConnectorsSdk
         ConnectorsShared::ExceptionTracking.capture_exception(office365_client_error, options)
       end
 
-      def yield_drive_items(drive_id, drive_owner_name:, drive_name:, break_after_page: false, &block)
+      def yield_drive_items(drive_id, drive_owner_name:, drive_name:, site_name:, break_after_page: false, &block)
         client.list_items(drive_id, break_after_page: break_after_page) do |item|
           yield_single_document_change(:identifier => "Office365 change: #{item&.id} (#{Office365::Adapter::GraphItem.get_path(item)})") do
             item.drive_owner_name = drive_owner_name
             item.drive_name = drive_name
+            item.site_name = site_name
             yield_create_or_update(drive_id, item, &block)
           end
         end
@@ -174,11 +176,12 @@ module ConnectorsSdk
         end
       end
 
-      def yield_changes(drive_id, drive_owner_name:, drive_name:, start_delta_link: nil, last_modified: nil, break_after_page: false, &block)
+      def yield_changes(drive_id, drive_owner_name:, drive_name:, site_name:, start_delta_link: nil, last_modified: nil, break_after_page: false, &block)
         client.list_changes(:drive_id => drive_id, :start_delta_link => start_delta_link, :last_modified => last_modified, :break_after_page => break_after_page) do |item|
           yield_single_document_change(:identifier => "Office365 change: #{item&.id} (#{Office365::Adapter::GraphItem.get_path(item)})") do
             item.drive_owner_name = drive_owner_name
             item.drive_name = drive_name
+            item.site_name = site_name
             yield_correct_actions_and_converted_item(drive_id, item, &block)
           end
         end

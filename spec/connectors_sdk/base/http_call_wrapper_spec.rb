@@ -27,17 +27,46 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
     }
   end
 
-  context '.document_batch' do
-    it 'can get documents' do
-      allow_any_instance_of(extractor_class).to receive(:yield_document_changes)
-        .and_yield(:create_or_update, 1, nil)
-        .and_yield(:create_or_update, 2, nil)
-        .and_yield(:create_or_update, 3, nil)
-        .and_yield(:create_or_update, 4, nil)
-        .and_yield(:create_or_update, 5, nil)
-      results, _cursors, _completed = backend.document_batch(params)
+  def mock_endpoint(path, data)
+    data = JSON.generate(data)
 
-      expect(results.size).to eq 5
+    stub_request(:get, "https://graph.microsoft.com/v1.0/#{path}")
+      .with { true }
+      .to_return(status: 200, body: data)
+  end
+
+  context '.extract' do
+    it 'yields documents' do
+      # fake data
+      sites = { value: [{ id: 4567 }] }
+      groups = { value: [{ id: 1234, createdDateTime: Time.now }] }
+      drives = { value: [{ id: 4567, driveType: 'documentLibrary' }] }
+      drive = { id: 1111, driveType: 'documentLibrary' }
+      children = { value: [{ folder: 'folder', id: 5432, name: 'item' }] }
+      permissions = {
+        value: [
+          { id: 666 }
+        ]
+      }
+
+      mock_endpoint('sites/?$select=id,name&search=&top=10', sites)
+      mock_endpoint('groups/?$select=id,createdDateTime', groups)
+      mock_endpoint('groups/1234/sites/root?$select=id,name', sites)
+      mock_endpoint('sites/4567/drives/?$select=id,owner,name,driveType', drives)
+      # ??
+      mock_endpoint('sites//drives/?$select=id,owner,name,driveType', drives)
+      mock_endpoint('drives/4567/root?$select=id', drive)
+      mock_endpoint('drives/4567/items/1111/children', children)
+      mock_endpoint('drives/4567/items/5432/permissions', permissions)
+      mock_endpoint('drives/4567/items/5432/children', { value: [] })
+
+      extractor = backend.extractor(params)
+      results = []
+
+      backend.extract(params) { |doc| results << doc }
+
+      expect(results.size).to eq 2 # a folder 1111 and a file 5432
+      expect(extractor.config.index_permissions).to be_truthy
     end
   end
 
