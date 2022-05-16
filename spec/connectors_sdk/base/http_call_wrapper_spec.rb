@@ -24,7 +24,7 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
 
   let(:params) do
     {
-      :content_source_id =>content_source_id,
+      :content_source_id => content_source_id,
       :secret_storage => secret_storage,
       :cursors => {},
       :access_token => 'something',
@@ -33,7 +33,7 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
   end
 
   before(:each) do
-   secret_storage.store_secret(content_source_id, { :access_token => 'something' })
+    secret_storage.store_secret(content_source_id, { :access_token => 'something' })
   end
 
   def mock_endpoint(path, data)
