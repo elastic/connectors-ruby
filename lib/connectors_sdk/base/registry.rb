@@ -24,8 +24,8 @@ module ConnectorsSdk
 
     REGISTRY = Factory.new
 
-    require_relative '../fake_connector/http_call_wrapper'
-    REGISTRY.register(ConnectorsSdk::FakeConnector::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::FakeConnector::HttpCallWrapper)
+    require_relative '../stub_connector/http_call_wrapper'
+    REGISTRY.register(ConnectorsSdk::StubConnector::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::StubConnector::HttpCallWrapper)
 
     # loading plugins (might replace this with a directory scan and conventions on names)
     require_relative '../confluence_cloud//http_call_wrapper'

@@ -9,12 +9,12 @@
 require 'connectors_sdk/base/http_call_wrapper'
 
 module ConnectorsSdk
-  module FakeConnector
+  module StubConnector
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
-      SERVICE_TYPE = 'fake_connector'
+      SERVICE_TYPE = 'stub_connector'
 
       def display_name
-        'Fake Connector'
+        'Stub Connector'
       end
 
       def configurable_fields
