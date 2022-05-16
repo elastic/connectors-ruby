@@ -74,14 +74,16 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   get '/' do
+    connector = settings.connector_class.new
+
     json(
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
       :connectors_revision => settings.revision,
       :connector_name => settings.connector_name,
-      :display_name => @connector.display_name,
-      :configurable_fields => @connector.configurable_fields,
-      :connection_requires_redirect => @connector.connection_requires_redirect,
+      :display_name => connector.display_name,
+      :configurable_fields => connector.configurable_fields,
+      :connection_requires_redirect => connector.connection_requires_redirect,
     )
   end
 
