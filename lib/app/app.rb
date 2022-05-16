@@ -28,6 +28,7 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
+<<<<<<< HEAD
   set :raise_errors, false
   set :show_exceptions, false
   set :bind, settings.http['host']
@@ -38,6 +39,21 @@ class ConnectorsWebApp < Sinatra::Base
   set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
   set :job_store, ConnectorsAsync::JobStore.new
   set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
+=======
+  configure do
+    set :raise_errors, false
+    set :show_exceptions, false
+    set :bind, settings.http['host']
+    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
+    set :api_key, settings.http['api_key']
+    set :deactivate_auth, settings.http['deactivate_auth']
+    set :connector_name, settings.http['connector']
+    set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
+    set :job_store, ConnectorsAsync::JobStore.new
+    set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
+    set :secret_storage, ConnectorsAsync::SecretStorage.new
+  end
+>>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
 
   error do
     e = env['sinatra.error']
@@ -100,9 +116,12 @@ class ConnectorsWebApp < Sinatra::Base
   post '/start_sync' do
     job = settings.job_store.create_job
 
+    settings.secret_storage.store_secret(body_params[:content_source_id], { access_token: body_params[:access_token] })
+
     settings.job_runner.start_job(
       job: job,
       connector_class: settings.connector_class,
+      secret_storage: settings.secret_storage,
       params: body_params
     )
 
@@ -136,19 +155,19 @@ class ConnectorsWebApp < Sinatra::Base
   post '/download' do
     connector = settings.connector_class.new
 
-    connector.download(body_params)
+    connector.download(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   post '/deleted' do
     connector = settings.connector_class.new
 
-    json :results => connector.deleted(body_params)
+    json :results => connector.deleted(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   post '/permissions' do
     connector = settings.connector_class.new
 
-    json :results => connector.permissions(body_params)
+    json :results => connector.permissions(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   # XXX remove `oauth2` from the name
@@ -172,7 +191,13 @@ class ConnectorsWebApp < Sinatra::Base
   post '/oauth2/refresh' do
     connector = settings.connector_class.new
 
-    json connector.refresh(body_params)
+    content_source_id = body_params[:content_source_id]
+
+    refresh_result = connector.refresh(body_params)
+
+    settings.secret_storage.store_secret(content_source_id, { access_token: refresh_result['access_token'] })
+
+    json refresh_result
   end
 
   post '/secrets/compare' do
