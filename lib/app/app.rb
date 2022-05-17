@@ -103,9 +103,7 @@ class ConnectorsWebApp < Sinatra::Base
     settings.job_runner.start_job(
       job: job,
       connector_class: settings.connector_class,
-      modified_since: body_params[:modified_since],
-      cursors: body_params[:cursors],
-      access_token: body_params[:access_token]
+      params: body_params
     )
 
     json(

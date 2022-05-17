@@ -17,7 +17,7 @@ module ConnectorsAsync
       @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: max_threads, max_queue: 0)
     end
 
-    def start_job(job:, connector_class:, cursors:, modified_since:, access_token:)
+    def start_job(job:, connector_class:, params:)
       @pool.post do
         init_thread
 
@@ -27,10 +27,10 @@ module ConnectorsAsync
 
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
-        cursors ||= {}
-        cursors[:modified_since] = modified_since if modified_since
+        params[:cursors] ||= {}
+        params[:cursors][:modified_since] = params.delete(:modified_since) if params[:modified_since]
 
-        new_cursors = connector.extract({ :cursors => cursors, :access_token => access_token }) do |doc|
+        new_cursors = connector.extract(params) do |doc|
           job.store(doc)
         end
 
