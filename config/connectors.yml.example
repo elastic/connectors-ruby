@@ -11,5 +11,5 @@ http:
   deactivate_auth: false
   connector: fake_connector
 
-worker:
-  max_thread_count: 4
+#worker:
+#  max_thread_count: 4
