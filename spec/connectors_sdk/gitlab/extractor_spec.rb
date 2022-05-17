@@ -58,37 +58,25 @@ describe ConnectorsSdk::GitLab::Extractor do
     context 'for multi-page results' do
       let(:link_header) { '<https://gitlab.com/api/v4/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false>; rel="next"' }
 
-      it 'passes the next page into the cursors when needed' do
-        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
-          .to_return(
-            :status => 200,
-            :body => projects_json,
-            :headers => {
-              'Link' => link_header
-            }
-          )
-
-        subject.document_changes.to_a
-
-        expect(subject.config.cursors).to_not be_nil
-        expect(subject.config.cursors).to include(:next_page)
-        expect(subject.config.cursors[:next_page]).to eq(link_header)
-      end
-
       context 'when next page' do
-        let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => { :next_page => link_header }) }
-
-        it 'uses the cursor link from parameters' do
+        before(:each) do
+          stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            .to_return(
+              :status => 200,
+              :body => projects_json,
+              :headers => {
+                'Link' => link_header
+              }
+            )
           stub_request(:get, "#{base_url}/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false")
             .to_return(
               :status => 200,
               :body => projects_json
             )
-
+        end
+        it 'uses the cursor link from parameters' do
           result = subject.document_changes.to_a
-
-          expect(result).to_not be_nil
-          expect(result.size).to eq(100)
+          expect(result.size).to eq(200)
 
           expect(result[0][0]).to eq(:create_or_update)
           expect(result[0][1][:title]).to_not be_nil

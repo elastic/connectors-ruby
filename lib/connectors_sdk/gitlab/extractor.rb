@@ -17,7 +17,7 @@ module ConnectorsSdk
     class Extractor < ConnectorsSdk::Base::Extractor
       PAGE_SIZE = 100 # max is 100
 
-      def yield_document_changes(modified_since: nil, break_after_page: false)
+      def yield_document_changes(modified_since: nil)
         query_params = {
           :pagination => :keyset,
           :per_page => PAGE_SIZE,
@@ -31,30 +31,30 @@ module ConnectorsSdk
         end
 
         cursors = config.cursors
-        next_cursors = {}
+        next_page_link = nil
 
-        if cursors.present? && cursors[:next_page].present?
-          if (matcher = /(https?:[^>]*)/.match(cursors[:next_page]))
-            clean_query = URI.parse(matcher.captures[0]).query
-            query_params = Rack::Utils.parse_query(clean_query)
-          else
-            raise "Next page link has unexpected format: #{cursors}"
+        loop do
+          if next_page_link.present?
+            if (matcher = /(https?:[^>]*)/.match(next_page_link))
+              clean_query = URI.parse(matcher.captures[0]).query
+              query_params = Rack::Utils.parse_query(clean_query)
+            else
+              raise "Next page link has unexpected format: #{cursors}"
+            end
           end
-        end
+          response = client.get('projects', query_params)
 
-        response = client.get('projects', query_params)
-
-        JSON.parse(response.body).map do |doc|
-          doc = doc.with_indifferent_access
-          if config.index_permissions
-            doc = doc.merge(project_permissions(doc[:id], doc[:visibility]))
+          JSON.parse(response.body).map do |doc|
+            doc = doc.with_indifferent_access
+            if config.index_permissions
+              doc = doc.merge(project_permissions(doc[:id], doc[:visibility]))
+            end
+            yield :create_or_update, ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc), nil
           end
-          yield :create_or_update, ConnectorsSdk::GitLab::Adapter.to_es_document(:project, doc), nil
+
+          next_page_link = response.headers['Link'] || nil
+          break unless next_page_link.present?
         end
-
-        next_page = response.headers['Link'] || ''
-
-        config.overwrite_cursors!(next_page.empty? ? next_cursors : next_cursors.merge({ :next_page => next_page }))
       end
 
       def yield_deleted_ids(ids)
