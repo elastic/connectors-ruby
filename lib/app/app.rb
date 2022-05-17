@@ -19,6 +19,7 @@ require 'sinatra/json'
 require 'connectors_shared'
 require 'connectors_app/config'
 require 'connectors_sdk/base/registry'
+require 'connectors_async'
 
 Dir[File.join(__dir__, 'initializers/**/*.rb')].sort.each { |f| require f }
 
@@ -27,14 +28,18 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
-  set :raise_errors, false
-  set :show_exceptions, false
-  set :bind, settings.http['host']
-  set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
-  set :api_key, settings.http['api_key']
-  set :deactivate_auth, settings.http['deactivate_auth']
-  set :connector_name, settings.http['connector']
-  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
+  configure do
+    set :raise_errors, false
+    set :show_exceptions, false
+    set :bind, settings.http['host']
+    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
+    set :api_key, settings.http['api_key']
+    set :deactivate_auth, settings.http['deactivate_auth']
+    set :connector_name, settings.http['connector']
+    set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
+    set :job_store, ConnectorsAsync::JobStore.new
+    set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
+  end
 
   error do
     e = env['sinatra.error']
@@ -53,8 +58,6 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   before do
-    @connector = settings.connector_class.new
-
     Time.zone = ActiveSupport::TimeZone.new('UTC')
     # XXX to be removed
     return if settings.deactivate_auth
@@ -85,51 +88,93 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/status' do
-    source_status = @connector.source_status(body_params)
+    connector = settings.connector_class.new
+
+    source_status = connector.source_status(body_params)
     json(
-      :extractor => { :name => @connector.display_name },
+      :extractor => { :name => connector.name },
       :contentProvider => source_status
     )
   end
 
-  post '/documents' do
-    results, cursors, completed = @connector.document_batch(body_params)
+  post '/start_sync' do
+    job = settings.job_store.create_job
+
+    settings.job_runner.start_job(
+      job: job,
+      connector_class: settings.connector_class,
+      modified_since: body_params[:modified_since],
+      cursors: body_params[:cursors],
+      access_token: body_params[:access_token]
+    )
 
     json(
-      :results => results,
-      :cursors => cursors,
-      :completed => completed
+      :job_id => job.id,
+      :status => job.status
     )
   end
 
+  post '/documents' do
+    job_id = body_params.fetch(:job_id)
+    job = settings.job_store.fetch_job(job_id)
+
+    response = {
+      :status => job.status
+    }
+
+    if job.is_failed?
+      response[:errors] = [job.error]
+    else
+      response[:docs] = job.pop_batch
+      response[:cursors] = job.cursors if job.has_cursors?
+    end
+
+    json(response)
+  rescue ConnectorsAsync::JobStore::JobNotFoundError
+    status 404
+    json(:errors => ["Job with id #{body_params.fetch(:job_id)} not found"])
+  end
+
   post '/download' do
-    @connector.download(body_params)
+    connector = settings.connector_class.new
+
+    connector.download(body_params)
   end
 
   post '/deleted' do
-    json :results => @connector.deleted(body_params)
+    connector = settings.connector_class.new
+
+    json :results => connector.deleted(body_params)
   end
 
   post '/permissions' do
-    json :results => @connector.permissions(body_params)
+    connector = settings.connector_class.new
+
+    json :results => connector.permissions(body_params)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
+    connector = settings.connector_class.new
+
     logger.info "Received client ID: #{body_params[:client_id]}"
     logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
-    authorization_uri = @connector.authorization_uri(body_params)
+    authorization_uri = connector.authorization_uri(body_params)
 
     json :oauth2redirect => authorization_uri
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
-    json @connector.access_token(body_params)
+    connector = settings.connector_class.new
+
+    json connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    json @connector.refresh(body_params)
+    connector = settings.connector_class.new
+
+    json connector.refresh(body_params)
   end
 
   def body_params

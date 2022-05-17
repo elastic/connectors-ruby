@@ -58,7 +58,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
     let(:drive_ids) { share_point_site_drive_ids }
     let(:groups_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}groups/?$select=id,createdDateTime" }
-    let(:sites_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/?$select=id&search=&top=10" }
+    let(:sites_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/?$select=id,name&search=&top=10" }
     let(:sites_body) { connectors_fixture_raw('office365/sites.json') }
     let(:site_1_id) { 'enterprisesearch.sharepoint.com,f62543c6-b329-4e0a-96c1-c1a065f5be3f,23ed25a9-4dee-4750-afb0-acb21475a499' }
     let(:site_2_id) { 'enterprisesearch.sharepoint.com,79e9ffcd-05d4-49b5-8d7c-eb0c111f218c,f19c4f31-428a-4627-89e1-72355835e8eb' }
@@ -170,6 +170,17 @@ describe ConnectorsSdk::SharePoint::Extractor do
         expect(subject.monitor.total_error_count).to eq(0)
       end
 
+      it 'has sites prefix in path' do
+        site = expect_sites([random_site]).first
+        drive = expect_site_drives(site[:id], [random_drive]).first
+        root = expect_root_item(drive[:id], random_item)
+        expect_item_children(drive[:id], root[:id], [random_document])
+
+        subject.yield_document_changes do |_action, document, _subextractors|
+          expect(document[:path]).to start_with("/sites/#{site[:name]}/")
+        end
+      end
+
       context 'documents fail' do
         before(:each) do
           subject.monitor = ConnectorsShared::Monitor.new(:connector => subject, :max_error_ratio => 1)
@@ -275,50 +286,6 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
   end
 
-  context 'break_after_page' do
-    describe '#yield_document_changes' do
-      let(:cursors) { {} }
-      let(:block) {
-        lambda do |args|
-          # no-op
-        end
-      }
-      let(:site_id) { 'site_01' }
-      let(:drives) { [{ :id => drive_id, :driveType => 'documentLibrary' }] }
-      let(:drive_id) { 'drive_01' }
-
-      subject { super().yield_document_changes(:break_after_page => true, &block) }
-
-      before(:each) do
-        expect_sites([:id => site_id])
-        expect_groups([])
-        expect_site_drives(site_id, drives)
-        allow(extractor).to receive(:retrieve_latest_cursors).and_return({ described_class::DRIVE_IDS_CURSOR_KEY => {} })
-      end
-
-      it 'does not error' do
-        cursors['current_drive_id'] = ('z' * 100) # sorts after any real id
-        expect { subject }.not_to raise_error
-      end
-
-      it 'preserves current_drive_id in the presence of a page_cursor' do
-        cursors['current_drive_id'] = drive_id
-        allow(extractor).to receive(:yield_drive_items) do |_args|
-          config.cursors['page_cursor'] = '_'
-        end
-
-        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id, 'drive_ids' => {} }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_', 'drive_ids' => {} })
-      end
-
-      it 'sets completed to true in the absence of a page_cursor' do
-        cursors['current_drive_id'] = drive_id
-        allow(extractor).to receive(:yield_drive_items)
-
-        expect { subject }.to change { extractor.completed }.from(false).to(true)
-      end
-    end
-  end
-
   def expect_item_children(drive_id, item_id, children)
     stub_request(:get, "#{graph_base_url}drives/#{drive_id}/items/#{item_id}/children")
       .to_return(graph_response({ value: children }))
@@ -338,7 +305,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
   end
 
   def expect_sites(sites)
-    stub_request(:get, "#{graph_base_url}sites/?$select=id&search=&top=10")
+    stub_request(:get, "#{graph_base_url}sites/?$select=id,name&search=&top=10")
       .to_return(graph_response({ value: sites }))
 
     sites
