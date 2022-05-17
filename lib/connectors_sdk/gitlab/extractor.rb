@@ -30,7 +30,6 @@ module ConnectorsSdk
           query_params[:last_activity_after] = date_since.iso8601
         end
 
-        cursors = config.cursors
         next_page_link = nil
 
         loop do
@@ -39,7 +38,7 @@ module ConnectorsSdk
               clean_query = URI.parse(matcher.captures[0]).query
               query_params = Rack::Utils.parse_query(clean_query)
             else
-              raise "Next page link has unexpected format: #{cursors}"
+              raise "Next page link has unexpected format: #{next_page_link}"
             end
           end
           response = client.get('projects', query_params)

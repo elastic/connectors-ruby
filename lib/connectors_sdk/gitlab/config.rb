@@ -15,7 +15,7 @@ module ConnectorsSdk
 
       def initialize(cursors:, index_permissions: false)
         super(:cursors => cursors)
-        @index_permissions = index_permissions
+        @index_permissions = index_permissions || false
       end
 
       def to_h

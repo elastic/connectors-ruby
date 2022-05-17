@@ -47,7 +47,7 @@ module ConnectorsSdk
       def config(params)
         ConnectorsSdk::GitLab::Config.new(
           :cursors => params.fetch(:cursors, {}) || {},
-          :index_permissions => params.fetch(:index_permissions, {}) || false
+          :index_permissions => params.fetch(:index_permissions, false)
         )
       end
 
