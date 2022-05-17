@@ -286,50 +286,6 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
   end
 
-  context 'break_after_page' do
-    describe '#yield_document_changes' do
-      let(:cursors) { {} }
-      let(:block) {
-        lambda do |args|
-          # no-op
-        end
-      }
-      let(:site_id) { 'site_01' }
-      let(:drives) { [{ :id => drive_id, :driveType => 'documentLibrary' }] }
-      let(:drive_id) { 'drive_01' }
-
-      subject { super().yield_document_changes(:break_after_page => true, &block) }
-
-      before(:each) do
-        expect_sites([:id => site_id, :name => random_string])
-        expect_groups([])
-        expect_site_drives(site_id, drives)
-        allow(extractor).to receive(:retrieve_latest_cursors).and_return({ described_class::DRIVE_IDS_CURSOR_KEY => {} })
-      end
-
-      it 'does not error' do
-        cursors['current_drive_id'] = ('z' * 100) # sorts after any real id
-        expect { subject }.not_to raise_error
-      end
-
-      it 'preserves current_drive_id in the presence of a page_cursor' do
-        cursors['current_drive_id'] = drive_id
-        allow(extractor).to receive(:yield_drive_items) do |_args|
-          config.cursors['page_cursor'] = '_'
-        end
-
-        expect { subject }.to change { cursors }.from({ 'current_drive_id' => drive_id, 'drive_ids' => {} }).to({ 'current_drive_id' => drive_id, 'page_cursor' => '_', 'drive_ids' => {} })
-      end
-
-      it 'sets completed to true in the absence of a page_cursor' do
-        cursors['current_drive_id'] = drive_id
-        allow(extractor).to receive(:yield_drive_items)
-
-        expect { subject }.to change { extractor.completed }.from(false).to(true)
-      end
-    end
-  end
-
   def expect_item_children(drive_id, item_id, children)
     stub_request(:get, "#{graph_base_url}drives/#{drive_id}/items/#{item_id}/children")
       .to_return(graph_response({ value: children }))
