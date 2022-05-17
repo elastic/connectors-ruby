@@ -44,7 +44,7 @@ module ConnectorsSdk
       end
 
       def config(params)
-        ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(params[:cloud_id]), :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::Atlassian::Config.new(:base_url => "#{params[:external_connector_base_url]}/wiki", :cursors => params.fetch(:cursors, {}) || {})
       end
 
       def health_check(params)
