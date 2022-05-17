@@ -10,14 +10,14 @@ require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/confluence_cloud/extractor'
 require 'connectors_sdk/confluence_cloud/authorization'
 require 'connectors_sdk/confluence_cloud/custom_client'
-require 'connectors_sdk/base/http_call_wrapper'
+require 'connectors_sdk/base/connector'
 
 module ConnectorsSdk
   module ConfluenceCloud
-    class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+    class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'confluence_cloud'
 
-      def name
+      def display_name
         'Confluence Cloud'
       end
 

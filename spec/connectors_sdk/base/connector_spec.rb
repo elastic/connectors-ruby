@@ -8,13 +8,13 @@
 
 require 'active_support/core_ext/array/access'
 
-require 'connectors_sdk/base/http_call_wrapper'
+require 'connectors_sdk/base/connector'
 require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/share_point/extractor'
-require 'connectors_sdk/share_point/http_call_wrapper'
+require 'connectors_sdk/share_point/connector'
 
-describe ConnectorsSdk::Base::HttpCallWrapper do
-  let(:wrapper_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
+describe ConnectorsSdk::Base::Connector do
+  let(:wrapper_class) { ConnectorsSdk::SharePoint::Connector }
   let(:extractor_class) { ConnectorsSdk::SharePoint::Extractor }
   let(:custom_client_error) { ConnectorsSdk::Office365::CustomClient::ClientError }
   let(:backend) do

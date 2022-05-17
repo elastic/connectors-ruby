@@ -11,6 +11,7 @@ require 'active_support/core_ext/time/zones'
 require 'faraday'
 require 'hashie'
 require 'json'
+require 'concurrent'
 
 require 'sinatra'
 require 'sinatra/config_file'
@@ -28,6 +29,8 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
+  DEFAULT_THREAD_COUNT = Concurrent.processor_count.freeze
+
   configure do
     set :raise_errors, false
     set :show_exceptions, false
@@ -38,7 +41,11 @@ class ConnectorsWebApp < Sinatra::Base
     set :connector_name, settings.http['connector']
     set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
     set :job_store, ConnectorsAsync::JobStore.new
-    set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
+    set :job_runner, ConnectorsAsync::JobRunner.new(
+      {
+        max_threads: settings.respond_to?(:worker) ? settings.worker['max_thread_count'] : DEFAULT_THREAD_COUNT
+      }
+    )
   end
 
   error do
@@ -71,6 +78,7 @@ class ConnectorsWebApp < Sinatra::Base
 
     # We only support Basic for now
     error = auth.provided? && auth.scheme != 'basic' ? ConnectorsShared::UNSUPPORTED_AUTH_SCHEME : ConnectorsShared::INVALID_API_KEY
+    p error
     response = { errors: [error.to_h] }.to_json
     halt(error.status_code, { 'Content-Type' => 'application/json' }, response)
   end
@@ -80,16 +88,15 @@ class ConnectorsWebApp < Sinatra::Base
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
       :connectors_revision => settings.revision,
-      :connector_name => ActiveSupport::Inflector.camelize(settings.http['connector'])
+      :connector_name => settings.connector_name,
+      :display_name => connector.display_name
     )
   end
 
   post '/status' do
-    connector = settings.connector_class.new
-
     source_status = connector.source_status(body_params)
     json(
-      :extractor => { :name => connector.name },
+      :extractor => { :name => connector.display_name },
       :contentProvider => source_status
     )
   end
@@ -133,27 +140,19 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    connector = settings.connector_class.new
-
     connector.download(body_params)
   end
 
   post '/deleted' do
-    connector = settings.connector_class.new
-
     json :results => connector.deleted(body_params)
   end
 
   post '/permissions' do
-    connector = settings.connector_class.new
-
     json :results => connector.permissions(body_params)
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
-    connector = settings.connector_class.new
-
     logger.info "Received client ID: #{body_params[:client_id]}"
     logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
     authorization_uri = connector.authorization_uri(body_params)
@@ -163,18 +162,18 @@ class ConnectorsWebApp < Sinatra::Base
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
-    connector = settings.connector_class.new
-
     json connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    connector = settings.connector_class.new
-
     json connector.refresh(body_params)
   end
 
   def body_params
     @body_params ||= JSON.parse(request.body.read, symbolize_names: true).with_indifferent_access
+  end
+
+  def connector
+    settings.connector_class.new
   end
 end
