@@ -17,12 +17,29 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'confluence_cloud'
 
-      def name
+      def display_name
         'Confluence Cloud'
       end
 
-      def service_type
-        SERVICE_TYPE
+      def connection_requires_redirect
+        true
+      end
+
+      def configurable_fields
+        [
+          {
+            'key' => 'base_url',
+            'label' => 'Base URL'
+          },
+          {
+            'key' => 'client_id',
+            'label' => 'Client ID'
+          },
+          {
+            'key' => 'client_secret',
+            'label' => 'Client Secret'
+          },
+        ]
       end
 
       private
