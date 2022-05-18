@@ -91,6 +91,10 @@ module ConnectorsSdk
         { :status => 'FAILURE', :statusCode => e.is_a?(custom_client_error) ? e.status_code : 500, :message => e.message }
       end
 
+      def compare_secrets(*)
+        raise 'Not implemented for this connector'
+      end
+
       def display_name
         raise 'Not implemented for this connector'
       end
@@ -137,6 +141,13 @@ module ConnectorsSdk
 
       def health_check(*)
         raise 'Not implemented for this connector'
+      end
+
+      def missing_secrets?(params)
+        missing = %w[secret other_secret].select { |field| params[field.to_sym].nil? }
+        unless missing.blank?
+          raise ConnectorsShared::ClientError.new("Missing required fields: #{missing.join(', ')}")
+        end
       end
     end
   end

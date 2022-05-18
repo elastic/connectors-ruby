@@ -175,6 +175,12 @@ class ConnectorsWebApp < Sinatra::Base
     json connector.refresh(body_params)
   end
 
+  post '/secrets/compare' do
+    connector = settings.connector_class.new
+
+    json connector.compare_secrets(body_params)
+  end
+
   def body_params
     @body_params ||= JSON.parse(request.body.read, symbolize_names: true).with_indifferent_access
   end
