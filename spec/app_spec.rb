@@ -312,15 +312,15 @@ RSpec.describe ConnectorsWebApp do
     end
   end
 
-  describe 'POST /secrets' do
+  describe 'POST /secrets/compare' do
     let(:equivalent) { true }
     before(:each) do
       basic_authorize 'ent-search', api_key
-      allow(connector).to receive(:secrets).and_return({ :equivalent => equivalent })
+      allow(connector).to receive(:compare_secrets).and_return({ :equivalent => equivalent })
     end
 
-    it 'compares secret' do
-      response = post('/secrets', '{}', { 'CONTENT_TYPE' => 'application/json' })
+    it 'compares secrets' do
+      response = post('/secrets/compare', '{}', { 'CONTENT_TYPE' => 'application/json' })
       expect(response).to be_successful
       expect(json(response).equivalent).to be_truthy
     end

@@ -9,7 +9,7 @@
 require 'connectors_sdk/confluence_cloud/http_call_wrapper'
 
 describe ConnectorsSdk::ConfluenceCloud::HttpCallWrapper do
-  describe '.secrets' do
+  describe '.compare_secrets' do
     context 'when secrets are equivalent' do
       let(:params) do
         {
@@ -19,7 +19,7 @@ describe ConnectorsSdk::ConfluenceCloud::HttpCallWrapper do
       end
 
       it 'returns true' do
-        expect(subject.secrets(params)[:equivalent]).to be_truthy
+        expect(subject.compare_secrets(params)[:equivalent]).to be_truthy
       end
     end
 
@@ -32,7 +32,7 @@ describe ConnectorsSdk::ConfluenceCloud::HttpCallWrapper do
       end
 
       it 'returns false' do
-        expect(subject.secrets(params)[:equivalent]).to be_falsey
+        expect(subject.compare_secrets(params)[:equivalent]).to be_falsey
       end
     end
   end

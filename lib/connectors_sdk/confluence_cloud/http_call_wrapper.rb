@@ -17,7 +17,7 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'confluence_cloud'
 
-      def secrets(params)
+      def compare_secrets(params)
         missing_secrets?(params)
 
         {

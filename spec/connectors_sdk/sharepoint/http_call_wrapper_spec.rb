@@ -9,7 +9,7 @@
 require 'connectors_sdk/share_point/http_call_wrapper'
 
 describe ConnectorsSdk::SharePoint::HttpCallWrapper do
-  describe '.secrets' do
+  describe '.compare_secrets' do
     let(:params) do
       {
         :secret => { :access_token => 'secret' },
@@ -29,7 +29,7 @@ describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       end
 
       it 'returns true' do
-        expect(subject.secrets(params)[:equivalent]).to be_truthy
+        expect(subject.compare_secrets(params)[:equivalent]).to be_truthy
       end
     end
 
@@ -41,7 +41,7 @@ describe ConnectorsSdk::SharePoint::HttpCallWrapper do
       end
 
       it 'returns false' do
-        expect(subject.secrets(params)[:equivalent]).to be_falsey
+        expect(subject.compare_secrets(params)[:equivalent]).to be_falsey
       end
     end
   end

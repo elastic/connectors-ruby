@@ -185,12 +185,12 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
     end
   end
 
-  context '.secrets' do
+  context '.compare_secrets' do
     context 'when secret is missing' do
       let(:params) { { :other_secret => 'other_secret' } }
 
       it 'raises ClientError' do
-        expect { backend.secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+        expect { backend.compare_secrets(params) }.to raise_error(ConnectorsShared::ClientError)
       end
     end
 
@@ -198,7 +198,7 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
       let(:params) { { :secret => 'secret' } }
 
       it 'raises ClientError' do
-        expect { backend.secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+        expect { backend.compare_secrets(params) }.to raise_error(ConnectorsShared::ClientError)
       end
     end
 
@@ -206,7 +206,7 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
       let(:params) { {} }
 
       it 'raises ClientError' do
-        expect { backend.secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+        expect { backend.compare_secrets(params) }.to raise_error(ConnectorsShared::ClientError)
       end
     end
   end

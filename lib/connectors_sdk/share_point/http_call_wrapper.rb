@@ -16,7 +16,7 @@ module ConnectorsSdk
     class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
       SERVICE_TYPE = 'share_point'
 
-      def secrets(params)
+      def compare_secrets(params)
         missing_secrets?(params)
 
         previous_user = client(:access_token => params[:other_secret][:access_token]).me

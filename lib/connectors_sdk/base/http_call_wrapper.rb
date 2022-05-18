@@ -91,7 +91,7 @@ module ConnectorsSdk
         { :status => 'FAILURE', :statusCode => e.is_a?(custom_client_error) ? e.status_code : 500, :message => e.message }
       end
 
-      def secrets(*)
+      def compare_secrets(*)
         raise 'Not implemented for this connector'
       end
 
