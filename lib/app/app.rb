@@ -28,7 +28,6 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
-<<<<<<< HEAD
   set :raise_errors, false
   set :show_exceptions, false
   set :bind, settings.http['host']
@@ -39,21 +38,7 @@ class ConnectorsWebApp < Sinatra::Base
   set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
   set :job_store, ConnectorsAsync::JobStore.new
   set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
-=======
-  configure do
-    set :raise_errors, false
-    set :show_exceptions, false
-    set :bind, settings.http['host']
-    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
-    set :api_key, settings.http['api_key']
-    set :deactivate_auth, settings.http['deactivate_auth']
-    set :connector_name, settings.http['connector']
-    set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
-    set :job_store, ConnectorsAsync::JobStore.new
-    set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
-    set :secret_storage, ConnectorsAsync::SecretStorage.new
-  end
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
+  set :secret_storage, ConnectorsAsync::SecretStorage.new
 
   error do
     e = env['sinatra.error']

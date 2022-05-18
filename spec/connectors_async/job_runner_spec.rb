@@ -14,19 +14,15 @@ describe ConnectorsAsync::JobRunner do
 
   context '#start_job' do
     let(:connector) { double }
-<<<<<<< HEAD
+    let(:access_token) { 'salad is OK' }
     let(:params) do
       {
         :modified_since => nil,
-        :access_token => 'salad is OK',
+        :access_token => access_token,
         :cursors => {}
       }
     end
-=======
-    let(:modified_since) { nil }
     let(:secret_storage) { double }
-    let(:access_token) { 'salad is OK' }
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
     let(:job) { double }
     let(:thread_executor_mock) { double }
     let(:extraction_time) { 0 }
@@ -55,16 +51,10 @@ describe ConnectorsAsync::JobRunner do
         start_time = Time.now
 
         job_runner.start_job(
-          content_source_id: content_source_id,
           job: job,
           connector_class: connector_class,
-<<<<<<< HEAD
-          params: params
-=======
-          modified_since: modified_since,
           secret_storage: secret_storage,
-          cursors: cursors
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
+          params: params
         )
 
         end_time = Time.now
@@ -81,16 +71,10 @@ describe ConnectorsAsync::JobRunner do
         expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
 
         job_runner.start_job(
-          content_source_id: content_source_id,
           job: job,
           connector_class: connector_class,
-<<<<<<< HEAD
-          params: params
-=======
-          modified_since: modified_since,
           secret_storage: secret_storage,
-          cursors: cursors
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
+          params: params
         )
 
         idle_a_bit
@@ -100,16 +84,10 @@ describe ConnectorsAsync::JobRunner do
         expect(job).to receive(:update_cursors).with(cursors_after_extraction)
 
         job_runner.start_job(
-          content_source_id: content_source_id,
           job: job,
           connector_class: connector_class,
-<<<<<<< HEAD
-          params: params
-=======
-          modified_since: modified_since,
           secret_storage: secret_storage,
-          cursors: cursors
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
+          params: params
         )
 
         idle_a_bit
@@ -137,16 +115,10 @@ describe ConnectorsAsync::JobRunner do
           end
 
           job_runner.start_job(
-            content_source_id: content_source_id,
             job: job,
             connector_class: connector_class,
-<<<<<<< HEAD
-            params: params
-=======
-            modified_since: modified_since,
             secret_storage: secret_storage,
-            cursors: cursors
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
+            params: params
           )
 
           idle_a_bit
@@ -165,16 +137,10 @@ describe ConnectorsAsync::JobRunner do
           expect(job).to receive(:fail).with(error)
 
           job_runner.start_job(
-            content_source_id: content_source_id,
             job: job,
             connector_class: connector_class,
-<<<<<<< HEAD
-            params: params
-=======
-            modified_since: modified_since,
             secret_storage: secret_storage,
-            cursors: cursors
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
+            params: params
           )
 
           idle_a_bit
@@ -198,16 +164,10 @@ describe ConnectorsAsync::JobRunner do
         expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
 
         job_runner.start_job(
-          content_source_id: content_source_id,
           job: job,
-          secret_storage: secret_storage,
           connector_class: connector_class,
-<<<<<<< HEAD
+          secret_storage: secret_storage,
           params: params
-=======
-          modified_since: modified_since,
-          cursors: cursors
->>>>>>> f0cc068 (Initial work to enable token refresh with async flow)
         )
 
         idle_a_bit
