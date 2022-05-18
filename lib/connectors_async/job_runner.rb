@@ -30,7 +30,6 @@ module ConnectorsAsync
 
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
-
         new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
           job.store(doc)
         end
