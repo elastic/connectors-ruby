@@ -59,7 +59,7 @@ describe ConnectorsAsync::JobRunner do
 
         end_time = Time.now
 
-        expect(end_time - start_time).to be < 0.01
+        expect(end_time - start_time).to be < 0.1
       end
     end
 

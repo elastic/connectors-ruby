@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-ruby File.read(File.join(__dir__, '.ruby-version')).strip
-
 # Pull gem index from rubygems
 source 'https://rubygems.org'
 
@@ -27,7 +25,7 @@ group :test do
   gem 'ruby-debug-ide'
   gem 'pry-remote'
   gem 'pry-nav'
-  gem 'debase', '0.2.5.beta2'
+  gem 'ruby-debug-base', '0.11.0', :platform => 'jruby'
   gem 'timecop'
   gem 'simplecov', require: false
   gem 'simplecov-material'
