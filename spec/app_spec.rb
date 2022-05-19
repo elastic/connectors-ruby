@@ -214,7 +214,7 @@ RSpec.describe ConnectorsWebApp do
 
   describe 'POST /oauth2/refresh' do
     context 'with valid request' do
-      let(:params) { { :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
+      let(:params) { { :content_source_id => '1', :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
 
       context 'with valid refresh token' do
         let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }

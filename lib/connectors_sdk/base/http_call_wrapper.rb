@@ -12,11 +12,23 @@ module ConnectorsSdk
   module Base
     class HttpCallWrapper
       def extractor(params)
+        content_source_id = params.fetch(:content_source_id)
+        secret_storage = params[:secret_storage]
+
         extractor_class.new(
-          content_source_id: params[:content_source_id] || "GENERATED-#{BSON::ObjectId.new}",
+          content_source_id: content_source_id || "GENERATED-#{BSON::ObjectId.new}",
           service_type: service_type,
-          authorization_data_proc: proc { { access_token: params[:access_token] } },
-          client_proc: proc { client(params) },
+          authorization_data_proc: proc do
+            secret = secret_storage.fetch_secret(content_source_id)
+            {
+              access_token: secret[:access_token]
+            }
+          end,
+          client_proc: proc {
+            secret = secret_storage.fetch_secret(content_source_id)
+            params[:access_token] = secret[:access_token]
+            client(params)
+          },
           config: config(params),
           features: params.fetch(:features, {}) || {}
         )
@@ -68,6 +80,10 @@ module ConnectorsSdk
         end
       end
 
+      def download(params)
+        extractor(params).download(params[:meta])
+      end
+
       def authorization_uri(params)
         authorization.authorization_uri(params)
       end
@@ -78,10 +94,6 @@ module ConnectorsSdk
 
       def refresh(params)
         authorization.refresh(params)
-      end
-
-      def download(params)
-        extractor(params).download(params[:meta])
       end
 
       def source_status(params)

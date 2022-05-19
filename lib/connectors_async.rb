@@ -7,3 +7,4 @@
 require 'connectors_async/job_runner'
 require 'connectors_async/job_store'
 require 'connectors_async/job'
+require 'connectors_async/secret_storage'
