@@ -17,7 +17,8 @@ module ConnectorsAsync
       @data = {
         :job_id => job_id,
         :status => ConnectorsShared::JobStatus::CREATED,
-        :documents => Queue.new
+        :documents => Queue.new,
+        :last_updated_at => Time.now
       }
     end
 
@@ -50,10 +51,12 @@ module ConnectorsAsync
       raise InvalidStatusError unless ConnectorsShared::JobStatus.is_valid?(new_status)
 
       @data[:status] = new_status
+      notify_changed
     end
 
     def update_cursors(new_cursors)
       @data[:cursors] = new_cursors
+      notify_changed
     end
 
     def fail(e)
@@ -64,6 +67,7 @@ module ConnectorsAsync
 
     def store(item)
       @data[:documents] << item
+      notify_changed
     end
 
     def pop_batch(up_to: 50)
@@ -78,6 +82,7 @@ module ConnectorsAsync
       results
     rescue ThreadError
       puts 'Attempt to access an empty queue happened, when the queue was not supposed to be empty'
+      notify_changed
       results
     end
 
@@ -85,6 +90,19 @@ module ConnectorsAsync
       status = @data[:status]
 
       [ConnectorsShared::JobStatus::FINISHED, ConnectorsShared::JobStatus::FAILED].include?(status)
+    end
+
+    def safe_to_clean_up?
+      return true if is_finished? && @data[:documents].length == 0
+
+      # half an hour seems good enough, given that some connectors take 5-10 minutes to respond when throttled
+      Time.now - @data[:last_updated_at] > 60 * 30
+    end
+
+    private
+
+    def notify_changed
+      @data[:last_updated_at] = Time.now
     end
   end
 end
