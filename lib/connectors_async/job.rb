@@ -86,5 +86,9 @@ module ConnectorsAsync
 
       [ConnectorsShared::JobStatus::FINISHED, ConnectorsShared::JobStatus::FAILED].include?(status)
     end
+
+    def should_throttle?
+      @data[:documents].length > 500
+    end
   end
 end

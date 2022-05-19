@@ -34,9 +34,12 @@ describe ConnectorsAsync::JobRunner do
       allow(job).to receive(:id).and_return(1)
       allow(job).to receive(:update_status)
       allow(job).to receive(:update_cursors)
+      allow(job).to receive(:should_throttle?).and_return(false)
+      allow(job).to receive(:store)
 
-      allow(connector).to receive(:extract) do
+      allow(connector).to receive(:extract) do |&block|
         sleep(extraction_time) if extraction_time > 0
+        block.call()
       end.and_return(cursors_after_extraction)
 
       allow(secret_storage).to receive(:fetch_secret).with(content_source_id).and_return(access_token)
@@ -162,6 +165,26 @@ describe ConnectorsAsync::JobRunner do
       it 'does not raise an error' do
         expect(job).to_not receive(:fail)
         expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
+
+        job_runner.start_job(
+          job: job,
+          connector_class: connector_class,
+          secret_storage: secret_storage,
+          params: params
+        )
+
+        idle_a_bit
+      end
+    end
+
+    context 'when job indicates that no results were picked up for a bit' do
+      before(:each) do
+        allow(job).to receive(:should_throttle?).and_return(true, true, false)
+        allow(Kernel).to receive(:sleep) { ; }
+      end
+
+      it 'throttles the run until the job no longer indicates it should be throttled' do
+        expect(job_runner).to receive(:idle)
 
         job_runner.start_job(
           job: job,
