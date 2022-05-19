@@ -8,6 +8,7 @@ require 'concurrent'
 require 'securerandom'
 
 require 'connectors_async/job'
+require 'connectors_async/job_watcher'
 
 module ConnectorsAsync
   class JobStore
@@ -16,6 +17,8 @@ module ConnectorsAsync
     def initialize
       # multiple threads can write to the store
       @store = Concurrent::Hash.new
+      @watcher = ConnectorsAsync::JobWatcher.new(job_store: self)
+      @watcher.watch
     end
 
     def create_job
@@ -32,6 +35,17 @@ module ConnectorsAsync
       raise JobNotFoundError unless @store.has_key?(job_id)
 
       @store[job_id]
+    end
+
+    def fetch_all
+      []
+      @store.values
+    end
+
+    def delete_job!(job_id)
+      raise JobNotFoundError unless @store.has_key?(job_id)
+
+      @store.delete(job_id)
     end
   end
 end
