@@ -39,7 +39,7 @@ describe ConnectorsAsync::JobRunner do
 
       allow(connector).to receive(:extract) do |&block|
         sleep(extraction_time) if extraction_time > 0
-        block.call()
+        block.call
       end.and_return(cursors_after_extraction)
 
       allow(secret_storage).to receive(:fetch_secret).with(content_source_id).and_return(access_token)
