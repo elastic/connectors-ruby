@@ -4,7 +4,7 @@ require 'hashie/mash'
 require 'connectors_sdk/gitlab/extractor'
 require 'connectors_sdk/gitlab/config'
 require 'connectors_sdk/gitlab/custom_client'
-require 'connectors_sdk/gitlab/http_call_wrapper'
+require 'connectors_sdk/gitlab/connector'
 
 describe ConnectorsSdk::GitLab::Extractor do
   let(:projects_json) { connectors_fixture_raw('gitlab/projects_list.json') }
@@ -30,7 +30,7 @@ describe ConnectorsSdk::GitLab::Extractor do
   subject do
     described_class.new(
       :content_source_id => 'gitlab_source_1',
-      :service_type => ConnectorsSdk::GitLab::HttpCallWrapper::SERVICE_TYPE,
+      :service_type => ConnectorsSdk::GitLab::Connector::SERVICE_TYPE,
       :config => config,
       :features => [],
       :client_proc => client_proc,

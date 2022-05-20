@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/http_call_wrapper'
+require 'connectors_sdk/base/connector'
 require 'connectors_sdk/gitlab/custom_client'
 require 'connectors_sdk/gitlab/adapter'
 require 'connectors_sdk/gitlab/config'
@@ -15,7 +15,7 @@ require 'rack/utils'
 
 module ConnectorsSdk
   module GitLab
-    class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+    class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
       def display_name

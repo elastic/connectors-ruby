@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'hashie/mash'
-require 'connectors_sdk/gitlab/http_call_wrapper'
+require 'connectors_sdk/gitlab/connector'
 
-describe ConnectorsSdk::GitLab::HttpCallWrapper do
+describe ConnectorsSdk::GitLab::Connector do
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { 'https://www.example.com' }
 
