@@ -10,7 +10,6 @@ require 'connectors_sdk/base/connector'
 require 'connectors_sdk/office365/config'
 require 'connectors_sdk/share_point/extractor'
 require 'connectors_sdk/share_point/authorization'
-require 'connectors_sdk/base/connector'
 
 module ConnectorsSdk
   module SharePoint
