@@ -9,7 +9,7 @@ http:
   port: 9292
   api_key: changeme
   deactivate_auth: false
-  connector: fake_connector
+  connector: stub_connector
 
-#worker:
-#  max_thread_count: 4
+worker:
+  max_thread_count: 4

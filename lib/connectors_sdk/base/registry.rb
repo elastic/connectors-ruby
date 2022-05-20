@@ -24,18 +24,14 @@ module ConnectorsSdk
 
     REGISTRY = Factory.new
 
+    require_relative '../stub_connector/connector'
+    REGISTRY.register(ConnectorsSdk::StubConnector::Connector::SERVICE_TYPE, ConnectorsSdk::StubConnector::Connector)
+
     # loading plugins (might replace this with a directory scan and conventions on names)
+    require_relative '../share_point/connector'
+    require_relative '../confluence_cloud/connector'
 
-    require_relative '../gitlab/http_call_wrapper'
-    REGISTRY.register(ConnectorsSdk::GitLab::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::GitLab::HttpCallWrapper)
-
-    require_relative '../fake_connector/http_call_wrapper'
-    REGISTRY.register(ConnectorsSdk::FakeConnector::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::FakeConnector::HttpCallWrapper)
-
-    require_relative '../confluence_cloud//http_call_wrapper'
-    require_relative '../share_point/http_call_wrapper'
-
-    REGISTRY.register(ConnectorsSdk::ConfluenceCloud::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::HttpCallWrapper)
-    REGISTRY.register(ConnectorsSdk::SharePoint::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::SharePoint::HttpCallWrapper)
+    REGISTRY.register(ConnectorsSdk::SharePoint::Connector::SERVICE_TYPE, ConnectorsSdk::SharePoint::Connector)
+    REGISTRY.register(ConnectorsSdk::ConfluenceCloud::Connector::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::Connector)
   end
 end

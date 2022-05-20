@@ -14,14 +14,21 @@ describe ConnectorsAsync::JobRunner do
 
   context '#start_job' do
     let(:connector) { double }
-    let(:modified_since) { nil }
     let(:access_token) { 'salad is OK' }
+    let(:params) do
+      {
+        :modified_since => nil,
+        :access_token => access_token,
+        :cursors => {}
+      }
+    end
+    let(:secret_storage) { double }
     let(:job) { double }
     let(:thread_executor_mock) { double }
     let(:extraction_time) { 0 }
     let(:connector_class) { double }
-    let(:cursors) { {} }
     let(:cursors_after_extraction) { { :canyon => 'crayons' } }
+    let(:content_source_id) { 'asdfg-125913qasg9125' }
 
     before(:each) do
       allow(job).to receive(:id).and_return(1)
@@ -31,6 +38,8 @@ describe ConnectorsAsync::JobRunner do
       allow(connector).to receive(:extract) do
         sleep(extraction_time) if extraction_time > 0
       end.and_return(cursors_after_extraction)
+
+      allow(secret_storage).to receive(:fetch_secret).with(content_source_id).and_return(access_token)
 
       allow(connector_class).to receive(:new).and_return(connector)
     end
@@ -44,9 +53,8 @@ describe ConnectorsAsync::JobRunner do
         job_runner.start_job(
           job: job,
           connector_class: connector_class,
-          modified_since: modified_since,
-          access_token: access_token,
-          cursors: cursors
+          secret_storage: secret_storage,
+          params: params
         )
 
         end_time = Time.now
@@ -65,9 +73,8 @@ describe ConnectorsAsync::JobRunner do
         job_runner.start_job(
           job: job,
           connector_class: connector_class,
-          modified_since: modified_since,
-          access_token: access_token,
-          cursors: cursors
+          secret_storage: secret_storage,
+          params: params
         )
 
         idle_a_bit
@@ -79,9 +86,8 @@ describe ConnectorsAsync::JobRunner do
         job_runner.start_job(
           job: job,
           connector_class: connector_class,
-          modified_since: modified_since,
-          access_token: access_token,
-          cursors: cursors
+          secret_storage: secret_storage,
+          params: params
         )
 
         idle_a_bit
@@ -111,9 +117,8 @@ describe ConnectorsAsync::JobRunner do
           job_runner.start_job(
             job: job,
             connector_class: connector_class,
-            modified_since: modified_since,
-            access_token: access_token,
-            cursors: cursors
+            secret_storage: secret_storage,
+            params: params
           )
 
           idle_a_bit
@@ -134,9 +139,8 @@ describe ConnectorsAsync::JobRunner do
           job_runner.start_job(
             job: job,
             connector_class: connector_class,
-            modified_since: modified_since,
-            access_token: access_token,
-            cursors: cursors
+            secret_storage: secret_storage,
+            params: params
           )
 
           idle_a_bit
@@ -162,9 +166,8 @@ describe ConnectorsAsync::JobRunner do
         job_runner.start_job(
           job: job,
           connector_class: connector_class,
-          modified_since: modified_since,
-          access_token: access_token,
-          cursors: cursors
+          secret_storage: secret_storage,
+          params: params
         )
 
         idle_a_bit

@@ -10,12 +10,20 @@ require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/confluence_cloud/extractor'
 require 'connectors_sdk/confluence_cloud/authorization'
 require 'connectors_sdk/confluence_cloud/custom_client'
-require 'connectors_sdk/base/http_call_wrapper'
+require 'connectors_sdk/base/connector'
 
 module ConnectorsSdk
   module ConfluenceCloud
-    class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+    class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'confluence_cloud'
+
+      def compare_secrets(params)
+        missing_secrets?(params)
+
+        {
+          :equivalent => params[:secret] == params[:other_secret]
+        }
+      end
 
       def display_name
         'Confluence Cloud'
@@ -61,7 +69,7 @@ module ConnectorsSdk
       end
 
       def config(params)
-        ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(params[:cloud_id]), :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::Atlassian::Config.new(:base_url => "#{params[:external_connector_base_url]}/wiki", :cursors => params.fetch(:cursors, {}) || {})
       end
 
       def health_check(params)

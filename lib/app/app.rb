@@ -11,7 +11,6 @@ require 'active_support/core_ext/time/zones'
 require 'faraday'
 require 'hashie'
 require 'json'
-require 'concurrent'
 
 require 'sinatra'
 require 'sinatra/config_file'
@@ -29,24 +28,17 @@ class ConnectorsWebApp < Sinatra::Base
   register Sinatra::ConfigFile
   config_file ConnectorsApp::CONFIG_FILE
 
-  DEFAULT_THREAD_COUNT = Concurrent.processor_count.freeze
-
-  configure do
-    set :raise_errors, false
-    set :show_exceptions, false
-    set :bind, settings.http['host']
-    set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
-    set :api_key, settings.http['api_key']
-    set :deactivate_auth, settings.http['deactivate_auth']
-    set :connector_name, settings.http['connector']
-    set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.http['connector'])
-    set :job_store, ConnectorsAsync::JobStore.new
-    set :job_runner, ConnectorsAsync::JobRunner.new(
-      {
-        max_threads: settings.respond_to?(:worker) ? settings.worker['max_thread_count'] : DEFAULT_THREAD_COUNT
-      }
-    )
-  end
+  set :raise_errors, false
+  set :show_exceptions, false
+  set :bind, settings.http['host']
+  set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
+  set :api_key, settings.http['api_key']
+  set :deactivate_auth, settings.http['deactivate_auth']
+  set :connector_name, settings.http['connector']
+  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
+  set :job_store, ConnectorsAsync::JobStore.new
+  set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
+  set :secret_storage, ConnectorsAsync::SecretStorage.new
 
   error do
     e = env['sinatra.error']
@@ -83,6 +75,8 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   get '/' do
+    connector = settings.connector_class.new
+
     json(
       :connectors_version => settings.version,
       :connectors_repository => settings.repository,
@@ -95,6 +89,8 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/status' do
+    connector = settings.connector_class.new
+
     source_status = connector.source_status(body_params)
     json(
       :extractor => { :name => connector.display_name },
@@ -105,12 +101,13 @@ class ConnectorsWebApp < Sinatra::Base
   post '/start_sync' do
     job = settings.job_store.create_job
 
+    settings.secret_storage.store_secret(body_params[:content_source_id], { access_token: body_params[:access_token] })
+
     settings.job_runner.start_job(
       job: job,
       connector_class: settings.connector_class,
-      modified_since: body_params[:modified_since],
-      cursors: body_params[:cursors],
-      access_token: body_params[:access_token]
+      secret_storage: settings.secret_storage,
+      params: body_params
     )
 
     json(
@@ -141,19 +138,27 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   post '/download' do
-    connector.download(body_params)
+    connector = settings.connector_class.new
+
+    connector.download(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   post '/deleted' do
-    json :results => connector.deleted(body_params)
+    connector = settings.connector_class.new
+
+    json :results => connector.deleted(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   post '/permissions' do
-    json :results => connector.permissions(body_params)
+    connector = settings.connector_class.new
+
+    json :results => connector.permissions(body_params.merge({ :secret_storage => settings.secret_storage }))
   end
 
   # XXX remove `oauth2` from the name
   post '/oauth2/init' do
+    connector = settings.connector_class.new
+
     logger.info "Received client ID: #{body_params[:client_id]}"
     logger.info "Received redirect URL: #{body_params[:redirect_uri]}"
     authorization_uri = connector.authorization_uri(body_params)
@@ -163,18 +168,30 @@ class ConnectorsWebApp < Sinatra::Base
 
   # XXX remove `oauth2` from the name
   post '/oauth2/exchange' do
+    connector = settings.connector_class.new
+
     json connector.access_token(body_params)
   end
 
   post '/oauth2/refresh' do
-    json connector.refresh(body_params)
+    connector = settings.connector_class.new
+
+    content_source_id = body_params[:content_source_id]
+
+    refresh_result = connector.refresh(body_params)
+
+    settings.secret_storage.store_secret(content_source_id, { access_token: refresh_result['access_token'] })
+
+    json refresh_result
+  end
+
+  post '/secrets/compare' do
+    connector = settings.connector_class.new
+
+    json connector.compare_secrets(body_params)
   end
 
   def body_params
     @body_params ||= JSON.parse(request.body.read, symbolize_names: true).with_indifferent_access
-  end
-
-  def connector
-    settings.connector_class.new
   end
 end

@@ -8,7 +8,7 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
   let(:api_key) { 'api_key' }
-  let(:connector_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
+  let(:connector_class) { ConnectorsSdk::SharePoint::Connector }
   let(:connector) { connector_class.new }
   let(:service_type) { connector_class::SERVICE_TYPE }
   let(:display_name) { 'SharePoint Online' }
@@ -214,7 +214,7 @@ RSpec.describe ConnectorsWebApp do
 
   describe 'POST /oauth2/refresh' do
     context 'with valid request' do
-      let(:params) { { :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
+      let(:params) { { :content_source_id => '1', :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
 
       context 'with valid refresh token' do
         let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
@@ -268,7 +268,7 @@ RSpec.describe ConnectorsWebApp do
     context 'when valid parameters are passed' do
       let(:params) { { :a => 'b', :c => 'd' } }
 
-      it 'returns the result of HttpCallWrapper.download' do
+      it 'returns the result of Connector.download' do
         allow(connector).to receive(:download).and_return(file_content)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
@@ -298,7 +298,7 @@ RSpec.describe ConnectorsWebApp do
       end
     end
 
-    context 'when HttpCallWrapper.download raises an error' do
+    context 'when Connector.download raises an error' do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
 
@@ -309,6 +309,20 @@ RSpec.describe ConnectorsWebApp do
         expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
         expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
       end
+    end
+  end
+
+  describe 'POST /secrets/compare' do
+    let(:equivalent) { true }
+    before(:each) do
+      basic_authorize 'ent-search', api_key
+      allow(connector).to receive(:compare_secrets).and_return({ :equivalent => equivalent })
+    end
+
+    it 'compares secrets' do
+      response = post('/secrets/compare', '{}', { 'CONTENT_TYPE' => 'application/json' })
+      expect(response).to be_successful
+      expect(json(response).equivalent).to be_truthy
     end
   end
 end
