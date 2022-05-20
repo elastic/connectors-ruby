@@ -61,14 +61,14 @@ describe ConnectorsAsync::JobStore do
   end
 
   context '#fetch_all' do
-    let!(:job_1) { job_store.create_job }
-    let!(:job_2) { job_store.create_job }
-    let!(:job_3) { job_store.create_job }
+    let!(:job1) { job_store.create_job }
+    let!(:job2) { job_store.create_job }
+    let!(:job3) { job_store.create_job }
 
     it 'returns all stored jobs' do
       jobs = job_store.fetch_all
 
-      expect(jobs).to include(job_1, job_2, job_3)
+      expect(jobs).to include(job1, job2, job3)
     end
   end
 end
