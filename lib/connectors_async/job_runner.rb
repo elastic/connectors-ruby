@@ -26,7 +26,7 @@ module ConnectorsAsync
         cursors = params[:cursors] ||= {}
         cursors[:modified_since] = params.delete(:modified_since) if params[:modified_since]
 
-        log("Running the job #{job.id}")
+        log_with_thread_id("Running the job #{job.id}")
 
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
@@ -37,15 +37,14 @@ module ConnectorsAsync
         job.update_status(ConnectorsShared::JobStatus::FINISHED)
         job.update_cursors(new_cursors)
 
-        log("Job #{job.id} has finished successfully")
+        log_with_thread_id("Job #{job.id} has finished successfully")
       rescue StandardError => e
         job.fail(e)
-        log("Job #{job.id} failed: #{e.message}")
+        log_with_thread_id("Job #{job.id} failed: #{e.message}")
       end
     end
 
-    def log(str)
-      # TODO: use proper logging
+    def log_with_thread_id(str)
       ConnectorsShared::Logger.debug("[#{Time.now.to_i}] [Thread #{Thread.current.object_id}] #{str}")
     end
 
