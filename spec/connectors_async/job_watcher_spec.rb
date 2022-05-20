@@ -16,8 +16,8 @@ describe ConnectorsAsync::JobWatcher do
 
   before(:each) do
     allow(Concurrent::ThreadPoolExecutor).to receive(:new).and_return(thread_pool_executor)
-    allow(thread_pool_executor).to receive(:post).and_yield() # we just threat it in sync mode here
-    allow(job_watcher).to receive(:loop).and_yield() # we just run the loop once
+    allow(thread_pool_executor).to receive(:post).and_yield # we just threat it in sync mode here
+    allow(job_watcher).to receive(:loop).and_yield # we just run the loop once
     allow(job_watcher).to receive(:idle) # and not actually idle
 
     allow(job_store).to receive(:fetch_all).and_return(jobs)
