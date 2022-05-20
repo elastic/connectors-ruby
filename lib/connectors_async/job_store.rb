@@ -38,7 +38,6 @@ module ConnectorsAsync
     end
 
     def fetch_all
-      []
       @store.values
     end
 
