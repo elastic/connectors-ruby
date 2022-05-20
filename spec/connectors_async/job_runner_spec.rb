@@ -180,7 +180,7 @@ describe ConnectorsAsync::JobRunner do
     context 'when job indicates that no results were picked up for a bit' do
       before(:each) do
         allow(job).to receive(:should_wait?).and_return(true, true, false)
-        allow(Kernel).to receive(:sleep) { ; }
+        allow(job_runner).to receive(:sleep) { ; }
       end
 
       it 'throttles the run until the job no longer indicates it should be throttled' do
