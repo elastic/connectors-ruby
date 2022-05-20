@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'connectors_sdk/base/connector'
 require 'connectors_sdk/office365/config'
 require 'connectors_sdk/share_point/extractor'
 require 'connectors_sdk/share_point/authorization'
@@ -16,12 +17,36 @@ module ConnectorsSdk
     class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'share_point'
 
-      def display_name
-        'SharePoint'
+      def compare_secrets(params)
+        missing_secrets?(params)
+
+        previous_user = client(:access_token => params[:other_secret][:access_token]).me
+        equivalent = previous_user.nil? ? false : previous_user.id == client(:access_token => params[:secret][:access_token]).me&.id
+
+        {
+          :equivalent => equivalent
+        }
       end
 
-      def service_type
-        SERVICE_TYPE
+      def display_name
+        'SharePoint Online'
+      end
+
+      def connection_requires_redirect
+        true
+      end
+
+      def configurable_fields
+        [
+          {
+            'key' => 'client_id',
+            'label' => 'Client ID'
+          },
+          {
+            'key' => 'client_secret',
+            'label' => 'Client Secret'
+          },
+        ]
       end
 
       private

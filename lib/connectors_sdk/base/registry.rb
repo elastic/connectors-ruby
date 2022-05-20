@@ -24,6 +24,9 @@ module ConnectorsSdk
 
     REGISTRY = Factory.new
 
+    require_relative '../stub_connector/connector'
+    REGISTRY.register(ConnectorsSdk::StubConnector::Connector::SERVICE_TYPE, ConnectorsSdk::StubConnector::Connector)
+
     # loading plugins (might replace this with a directory scan and conventions on names)
     require_relative '../share_point/connector'
     require_relative '../confluence_cloud/connector'

@@ -17,20 +17,20 @@ module ConnectorsAsync
       @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: max_threads, max_queue: 0)
     end
 
-    def start_job(job:, connector_class:, cursors:, modified_since:, access_token:)
+    def start_job(job:, connector_class:, secret_storage:, params:)
       @pool.post do
         init_thread
 
         connector = connector_class.new
+        content_source_id = params[:content_source_id]
+        cursors = params[:cursors] ||= {}
+        cursors[:modified_since] = params.delete(:modified_since) if params[:modified_since]
 
         log("Running the job #{job.id}")
 
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
-        cursors ||= {}
-        cursors[:modified_since] = modified_since if modified_since
-
-        new_cursors = connector.extract({ :cursors => cursors, :access_token => access_token }) do |doc|
+        new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
           job.store(doc)
         end
 

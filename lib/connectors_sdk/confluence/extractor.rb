@@ -82,7 +82,7 @@ module ConnectorsSdk
       private
 
       def content_base_url
-        'https://workplace-search.atlassian.net/wiki'
+        config.base_url
       end
 
       def yield_spaces

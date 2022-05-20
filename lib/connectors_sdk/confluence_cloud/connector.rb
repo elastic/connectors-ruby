@@ -17,12 +17,37 @@ module ConnectorsSdk
     class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'confluence_cloud'
 
+      def compare_secrets(params)
+        missing_secrets?(params)
+
+        {
+          :equivalent => params[:secret] == params[:other_secret]
+        }
+      end
+
       def display_name
         'Confluence Cloud'
       end
 
-      def service_type
-        SERVICE_TYPE
+      def connection_requires_redirect
+        true
+      end
+
+      def configurable_fields
+        [
+          {
+            'key' => 'base_url',
+            'label' => 'Base URL'
+          },
+          {
+            'key' => 'client_id',
+            'label' => 'Client ID'
+          },
+          {
+            'key' => 'client_secret',
+            'label' => 'Client Secret'
+          },
+        ]
       end
 
       private
@@ -44,7 +69,7 @@ module ConnectorsSdk
       end
 
       def config(params)
-        ConnectorsSdk::Atlassian::Config.new(:base_url => base_url(params[:cloud_id]), :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::Atlassian::Config.new(:base_url => "#{params[:external_connector_base_url]}/wiki", :cursors => params.fetch(:cursors, {}) || {})
       end
 
       def health_check(params)
