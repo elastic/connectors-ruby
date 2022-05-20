@@ -13,7 +13,6 @@ require 'hashie'
 require 'json'
 
 require 'sinatra'
-require 'config'
 require 'sinatra/config_file'
 require 'sinatra/json'
 
@@ -27,18 +26,19 @@ Dir[File.join(__dir__, 'initializers/**/*.rb')].sort.each { |f| require f }
 class ConnectorsWebApp < Sinatra::Base
   set :raise_errors, false
   set :show_exceptions, false
-  set :bind, Settings.http['host']
-  set :port, [ENV['PORT'], Settings.http['port'], '9292'].detect(&:present?)
-  set :api_key, Settings.http['api_key']
-  set :deactivate_auth, Settings.http['deactivate_auth']
-  set :connector_name, Settings.http['connector']
-  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(Settings.connector_name)
+  set :bind, ConnectorsApp::Config.http['host']
+  set :port, [ENV['PORT'], ConnectorsApp::Config.http['port'], '9292'].detect(&:present?)
+  set :api_key, ConnectorsApp::Config.http['api_key']
+  set :deactivate_auth, ConnectorsApp::Config.http['deactivate_auth']
+  set :connector_name, ConnectorsApp::Config.http['connector']
+  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(ConnectorsApp::Config.connector_name)
   set :job_store, ConnectorsAsync::JobStore.new
-  set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: Settings.worker['max_thread_count'] })
+  set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: ConnectorsApp::Config.worker['max_thread_count'] })
   set :secret_storage, ConnectorsAsync::SecretStorage.new
 
   error do
     e = env['sinatra.error']
+    puts e.message
     err = case e
           when ConnectorsShared::ClientError
             ConnectorsShared::Error.new(400, 'BAD_REQUEST', e.message)
@@ -58,7 +58,7 @@ class ConnectorsWebApp < Sinatra::Base
     # XXX to be removed
     return if settings.deactivate_auth
 
-    raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(settings.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
+    raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(ConnectorsApp::Config.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
 
     auth = Rack::Auth::Basic::Request.new(request.env)
 
@@ -75,10 +75,10 @@ class ConnectorsWebApp < Sinatra::Base
     connector = settings.connector_class.new
 
     json(
-      :connectors_version => settings.version,
-      :connectors_repository => settings.repository,
-      :connectors_revision => settings.revision,
-      :connector_name => settings.connector_name,
+      :connectors_version => ConnectorsApp::Config.version,
+      :connectors_repository => ConnectorsApp::Config.repository,
+      :connectors_revision => ConnectorsApp::Config.revision,
+      :connector_name => connector.connector_name,
       :display_name => connector.display_name,
       :configurable_fields => connector.configurable_fields,
       :connection_requires_redirect => connector.connection_requires_redirect,
