@@ -67,7 +67,7 @@ module ConnectorsAsync
     end
 
     def idle(timeout)
-      Kernel.sleep(timeout)
+      sleep(timeout)
     end
   end
 end
