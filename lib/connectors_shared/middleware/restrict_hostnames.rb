@@ -46,7 +46,7 @@ module ConnectorsShared
       end
 
       def denied?(env)
-        requested_ips = lookup_ips(env[:url].hostname)
+        requested_ips = lookup_ips(env[:url].hostname.to_s)
         no_match = requested_ips.all? { |ip| !@allowed_ips.include?(ip) }
         return false unless no_match
         ConnectorsShared::Logger.warn("Requested url #{env[:url]} with resolved ip addresses #{requested_ips} does not match " \
