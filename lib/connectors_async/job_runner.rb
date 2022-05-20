@@ -46,7 +46,7 @@ module ConnectorsAsync
 
     def log(str)
       # TODO: use proper logging
-      puts("[#{Time.now.to_i}] [Thread #{Thread.current.object_id}] #{str}")
+      ConnectorsShared::Logger.debug("[#{Time.now.to_i}] [Thread #{Thread.current.object_id}] #{str}")
     end
 
     private
