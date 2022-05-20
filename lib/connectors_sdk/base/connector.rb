@@ -10,7 +10,7 @@ require 'bson'
 
 module ConnectorsSdk
   module Base
-    class HttpCallWrapper
+    class Connector
       def extractor(params)
         content_source_id = params.fetch(:content_source_id)
         secret_storage = params[:secret_storage]
