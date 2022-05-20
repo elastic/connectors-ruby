@@ -24,11 +24,14 @@ module ConnectorsSdk
 
     REGISTRY = Factory.new
 
-    # loading plugins (might replace this with a directory scan and conventions on names)
-    require_relative '../share_point/http_call_wrapper'
-    require_relative '../confluence_cloud//http_call_wrapper'
+    require_relative '../stub_connector/connector'
+    REGISTRY.register(ConnectorsSdk::StubConnector::Connector::SERVICE_TYPE, ConnectorsSdk::StubConnector::Connector)
 
-    REGISTRY.register(ConnectorsSdk::SharePoint::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::SharePoint::HttpCallWrapper)
-    REGISTRY.register(ConnectorsSdk::ConfluenceCloud::HttpCallWrapper::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::HttpCallWrapper)
+    # loading plugins (might replace this with a directory scan and conventions on names)
+    require_relative '../share_point/connector'
+    require_relative '../confluence_cloud/connector'
+
+    REGISTRY.register(ConnectorsSdk::SharePoint::Connector::SERVICE_TYPE, ConnectorsSdk::SharePoint::Connector)
+    REGISTRY.register(ConnectorsSdk::ConfluenceCloud::Connector::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::Connector)
   end
 end

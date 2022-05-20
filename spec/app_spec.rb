@@ -8,9 +8,10 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
   let(:api_key) { 'api_key' }
-  let(:connector_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
+  let(:connector_class) { ConnectorsSdk::SharePoint::Connector }
   let(:connector) { connector_class.new }
-  let(:connector_name) { 'SharePoint' }
+  let(:service_type) { connector_class::SERVICE_TYPE }
+  let(:display_name) { 'SharePoint Online' }
 
   def expect_json(response, json)
     expect(json(response)).to eq json
@@ -21,11 +22,11 @@ RSpec.describe ConnectorsWebApp do
   end
 
   before(:each) do
-    allow(ConnectorsWebApp.settings).to receive(:deactivate_auth).and_return(false)
-    allow(ConnectorsWebApp.settings).to receive(:api_key).and_return(api_key)
-    allow(ConnectorsWebApp.settings).to receive(:connector_class).and_return(connector_class)
+    ConnectorsWebApp.set :api_key, api_key
+    ConnectorsWebApp.set :connector_name, service_type
+    ConnectorsWebApp.set :connector_class, connector_class
+
     allow(connector_class).to receive(:new).and_return(connector)
-    allow(ConnectorsWebApp.settings).to receive(:http).and_return({ 'connector' => connector_name })
   end
 
   describe 'Catch all' do
@@ -96,7 +97,10 @@ RSpec.describe ConnectorsWebApp do
       expect(json(response)['connectors_version']).to eq ConnectorsApp::VERSION
       expect(json(response)['connectors_revision']).to eq ConnectorsApp::Config['revision']
       expect(json(response)['connectors_repository']).to eq ConnectorsApp::Config['repository']
-      expect(json(response)['connector_name']).to eq connector_name
+      expect(json(response)['connector_name']).to eq service_type
+      expect(json(response)['display_name']).to eq display_name
+      expect(json(response)['configurable_fields'].map { |f| f['key'] }).to eq ['client_id', 'client_secret']
+      expect(json(response)['connection_requires_redirect']).to eq true
     end
   end
 
@@ -105,19 +109,18 @@ RSpec.describe ConnectorsWebApp do
       {
         'status' => 'OK',
         'statusCode' => 200,
-        'message' => 'Connected to SharePoint'
+        'message' => 'Connected to SharePoint Online'
       }
     end
 
     it 'returns source status' do
-      allow(connector).to receive(:name).and_return(connector_name)
       allow(connector).to receive(:source_status).and_return(source_status)
 
       basic_authorize 'ent-search', api_key
       response = post('/status', JSON.generate({ :access_token => 'access_token' }), { 'CONTENT_TYPE' => 'application/json' })
 
       expect(response).to be_successful
-      expect(json(response)['extractor']['name']).to eq(connector_name)
+      expect(json(response)['extractor']['name']).to eq(display_name)
       expect(json(response)['contentProvider']).to eq(source_status)
     end
   end
@@ -211,7 +214,7 @@ RSpec.describe ConnectorsWebApp do
 
   describe 'POST /oauth2/refresh' do
     context 'with valid request' do
-      let(:params) { { :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
+      let(:params) { { :content_source_id => '1', :client_id => 'client id', :client_secret => 'client_secret', :refresh_token => 'refresh_token', :redirect_uri => 'http://here' } }
 
       context 'with valid refresh token' do
         let(:token_hash) { { :access_token => 'access_token', :refresh_token => 'refresh_token' } }
@@ -265,7 +268,7 @@ RSpec.describe ConnectorsWebApp do
     context 'when valid parameters are passed' do
       let(:params) { { :a => 'b', :c => 'd' } }
 
-      it 'returns the result of HttpCallWrapper.download' do
+      it 'returns the result of Connector.download' do
         allow(connector).to receive(:download).and_return(file_content)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
@@ -295,7 +298,7 @@ RSpec.describe ConnectorsWebApp do
       end
     end
 
-    context 'when HttpCallWrapper.download raises an error' do
+    context 'when Connector.download raises an error' do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
 
@@ -306,6 +309,20 @@ RSpec.describe ConnectorsWebApp do
         expect(json(response)['errors'].first['code']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.code)
         expect(json(response)['errors'].first['message']).to eq(ConnectorsShared::INTERNAL_SERVER_ERROR.message)
       end
+    end
+  end
+
+  describe 'POST /secrets/compare' do
+    let(:equivalent) { true }
+    before(:each) do
+      basic_authorize 'ent-search', api_key
+      allow(connector).to receive(:compare_secrets).and_return({ :equivalent => equivalent })
+    end
+
+    it 'compares secrets' do
+      response = post('/secrets/compare', '{}', { 'CONTENT_TYPE' => 'application/json' })
+      expect(response).to be_successful
+      expect(json(response).equivalent).to be_truthy
     end
   end
 end

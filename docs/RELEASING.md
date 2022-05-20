@@ -30,14 +30,14 @@ A Gem will be published to RubyGems: https://rubygems.org/gems/connectors_sdk.
 Then immediately update ent-search's gem dependency with the released version:
 
 - Update Gemfile if necessary
-- Run `./script/bundle update connectors_sdk`
+- Run `./script/bundle update --conservative connectors_sdk`
 - Verify bundler picked up the version you expected it to update to
 - PR these changes to the appropriate Enterprise Search release branch ([example](https://github.com/elastic/ent-search/pull/6476))
 
-Last, take care of the branching:
+Take care of the branching (minor releases only):
 
-- Increment the VERSION on main to match the next release
-- Create a new maintenance branch if it's a new MINOR
+- Increment the VERSION on main to match the next minor release
+- Create a new maintenance branch
 
 After the Elastic unified release is complete
 

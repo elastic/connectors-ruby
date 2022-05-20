@@ -6,25 +6,34 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/http_call_wrapper'
+require 'active_support/core_ext/array/access'
+
+require 'connectors_sdk/base/connector'
+require 'connectors_async/secret_storage'
 require 'connectors_sdk/office365/custom_client'
 require 'connectors_sdk/share_point/extractor'
-require 'connectors_sdk/share_point/http_call_wrapper'
+require 'connectors_sdk/share_point/connector'
 
-describe ConnectorsSdk::Base::HttpCallWrapper do
-  let(:wrapper_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
+describe ConnectorsSdk::Base::Connector do
+  let(:wrapper_class) { ConnectorsSdk::SharePoint::Connector }
   let(:extractor_class) { ConnectorsSdk::SharePoint::Extractor }
   let(:custom_client_error) { ConnectorsSdk::Office365::CustomClient::ClientError }
-  let(:backend) do
-    wrapper_class.new
-  end
+  let(:backend) { wrapper_class.new }
+  let(:secret_storage) { ConnectorsAsync::SecretStorage.new }
+  let(:content_source_id) { '505' }
 
   let(:params) do
     {
+      :content_source_id => content_source_id,
+      :secret_storage => secret_storage,
       :cursors => {},
       :access_token => 'something',
       :index_permissions => true
     }
+  end
+
+  before(:each) do
+    secret_storage.store_secret(content_source_id, { :access_token => 'something' })
   end
 
   def mock_endpoint(path, data)
@@ -49,9 +58,9 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
         ]
       }
 
-      mock_endpoint('sites/?$select=id&search=&top=10', sites)
+      mock_endpoint('sites/?$select=id,name&search=&top=10', sites)
       mock_endpoint('groups/?$select=id,createdDateTime', groups)
-      mock_endpoint('groups/1234/sites/root?$select=id', sites)
+      mock_endpoint('groups/1234/sites/root?$select=id,name', sites)
       mock_endpoint('sites/4567/drives/?$select=id,owner,name,driveType', drives)
       # ??
       mock_endpoint('sites//drives/?$select=id,owner,name,driveType', drives)
@@ -75,6 +84,8 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
     let(:download_params) { { :memento => 'mori' } }
     let(:params) do
       {
+        :content_source_id => 'some-nice-id-here',
+        :secret_storage => secret_storage,
         :access_token => 'access_token',
         :meta => {
           :download_url => 'download_url'
@@ -109,6 +120,8 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
     let(:ids) { 10.times.collect { random_string } }
     let(:params) do
       {
+          :content_source_id => 'some-nice-id-here',
+          :secret_storage => secret_storage,
           :access_token => 'access_token',
           :ids => ids
       }
@@ -120,7 +133,7 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
 
     context 'with valid access token' do
       it 'returns deleted ids' do
-        allow(extractor_mock).to receive(:yield_deleted_ids).with(ids).and_yield(ids.first).and_yield(ids.second)
+        allow(extractor_mock).to receive(:yield_deleted_ids).with(ids).and_yield(ids.first).and_yield(ids[1])
         expect(backend.deleted(params)).to eq ids[0, 2]
       end
     end
@@ -138,6 +151,7 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
     let(:user_id) { 'user_id' }
     let(:params) do
       {
+          :content_source_id => 'some-nice-id-here',
           :access_token => 'access_token',
           :user_id => user_id
       }
@@ -179,6 +193,32 @@ describe ConnectorsSdk::Base::HttpCallWrapper do
         allow(backend).to receive(:health_check).and_raise(StandardError)
         response = backend.source_status(params)
         expect(response[:status]).to eq 'FAILURE'
+      end
+    end
+  end
+
+  context '.compare_secrets' do
+    context 'when secret is missing' do
+      let(:params) { { :other_secret => 'other_secret' } }
+
+      it 'raises ClientError' do
+        expect { backend.compare_secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+      end
+    end
+
+    context 'when other_secret is missing' do
+      let(:params) { { :secret => 'secret' } }
+
+      it 'raises ClientError' do
+        expect { backend.compare_secrets(params) }.to raise_error(ConnectorsShared::ClientError)
+      end
+    end
+
+    context 'when params is empty' do
+      let(:params) { {} }
+
+      it 'raises ClientError' do
+        expect { backend.compare_secrets(params) }.to raise_error(ConnectorsShared::ClientError)
       end
     end
   end

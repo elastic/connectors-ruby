@@ -20,7 +20,7 @@ module ConnectorsSdk
 
       ConnectorsSdk::Base::Extractor::TRANSIENT_SERVER_ERROR_CLASSES << Atlassian::CustomClient::ServiceUnavailableError
 
-      def yield_document_changes(modified_since: nil, break_after_page: false)
+      def yield_document_changes(modified_since: nil)
         @space_permissions_cache = {}
         @content_restriction_cache = {}
         yield_spaces do |space|
@@ -49,11 +49,6 @@ module ConnectorsSdk
             else
               yield :create_or_update, Confluence::Adapter.es_document_from_confluence_content(content, content_base_url, restrictions)
             end
-          end
-
-          if break_after_page
-            @completed = true
-            break
           end
         end
       end
@@ -87,7 +82,7 @@ module ConnectorsSdk
       private
 
       def content_base_url
-        'https://workplace-search.atlassian.net/wiki'
+        config.base_url
       end
 
       def yield_spaces

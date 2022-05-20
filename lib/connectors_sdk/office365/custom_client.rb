@@ -52,7 +52,6 @@ module ConnectorsSdk
       def initialize(access_token:, cursors: {}, ensure_fresh_auth: nil)
         @access_token = access_token
         @cursors = cursors || {}
-        @cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY] ||= {}
         super(:ensure_fresh_auth => ensure_fresh_auth)
       end
 
@@ -77,12 +76,11 @@ module ConnectorsSdk
         # recently created groups (new Private Team site will be there) to reduce friction and index this site
         # earlier.
         # See: https://github.com/elastic/ent-search/pull/3581
-        share_point_sites = (sites(:fields => %w[id]) + recent_share_point_group_sites(:fields => %[id]))
+        share_point_sites = (sites(:fields => %w[id,name]) + recent_share_point_group_sites(:fields => %w[id,name]))
 
         share_point_sites
-          .map(&:id)
-          .uniq
-          .map { |site_id| site_drives(site_id, :fields => fields) }
+          .uniq(&:id)
+          .map { |site| site_drives(site, :fields => fields) }
           .flatten
           .compact
       end
@@ -104,47 +102,32 @@ module ConnectorsSdk
         request_all(:endpoint => 'sites/', :fields => fields, :additional_query_params => { :search => '', :top => 10 })
       end
 
-      def site_drives(site_id, fields: [])
+      def site_drives(site, fields: [])
         document_libraries(
-          request_all(:endpoint => "sites/#{site_id}/drives/", :fields => fields)
-        )
+          request_all(:endpoint => "sites/#{site.id}/drives/", :fields => fields)
+        ).map do |drive|
+          drive.site_name = site.name
+          drive
+        end
       rescue ClientError => e
         ConnectorsShared::Logger.info("Received response of #{e.status_code} trying to get drive for Site with Id = #{site_id}: #{e.message}")
         nil
       end
 
-      def list_items(drive_id, fields: [], break_after_page: false)
+      def list_items(drive_id, fields: [])
         # MSFT Graph API does not have a recursive list items, have to do this dfs style
-
-        stack = if break_after_page && cursors['page_cursor'].present?
-                  cursors.delete('page_cursor')
-                else
-                  [get_root_item(drive_id, ['id']).id]
-                end
-
+        stack = [get_root_item(drive_id, ['id']).id]
         # We rely on the id field below to perform our DFS
         fields_with_id = fields.any? ? fields | ['id'] : fields
-        yielded = 0
         while stack.any?
           folder_id = stack.pop
-          item_children(drive_id, folder_id, :fields => fields_with_id, :break_after_page => break_after_page) do |item|
+          item_children(drive_id, folder_id, :fields => fields_with_id) do |item|
             if item.folder
               stack << item.id
             end
             yield item
-
-            yielded += 1
           end
 
-          if break_after_page && yielded >= 100
-            if cursors['item_children_next_link'].present?
-              stack << folder_id
-            end
-            if stack.any?
-              cursors['page_cursor'] = stack.dup
-              break
-            end
-          end
         end
       end
 
@@ -152,19 +135,16 @@ module ConnectorsSdk
         request_endpoint(:endpoint => "drives/#{drive_id}/items/#{item_id}/permissions").value
       end
 
-      def list_changes(drive_id:, start_delta_link: nil, last_modified: nil, break_after_page: false)
+      def list_changes(drive_id:, start_delta_link: nil, last_modified: nil)
         query_params = { :'$select' => %w(id content.downloadUrl lastModifiedDateTime lastModifiedBy root deleted file folder package name webUrl createdBy createdDateTime size).join(',') }
         response =
-          if break_after_page && cursors['page_cursor'].present?
-            request_json(:url => cursors.delete('page_cursor'))
-          elsif start_delta_link.nil?
+          if start_delta_link.nil?
             endpoint = "drives/#{drive_id}/root/delta"
             request_endpoint(:endpoint => endpoint, :query_params => query_params)
           else
             request_json(:url => start_delta_link, :query_params => query_params)
           end
 
-        yielded = 0
         loop do
           response.value.each do |change|
             # MSFT Graph API does not allow us to view "changes" in chronological order, so if there is no cursor,
@@ -172,25 +152,18 @@ module ConnectorsSdk
             # since to get another cursor, we would have to go through all the changes anyway
             next if last_modified.present? && Time.parse(change.lastModifiedDateTime) < last_modified
             next if change.root # We don't want to index the root of the drive
-
             yield change
-            yielded += 1
-          end
-
-          if break_after_page && yielded >= 100 && response['@odata.nextLink'].present?
-            cursors['page_cursor'] = response['@odata.nextLink']
-            break
           end
 
           break if response['@odata.nextLink'].nil?
           response = request_json(:url => response['@odata.nextLink'])
         end
 
-        cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY][drive_id] = response['@odata.deltaLink']
+        cursors[drive_id] = response['@odata.deltaLink']
       end
 
       def get_latest_delta_link(drive_id)
-        cursors[ConnectorsSdk::Office365::Extractor::DRIVE_IDS_CURSOR_KEY][drive_id] || exhaustively_get_delta_link(drive_id)
+        cursors[drive_id] || exhaustively_get_delta_link(drive_id)
       end
 
       def exhaustively_get_delta_link(drive_id)
@@ -236,7 +209,7 @@ module ConnectorsSdk
 
         groups(:fields => %w(id createdDateTime))
           .select { |group| group.createdDateTime > created_date_time_threshold }
-          .map { |group| group_root_site(group.id, :fields => %w[id]) }.compact
+          .map { |group| group_root_site(group.id, :fields => fields) }.compact
       end
 
       def document_libraries(drives)
@@ -264,30 +237,15 @@ module ConnectorsSdk
         request_endpoint(:endpoint => "drives/#{drive_id}/root", :query_params => query_params)
       end
 
-      def item_children(drive_id, item_id, fields: [], break_after_page: false, &block)
-        next_link = cursors.delete('item_children_next_link') if break_after_page
+      def item_children(drive_id, item_id, fields: [], &block)
+        endpoint = "drives/#{drive_id}/items/#{item_id}/children"
+        query_params = transform_fields_to_request_query_params(fields)
+        response = request_endpoint(:endpoint => endpoint, :query_params => query_params)
 
-        response = if next_link.present?
-                     request_json(:url => next_link)
-                   else
-                     endpoint = "drives/#{drive_id}/items/#{item_id}/children"
-                     query_params = transform_fields_to_request_query_params(fields)
-                     request_endpoint(:endpoint => endpoint, :query_params => query_params)
-                   end
-
-        yielded = 0
         loop do
           response.value.each(&block)
           next_link = response['@odata.nextLink']
-
           break if next_link.nil?
-
-          yielded += response.value.size
-          if break_after_page && yielded >= 100
-            cursors['item_children_next_link'] = next_link
-            break
-          end
-
           response = request_json(:url => next_link)
         end
       end
