@@ -27,10 +27,10 @@ module ConnectorsAsync
 
     def watch
       raise 'Already watching!' unless @is_watching.make_true
-      ConnectorsShared::Logger.info("Watching after jobs < ( o ) >")
+      ConnectorsShared::Logger.info('Watching after jobs {•̃_•̃}')
 
       @pool.post do
-        while true
+        Kernel.loop do
           jobs_to_clean_up = []
 
           jobs = @job_store.fetch_all

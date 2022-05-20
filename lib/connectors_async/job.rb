@@ -93,7 +93,7 @@ module ConnectorsAsync
     end
 
     def safe_to_clean_up?
-      return true if is_finished? && @data[:documents].length == 0
+      return true if is_finished? && @data[:documents].empty?
 
       # half an hour seems good enough, given that some connectors take 5-10 minutes to respond when throttled
       Time.now - @data[:last_updated_at] > 60 * 30
