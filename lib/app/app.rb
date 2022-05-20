@@ -32,7 +32,7 @@ class ConnectorsWebApp < Sinatra::Base
   set :api_key, ConnectorsApp::Config.http['api_key']
   set :deactivate_auth, ConnectorsApp::Config.http['deactivate_auth']
   set :connector_name, ConnectorsApp::Config.http['connector']
-  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(ConnectorsApp::Config.connector_name)
+  set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
   set :job_store, ConnectorsAsync::JobStore.new
   set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: ConnectorsApp::Config.worker['max_thread_count'] })
   set :secret_storage, ConnectorsAsync::SecretStorage.new
@@ -59,7 +59,8 @@ class ConnectorsWebApp < Sinatra::Base
     # XXX to be removed
     return if settings.deactivate_auth
 
-    raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(ConnectorsApp::Config.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
+
+    raise StandardError.new 'You need to set an API key in the config file' if ![:test, :development].include?(settings.environment) && settings.api_key == ConnectorsApp::DEFAULT_PASSWORD
 
     auth = Rack::Auth::Basic::Request.new(request.env)
 
