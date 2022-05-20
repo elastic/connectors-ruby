@@ -195,6 +195,25 @@ describe ConnectorsAsync::JobRunner do
 
         idle_a_bit
       end
+
+      context 'when job idled for too long' do
+        before(:each) do
+          allow(job).to receive(:should_wait?).and_return(true)
+        end
+
+        it 'fails a job' do
+          expect(job).to receive(:fail)
+
+          job_runner.start_job(
+            job: job,
+            connector_class: connector_class,
+            secret_storage: secret_storage,
+            params: params
+          )
+
+          idle_a_bit
+        end
+      end
     end
   end
 

@@ -13,14 +13,17 @@ require 'connectors_shared/logger'
 
 module ConnectorsAsync
   class JobRunner
-    THROTTLE_SLEEP_TIME = 10
+    IDLE_SLEEP_TIME = 10
+    MAX_IDLE_ATTEMPTS = 30
+
+    class JobStuckError < StandardError; end
 
     def initialize(max_threads:)
       @pool = Concurrent::ThreadPoolExecutor.new(
         min_threads: 1,
         max_threads: max_threads,
         max_queue: 0,
-        idletime: THROTTLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
+        idletime: IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
       )
     end
 
@@ -38,14 +41,8 @@ module ConnectorsAsync
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
         new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
-          job.store(doc)
-
-          if job.should_wait?
-            log("Job #{job.id} is sleeping: Enterprise Search haven't picked up documents for a while.")
-
-            idle(THROTTLE_SLEEP_TIME) while job.should_wait?
-
-            log("Job #{job.id} woke up")
+          with_throttling(job) do
+            job.store(doc)
           end
         end
 
@@ -65,6 +62,26 @@ module ConnectorsAsync
     end
 
     private
+
+    def with_throttling(job)
+      attempts = 0
+      if job.should_wait?
+        log("Job #{job.id} is sleeping: Enterprise Search haven't picked up documents for a while.")
+
+        while job.should_wait?
+          if attempts < MAX_IDLE_ATTEMPTS
+            attempts += 1
+            idle(IDLE_SLEEP_TIME)
+          else
+            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{IDLE_SLEEP_TIME} seconds.")
+          end
+        end
+
+        log("Job #{job.id} woke up")
+      end
+
+      yield
+    end
 
     def idle(time)
       Kernel.sleep(time)
