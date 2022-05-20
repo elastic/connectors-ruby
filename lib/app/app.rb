@@ -78,7 +78,6 @@ class ConnectorsWebApp < Sinatra::Base
 
     # We only support Basic for now
     error = auth.provided? && auth.scheme != 'basic' ? ConnectorsShared::UNSUPPORTED_AUTH_SCHEME : ConnectorsShared::INVALID_API_KEY
-    p error
     response = { errors: [error.to_h] }.to_json
     halt(error.status_code, { 'Content-Type' => 'application/json' }, response)
   end
