@@ -173,6 +173,6 @@ class ConnectorsWebApp < Sinatra::Base
   end
 
   def connector
-    settings.connector_class.new
+    @_connector ||= settings.connector_class.new
   end
 end
