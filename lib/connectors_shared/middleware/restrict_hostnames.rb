@@ -36,7 +36,7 @@ module ConnectorsShared
       def ips_from_hosts(hosts)
         hosts&.flat_map do |host|
           if URL_PATTERN.match(host)
-            lookup_ips(URI.parse(host).host)
+            lookup_ips(Addressable::URI.parse(host).hostname)
           elsif Resolv::IPv4::Regex.match(host) || Resolv::IPv6::Regex.match(host)
             IPAddr.new(host)
           else
@@ -46,7 +46,7 @@ module ConnectorsShared
       end
 
       def denied?(env)
-        requested_ips = lookup_ips(env[:url].hostname.to_s)
+        requested_ips = lookup_ips(env[:url].hostname)
         no_match = requested_ips.all? { |ip| !@allowed_ips.include?(ip) }
         return false unless no_match
         ConnectorsShared::Logger.warn("Requested url #{env[:url]} with resolved ip addresses #{requested_ips} does not match " \
