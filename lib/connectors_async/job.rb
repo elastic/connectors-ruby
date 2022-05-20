@@ -12,6 +12,7 @@ module ConnectorsAsync
   class Job
     class StatusUpdateError < StandardError; end
     class InvalidStatusError < StandardError; end
+    class StuckError < StandardError; end
 
     def initialize(job_id)
       @data = {

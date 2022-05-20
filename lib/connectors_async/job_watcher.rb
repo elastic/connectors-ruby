@@ -10,7 +10,9 @@ require 'connectors_shared/logger'
 
 module ConnectorsAsync
   class JobWatcher
-    IDLE_TIME = 3 # seconds
+    IDLE_TIME = 30 # seconds
+
+    class AlreadyWatchingError < StandardError; end
 
     def initialize(job_store:)
       @job_store = job_store
@@ -26,36 +28,43 @@ module ConnectorsAsync
     end
 
     def watch
-      raise 'Already watching!' unless @is_watching.make_true
+      raise AlreadyWatchingError.new('Already watching!') unless @is_watching.make_true
       ConnectorsShared::Logger.info('Watching after jobs {•̃_•̃}')
 
       @pool.post do
-        Kernel.loop do
-          jobs_to_clean_up = []
-
-          jobs = @job_store.fetch_all
-
-          ConnectorsShared::Logger.debug("Found #{jobs.length} jobs.")
-
-          jobs.each do |job|
-            if job.safe_to_clean_up?
-              jobs_to_clean_up << job
-            end
-          end
-
-          ConnectorsShared::Logger.debug("Found #{jobs_to_clean_up.length} jobs to clean up.")
-
-          jobs_to_clean_up.each do |job|
-            ConnectorsShared::Logger.info "Cleaning up #{job.id}"
-            @job_store.delete_job!(job.id)
-          end
-
-          idle(IDLE_TIME)
+        loop do
+          run!
+        rescue StandardError => e
+          ConnectorsShared::Logger.error("An error occurred while watching over jobs: #{e.message}")
         end
       end
     end
 
     private
+
+    def run!
+      jobs_to_clean_up = []
+
+      jobs = @job_store.fetch_all
+
+      ConnectorsShared::Logger.debug("Found #{jobs.length} jobs.")
+
+      jobs.each do |job|
+        if job.safe_to_clean_up?
+          jobs_to_clean_up << job
+        end
+      end
+
+      ConnectorsShared::Logger.debug("Found #{jobs_to_clean_up.length} jobs to clean up.")
+
+      jobs_to_clean_up.each do |job|
+        ConnectorsShared::Logger.info "Cleaning up #{job.id}"
+        job.fail(ConnectorsAsync::Job::StuckError.new) unless job.is_finished?
+        @job_store.delete_job!(job.id)
+      end
+
+      idle(IDLE_TIME)
+    end
 
     def idle(timeout)
       Kernel.sleep(timeout)
