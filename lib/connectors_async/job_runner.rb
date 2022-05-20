@@ -84,7 +84,7 @@ module ConnectorsAsync
     end
 
     def idle(time)
-      Kernel.sleep(time)
+      sleep(time)
     end
 
     def init_thread
