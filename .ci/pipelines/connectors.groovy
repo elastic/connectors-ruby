@@ -34,7 +34,7 @@ eshPipeline(
                     reportName: 'Coverage Report'
                 ])
             },
-            nodes: ['linux', 'windows'],
+            // nodes: ['linux', 'windows'], // disabled pending https://github.com/elastic/ent-search-jenkins-lib/pull/36
             match_on_all_branches: true,
        ],
        [
