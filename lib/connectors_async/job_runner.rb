@@ -40,10 +40,10 @@ module ConnectorsAsync
         new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
           job.store(doc)
 
-          if job.should_throttle?
+          if job.should_wait?
             log("Job #{job.id} is sleeping: Enterprise Search haven't picked up documents for a while.")
 
-            idle(THROTTLE_SLEEP_TIME) while job.should_throttle?
+            idle(THROTTLE_SLEEP_TIME) while job.should_wait?
 
             log("Job #{job.id} woke up")
           end
