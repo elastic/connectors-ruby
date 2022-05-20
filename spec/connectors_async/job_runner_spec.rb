@@ -34,7 +34,7 @@ describe ConnectorsAsync::JobRunner do
       allow(job).to receive(:id).and_return(1)
       allow(job).to receive(:update_status)
       allow(job).to receive(:update_cursors)
-      allow(job).to receive(:should_throttle?).and_return(false)
+      allow(job).to receive(:should_wait?).and_return(false)
       allow(job).to receive(:store)
 
       allow(connector).to receive(:extract) do |&block|
@@ -179,7 +179,7 @@ describe ConnectorsAsync::JobRunner do
 
     context 'when job indicates that no results were picked up for a bit' do
       before(:each) do
-        allow(job).to receive(:should_throttle?).and_return(true, true, false)
+        allow(job).to receive(:should_wait?).and_return(true, true, false)
         allow(Kernel).to receive(:sleep) { ; }
       end
 
