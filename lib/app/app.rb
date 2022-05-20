@@ -16,9 +16,10 @@ require 'sinatra'
 require 'sinatra/config_file'
 require 'sinatra/json'
 
-require 'connectors_shared'
-require 'connectors_sdk/base/registry'
+require 'connectors_app/config'
 require 'connectors_async'
+require 'connectors_sdk/base/registry'
+require 'connectors_shared'
 
 Dir[File.join(__dir__, 'initializers/**/*.rb')].sort.each { |f| require f }
 
@@ -78,7 +79,7 @@ class ConnectorsWebApp < Sinatra::Base
       :connectors_version => ConnectorsApp::Config.version,
       :connectors_repository => ConnectorsApp::Config.repository,
       :connectors_revision => ConnectorsApp::Config.revision,
-      :connector_name => connector.connector_name,
+      :connector_name => settings.connector_name,
       :display_name => connector.display_name,
       :configurable_fields => connector.configurable_fields,
       :connection_requires_redirect => connector.connection_requires_redirect,
