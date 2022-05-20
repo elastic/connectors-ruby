@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors_async/job_runner'
+require 'connectors_async/job_watcher'
 require 'connectors_sdk/base/adapter'
 
 describe ConnectorsAsync::JobRunner do
@@ -24,6 +25,7 @@ describe ConnectorsAsync::JobRunner do
     end
     let(:secret_storage) { double }
     let(:job) { double }
+    let(:job_watcher) { double }
     let(:thread_executor_mock) { double }
     let(:extraction_time) { 0 }
     let(:connector_class) { double }
@@ -35,6 +37,8 @@ describe ConnectorsAsync::JobRunner do
       allow(job).to receive(:update_status)
       allow(job).to receive(:update_cursors)
 
+      allow(job_watcher).to receive(:watch)
+
       allow(connector).to receive(:extract) do
         sleep(extraction_time) if extraction_time > 0
       end.and_return(cursors_after_extraction)
@@ -42,6 +46,7 @@ describe ConnectorsAsync::JobRunner do
       allow(secret_storage).to receive(:fetch_secret).with(content_source_id).and_return(access_token)
 
       allow(connector_class).to receive(:new).and_return(connector)
+      allow(ConnectorsAsync::JobWatcher).to receive(:new).and_return(job_watcher)
     end
 
     context 'extractor takes a long time to complete' do
