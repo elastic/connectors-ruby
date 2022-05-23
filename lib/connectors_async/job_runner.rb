@@ -8,13 +8,12 @@ require 'concurrent'
 
 require 'connectors_app/config'
 require 'connectors_async/job_store'
+require 'connectors_shared/constants'
 require 'connectors_shared/job_status'
 require 'connectors_shared/logger'
 
 module ConnectorsAsync
   class JobRunner
-    IDLE_SLEEP_TIME = 10
-    MAX_IDLE_ATTEMPTS = 30
 
     class JobStuckError < StandardError; end
 
@@ -23,7 +22,7 @@ module ConnectorsAsync
         min_threads: 1,
         max_threads: max_threads,
         max_queue: 0,
-        idletime: IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
+        idletime: ConnectorsShared::Constants::IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
       )
     end
 
@@ -69,9 +68,9 @@ module ConnectorsAsync
         log("Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
 
         while job.should_wait?
-          if attempts < MAX_IDLE_ATTEMPTS
+          if attempts < ConnectorsShared::Constants::MAX_IDLE_ATTEMPTS
             attempts += 1
-            idle(IDLE_SLEEP_TIME)
+            idle(ConnectorsShared::Constants::IDLE_SLEEP_TIME)
           else
             raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{IDLE_SLEEP_TIME} seconds.")
           end
