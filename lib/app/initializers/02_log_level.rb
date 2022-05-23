@@ -5,6 +5,10 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'stubs/app_config'
+require 'connectors_app/config'
+require 'connectors_shared/logger'
+
 logger = AppConfig.connectors_logger
 logger.level = ConnectorsApp::Config['log_level'] || 'info'
 
