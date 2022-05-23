@@ -8,14 +8,22 @@ require 'concurrent'
 
 require 'connectors_app/config'
 require 'connectors_async/job_store'
+require 'connectors_shared/constants'
 require 'connectors_shared/job_status'
 require 'connectors_shared/exception_tracking'
 require 'connectors_shared/logger'
 
 module ConnectorsAsync
   class JobRunner
+    class JobStuckError < StandardError; end
+
     def initialize(max_threads:)
-      @pool = Concurrent::ThreadPoolExecutor.new(min_threads: 1, max_threads: max_threads, max_queue: 0)
+      @pool = Concurrent::ThreadPoolExecutor.new(
+        min_threads: 1,
+        max_threads: max_threads,
+        max_queue: 0,
+        idletime: ConnectorsShared::Constants::IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
+      )
     end
 
     def start_job(job:, connector_class:, secret_storage:, params:)
@@ -32,7 +40,9 @@ module ConnectorsAsync
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
         new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
-          job.store(doc)
+          with_throttling(job) do
+            job.store(doc)
+          end
         end
 
         job.update_status(ConnectorsShared::JobStatus::FINISHED)
@@ -40,9 +50,9 @@ module ConnectorsAsync
 
         log_with_thread_id(:info, "Job #{job.id} has finished successfully")
       rescue StandardError => e
-        job.fail(e)
         log_with_thread_id(:error, "Job #{job.id} failed.")
         ConnectorsShared::ExceptionTracking.log_exception(e)
+        job.fail(e)
       end
     end
 
@@ -51,6 +61,31 @@ module ConnectorsAsync
     end
 
     private
+
+    def with_throttling(job)
+      attempts = 0
+      if job.should_wait?
+        log_with_thread_id(:info, "Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
+
+        while job.should_wait?
+          if attempts < ConnectorsShared::Constants::MAX_IDLE_ATTEMPTS
+            attempts += 1
+            idle(ConnectorsShared::Constants::IDLE_SLEEP_TIME)
+          else
+            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{ConnectorsShared::Constants::IDLE_SLEEP_TIME} seconds.")
+          end
+        end
+
+        log_with_thread_id(:info, "Job #{job.id} woke up")
+      end
+
+      yield
+    end
+
+    def idle(time)
+      log_with_thread_id(:debug, "Idling for #{time} seconds")
+      sleep(time)
+    end
 
     def init_thread
       Time.zone = ActiveSupport::TimeZone.new('UTC') # bah Time.zone should be init for each thread
