@@ -4,6 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'active_support/core_ext/numeric/time'
 require 'concurrent'
 
 require 'connectors_app/config'
@@ -22,7 +23,7 @@ module ConnectorsAsync
         min_threads: 1,
         max_threads: max_threads,
         max_queue: 0,
-        idletime: ConnectorsShared::Constants::IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
+        idletime: ConnectorsShared::Constants::IDLE_SLEEP_TIME + 1.second # we +1 just so that thread.sleep manages to finish by the idle timeout
       )
     end
 
@@ -63,16 +64,15 @@ module ConnectorsAsync
     private
 
     def with_throttling(job)
-      attempts = 0
       if job.should_wait?
         log_with_thread_id(:info, "Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
-
+        wait_duration = 0
         while job.should_wait?
-          if attempts < ConnectorsShared::Constants::MAX_IDLE_ATTEMPTS
-            attempts += 1
+          if wait_duration < ConnectorsShared::Constants::MAX_IDLE_TIME
             idle(ConnectorsShared::Constants::IDLE_SLEEP_TIME)
+            wait_duration += ConnectorsShared::Constants::IDLE_SLEEP_TIME
           else
-            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{ConnectorsShared::Constants::IDLE_SLEEP_TIME} seconds.")
+            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited for #{ConnectorsShared::Constants::MAX_IDLE_TIME} seconds.")
           end
         end
 

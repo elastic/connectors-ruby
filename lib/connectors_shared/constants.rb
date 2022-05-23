@@ -4,6 +4,8 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'active_support/core_ext/numeric/time'
+
 module ConnectorsShared
   class Constants
     THUMBNAIL_FIELDS = %w[_thumbnail_80x100 _thumbnail_310x430].freeze
@@ -18,7 +20,7 @@ module ConnectorsShared
     # full, it will sleep for maximum MAX_IDDLE_ATTEMPTS times, and if the queue is still
     # full, then job will be terminated.
     JOB_QUEUE_SIZE_IDLE_THRESHOLD = 500 # How many documents the job queue stores until it sleeps
-    IDLE_SLEEP_TIME = 10 # For how long job queue will sleep before checking the queue size again
-    MAX_IDLE_ATTEMPTS = 30 # How many consecutive times job will try to sleep until it's destroyed
+    IDLE_SLEEP_TIME = 10.seconds # For how long job queue will sleep before checking the queue size again
+    MAX_IDLE_TIME = 300.seconds # How long a job will try to sleep until it's destroyed
   end
 end

@@ -6,6 +6,10 @@
 
 # frozen_string_literal: true
 
+require 'active_support/duration'
+require 'active_support/core_ext/time'
+require 'timecop'
+
 require 'connectors_async/job_runner'
 require 'connectors_sdk/base/adapter'
 
@@ -183,7 +187,7 @@ describe ConnectorsAsync::JobRunner do
         allow(job_runner).to receive(:sleep) { ; }
       end
 
-      it 'throttles the run until the job no longer indicates it should be throttled' do
+      it 'throttles the run' do
         expect(job_runner).to receive(:idle)
 
         job_runner.start_job(
@@ -199,6 +203,11 @@ describe ConnectorsAsync::JobRunner do
       context 'when job idled for too long' do
         before(:each) do
           allow(job).to receive(:should_wait?).and_return(true)
+          allow(job_runner).to receive(:idle) { |idle_seconds| Timecop.travel(Time.now.advance(seconds: idle_seconds)) }
+        end
+
+        after do
+          Timecop.return
         end
 
         it 'fails a job' do
@@ -212,6 +221,22 @@ describe ConnectorsAsync::JobRunner do
           )
 
           idle_a_bit
+        end
+
+        it 'keeps trying until a wait threshold is met' do
+          run_start = Time.now
+
+          job_runner.start_job(
+            job: job,
+            connector_class: connector_class,
+            secret_storage: secret_storage,
+            params: params
+          )
+          idle_a_bit
+
+          run_end = Time.now
+
+          expect(run_end - run_start).to be > ConnectorsShared::Constants::MAX_IDLE_TIME
         end
       end
     end
