@@ -17,13 +17,6 @@ module ConnectorsAsync
     def initialize(job_store:)
       @job_store = job_store
 
-      @pool = Concurrent::ThreadPoolExecutor.new(
-        min_threads: 1,
-        max_threads: 1,
-        max_queue: 0,
-        idletime: IDLE_TIME + 1
-      )
-
       @is_watching = Concurrent::AtomicBoolean.new(false)
     end
 
@@ -31,11 +24,11 @@ module ConnectorsAsync
       raise AlreadyWatchingError.new('Already watching!') unless @is_watching.make_true
       ConnectorsShared::Logger.info('Watching after jobs {•̃_•̃}')
 
-      @pool.post do
+      Thread.new do
         loop do
           run!
         rescue StandardError => e
-          ConnectorsShared::Logger.error("An error occurred while watching over jobs: #{e.message}")
+          ConnectorsShared::ExceptionTracking.log_exception(e)
         end
       end
     end

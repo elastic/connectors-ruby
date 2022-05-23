@@ -7,16 +7,15 @@
 # frozen_string_literal: true
 
 require 'connectors_async/job_watcher'
+require 'connectors_shared/exception_tracking'
 
 describe ConnectorsAsync::JobWatcher do
-  let(:thread_pool_executor) { double }
   let(:job_store) { double }
   let(:jobs) { [] }
   let(:job_watcher) { described_class.new(job_store: job_store) }
 
   before(:each) do
-    allow(Concurrent::ThreadPoolExecutor).to receive(:new).and_return(thread_pool_executor)
-    allow(thread_pool_executor).to receive(:post).and_yield # we just threat it in sync mode here
+    allow(Thread).to receive(:new).and_yield # we just threat it in sync mode here
     allow(job_watcher).to receive(:loop).and_yield # we just run the loop once
     allow(job_watcher).to receive(:idle) # and not actually idle
 
@@ -47,7 +46,7 @@ describe ConnectorsAsync::JobWatcher do
     end
 
     it 'logs an error' do
-      expect(ConnectorsShared::Logger).to receive(:error)
+      expect(ConnectorsShared::ExceptionTracking).to receive(:log_exception)
 
       job_watcher.watch
     end
