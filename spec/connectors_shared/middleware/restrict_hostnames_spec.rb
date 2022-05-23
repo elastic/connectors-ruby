@@ -164,7 +164,16 @@ describe ConnectorsShared::Middleware::RestrictHostnames do
     end
 
     context 'external domain' do
+      let(:actual_ip) { double('good ip', :ip_address => '203.0.113.1') }
       let(:env) { external_url }
+
+      before(:each) do
+        allow(Addrinfo).to receive(:getaddrinfo).with(external_url[:url].host, nil, :UNSPEC, :STREAM).and_return(
+          [actual_ip],
+          [actual_ip]
+        )
+      end
+
       it_behaves_like 'an allowed call'
 
       context 'when DNS lookup changes between initialization and request' do
