@@ -20,5 +20,7 @@ module ConnectorsShared
     JOB_QUEUE_SIZE_IDLE_THRESHOLD = 500 # How many documents the job queue stores until it sleeps
     IDLE_SLEEP_TIME = 10 # For how long job queue will sleep before checking the queue size again
     MAX_IDLE_ATTEMPTS = 30 # How many consecutive times job will try to sleep until it's destroyed
+
+    STALE_JOB_TIMEOUT = 60 * 30 # Time in seconds after which the job will be cleaned up if the job is considered stuck
   end
 end
