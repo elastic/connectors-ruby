@@ -50,9 +50,9 @@ module ConnectorsAsync
 
         log_with_thread_id(:info, "Job #{job.id} has finished successfully")
       rescue StandardError => e
-        job.fail(e)
         log_with_thread_id(:error, "Job #{job.id} failed.")
         ConnectorsShared::ExceptionTracking.log_exception(e)
+        job.fail(e)
       end
     end
 
@@ -65,7 +65,7 @@ module ConnectorsAsync
     def with_throttling(job)
       attempts = 0
       if job.should_wait?
-        log("Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
+        log_with_thread_id(:info, "Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
 
         while job.should_wait?
           if attempts < ConnectorsShared::Constants::MAX_IDLE_ATTEMPTS
@@ -76,14 +76,14 @@ module ConnectorsAsync
           end
         end
 
-        log("Job #{job.id} woke up")
+        log_with_thread_id(:info, "Job #{job.id} woke up")
       end
 
       yield
     end
 
     def idle(time)
-      log("Idling for #{time} seconds")
+      log_with_thread_id(:debug, "Idling for #{time} seconds")
       sleep(time)
     end
 
