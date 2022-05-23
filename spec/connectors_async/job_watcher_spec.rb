@@ -111,7 +111,7 @@ describe ConnectorsAsync::JobWatcher do
 
     it 'attempts to fail and remove the job' do
       expect(job_store).to receive(:delete_job!).with(job_id)
-      expect(job).to receive(:fail)
+      expect(job).to receive(:fail).with(instance_of(ConnectorsAsync::JobWatcher::JobTerminatedError))
 
       job_watcher.watch
     end

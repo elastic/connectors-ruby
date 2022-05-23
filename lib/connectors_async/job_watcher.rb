@@ -15,6 +15,7 @@ module ConnectorsAsync
     IDLE_TIME = 30 # seconds
 
     class AlreadyWatchingError < StandardError; end
+    class JobTerminatedError < StandardError; end
 
     def initialize(job_store:)
       @job_store = job_store
@@ -54,7 +55,7 @@ module ConnectorsAsync
 
       jobs_to_clean_up.each do |job|
         ConnectorsShared::Logger.debug "Cleaning up #{job.id}"
-        job.fail(ConnectorsAsync::Job::StuckError.new) unless job.is_finished?
+        job.fail(JobTerminatedError.new) unless job.is_finished?
         @job_store.delete_job!(job.id)
       end
 

@@ -14,7 +14,6 @@ module ConnectorsAsync
   class Job
     class StatusUpdateError < StandardError; end
     class InvalidStatusError < StandardError; end
-    class StuckError < StandardError; end
 
     def initialize(job_id)
       @data = {
@@ -22,6 +21,7 @@ module ConnectorsAsync
         :status => ConnectorsShared::JobStatus::CREATED,
         :documents => Queue.new # queue is thread-safe
       }
+
       @last_updated_at = Time.now
     end
 
@@ -100,7 +100,7 @@ module ConnectorsAsync
       return true if is_finished? && @data[:documents].empty?
 
       # half an hour seems good enough, given that some connectors take 5-10 minutes to respond when throttled
-      Time.now - @data[:last_updated_at] > ConnectorsShared::Constants::STALE_JOB_TIMEOUT
+      Time.now - @last_updated_at > ConnectorsShared::Constants::STALE_JOB_TIMEOUT
     end
 
     private
