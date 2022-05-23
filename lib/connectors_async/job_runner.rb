@@ -66,7 +66,7 @@ module ConnectorsAsync
     def with_throttling(job)
       attempts = 0
       if job.should_wait?
-        log("Job #{job.id} is sleeping: Enterprise Search haven't picked up documents for a while.")
+        log("Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
 
         while job.should_wait?
           if attempts < MAX_IDLE_ATTEMPTS
