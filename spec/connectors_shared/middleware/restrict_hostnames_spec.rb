@@ -165,6 +165,14 @@ describe ConnectorsShared::Middleware::RestrictHostnames do
 
     context 'external domain' do
       let(:env) { external_url }
+
+      before(:each) do
+        allow(subject).to receive(:lookup_ips).and_return([
+          IPAddr.new('2a00:1450:400e:802::200e'),
+          IPAddr.new('142.251.36.46')
+        ])
+      end
+
       it_behaves_like 'an allowed call'
 
       context 'when DNS lookup changes between initialization and request' do
