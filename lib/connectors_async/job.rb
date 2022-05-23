@@ -4,6 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'concurrent/map'
 require 'connectors_shared/constants'
 require 'connectors_shared/job_status'
 
@@ -16,12 +17,11 @@ module ConnectorsAsync
     class StuckError < StandardError; end
 
     def initialize(job_id)
-      @data = {
-        :job_id => job_id,
-        :status => ConnectorsShared::JobStatus::CREATED,
-        :documents => Queue.new,
-        :last_updated_at => Time.now
-      }
+      @data = Concurrent::Map.new
+      @data[:job_id] = job_id
+      @data[:status] = ConnectorsShared::JobStatus::CREATED
+      @data[:documents] = Queue.new # queue is thread-safe
+      @data[:last_updated_at] = Time.now
     end
 
     def id
@@ -41,7 +41,7 @@ module ConnectorsAsync
     end
 
     def has_cursors?
-      @data.has_key?(:cursors)
+      @data[:cursors].present?
     end
 
     def cursors
