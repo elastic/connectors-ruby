@@ -36,7 +36,7 @@ module ConnectorsShared
       def ips_from_hosts(hosts)
         hosts&.flat_map do |host|
           if URL_PATTERN.match(host)
-            lookup_ips(URI.parse(host).host)
+            lookup_ips(Addressable::URI.parse(host).hostname)
           elsif Resolv::IPv4::Regex.match(host) || Resolv::IPv6::Regex.match(host)
             IPAddr.new(host)
           else

@@ -188,16 +188,19 @@ module ConnectorsSdk
       end
 
       def permissions(source_user_id, &block)
+        result = []
         Connectors::Stats.measure("extractor.#{Connectors::Stats.class_key(self.class)}.permissions") do
           with_auth_tokens_and_retry do
             Connectors::Stats.measure("extractor.#{Connectors::Stats.class_key(self.class)}.yield_permissions") do
               yield_permissions(source_user_id) do |permissions|
                 log_info("Extracted #{permissions.size} permissions for source user #{source_user_id}")
+                result = permissions
                 block.call(permissions) if block_given?
               end
             end
           end
         end
+        result.each
       end
 
       ConnectorsShared::Logger::SUPPORTED_LOG_LEVELS.each do |log_level|
