@@ -80,6 +80,7 @@ module ConnectorsAsync
         results << @data[:documents].pop(true)
       end
 
+      notify_changed
       results
     rescue ThreadError
       puts 'Attempt to access an empty queue happened, when the queue was not supposed to be empty'
