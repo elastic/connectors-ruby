@@ -58,7 +58,7 @@ module ConnectorsAsync
       ConnectorsShared::Logger.debug("Found #{jobs_to_clean_up.length} jobs to clean up.")
 
       jobs_to_clean_up.each do |job|
-        ConnectorsShared::Logger.info "Cleaning up #{job.id}"
+        ConnectorsShared::Logger.debug "Cleaning up #{job.id}"
         job.fail(ConnectorsAsync::Job::StuckError.new) unless job.is_finished?
         @job_store.delete_job!(job.id)
       end
