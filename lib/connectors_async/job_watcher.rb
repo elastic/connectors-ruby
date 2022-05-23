@@ -62,6 +62,7 @@ module ConnectorsAsync
     end
 
     def idle(timeout)
+      ConnectorsShared::Logger.debug "Idling for #{timeout}"
       sleep(timeout)
     end
   end
