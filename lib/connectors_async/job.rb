@@ -17,11 +17,12 @@ module ConnectorsAsync
     class StuckError < StandardError; end
 
     def initialize(job_id)
-      @data = Concurrent::Map.new
-      @data[:job_id] = job_id
-      @data[:status] = ConnectorsShared::JobStatus::CREATED
-      @data[:documents] = Queue.new # queue is thread-safe
-      @data[:last_updated_at] = Time.now
+      @data = {
+        :job_id => job_id,
+        :status => ConnectorsShared::JobStatus::CREATED,
+        :documents => Queue.new # queue is thread-safe
+      }
+      @last_updated_at = Time.now
     end
 
     def id
@@ -105,7 +106,7 @@ module ConnectorsAsync
     private
 
     def notify_changed
-      @data[:last_updated_at] = Time.now
+      @last_updated_at = Time.now
     end
   end
 end
