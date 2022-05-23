@@ -200,7 +200,7 @@ module ConnectorsSdk
             end
           end
         end
-        result
+        result.each
       end
 
       ConnectorsShared::Logger::SUPPORTED_LOG_LEVELS.each do |log_level|
