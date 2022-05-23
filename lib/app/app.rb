@@ -39,7 +39,6 @@ class ConnectorsWebApp < Sinatra::Base
 
   error do
     e = env['sinatra.error']
-    puts e.message
     err = case e
           when ConnectorsShared::ClientError
             ConnectorsShared::Error.new(400, 'BAD_REQUEST', e.message)
