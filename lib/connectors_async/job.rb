@@ -16,6 +16,11 @@ module ConnectorsAsync
     class InvalidStatusError < StandardError; end
 
     def initialize(job_id)
+      # Imporatant:
+      # Don't expose the @data outside
+      # Don't allow to update @last_updated_at by anyone but this class
+      # This is a naive implementation that can break, if any of these two conditions are not satisfied.
+
       @data = {
         :job_id => job_id,
         :status => ConnectorsShared::JobStatus::CREATED,
