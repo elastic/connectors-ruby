@@ -8,7 +8,7 @@ RSpec.describe ConnectorsWebApp do
 
   let(:app) { ConnectorsWebApp }
   let(:api_key) { 'api_key' }
-  let(:connector_class) { ConnectorsSdk::SharePoint::HttpCallWrapper }
+  let(:connector_class) { ConnectorsSdk::SharePoint::Connector }
   let(:connector) { connector_class.new }
   let(:service_type) { connector_class::SERVICE_TYPE }
   let(:display_name) { 'SharePoint Online' }
@@ -268,7 +268,7 @@ RSpec.describe ConnectorsWebApp do
     context 'when valid parameters are passed' do
       let(:params) { { :a => 'b', :c => 'd' } }
 
-      it 'returns the result of HttpCallWrapper.download' do
+      it 'returns the result of Connector.download' do
         allow(connector).to receive(:download).and_return(file_content)
         response = post('/download', JSON.generate(params), { 'CONTENT_TYPE' => 'application/json' })
 
@@ -298,7 +298,7 @@ RSpec.describe ConnectorsWebApp do
       end
     end
 
-    context 'when HttpCallWrapper.download raises an error' do
+    context 'when Connector.download raises an error' do
       let(:params) { { :a => 'b', :c => 'd' } }
       let(:error_class) { ArgumentError }
 

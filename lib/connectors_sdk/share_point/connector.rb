@@ -6,14 +6,14 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/http_call_wrapper'
+require 'connectors_sdk/base/connector'
 require 'connectors_sdk/office365/config'
 require 'connectors_sdk/share_point/extractor'
 require 'connectors_sdk/share_point/authorization'
 
 module ConnectorsSdk
   module SharePoint
-    class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+    class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'share_point'
 
       def compare_secrets(params)

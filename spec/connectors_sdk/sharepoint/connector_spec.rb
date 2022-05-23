@@ -6,16 +6,26 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/confluence_cloud/http_call_wrapper'
+require 'connectors_sdk/share_point/connector'
 
-describe ConnectorsSdk::ConfluenceCloud::HttpCallWrapper do
+describe ConnectorsSdk::SharePoint::Connector do
   describe '.compare_secrets' do
+    let(:params) do
+      {
+        :secret => { :access_token => 'secret' },
+        :other_secret => { :access_token => 'other_secret' }
+      }
+    end
+    let(:client) { double }
+    let(:user) { Hashie::Mash.new(:id => 1) }
+
+    before(:each) do
+      allow(subject).to receive(:client).and_return(client)
+    end
+
     context 'when secrets are equivalent' do
-      let(:params) do
-        {
-          :secret => 'secret',
-          :other_secret => 'secret'
-        }
+      before(:each) do
+        allow(client).to receive(:me).and_return(user)
       end
 
       it 'returns true' do
@@ -24,11 +34,10 @@ describe ConnectorsSdk::ConfluenceCloud::HttpCallWrapper do
     end
 
     context 'when secrets are not equivalent' do
-      let(:params) do
-        {
-            :secret => 'secret',
-            :other_secret => 'other_secret'
-        }
+      let(:other_user) { Hashie::Mash.new(:id => 2) }
+
+      before(:each) do
+        allow(client).to receive(:me).and_return(user, other_user)
       end
 
       it 'returns false' do

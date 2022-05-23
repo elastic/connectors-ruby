@@ -6,11 +6,11 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/http_call_wrapper'
+require 'connectors_sdk/base/connector'
 
 module ConnectorsSdk
   module StubConnector
-    class HttpCallWrapper < ConnectorsSdk::Base::HttpCallWrapper
+    class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'stub_connector'
 
       def display_name
