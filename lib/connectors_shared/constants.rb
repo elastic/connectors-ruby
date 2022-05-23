@@ -10,7 +10,7 @@ module ConnectorsShared
     SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version].freeze
     ALLOW_FIELD = '_allow_permissions'.freeze
     DENY_FIELD = '_deny_permissions'.freeze
-    
+
     # The following section reads as following:
     # The job will extract documents until the job queue size will reach
     # JOB_QUEUE_SIZE_IDLE_THRESHOLD items. After that, the job will attempt to sleep

@@ -7,7 +7,6 @@
 require 'concurrent/map'
 require 'connectors_shared/constants'
 require 'connectors_shared/job_status'
-require 'connectors_shared/constants'
 
 # The class is actually supported for single-threaded usage EXCEPT for :documents field
 # :documents are a Queue that's stated to be safe in a threaded environment
