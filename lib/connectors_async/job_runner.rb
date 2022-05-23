@@ -14,7 +14,6 @@ require 'connectors_shared/logger'
 
 module ConnectorsAsync
   class JobRunner
-
     class JobStuckError < StandardError; end
 
     def initialize(max_threads:)
@@ -72,7 +71,7 @@ module ConnectorsAsync
             attempts += 1
             idle(ConnectorsShared::Constants::IDLE_SLEEP_TIME)
           else
-            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{IDLE_SLEEP_TIME} seconds.")
+            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{ConnectorsShared::Constants::IDLE_SLEEP_TIME} seconds.")
           end
         end
 
@@ -83,6 +82,7 @@ module ConnectorsAsync
     end
 
     def idle(time)
+      log("Idling for #{time} seconds")
       sleep(time)
     end
 

@@ -202,7 +202,7 @@ describe ConnectorsAsync::JobRunner do
         end
 
         it 'fails a job' do
-          expect(job).to receive(:fail)
+          expect(job).to receive(:fail).with(instance_of(ConnectorsAsync::JobRunner::JobStuckError))
 
           job_runner.start_job(
             job: job,
