@@ -4,6 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'connectors_shared/constants'
 require 'connectors_shared/job_status'
 
 # The class is actually supported for single-threaded usage EXCEPT for :documents field
@@ -98,7 +99,7 @@ module ConnectorsAsync
       return true if is_finished? && @data[:documents].empty?
 
       # half an hour seems good enough, given that some connectors take 5-10 minutes to respond when throttled
-      Time.now - @data[:last_updated_at] > 60 * 30
+      Time.now - @data[:last_updated_at] > ConnectorsShared::Constants::STALE_JOB_TIMEOUT
     end
 
     private

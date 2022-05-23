@@ -10,5 +10,7 @@ module ConnectorsShared
     SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version].freeze
     ALLOW_FIELD = '_allow_permissions'.freeze
     DENY_FIELD = '_deny_permissions'.freeze
+
+    STALE_JOB_TIMEOUT = 60 * 30 # Time in seconds after which the job will be cleaned up if the job is considered stuck
   end
 end
