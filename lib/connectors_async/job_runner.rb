@@ -72,7 +72,7 @@ module ConnectorsAsync
             idle(ConnectorsShared::Constants::IDLE_SLEEP_TIME)
             wait_duration += ConnectorsShared::Constants::IDLE_SLEEP_TIME
           else
-            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited for #{ConnectorsShared::Constants::MAX_IDLE_TIME} seconds.")
+            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited for #{wait_duration} seconds.")
           end
         end
 
