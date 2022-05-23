@@ -6,7 +6,9 @@
 
 require 'concurrent'
 
+require 'connectors_async/job'
 require 'connectors_shared/logger'
+require 'connectors_shared/exception_tracking'
 
 module ConnectorsAsync
   class JobWatcher

@@ -78,15 +78,15 @@ describe ConnectorsAsync::JobWatcher do
   context 'when a finished job can be cleaned up' do
     let(:job_id) { 'this-is-job' }
 
-    let(:job) { double }
+    let(:job) do
+      double(
+        :id => job_id,
+        :is_finished? => true,
+        :safe_to_clean_up? => true
+      )
+    end
 
     let(:jobs) { [job] }
-
-    before(:each) do
-      allow(job).to receive(:safe_to_clean_up?).and_return(true)
-      allow(job).to receive(:is_finished?).and_return(true)
-      allow(job).to receive(:id).and_return(job_id)
-    end
 
     it 'attempts to remove the job without failing it' do
       expect(job_store).to receive(:delete_job!).with(job_id)
@@ -99,15 +99,15 @@ describe ConnectorsAsync::JobWatcher do
   context 'when a stale job can be cleaned up' do
     let(:job_id) { 'this-is-job' }
 
-    let(:job) { double }
+    let(:job) do
+      double(
+        :id => job_id,
+        :is_finished? => false,
+        :safe_to_clean_up? => true
+      )
+    end
 
     let(:jobs) { [job] }
-
-    before(:each) do
-      allow(job).to receive(:safe_to_clean_up?).and_return(true)
-      allow(job).to receive(:is_finished?).and_return(false)
-      allow(job).to receive(:id).and_return(job_id)
-    end
 
     it 'attempts to fail and remove the job' do
       expect(job_store).to receive(:delete_job!).with(job_id)
