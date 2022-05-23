@@ -19,10 +19,7 @@ require 'sinatra/json'
 require 'connectors_shared'
 require 'connectors_app/config'
 require 'connectors_sdk/base/registry'
-require 'connectors_async/job_watcher'
-require 'connectors_async/job_store'
-require 'connectors_async/job_runner'
-require 'connectors_async/secret_storage'
+require 'connectors_async'
 
 Dir[File.join(__dir__, 'initializers/**/*.rb')].sort.each { |f| require f }
 
