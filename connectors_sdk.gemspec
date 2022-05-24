@@ -27,4 +27,21 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport'
   s.add_dependency 'bson'
   s.add_dependency 'mime-types'
+  s.add_dependency 'tzinfo-data'
+  s.add_dependency 'nokogiri'
+
+  # Dependencies for the HTTP service
+  s.add_dependency 'sinatra'
+  s.add_dependency 'sinatra-contrib'
+  s.add_dependency 'rack'
+  s.add_dependency 'forwardable'
+  s.add_dependency 'faraday'
+  s.add_dependency 'faraday_middleware'
+  s.add_dependency 'httpclient'
+  s.add_dependency 'attr_extras'
+  s.add_dependency 'hashie'
+  s.add_dependency 'concurrent-ruby'
+
+  # Dependencies for oauth
+  s.add_dependency 'signet'
 end
