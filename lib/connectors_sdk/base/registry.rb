@@ -34,5 +34,6 @@ module ConnectorsSdk
 
     REGISTRY.register(ConnectorsSdk::SharePoint::Connector::SERVICE_TYPE, ConnectorsSdk::SharePoint::Connector)
     REGISTRY.register(ConnectorsSdk::ConfluenceCloud::Connector::SERVICE_TYPE, ConnectorsSdk::ConfluenceCloud::Connector)
+    REGISTRY.register(ConnectorsSdk::GitLab::Connector::SERVICE_TYPE, ConnectorsSdk::GitLab::Connector)
   end
 end

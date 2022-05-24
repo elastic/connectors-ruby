@@ -24,7 +24,7 @@ module ConnectorsSdk
           :order_by => :id,
           :sort => :desc
         }
-        # # looks like it's an incremental sync
+        # looks like it's an incremental sync
         if modified_since.present?
           date_since = modified_since.is_a?(Time) ? modified_since : Time.new(modified_since)
           query_params[:last_activity_after] = date_since.iso8601
