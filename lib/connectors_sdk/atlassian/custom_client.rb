@@ -31,7 +31,7 @@ module ConnectorsSdk
 
       MEDIA_API_BASE_URL = 'https://api.media.atlassian.com'
 
-      attr_reader :base_url, :access_token,  :basic_auth_token
+      attr_reader :base_url, :access_token, :basic_auth_token
 
       def initialize(base_url:, access_token:, basic_auth_token: nil, ensure_fresh_auth: nil)
         @access_token = access_token
@@ -53,7 +53,7 @@ module ConnectorsSdk
         elsif @basic_auth_token.present?
           result.append([ConnectorsShared::Middleware::BasicAuth, { :basic_auth_token => @basic_auth_token }])
         else
-          raise "Either access token or basic auth must be provided"
+          raise 'Either access token or basic auth must be provided'
         end
       end
 
