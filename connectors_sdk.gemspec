@@ -18,8 +18,7 @@ Gem::Specification.new do |s|
       'LICENSE',
       'NOTICE.txt',
       'lib/connectors_sdk.rb',
-      'lib/connectors_shared.rb',
-      'lib/stubs/enterprise_search/exception_tracking.rb'
+      'lib/connectors_shared.rb'
     ]
   s.license     = 'Elastic-2.0'
 
@@ -31,16 +30,11 @@ Gem::Specification.new do |s|
   s.add_dependency 'nokogiri'
 
   # Dependencies for the HTTP service
-  s.add_dependency 'sinatra'
-  s.add_dependency 'sinatra-contrib'
-  s.add_dependency 'rack'
   s.add_dependency 'forwardable'
   s.add_dependency 'faraday'
   s.add_dependency 'faraday_middleware'
   s.add_dependency 'httpclient'
-  s.add_dependency 'attr_extras'
   s.add_dependency 'hashie'
-  s.add_dependency 'concurrent-ruby'
 
   # Dependencies for oauth
   s.add_dependency 'signet'
