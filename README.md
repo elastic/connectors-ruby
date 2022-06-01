@@ -17,7 +17,7 @@ Under Linux or Macos, you can run the application using Docker or directly on yo
 
 For the latter you will need:
 - rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
-- bundler (for version, see [.bundler-version](./.bundler-version))
+- [bundler](https://bundler.io/) (for version, see [.bundler-version](./.bundler-version))
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
 ### Windows support
