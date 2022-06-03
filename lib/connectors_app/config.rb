@@ -13,7 +13,7 @@ CONFIG_FILE = ENV['CONNECTORS_CONFIG'] || File.join(__dir__, '../..', 'config', 
 
 puts "Parsing #{CONFIG_FILE} configuration file."
 
-Config.setup do |config|
+::Config.setup do |config|
   config.evaluate_erb_in_yaml = false
 
   config.schema do
@@ -32,13 +32,15 @@ Config.setup do |config|
     required(:worker).hash do
       required(:max_thread_count).value(:integer)
     end
+
+    required(:log_level).value(:string)
   end
 end
 
-Config.load_and_set_settings(CONFIG_FILE)
+::Config.load_and_set_settings(CONFIG_FILE)
 
 module ConnectorsApp
   DEFAULT_PASSWORD = 'changeme'
 
-  Config = Settings
+  Config = ::Settings
 end
