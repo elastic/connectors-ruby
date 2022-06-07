@@ -16,28 +16,25 @@ require 'sinatra'
 require 'sinatra/config_file'
 require 'sinatra/json'
 
-require 'connectors_shared'
 require 'connectors_app/config'
-require 'connectors_sdk/base/registry'
 require 'connectors_async'
+require 'connectors_sdk/base/registry'
+require 'connectors_shared'
 
 Dir[File.join(__dir__, 'initializers/**/*.rb')].sort.each { |f| require f }
 
 # Sinatra app
 class ConnectorsWebApp < Sinatra::Base
-  register Sinatra::ConfigFile
-  config_file ConnectorsApp::CONFIG_FILE
-
   set :raise_errors, false
   set :show_exceptions, false
-  set :bind, settings.http['host']
-  set :port, [ENV['PORT'], settings.http['port'], '9292'].detect(&:present?)
-  set :api_key, settings.http['api_key']
-  set :deactivate_auth, settings.http['deactivate_auth']
-  set :connector_name, settings.http['connector']
+  set :bind, ConnectorsApp::Config.http['host']
+  set :port, [ENV['PORT'], ConnectorsApp::Config.http['port'], '9292'].detect(&:present?)
+  set :api_key, ConnectorsApp::Config.http['api_key']
+  set :deactivate_auth, ConnectorsApp::Config.http['deactivate_auth']
+  set :connector_name, ConnectorsApp::Config.http['connector']
   set :connector_class, ConnectorsSdk::Base::REGISTRY.connector_class(settings.connector_name)
   set :job_store, ConnectorsAsync::JobStore.new
-  set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: settings.worker['max_thread_count'] })
+  set :job_runner, ConnectorsAsync::JobRunner.new({ max_threads: ConnectorsApp::Config.worker['max_thread_count'] })
   set :secret_storage, ConnectorsAsync::SecretStorage.new
 
   error do
@@ -78,9 +75,9 @@ class ConnectorsWebApp < Sinatra::Base
     connector = settings.connector_class.new
 
     json(
-      :connectors_version => settings.version,
-      :connectors_repository => settings.repository,
-      :connectors_revision => settings.revision,
+      :connectors_version => ConnectorsApp::Config.version,
+      :connectors_repository => ConnectorsApp::Config.repository,
+      :connectors_revision => ConnectorsApp::Config.revision,
       :connector_name => settings.connector_name,
       :display_name => connector.display_name,
       :configurable_fields => connector.configurable_fields,

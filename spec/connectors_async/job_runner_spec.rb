@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors_async/job_runner'
+require 'connectors_async/job_watcher'
 require 'connectors_sdk/base/adapter'
 
 describe ConnectorsAsync::JobRunner do
@@ -24,6 +25,7 @@ describe ConnectorsAsync::JobRunner do
     end
     let(:secret_storage) { double }
     let(:job) { double }
+    let(:job_watcher) { double }
     let(:thread_executor_mock) { double }
     let(:extraction_time) { 0 }
     let(:connector_class) { double }
@@ -34,14 +36,20 @@ describe ConnectorsAsync::JobRunner do
       allow(job).to receive(:id).and_return(1)
       allow(job).to receive(:update_status)
       allow(job).to receive(:update_cursors)
+      allow(job).to receive(:should_wait?).and_return(false)
+      allow(job).to receive(:store)
 
-      allow(connector).to receive(:extract) do
+      allow(job_watcher).to receive(:watch)
+
+      allow(connector).to receive(:extract) do |&block|
         sleep(extraction_time) if extraction_time > 0
+        block.call
       end.and_return(cursors_after_extraction)
 
       allow(secret_storage).to receive(:fetch_secret).with(content_source_id).and_return(access_token)
 
       allow(connector_class).to receive(:new).and_return(connector)
+      allow(ConnectorsAsync::JobWatcher).to receive(:new).and_return(job_watcher)
     end
 
     context 'extractor takes a long time to complete' do
@@ -171,6 +179,45 @@ describe ConnectorsAsync::JobRunner do
         )
 
         idle_a_bit
+      end
+    end
+
+    context 'when job indicates that no results were picked up for a bit' do
+      before(:each) do
+        allow(job).to receive(:should_wait?).and_return(true, true, false)
+        allow(job_runner).to receive(:sleep) { ; }
+      end
+
+      it 'throttles the run until the job no longer indicates it should be throttled' do
+        expect(job_runner).to receive(:idle)
+
+        job_runner.start_job(
+          job: job,
+          connector_class: connector_class,
+          secret_storage: secret_storage,
+          params: params
+        )
+
+        idle_a_bit
+      end
+
+      context 'when job idled for too long' do
+        before(:each) do
+          allow(job).to receive(:should_wait?).and_return(true)
+        end
+
+        it 'fails a job' do
+          expect(job).to receive(:fail).with(instance_of(ConnectorsAsync::JobRunner::JobStuckError))
+
+          job_runner.start_job(
+            job: job,
+            connector_class: connector_class,
+            secret_storage: secret_storage,
+            params: params
+          )
+
+          idle_a_bit
+        end
       end
     end
   end

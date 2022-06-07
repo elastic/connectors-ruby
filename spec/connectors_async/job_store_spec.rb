@@ -41,4 +41,34 @@ describe ConnectorsAsync::JobStore do
       end
     end
   end
+
+  context '#delete_job!' do
+    context 'when id of non-existing job is passed' do
+      it 'raises an error' do
+        expect { job_store.delete_job!('lalala') }.to raise_error(ConnectorsAsync::JobStore::JobNotFoundError)
+      end
+    end
+
+    context 'when id of existing job is passed' do
+      let(:job) { job_store.create_job }
+
+      it 'removes this job' do
+        job_store.delete_job!(job.id)
+
+        expect { job_store.fetch_job(job.id) }.to raise_error(ConnectorsAsync::JobStore::JobNotFoundError)
+      end
+    end
+  end
+
+  context '#fetch_all' do
+    let!(:job1) { job_store.create_job }
+    let!(:job2) { job_store.create_job }
+    let!(:job3) { job_store.create_job }
+
+    it 'returns all stored jobs' do
+      jobs = job_store.fetch_all
+
+      expect(jobs).to include(job1, job2, job3)
+    end
+  end
 end

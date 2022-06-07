@@ -1,7 +1,5 @@
 # Releasing the Connectors project
 
-The Connectors project contains logic that is also packaged as a Gem to be included in the Enterprise Search distribution ([example](https://github.com/elastic/ent-search/blob/9e87bf1c293df97f3a550ed1e2a7efac18c9d8f2/Gemfile#L262)).
-
 The version scheme we use is **MAJOR.MINOR.PATCH.BUILD** and stored in the [VERSION](https://github.com/elastic/connectors/blob/main/VERSION) file
 at the root of this repository.
 
@@ -27,13 +25,6 @@ To release Connectors:
 
 A Gem will be published to RubyGems: https://rubygems.org/gems/connectors_sdk.
 
-Then immediately update ent-search's gem dependency with the released version:
-
-- Update Gemfile if necessary
-- Run `./script/bundle update --conservative connectors_sdk`
-- Verify bundler picked up the version you expected it to update to
-- PR these changes to the appropriate Enterprise Search release branch ([example](https://github.com/elastic/ent-search/pull/6476))
-
 Take care of the branching (minor releases only):
 
 - Increment the VERSION on main to match the next minor release
@@ -50,7 +41,7 @@ For instance, if someone wants to use the project as an HTTP Service and we have
 bug fix we want them to have as soon as possible.
 
 In that case, we increment the **BUILD** number, and follow the same release
-process than for the unified release, except that this gem won't ship with Enterprise Search.
+process than for the unified release.
 
 So `8.1.2.1`, `8.1.2.2` etc. On the next unified release, the version will be bumped to
 the next **PATCH** value, and **BUILD** set to `0`

@@ -1,6 +1,6 @@
 # general metadata
 version: "CHANGEME"
-repository: "https://github.com/elastic/connectors"
+repository: "git@github.com:elastic/connectors.git"
 revision: "main"
 
 # web service
@@ -13,3 +13,5 @@ http:
 
 worker:
   max_thread_count: 4
+
+log_level: info
