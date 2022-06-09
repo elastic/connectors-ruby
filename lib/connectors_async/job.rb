@@ -108,14 +108,15 @@ module ConnectorsAsync
       Time.now - @last_updated_at > ConnectorsShared::Constants::STALE_JOB_TIMEOUT
     end
 
+    def should_wait?
+      @data[:documents].length > ConnectorsShared::Constants::JOB_QUEUE_SIZE_IDLE_THRESHOLD
+    end
+
     private
 
     def notify_changed
       @last_updated_at = Time.now
     end
 
-    def should_wait?
-      @data[:documents].length > ConnectorsShared::Constants::JOB_QUEUE_SIZE_IDLE_THRESHOLD
-    end
   end
 end
