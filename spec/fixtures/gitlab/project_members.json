@@ -1,0 +1,54 @@
+[
+  {
+    "id": 33,
+    "username": "someone",
+    "name": "someone",
+    "state": "active",
+    "avatar_url": "https://secure.gravatar.com/avatar/fb24ce8723e1cc23986de0669e8bd4da?s=80&d=identicon",
+    "web_url": "https://gitlab.com/someone",
+    "access_level": 50,
+    "created_at": "2018-03-13T09:13:19.346Z",
+    "expires_at": null,
+    "membership_state": "active"
+  },
+  {
+    "id": 22,
+    "username": "yetsomeone",
+    "name": "Yet Someone",
+    "state": "active",
+    "avatar_url": "https://secure.gravatar.com/avatar/efa724b7092f8d0bdc5ce00c2d3f86eb?s=80&d=identicon",
+    "web_url": "https://gitlab.com/yetsomeone",
+    "access_level": 30,
+    "created_at": "2018-04-15T07:55:32.423Z",
+    "created_by": {
+      "id": 33,
+      "username": "someone",
+      "name": "someone",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/fb24ce8723e1cc23986de0669e8bd4da?s=80&d=identicon",
+      "web_url": "https://gitlab.com/someone"
+    },
+    "expires_at": null,
+    "membership_state": "active"
+  },
+  {
+    "id": 11,
+    "username": "someoneelse",
+    "name": "MC",
+    "state": "active",
+    "avatar_url": "https://secure.gravatar.com/avatar/bac1e2c06f6feba833cefbfa6b686708?s=80&d=identicon",
+    "web_url": "https://gitlab.com/someoneelse",
+    "access_level": 40,
+    "created_at": "2018-07-09T19:01:19.109Z",
+    "created_by": {
+      "id": 33,
+      "username": "someone",
+      "name": "someone",
+      "state": "active",
+      "avatar_url": "https://secure.gravatar.com/avatar/fb24ce8723e1cc23986de0669e8bd4da?s=80&d=identicon",
+      "web_url": "https://gitlab.com/someone"
+    },
+    "expires_at": null,
+    "membership_state": "active"
+  }
+]
