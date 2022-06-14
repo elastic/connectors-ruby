@@ -48,7 +48,7 @@ make run
 Consumers will need to use the `api_key` string as the password in
 the basic Authorization header.
 
-### Running a with Docker
+### Running a webserver with Docker
 You can run the web server using our Dockerfile.
 
 First, build the Docker image with:
