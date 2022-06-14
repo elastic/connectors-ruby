@@ -29,10 +29,6 @@ module ConnectorsSdk
         'Confluence Cloud'
       end
 
-      def connection_requires_redirect
-        true
-      end
-
       def configurable_fields
         [
           {
@@ -40,12 +36,8 @@ module ConnectorsSdk
             'label' => 'Base URL'
           },
           {
-            'key' => 'client_id',
-            'label' => 'Client ID'
-          },
-          {
-            'key' => 'client_secret',
-            'label' => 'Client Secret'
+            'key' => 'basic_auth_token',
+            'label' => 'basic_auth_token'
           },
         ]
       end
@@ -61,7 +53,10 @@ module ConnectorsSdk
       end
 
       def client(params)
-        ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(params[:cloud_id]), :access_token => params[:access_token])
+        ConnectorsSdk::ConfluenceCloud::CustomClient.new(
+          :base_url => base_url(params[:cloud_id]),
+          :basic_auth_token => params[:basic_auth_token]
+        )
       end
 
       def custom_client_error
@@ -69,7 +64,11 @@ module ConnectorsSdk
       end
 
       def config(params)
-        ConnectorsSdk::Atlassian::Config.new(:base_url => "#{params[:external_connector_base_url]}/wiki", :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::Atlassian::Config.new(
+          :base_url => "#{params[:external_connector_base_url]}/wiki",
+          :cursors => params.fetch(:cursors, {}) || {},
+          :index_permissions => params[:index_permissions] || false
+        )
       end
 
       def health_check(params)

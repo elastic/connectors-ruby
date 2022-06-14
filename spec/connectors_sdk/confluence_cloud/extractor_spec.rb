@@ -21,12 +21,12 @@ describe ConnectorsSdk::ConfluenceCloud::Extractor do
   let(:api_base_url) { 'https://api.atlassian.com/ex/confluence/abc123' }
   let(:content_source_id) { BSON::ObjectId.new }
   let(:oauth_config) { { :client_id => 'client_id', :client_secret => 'client_secret', :base_url => base_url } }
-  let(:access_token) { 'access_token' }
+  let(:basic_auth_token) { 'basic_auth_token' }
   let(:headers) { { 'Content-Type' => 'application/json' } }
 
   let(:authorization_data) do
     {
-      'access_token' => access_token,
+      'basic_auth_token' => basic_auth_token,
       'base_url' => base_url,
       'cloud_id' => cloud_id
     }
@@ -45,7 +45,7 @@ describe ConnectorsSdk::ConfluenceCloud::Extractor do
     proc do
       ConnectorsSdk::ConfluenceCloud::CustomClient.new(
         :base_url => api_base_url,
-        :access_token => access_token
+        :basic_auth_token => basic_auth_token
       )
     end
   end
