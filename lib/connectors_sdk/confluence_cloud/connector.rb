@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'base64'
 require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/confluence_cloud/extractor'
 require 'connectors_sdk/confluence_cloud/authorization'
@@ -33,11 +34,15 @@ module ConnectorsSdk
         [
           {
             'key' => 'base_url',
-            'label' => 'Base URL'
+            'label' => 'Confluence Cloud Base URL'
           },
           {
-            'key' => 'basic_auth_token',
-            'label' => 'basic_auth_token'
+            'key' => 'confluence_user_email',
+            'label' => 'Confluence user email'
+          },
+          {
+            'key' => 'confluence_api_token',
+            'label' => 'Confluence user REST API Token'
           },
         ]
       end
@@ -53,9 +58,10 @@ module ConnectorsSdk
       end
 
       def client(params)
+        token = extract_basic_auth_token(params)
         ConnectorsSdk::ConfluenceCloud::CustomClient.new(
           :base_url => base_url(params[:cloud_id]),
-          :basic_auth_token => params[:basic_auth_token]
+          :basic_auth_token => token
         )
       end
 
@@ -64,8 +70,10 @@ module ConnectorsSdk
       end
 
       def config(params)
+        url = params[:base_url]
+        url = "#{url}/wiki" unless url.end_with?('wiki')
         ConnectorsSdk::Atlassian::Config.new(
-          :base_url => "#{params[:external_connector_base_url]}/wiki",
+          :base_url => url,
           :cursors => params.fetch(:cursors, {}) || {},
           :index_permissions => params[:index_permissions] || false
         )
@@ -77,6 +85,15 @@ module ConnectorsSdk
 
       def base_url(cloud_id)
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
+      end
+
+      private
+
+      def extract_basic_auth_token(params)
+        login = params.fetch('confluence_user_email', nil)
+        api_token = params.fetch('confluence_api_token', nil)
+        nil unless login.present? && api_token.present?
+        Base64.strict_encode64("#{login}:#{api_token}")
       end
     end
   end
