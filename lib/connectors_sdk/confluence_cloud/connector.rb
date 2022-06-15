@@ -59,8 +59,11 @@ module ConnectorsSdk
 
       def client(params)
         token = extract_basic_auth_token(params)
+        # From Confluence API documentation:
+        # Requests that use OAuth 2.0 (3LO) are made via api.atlassian.com (not https://your-domain.atlassian.net).
+        base_url = token.present? && !token.strip.empty? ? params[:base_url] : base_url(params[:cloud_id])
         ConnectorsSdk::ConfluenceCloud::CustomClient.new(
-          :base_url => base_url(params[:cloud_id]),
+          :base_url => add_wiki_path(base_url),
           :basic_auth_token => token
         )
       end
@@ -70,8 +73,7 @@ module ConnectorsSdk
       end
 
       def config(params)
-        url = params[:base_url]
-        url = "#{url}/wiki" unless url.end_with?('wiki')
+        url = add_wiki_path(params[:base_url])
         ConnectorsSdk::Atlassian::Config.new(
           :base_url => url,
           :cursors => params.fetch(:cursors, {}) || {},
@@ -85,6 +87,11 @@ module ConnectorsSdk
 
       def base_url(cloud_id)
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
+      end
+
+      def add_wiki_path(url)
+        url = "#{url}/wiki" unless url.end_with?('/wiki')
+        url
       end
 
       private
