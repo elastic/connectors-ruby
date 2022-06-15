@@ -132,7 +132,6 @@ describe ConnectorsSdk::Confluence::CustomClient do
     end).to be_nil
   end
 
-
   describe '#content' do
     let(:next_value) { '/a-provided-endpoint?with=a_param' }
 
