@@ -14,6 +14,9 @@ lint: config/connectors.yml
 autocorrect: config/connectors.yml
 	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -a
 
+autocorrect_all: config/connectors.yml
+	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -A
+
 api_key: config/connectors.yml
 	${YQ} e ".http.api_key = \"$(shell uuidgen | tr -d '-')\"" -i config/connectors.yml
 

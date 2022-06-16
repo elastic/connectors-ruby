@@ -84,8 +84,6 @@ module ConnectorsSdk
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
       end
 
-      private
-
       def is_basic_auth(params)
         login = params.fetch('confluence_user_email', nil)
         api_token = params.fetch('confluence_api_token', nil)
@@ -103,14 +101,9 @@ module ConnectorsSdk
         # From Confluence API documentation:
         # Requests that use OAuth 2.0 (3LO) are made via api.atlassian.com (not https://your-domain.atlassian.net).
         if is_basic_auth(params)
-          return add_wiki_path(params[:base_url])
+          return params[:base_url].end_with?('/wiki') ? params[:base_url] : "#{params[:base_url]}/wiki"
         end
-        add_wiki_path(base_url(params[:cloud_id]))
-      end
-
-      def add_wiki_path(url)
-        return url if url.end_with?('/wiki')
-        "#{url}/wiki"
+        base_url(params[:cloud_id])
       end
     end
   end
