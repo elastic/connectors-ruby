@@ -7,9 +7,11 @@
 require 'active_support/core_ext/array/wrap'
 require 'active_support/core_ext/numeric/time'
 require 'active_support/core_ext/object/deep_dup'
+require 'active_support/core_ext/object/json'
 require 'connectors_shared'
 require 'connectors_shared/extension_mapping_util'
 require 'date'
+require 'json'
 require 'mime-types'
 
 module ConnectorsSdk

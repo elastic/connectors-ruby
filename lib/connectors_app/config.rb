@@ -21,14 +21,6 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     required(:repository).value(:string)
     required(:revision).value(:string)
 
-    required(:http).hash do
-      required(:host)
-      required(:port).value(:integer)
-      required(:api_key).value(:string)
-      required(:deactivate_auth)
-      required(:connector).value(:string)
-    end
-
     required(:worker).hash do
       required(:max_thread_count).value(:integer)
     end

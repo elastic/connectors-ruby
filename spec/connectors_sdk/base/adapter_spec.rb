@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'hashie'
+require 'active_support/core_ext/hash'
 require 'connectors_sdk/base/adapter'
 
 describe ConnectorsSdk::Base::Adapter do

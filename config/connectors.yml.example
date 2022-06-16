@@ -3,14 +3,6 @@ version: "CHANGEME"
 repository: "git@github.com:elastic/connectors.git"
 revision: "main"
 
-# web service
-http:
-  host: 0.0.0.0
-  port: 9292
-  api_key: changeme
-  deactivate_auth: false
-  connector: stub_connector
-
 worker:
   max_thread_count: 4
 
