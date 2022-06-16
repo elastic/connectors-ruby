@@ -1,6 +1,6 @@
 # general metadata
 version: "CHANGEME"
-repository: "https://github.com/elastic/connectors"
+repository: "git@github.com:elastic/connectors.git"
 revision: "main"
 
 # web service

@@ -6,7 +6,6 @@
 
 require 'concurrent'
 
-require 'connectors_app/config'
 require 'connectors_async/job_store'
 require 'connectors_shared/constants'
 require 'connectors_shared/job_status'

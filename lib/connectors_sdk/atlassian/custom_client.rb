@@ -9,6 +9,7 @@
 require 'faraday_middleware'
 
 require 'connectors_shared/middleware/bearer_auth'
+require 'connectors_shared/middleware/basic_auth'
 require 'connectors_shared/middleware/restrict_hostnames'
 require 'connectors_sdk/base/custom_client'
 
@@ -30,10 +31,12 @@ module ConnectorsSdk
 
       MEDIA_API_BASE_URL = 'https://api.media.atlassian.com'
 
-      attr_reader :base_url, :access_token
+      attr_reader :base_url, :access_token, :basic_auth_token
 
-      def initialize(base_url:, access_token:, ensure_fresh_auth: nil)
+      def initialize(base_url:, access_token: nil, basic_auth_token: nil, ensure_fresh_auth: nil)
+        raise 'Either access_token or basic_auth_token must be provided' unless access_token.present? || basic_auth_token.present?
         @access_token = access_token
+        @basic_auth_token = basic_auth_token
         super(:base_url => base_url, :ensure_fresh_auth => ensure_fresh_auth)
       end
 
@@ -42,11 +45,17 @@ module ConnectorsSdk
       end
 
       def additional_middleware
-        [
-            ::FaradayMiddleware::FollowRedirects,
-            [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }],
-            [ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }]
+        result = [
+          FaradayMiddleware::FollowRedirects,
+          [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, MEDIA_API_BASE_URL] }]
         ]
+        if @access_token.present?
+          result.append([ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @access_token }])
+        elsif @basic_auth_token.present?
+          result.append([ConnectorsShared::Middleware::BasicAuth, { :basic_auth_token => @basic_auth_token }])
+        else
+          raise 'Either access token or basic auth must be provided'
+        end
       end
 
       def update_auth_data!(new_access_token)
