@@ -58,13 +58,9 @@ module ConnectorsSdk
       end
 
       def client(params)
-        token = extract_basic_auth_token(params)
-        # From Confluence API documentation:
-        # Requests that use OAuth 2.0 (3LO) are made via api.atlassian.com (not https://your-domain.atlassian.net).
-        base_url = token.present? && !token.strip.empty? ? params[:base_url] : base_url(params[:cloud_id])
         ConnectorsSdk::ConfluenceCloud::CustomClient.new(
-          :base_url => add_wiki_path(base_url),
-          :basic_auth_token => token
+          :base_url => extract_base_url(params),
+          :basic_auth_token => extract_basic_auth_token(params)
         )
       end
 
@@ -73,9 +69,8 @@ module ConnectorsSdk
       end
 
       def config(params)
-        url = add_wiki_path(params[:base_url])
         ConnectorsSdk::Atlassian::Config.new(
-          :base_url => url,
+          :base_url => extract_base_url(params),
           :cursors => params.fetch(:cursors, {}) || {},
           :index_permissions => params[:index_permissions] || false
         )
@@ -89,18 +84,33 @@ module ConnectorsSdk
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
       end
 
-      def add_wiki_path(url)
-        url = "#{url}/wiki" unless url.end_with?('/wiki')
-        url
-      end
-
       private
+
+      def is_basic_auth(params)
+        login = params.fetch('confluence_user_email', nil)
+        api_token = params.fetch('confluence_api_token', nil)
+        login.present? && api_token.present?
+      end
 
       def extract_basic_auth_token(params)
         login = params.fetch('confluence_user_email', nil)
         api_token = params.fetch('confluence_api_token', nil)
         nil unless login.present? && api_token.present?
         Base64.strict_encode64("#{login}:#{api_token}")
+      end
+
+      def extract_base_url(params)
+        # From Confluence API documentation:
+        # Requests that use OAuth 2.0 (3LO) are made via api.atlassian.com (not https://your-domain.atlassian.net).
+        if is_basic_auth(params)
+          return add_wiki_path(params[:base_url])
+        end
+        add_wiki_path(base_url(params[:cloud_id]))
+      end
+
+      def add_wiki_path(url)
+        return url if url.end_with?('/wiki')
+        "#{url}/wiki"
       end
     end
   end

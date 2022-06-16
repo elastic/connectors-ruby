@@ -52,7 +52,7 @@ module ConnectorsSdk
       def download(item)
         content = item[:content]
         parent_id = content.dig('container', 'id')
-        client.download("#{client.base_url}/wiki/rest/api/content/#{parent_id}/child/attachment/#{content['id']}/download").body
+        client.download("#{client.base_url}/rest/api/content/#{parent_id}/child/attachment/#{content['id']}/download").body
       end
     end
   end
