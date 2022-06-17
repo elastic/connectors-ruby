@@ -1,5 +1,5 @@
 YQ ?= "yq"
-.phony: test lint autocorrect api_key update_config build
+.phony: test lint autocorrect update_config build
 .phony: release_dev release build_gem install build-docker run-docker exec_app tag
 
 config/connectors.yml:
@@ -13,9 +13,6 @@ lint: config/connectors.yml
 
 autocorrect: config/connectors.yml
 	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -a
-
-api_key: config/connectors.yml
-	${YQ} e ".http.api_key = \"$(shell uuidgen | tr -d '-')\"" -i config/connectors.yml
 
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
@@ -62,9 +59,6 @@ run-docker:
 	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
 
 exec_app:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec rackup config.ru
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb
 
 run: | update_config_dev exec_app
-
-console:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec irb -r ./console.rb

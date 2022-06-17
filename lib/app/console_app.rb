@@ -6,10 +6,6 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/office365/adapter'
+$LOAD_PATH << '../'
 
-describe ConnectorsSdk::Office365::Adapter do
-  it 'is not a concrete class' do
-    expect { described_class.es_document_from_folder(nil) }.to raise_error(NotImplementedError)
-  end
-end
+puts 'Hello Connectors 3.0'
