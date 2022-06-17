@@ -10,11 +10,21 @@ require 'connectors_sdk/confluence/custom_client'
 
 describe ConnectorsSdk::Confluence::CustomClient do
   let(:auth_token) { 'auth_token' }
+  let(:basic_auth_token) { 'confluence_is_basic' }
   let(:base_url) { 'http://localhost' }
   let(:client) do
     described_class.new(
       :base_url => base_url,
-      :access_token => 'access_token'
+      :access_token => 'access_token',
+      :basic_auth_token => nil
+    )
+  end
+
+  let(:basic_client) do
+    described_class.new(
+      :base_url => base_url,
+      :access_token => nil,
+      :basic_auth_token => basic_auth_token
     )
   end
 
@@ -90,6 +100,36 @@ describe ConnectorsSdk::Confluence::CustomClient do
   it '#content_search' do
     client.content_search('CQL', :expand => [], :limit => 25)
     expect(content_search_request).to have_been_requested
+  end
+
+  it 'applies correct middleware for token auth' do
+    client.additional_middleware.find do |item|
+      item.is_a?(Array) && item[0].is_a?(ConnectorsShared::Middleware::BearerAuth)
+    end
+  end
+
+  it 'applies correct middleware for token auth' do
+    expect(client.additional_middleware.find do |item|
+      item.is_a?(Array) && item[0] == ConnectorsShared::Middleware::BearerAuth
+    end).to be_present
+  end
+
+  it 'does not apply incorrect middleware for token auth' do
+    expect(client.additional_middleware.find do |item|
+      item.is_a?(Array) && item[0] == ConnectorsShared::Middleware::BasicAuth
+    end).to be_nil
+  end
+
+  it 'applies correct middleware for basic auth' do
+    expect(basic_client.additional_middleware.find do |item|
+      item.is_a?(Array) && item[0] == ConnectorsShared::Middleware::BasicAuth
+    end).to be_present
+  end
+
+  it 'does not apply incorrect middleware for basic auth' do
+    expect(basic_client.additional_middleware.find do |item|
+      item.is_a?(Array) && item[0] == ConnectorsShared::Middleware::BearerAuth
+    end).to be_nil
   end
 
   describe '#content' do

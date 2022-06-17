@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'base64'
 require 'connectors_sdk/atlassian/config'
 require 'connectors_sdk/confluence_cloud/extractor'
 require 'connectors_sdk/confluence_cloud/authorization'
@@ -29,23 +30,19 @@ module ConnectorsSdk
         'Confluence Cloud'
       end
 
-      def connection_requires_redirect
-        true
-      end
-
       def configurable_fields
         [
           {
             'key' => 'base_url',
-            'label' => 'Base URL'
+            'label' => 'Confluence Cloud Base URL'
           },
           {
-            'key' => 'client_id',
-            'label' => 'Client ID'
+            'key' => 'confluence_user_email',
+            'label' => 'Confluence user email'
           },
           {
-            'key' => 'client_secret',
-            'label' => 'Client Secret'
+            'key' => 'confluence_api_token',
+            'label' => 'Confluence user REST API Token'
           },
         ]
       end
@@ -61,7 +58,10 @@ module ConnectorsSdk
       end
 
       def client(params)
-        ConnectorsSdk::ConfluenceCloud::CustomClient.new(:base_url => base_url(params[:cloud_id]), :access_token => params[:access_token])
+        ConnectorsSdk::ConfluenceCloud::CustomClient.new(
+          :base_url => extract_base_url(params),
+          :basic_auth_token => extract_basic_auth_token(params)
+        )
       end
 
       def custom_client_error
@@ -69,7 +69,11 @@ module ConnectorsSdk
       end
 
       def config(params)
-        ConnectorsSdk::Atlassian::Config.new(:base_url => "#{params[:external_connector_base_url]}/wiki", :cursors => params.fetch(:cursors, {}) || {})
+        ConnectorsSdk::Atlassian::Config.new(
+          :base_url => extract_base_url(params),
+          :cursors => params.fetch(:cursors, {}) || {},
+          :index_permissions => params[:index_permissions] || false
+        )
       end
 
       def health_check(params)
@@ -78,6 +82,28 @@ module ConnectorsSdk
 
       def base_url(cloud_id)
         "https://api.atlassian.com/ex/confluence/#{cloud_id}"
+      end
+
+      def is_basic_auth(params)
+        login = params.fetch('confluence_user_email', nil)
+        api_token = params.fetch('confluence_api_token', nil)
+        login.present? && api_token.present?
+      end
+
+      def extract_basic_auth_token(params)
+        login = params.fetch('confluence_user_email', nil)
+        api_token = params.fetch('confluence_api_token', nil)
+        nil unless login.present? && api_token.present?
+        Base64.strict_encode64("#{login}:#{api_token}")
+      end
+
+      def extract_base_url(params)
+        # From Confluence API documentation:
+        # Requests that use OAuth 2.0 (3LO) are made via api.atlassian.com (not https://your-domain.atlassian.net).
+        if is_basic_auth(params)
+          return params[:base_url].end_with?('/wiki') ? params[:base_url] : "#{params[:base_url]}/wiki"
+        end
+        base_url(params[:cloud_id])
       end
     end
   end

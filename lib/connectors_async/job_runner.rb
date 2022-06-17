@@ -30,15 +30,17 @@ module ConnectorsAsync
         init_thread
 
         connector = connector_class.new
-        content_source_id = params[:content_source_id]
-        cursors = params[:cursors] ||= {}
-        cursors[:modified_since] = params.delete(:modified_since) if params[:modified_since]
+        extractor_params = params.dup
+        cursors = extractor_params[:cursors] ||= {}
+        cursors[:modified_since] = extractor_params.delete(:modified_since) if extractor_params[:modified_since]
+        extractor_params[:cursors] = cursors
+        extractor_params[:secret_storage] = secret_storage
 
         log_with_thread_id(:info, "Running the job #{job.id}")
 
         job.update_status(ConnectorsShared::JobStatus::RUNNING)
 
-        new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
+        new_cursors = connector.extract(extractor_params) do |doc|
           with_throttling(job) do
             job.store(doc)
           end
