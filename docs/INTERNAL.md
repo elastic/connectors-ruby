@@ -36,18 +36,10 @@
 ##### Start Connectors
 * `cd` into your connectors checkout
 * run `make install` to get the latest dependencies
-* run `make api_key` to generate a new API key
 * run `make run` to start Connectors.
 
-##### Register your local Connectors Web App with Enterprise Search
-* go to add a new source
-* choose "customized"
-* specify your local connectors address as the URL, by default: `http://localhost:9292`
+##### Register your local Connectors with Enterprise Search
+* TBD
 
 ### Minimal manual tests
-- [ ] run `make lint`
-- [ ] run `make test`
-- [ ] run `make run`, ensure it doesn't crash
-- [ ] run `curl -u elastic:changeme http://localhost:9292 | jq` and validate API key error
-- [ ] run `curl -u elastic:$CONNECTOR_API_KEY http://localhost:9292 | jq` and validate 200 OK
-- [ ] create a new content source using the external connector. Validate that it syncs, and that there are no errors in the ent-search or connectors logs.
+* TBD
