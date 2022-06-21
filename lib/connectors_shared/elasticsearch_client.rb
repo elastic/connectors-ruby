@@ -17,7 +17,8 @@ module ConnectorsShared
         client.cluster.health
       end
 
-    private
+      private
+
       def client
         @client ||= Elasticsearch::Client.new(connection_configs)
       end
