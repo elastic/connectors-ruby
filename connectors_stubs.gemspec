@@ -1,4 +1,4 @@
-require_relative 'lib/connectors_app/config'
+require_relative 'lib/app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_stubs'

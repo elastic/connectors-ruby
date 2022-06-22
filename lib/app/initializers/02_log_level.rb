@@ -6,7 +6,7 @@
 #
 
 require 'stubs/app_config'
-require 'connectors_app/config'
+require 'app/config'
 require 'utility/logger'
 
 logger = AppConfig.connectors_logger

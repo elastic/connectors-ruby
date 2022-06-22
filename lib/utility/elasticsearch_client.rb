@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require 'elasticsearch'
-require 'connectors_app/config'
+require 'app/config'
 
 module Utility
   class ElasticsearchClient

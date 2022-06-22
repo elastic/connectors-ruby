@@ -1,7 +1,7 @@
-require_relative 'lib/connectors_app/config'
+require_relative 'lib/app/config'
 
 Gem::Specification.new do |s|
-  s.name        = 'connectors_sdk'
+  s.name        = 'connectors'
   s.version     = App::Config['version']
   s.homepage    = "https://github.com/elastic/connectors"
   s.summary     = 'Gem containing apis used by Enterprise Search and implementations of Connectors'
