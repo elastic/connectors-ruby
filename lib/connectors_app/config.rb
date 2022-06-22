@@ -21,6 +21,12 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     required(:repository).value(:string)
     required(:revision).value(:string)
 
+    required(:elasticsearch).hash do
+      optional(:cloud_id).value(:string)
+      optional(:hosts).value(:string)
+      required(:api_key).value(:string)
+    end
+
     required(:worker).hash do
       required(:max_thread_count).value(:integer)
     end
