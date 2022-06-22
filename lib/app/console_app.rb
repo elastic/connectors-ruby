@@ -8,6 +8,8 @@
 
 $LOAD_PATH << '../'
 
+require 'app/config'
+
 module App
   module ConsoleApp
     puts 'Hello Connectors 3.0'

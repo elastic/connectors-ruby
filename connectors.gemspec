@@ -1,6 +1,4 @@
-puts "WADUP"
 require_relative 'lib/app/config'
-puts "WAAAT"
 
 Gem::Specification.new do |s|
   s.name        = 'connectors'

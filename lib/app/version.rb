@@ -6,5 +6,5 @@
 require 'app/config'
 
 module App
-  VERSION = ConnectorsApp::Config['version']
+  VERSION = App::Config['version']
 end
