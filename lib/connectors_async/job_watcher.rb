@@ -7,8 +7,8 @@
 require 'concurrent'
 
 require 'connectors_async/job'
-require 'connectors_shared/logger'
-require 'connectors_shared/exception_tracking'
+require 'utility/logger'
+require 'utility/exception_tracking'
 
 module ConnectorsAsync
   class JobWatcher
@@ -25,13 +25,13 @@ module ConnectorsAsync
 
     def watch
       raise AlreadyWatchingError.new('Already watching!') unless @is_watching.make_true
-      ConnectorsShared::Logger.info('Watching after jobs {•̃_•̃}')
+      Utility::Logger.info('Watching after jobs {•̃_•̃}')
 
       Thread.new do
         loop do
           run!
         rescue StandardError => e
-          ConnectorsShared::ExceptionTracking.log_exception(e)
+          Utility::ExceptionTracking.log_exception(e)
         end
       end
     end
@@ -43,7 +43,7 @@ module ConnectorsAsync
 
       jobs = @job_store.fetch_all
 
-      ConnectorsShared::Logger.debug("Found #{jobs.length} jobs.")
+      Utility::Logger.debug("Found #{jobs.length} jobs.")
 
       jobs.each do |job|
         if job.safe_to_clean_up?
@@ -51,10 +51,10 @@ module ConnectorsAsync
         end
       end
 
-      ConnectorsShared::Logger.debug("Found #{jobs_to_clean_up.length} jobs to clean up.")
+      Utility::Logger.debug("Found #{jobs_to_clean_up.length} jobs to clean up.")
 
       jobs_to_clean_up.each do |job|
-        ConnectorsShared::Logger.debug "Cleaning up #{job.id}"
+        Utility::Logger.debug "Cleaning up #{job.id}"
         job.fail(JobTerminatedError.new) unless job.is_finished?
         @job_store.delete_job!(job.id)
       end
@@ -63,7 +63,7 @@ module ConnectorsAsync
     end
 
     def idle(timeout)
-      ConnectorsShared::Logger.debug "Idling for #{timeout}"
+      Utility::Logger.debug "Idling for #{timeout}"
       sleep(timeout)
     end
   end

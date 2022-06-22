@@ -7,14 +7,14 @@
 #
 
 require 'spec_helper'
-require 'connectors_shared/errors'
-require 'connectors_shared/logger'
-require 'connectors_shared/monitor'
+require 'utility/errors'
+require 'utility/logger'
+require 'utility/monitor'
 
-RSpec.describe ConnectorsShared::Monitor do
+RSpec.describe Utility::Monitor do
   class StubConnector
     def log_debug(message)
-      ConnectorsShared::Logger.debug(message)
+      Utility::Logger.debug(message)
     end
   end
 
@@ -26,6 +26,6 @@ RSpec.describe ConnectorsShared::Monitor do
       11.times do |n|
         subject.note_error(StandardError.new("This is error number #{n}"))
       end
-    end.to raise_error(ConnectorsShared::MaxSuccessiveErrorsExceededError)
+    end.to raise_error(Utility::MaxSuccessiveErrorsExceededError)
   end
 end

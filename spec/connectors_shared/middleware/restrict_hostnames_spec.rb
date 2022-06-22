@@ -8,9 +8,9 @@
 
 require 'faraday_middleware'
 
-require 'connectors_shared/middleware/restrict_hostnames'
+require 'utility/middleware/restrict_hostnames'
 
-describe ConnectorsShared::Middleware::RestrictHostnames do
+describe Utility::Middleware::RestrictHostnames do
   let(:localhost_ipv4_url) do
     { :url => Addressable::URI.parse('http://127.0.0.1') }
   end
@@ -36,7 +36,7 @@ describe ConnectorsShared::Middleware::RestrictHostnames do
 
   shared_examples_for 'a blocked call' do
     it 'raises because the address is not allowed' do
-      expect { subject.call(env) }.to raise_error(ConnectorsShared::Middleware::RestrictHostnames::AddressNotAllowed)
+      expect { subject.call(env) }.to raise_error(Utility::Middleware::RestrictHostnames::AddressNotAllowed)
     end
   end
 
@@ -185,8 +185,8 @@ describe ConnectorsShared::Middleware::RestrictHostnames do
             [fake_ip],
             [actual_ip]
           )
-          expect(ConnectorsShared::Logger).to receive(:warn).with('Requested url https://google.com with resolved ip addresses [#<IPAddr: IPv4:203.0.113.1/255.255.255.255>] does not match allowed hosts ["https://google.com"] with resolved ip addresses [#<IPAddr: IPv4:203.0.113.0/255.255.255.255>]. Retrying.').and_call_original
-          expect(ConnectorsShared::Logger).to_not receive(:error)
+          expect(Utility::Logger).to receive(:warn).with('Requested url https://google.com with resolved ip addresses [#<IPAddr: IPv4:203.0.113.1/255.255.255.255>] does not match allowed hosts ["https://google.com"] with resolved ip addresses [#<IPAddr: IPv4:203.0.113.0/255.255.255.255>]. Retrying.').and_call_original
+          expect(Utility::Logger).to_not receive(:error)
         end
 
         it_behaves_like 'an allowed call'

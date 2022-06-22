@@ -9,9 +9,9 @@
 require 'benchmark'
 require 'nokogiri'
 
-require 'connectors_shared/extraction_utils'
+require 'utility/extraction_utils'
 
-describe ConnectorsShared::ExtractionUtils do
+describe Utility::ExtractionUtils do
   describe '.node_descendant_text' do
     it 'should raise an error unless given a node object' do
       expect { described_class.node_descendant_text('something') }.to raise_error(ArgumentError, /node-like/)

@@ -8,23 +8,23 @@
 
 require 'faraday'
 
-require 'connectors_sdk/base/config'
-require 'connectors_sdk/base/custom_client'
-require 'connectors_sdk/base/extractor'
+require 'connectors/base/config'
+require 'connectors/base/custom_client'
+require 'connectors/base/extractor'
 
-describe ConnectorsSdk::Base::Extractor do
+describe Connectors::Base::Extractor do
   let(:service_type) { 'share_point' }
-  let(:config) { ConnectorsSdk::Base::Config.new(:cursors => {}) }
+  let(:config) { Connectors::Base::Config.new(:cursors => {}) }
   let(:content_source_id) { BSON::ObjectId.new }
   let(:cursors) { nil }
-  let(:client_proc) { proc { ConnectorsSdk::Base::CustomClient.new(base_url: 'https://example.com') } }
+  let(:client_proc) { proc { Connectors::Base::CustomClient.new(base_url: 'https://example.com') } }
   let(:authorization_data_proc) { proc { {} } }
 
   subject do
     described_class.new(
       :content_source_id => content_source_id,
       :service_type => service_type,
-      :config => ConnectorsSdk::Base::Config.new(:cursors => cursors),
+      :config => Connectors::Base::Config.new(:cursors => cursors),
       :features => [],
       :client_proc => client_proc,
       :authorization_data_proc => authorization_data_proc
@@ -32,10 +32,10 @@ describe ConnectorsSdk::Base::Extractor do
   end
 
   context 'retry logic' do
-    context 'when ConnectorsShared::TokenRefreshFailedError is raised' do
-      class ExtractorWithTokenRefreshFailure < ConnectorsSdk::Base::Extractor
+    context 'when Utility::TokenRefreshFailedError is raised' do
+      class ExtractorWithTokenRefreshFailure < Connectors::Base::Extractor
         def yield_document_changes(modified_since: nil)
-          raise ConnectorsShared::TokenRefreshFailedError
+          raise Utility::TokenRefreshFailedError
         end
       end
 
@@ -52,14 +52,14 @@ describe ConnectorsSdk::Base::Extractor do
 
         expect do
           extractor.document_changes { |e| e }
-        end.to raise_error(ConnectorsShared::TokenRefreshFailedError)
+        end.to raise_error(Utility::TokenRefreshFailedError)
       end
     end
 
     context 'when a rate limit error is raised' do
       class RateLimitFailure < StandardError
       end
-      class ExtractorWithRateLimitFailure < ConnectorsSdk::Base::Extractor
+      class ExtractorWithRateLimitFailure < Connectors::Base::Extractor
         def yield_document_changes(modified_since: nil)
           yield_single_document_change(:identifier => 'the only one') do
             raise RateLimitFailure.new('oops, rate limit')
@@ -71,7 +71,7 @@ describe ConnectorsSdk::Base::Extractor do
         def convert_rate_limit_errors
           yield
         rescue RateLimitFailure
-          raise ConnectorsShared::ThrottlingError.new(:suspend_until => Time.now + 5.minutes, :cursors => {})
+          raise Utility::ThrottlingError.new(:suspend_until => Time.now + 5.minutes, :cursors => {})
         end
       end
 
@@ -87,14 +87,14 @@ describe ConnectorsSdk::Base::Extractor do
         expect(extractor).to receive(:yield_document_changes).once.and_call_original
         expect do
           extractor.document_changes { |e| e }
-        end.to raise_error(ConnectorsShared::SuspendedJobError)
+        end.to raise_error(Utility::SuspendedJobError)
       end
     end
 
-    context 'when ConnectorsShared::JobInterruptedError is raised' do
-      class ExtractorWithInterruptedJob < ConnectorsSdk::Base::Extractor
+    context 'when Utility::JobInterruptedError is raised' do
+      class ExtractorWithInterruptedJob < Connectors::Base::Extractor
         def yield_document_changes(modified_since: nil)
-          raise ConnectorsShared::JobInterruptedError
+          raise Utility::JobInterruptedError
         end
       end
 
@@ -111,14 +111,14 @@ describe ConnectorsSdk::Base::Extractor do
 
         expect do
           extractor.document_changes { |e| e }
-        end.to raise_error(ConnectorsShared::JobInterruptedError)
+        end.to raise_error(Utility::JobInterruptedError)
       end
     end
 
     context 'when extracting content raises unexpected errors' do
       let(:error_raised) { RuntimeError.new('fail') }
 
-      class ExtractorWithFailure < ConnectorsSdk::Base::Extractor
+      class ExtractorWithFailure < Connectors::Base::Extractor
         attr_accessor :setup_failure_count, :documents
 
         def initialize(setup_failure_count: nil, documents: [], error_to_raise: 'fail', **args)
@@ -195,7 +195,7 @@ describe ConnectorsSdk::Base::Extractor do
               :authorization_data_proc => authorization_data_proc
             )
           end
-          let(:monitor) { ConnectorsShared::Monitor.new(:connector => extractor, :max_error_ratio => max_error_ratio, :window_size => window_size) }
+          let(:monitor) { Utility::Monitor.new(:connector => extractor, :max_error_ratio => max_error_ratio, :window_size => window_size) }
           let(:max_error_ratio) { 0.2 }
           let(:window_size) { 10 }
 
@@ -217,7 +217,7 @@ describe ConnectorsSdk::Base::Extractor do
               let(:max_error_ratio) { 0.15 }
               it 'fails in finalize' do
                 extractor.document_changes.to_a
-                expect { monitor.finalize }.to raise_error(ConnectorsShared::MaxErrorsInWindowExceededError)
+                expect { monitor.finalize }.to raise_error(Utility::MaxErrorsInWindowExceededError)
                 expect(monitor.error_queue.size).to eq(1)
               end
             end
@@ -226,7 +226,7 @@ describe ConnectorsSdk::Base::Extractor do
               let(:window_size) { 4 }
               it 'fails in document_changes and does not retry' do
                 expect(extractor).to receive(:yield_document_changes).exactly(1).times.and_call_original
-                expect { extractor.document_changes { |a| a } }.to raise_error(ConnectorsShared::MaxErrorsInWindowExceededError)
+                expect { extractor.document_changes { |a| a } }.to raise_error(Utility::MaxErrorsInWindowExceededError)
                 expect(monitor.error_queue.size).to eq(1)
               end
             end
@@ -248,13 +248,13 @@ describe ConnectorsSdk::Base::Extractor do
           )
         end
 
-        it 'they get wrapped in a ConnectorsShared::TransientServerError with a resume time in the future' do
+        it 'they get wrapped in a Utility::TransientServerError with a resume time in the future' do
           expect(extractor).to receive(:yield_document_changes).exactly(3).times.and_call_original
 
           expect do
             extractor.document_changes { |e| e }
           end.to raise_error do |e|
-            expect(e).to be_a(ConnectorsShared::TransientServerError)
+            expect(e).to be_a(Utility::TransientServerError)
             expect(e.cause).to be_a(Faraday::ConnectionFailed)
             expect(e.suspend_until).to be > 1.minute.from_now
           end

@@ -7,9 +7,9 @@
 #
 
 require 'spec_helper'
-require 'connectors_shared/logger'
+require 'utility/logger'
 
-RSpec.describe ConnectorsShared::Logger do
+RSpec.describe Utility::Logger do
   let(:message) { 'this is a test message' }
 
   it 'can give the connectors logger' do

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'hashie/mash'
-require 'connectors_sdk/gitlab/adapter'
+require 'connectors/gitlab/adapter'
 
-describe ConnectorsSdk::GitLab::Adapter do
+describe Connectors::GitLab::Adapter do
   let(:project_hash) { Hashie::Mash.new(JSON.parse(connectors_fixture_raw('gitlab/simple_project.json'))) }
 
   context '#to_es_document' do

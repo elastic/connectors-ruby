@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors_async/job'
-require 'connectors_shared/job_status'
+require 'utility/job_status'
 
 describe ConnectorsAsync::Job do
   let(:job_id) { 12345 }
@@ -15,7 +15,7 @@ describe ConnectorsAsync::Job do
 
   context '#initialize' do
     it 'sets CREATED status' do
-      expect(job.status).to eq(ConnectorsShared::JobStatus::CREATED)
+      expect(job.status).to eq(Utility::JobStatus::CREATED)
     end
 
     it 'sets the same id that was passed into the constructor' do
@@ -26,7 +26,7 @@ describe ConnectorsAsync::Job do
   context '#update_status' do
     context 'when job hasn\'t finished' do
       it 'allows to update status' do
-        new_status = ConnectorsShared::JobStatus::RUNNING
+        new_status = Utility::JobStatus::RUNNING
 
         job.update_status(new_status)
 
@@ -36,11 +36,11 @@ describe ConnectorsAsync::Job do
 
     context 'when job has finished' do
       before(:each) do
-        job.update_status(ConnectorsShared::JobStatus::FINISHED)
+        job.update_status(Utility::JobStatus::FINISHED)
       end
 
       it 'raises an error' do
-        expect { job.update_status(ConnectorsShared::JobStatus::RUNNING) }.to raise_error(ConnectorsAsync::Job::StatusUpdateError)
+        expect { job.update_status(Utility::JobStatus::RUNNING) }.to raise_error(ConnectorsAsync::Job::StatusUpdateError)
       end
     end
 
@@ -130,7 +130,7 @@ describe ConnectorsAsync::Job do
     end
 
     it 'changes job status to failed' do
-      expect(job.status).to eq(ConnectorsShared::JobStatus::FAILED)
+      expect(job.status).to eq(Utility::JobStatus::FAILED)
     end
 
     it 'stores an error' do

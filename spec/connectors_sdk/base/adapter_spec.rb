@@ -8,12 +8,12 @@
 
 require 'hashie'
 require 'active_support/core_ext/hash'
-require 'connectors_sdk/base/adapter'
+require 'connectors/base/adapter'
 
-describe ConnectorsSdk::Base::Adapter do
+describe Connectors::Base::Adapter do
   context '.generate_id_helpers' do
     before do
-      class Dummy < ConnectorsSdk::Base::Adapter
+      class Dummy < Connectors::Base::Adapter
         generate_id_helpers :dummy, 'dummy'
       end
     end

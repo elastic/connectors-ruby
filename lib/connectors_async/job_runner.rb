@@ -7,10 +7,10 @@
 require 'concurrent'
 
 require 'connectors_async/job_store'
-require 'connectors_shared/constants'
-require 'connectors_shared/job_status'
-require 'connectors_shared/exception_tracking'
-require 'connectors_shared/logger'
+require 'utility/constants'
+require 'utility/job_status'
+require 'utility/exception_tracking'
+require 'utility/logger'
 
 module ConnectorsAsync
   class JobRunner
@@ -21,7 +21,7 @@ module ConnectorsAsync
         min_threads: 1,
         max_threads: max_threads,
         max_queue: 0,
-        idletime: ConnectorsShared::Constants::IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
+        idletime: Utility::Constants::IDLE_SLEEP_TIME + 1 # we +1 just so that thread.sleep manages to finish by the idle timeout
       )
     end
 
@@ -36,7 +36,7 @@ module ConnectorsAsync
 
         log_with_thread_id(:info, "Running the job #{job.id}")
 
-        job.update_status(ConnectorsShared::JobStatus::RUNNING)
+        job.update_status(Utility::JobStatus::RUNNING)
 
         new_cursors = connector.extract({ :content_source_id => content_source_id, :cursors => cursors, :secret_storage => secret_storage }) do |doc|
           with_throttling(job) do
@@ -44,19 +44,19 @@ module ConnectorsAsync
           end
         end
 
-        job.update_status(ConnectorsShared::JobStatus::FINISHED)
+        job.update_status(Utility::JobStatus::FINISHED)
         job.update_cursors(new_cursors)
 
         log_with_thread_id(:info, "Job #{job.id} has finished successfully")
       rescue StandardError => e
         log_with_thread_id(:error, "Job #{job.id} failed.")
-        ConnectorsShared::ExceptionTracking.log_exception(e)
+        Utility::ExceptionTracking.log_exception(e)
         job.fail(e)
       end
     end
 
     def log_with_thread_id(level, str)
-      ConnectorsShared::Logger.public_send(level, "[Thread #{Thread.current.name}] #{str}")
+      Utility::Logger.public_send(level, "[Thread #{Thread.current.name}] #{str}")
     end
 
     private
@@ -67,11 +67,11 @@ module ConnectorsAsync
         log_with_thread_id(:info, "Job #{job.id} is sleeping: Enterprise Search hasn't picked up documents for a while.")
 
         while job.should_wait?
-          if attempts < ConnectorsShared::Constants::MAX_IDLE_ATTEMPTS
+          if attempts < Utility::Constants::MAX_IDLE_ATTEMPTS
             attempts += 1
-            idle(ConnectorsShared::Constants::IDLE_SLEEP_TIME)
+            idle(Utility::Constants::IDLE_SLEEP_TIME)
           else
-            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{ConnectorsShared::Constants::IDLE_SLEEP_TIME} seconds.")
+            raise JobStuckError.new("Enterprise Search failed to collect the data from the queue, waited #{attempts} times for #{Utility::Constants::IDLE_SLEEP_TIME} seconds.")
           end
         end
 

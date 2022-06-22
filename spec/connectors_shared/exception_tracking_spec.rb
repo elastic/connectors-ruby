@@ -7,9 +7,9 @@
 #
 
 require 'spec_helper'
-require 'connectors_shared/exception_tracking'
+require 'utility/exception_tracking'
 
-RSpec.describe ConnectorsShared::ExceptionTracking do
+RSpec.describe Utility::ExceptionTracking do
   let(:message) { 'this is a test message' }
   let(:exception) { StandardError.new(message) }
 

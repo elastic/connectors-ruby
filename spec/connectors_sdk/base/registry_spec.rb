@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors_sdk/base/registry'
+require 'connectors/base/registry'
 
-describe ConnectorsSdk::Base::Factory do
+describe Connectors::Base::Factory do
   let(:factory) do
     described_class.new
   end

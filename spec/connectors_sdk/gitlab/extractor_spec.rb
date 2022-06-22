@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require 'hashie/mash'
-require 'connectors_sdk/gitlab/extractor'
-require 'connectors_sdk/gitlab/config'
-require 'connectors_sdk/gitlab/custom_client'
-require 'connectors_sdk/gitlab/connector'
+require 'connectors/gitlab/extractor'
+require 'connectors/gitlab/config'
+require 'connectors/gitlab/custom_client'
+require 'connectors/gitlab/connector'
 
-describe ConnectorsSdk::GitLab::Extractor do
+describe Connectors::GitLab::Extractor do
   let(:projects_json) { connectors_fixture_raw('gitlab/projects_list.json') }
   let(:project_json) { connectors_fixture_raw('gitlab/project.json') }
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
@@ -15,11 +15,11 @@ describe ConnectorsSdk::GitLab::Extractor do
   let(:project_members_json) { connectors_fixture_raw('gitlab/project_members.json') }
   let(:base_url) { 'https://www.example.com' }
 
-  let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => {}, :index_permissions => false) }
+  let(:config) { Connectors::GitLab::Config.new(:cursors => {}, :index_permissions => false) }
   let(:cursors) { nil }
   let(:client_proc) do
     proc do
-      ConnectorsSdk::GitLab::CustomClient.new(
+      Connectors::GitLab::CustomClient.new(
         :base_url => base_url,
         :api_token => 'token'
       )
@@ -30,7 +30,7 @@ describe ConnectorsSdk::GitLab::Extractor do
   subject do
     described_class.new(
       :content_source_id => 'gitlab_source_1',
-      :service_type => ConnectorsSdk::GitLab::Connector::SERVICE_TYPE,
+      :service_type => Connectors::GitLab::Connector::SERVICE_TYPE,
       :config => config,
       :features => [],
       :client_proc => client_proc,
@@ -111,7 +111,7 @@ describe ConnectorsSdk::GitLab::Extractor do
       end
 
       context 'with permissions' do
-        let(:config) { ConnectorsSdk::GitLab::Config.new(:cursors => {}, :index_permissions => true) }
+        let(:config) { Connectors::GitLab::Config.new(:cursors => {}, :index_permissions => true) }
 
         context 'public projects' do
           let(:projects) do
