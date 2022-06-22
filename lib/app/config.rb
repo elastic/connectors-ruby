@@ -37,7 +37,7 @@ end
 
 ::Config.load_and_set_settings(CONFIG_FILE)
 
-module ConnectorsApp
+module App
   DEFAULT_PASSWORD = 'changeme'
 
   Config = ::Settings

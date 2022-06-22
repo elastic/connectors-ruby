@@ -2,23 +2,23 @@ require_relative 'lib/connectors_app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_sdk'
-  s.version     = ConnectorsApp::Config['version']
+  s.version     = App::Config['version']
   s.homepage    = "https://github.com/elastic/connectors"
   s.summary     = 'Gem containing apis used by Enterprise Search and implementations of Connectors'
   s.description = ''
   s.authors     = ['Elastic']
   s.email       = 'ent-search-dev@elastic.co'
   s.metadata    = {
-    "revision" => ConnectorsApp::Config['revision'],
-    "repository" => ConnectorsApp::Config['repository']
+    "revision" => App::Config['revision'],
+    "repository" => App::Config['repository']
   }
-  s.files       = Dir.glob("lib/connectors_sdk/**/*", File::FNM_DOTMATCH) +
-    Dir.glob("lib/connectors_shared/**/*", File::FNM_DOTMATCH) +
+  s.files       = Dir.glob("lib/connectors/**/*", File::FNM_DOTMATCH) +
+    Dir.glob("lib/utility/**/*", File::FNM_DOTMATCH) +
     [
       'LICENSE',
       'NOTICE.txt',
-      'lib/connectors_sdk.rb',
-      'lib/connectors_shared.rb'
+      'lib/connectors.rb',
+      'lib/utility.rb'
     ]
   s.license     = 'Elastic-2.0'
 

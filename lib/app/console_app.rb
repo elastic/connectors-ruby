@@ -8,4 +8,8 @@
 
 $LOAD_PATH << '../'
 
-puts 'Hello Connectors 3.0'
+module App
+  module ConsoleApp
+    puts 'Hello Connectors 3.0'
+  end
+end
