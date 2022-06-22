@@ -9,12 +9,15 @@ require 'connectors_shared/middleware/bearer_auth'
 require 'connectors_shared/middleware/basic_auth'
 require 'connectors_shared/middleware/restrict_hostnames'
 
+require 'connectors_app/config'
+
 module ConnectorsSdk
   module GitLab
-    API_BASE_URL = 'https://gitlab.com/api/v4'
+    API_BASE_URL = ConnectorsApp::Config['gitlab']['api_base_url'] || 'https://gitlab.com/api/v4'
+    API_TOKEN = ConnectorsApp::Config['gitlab']['api_token']
 
     class CustomClient < ConnectorsSdk::Base::CustomClient
-      class ClientError < ConnectorsShared::ClientError
+      class ClientError < StandardError
         attr_reader :status_code, :endpoint
 
         def initialize(status_code, endpoint)
@@ -23,7 +26,7 @@ module ConnectorsSdk
         end
       end
 
-      def initialize(base_url:, api_token:, ensure_fresh_auth: nil)
+      def initialize(base_url:, api_token: API_TOKEN, ensure_fresh_auth: nil)
         @api_token = api_token
         super(:base_url => base_url, :ensure_fresh_auth => ensure_fresh_auth)
       end
@@ -32,7 +35,7 @@ module ConnectorsSdk
         [
           ::FaradayMiddleware::FollowRedirects,
           [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, API_BASE_URL] }],
-          [ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => @api_token }]
+          [ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => API_TOKEN }]
         ]
       end
     end

@@ -8,4 +8,17 @@
 
 $LOAD_PATH << '../'
 
-puts 'Hello Connectors 3.0'
+require 'connectors_sdk/gitlab/connector'
+
+puts 'Hello Connectors 3.0!'
+puts 'Please enter a command. Available options:'
+puts '- sync - start synchronization'
+puts '- status - check the status of a third-party service'
+
+command = gets.chomp
+
+if command.to_sym == :gets
+
+else
+  puts 'Sorry, this command is not yet implemented'
+end

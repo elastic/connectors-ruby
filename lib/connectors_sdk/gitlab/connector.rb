@@ -7,11 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors_sdk/base/connector'
-require 'connectors_sdk/gitlab/custom_client'
-require 'connectors_sdk/gitlab/adapter'
-require 'connectors_sdk/gitlab/config'
 require 'connectors_sdk/gitlab/extractor'
-require 'rack/utils'
 
 module ConnectorsSdk
   module GitLab
@@ -25,46 +21,42 @@ module ConnectorsSdk
       def configurable_fields
         [
           {
-            'key' => 'api_token',
-            'label' => 'API Token'
-          },
-          {
             'key' => 'base_url',
             'label' => 'Base URL'
+          },
+          {
+            'key' => 'api_token',
+            'label' => 'API Token'
           }
         ]
       end
 
-      private
-
-      def client(params)
-        ConnectorsSdk::GitLab::CustomClient.new(
-          :base_url => params[:base_url] || ConnectorsSdk::GitLab::API_BASE_URL,
-          :api_token => params[:api_token]
-        )
+      def health_check(_params)
+        true
       end
 
-      def config(params)
-        ConnectorsSdk::GitLab::Config.new(
-          :cursors => params.fetch(:cursors, {}) || {},
-          :index_permissions => params.fetch(:index_permissions, false)
-        )
-      end
-
-      def extractor_class
-        ConnectorsSdk::GitLab::Extractor
-      end
-
-      def custom_client_error
-        ConnectorsSdk::GitLab::CustomClient::ClientError
-      end
-
-      def health_check(params)
-        # let's do a simple call
-        response = client(params).get('user')
-        unless response.present? && response.status == 200
-          raise "Health check failed with response status #{response.status} and body #{response.body}"
+      def document_batch(_params)
+        results = 30.times.map do |i|
+          {
+            :action => :create_or_update,
+            :document => {
+              :id => "document_#{i}",
+              :type => 'document',
+              :body => "contents for document number: #{i}"
+            },
+            :download => nil
+          }
         end
+
+        [results, {}, true]
+      end
+
+      def deleted(_params)
+        []
+      end
+
+      def permissions(_params)
+        []
       end
     end
   end
