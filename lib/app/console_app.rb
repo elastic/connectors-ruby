@@ -17,8 +17,9 @@ puts '- status - check the status of a third-party service'
 
 command = gets.chomp
 
-if command.to_sym == :gets
-
+if command.to_sym == :sync
+  connector = ConnectorsSdk::GitLab::Connector.new
+  connector.sync_content({})
 else
   puts 'Sorry, this command is not yet implemented'
 end

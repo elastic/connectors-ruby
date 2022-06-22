@@ -7,17 +7,17 @@
 # frozen_string_literal: true
 
 require 'hashie'
+require 'json'
 require 'rack/utils'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors_sdk/gitlab/custom_client'
-
 
 module ConnectorsSdk
   module GitLab
     class Extractor
       PAGE_SIZE = 100 # max is 100
 
-      def yield_projects
+      def yield_projects_page(next_page_link = nil)
         query_params = {
           :pagination => :keyset,
           :per_page => PAGE_SIZE,
@@ -25,25 +25,21 @@ module ConnectorsSdk
           :sort => :desc
         }
 
-        next_page_link = nil
-
-        10.times do
-          if next_page_link.present?
-            if (matcher = /(https?:[^>]*)/.match(next_page_link))
-              clean_query = URI.parse(matcher.captures[0]).query
-              query_params = Rack::Utils.parse_query(clean_query)
-            else
-              raise "Next page link has unexpected format: #{next_page_link}"
-            end
+        if next_page_link.present?
+          if (matcher = /(https?:[^>]*)/.match(next_page_link))
+            clean_query = URI.parse(matcher.captures[0]).query
+            query_params = Rack::Utils.parse_query(clean_query)
+          else
+            raise "Next page link has unexpected format: #{next_page_link}"
           end
-          response = client.get('projects', query_params)
-
-          projects_chunk = JSON.parse(response.body)
-          yield projects_chunk
-
-          next_page_link = response.headers['Link'] || nil
-          break unless next_page_link.present?
         end
+        response = client.get('projects', query_params)
+
+        projects_chunk = JSON.parse(response.body)
+        yield projects_chunk
+
+        # return next link
+        response.headers['Link'] || nil
       end
 
       def fetch_project_repository_files(project_id)

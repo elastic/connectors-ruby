@@ -5,14 +5,22 @@
 #
 
 # frozen_string_literal: true
+require 'active_support/core_ext/hash/indifferent_access'
 
 require 'connectors_sdk/base/connector'
 require 'connectors_sdk/gitlab/extractor'
+require 'connectors_sdk/utility/sink'
 
 module ConnectorsSdk
   module GitLab
     class Connector < ConnectorsSdk::Base::Connector
       SERVICE_TYPE = 'gitlab'
+
+      def initialize
+        super
+        @extractor = ConnectorsSdk::GitLab::Extractor.new
+        @sink = Utility::Sink::ConsoleSink.new
+      end
 
       def display_name
         'GitLab Connector'
@@ -35,20 +43,9 @@ module ConnectorsSdk
         true
       end
 
-      def document_batch(_params)
-        results = 30.times.map do |i|
-          {
-            :action => :create_or_update,
-            :document => {
-              :id => "document_#{i}",
-              :type => 'document',
-              :body => "contents for document number: #{i}"
-            },
-            :download => nil
-          }
-        end
-
-        [results, {}, true]
+      def sync_content(_params)
+        puts 'Starting content synchronization...'
+        extract_projects
       end
 
       def deleted(_params)
@@ -57,6 +54,38 @@ module ConnectorsSdk
 
       def permissions(_params)
         []
+      end
+
+      private
+
+      def extract_projects
+        next_page_link = nil
+        loop do
+          next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
+            @sink.ingest_multiple(projects_chunk)
+            extract_project_files(projects_chunk)
+          end
+          break unless next_page_link.present?
+        end
+      rescue StandardError => e
+        puts(e.message)
+        puts(e.backtrace)
+        raise e
+      end
+
+      def extract_project_files(projects_chunk)
+        projects_chunk.each_with_index do |project, idx|
+          project = project.with_indifferent_access
+          files = @extractor.fetch_project_repository_files(project[:id])
+          chunk_size = projects_chunk.size
+          puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
+          project[:files] = files
+        end
+        @sink.ingest_multiple(projects_chunk)
+      rescue StandardError => e
+        puts(e.message)
+        puts(e.backtrace)
+        raise e
       end
     end
   end
