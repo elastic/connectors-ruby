@@ -8,7 +8,7 @@
 
 require 'connectors_async/job_runner'
 require 'connectors_async/job_watcher'
-require 'connectors_sdk/base/adapter'
+require 'connectors/base/adapter'
 
 describe ConnectorsAsync::JobRunner do
   let(:job_runner) { described_class.new(max_threads: 4) }
@@ -75,8 +75,8 @@ describe ConnectorsAsync::JobRunner do
       let(:extraction_time) { 0 }
 
       it 'updates the job status throughout the run' do
-        expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::RUNNING)
-        expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
+        expect(job).to receive(:update_status).with(Utility::JobStatus::RUNNING)
+        expect(job).to receive(:update_status).with(Utility::JobStatus::FINISHED)
 
         job_runner.start_job(
           job: job,
@@ -160,16 +160,16 @@ describe ConnectorsAsync::JobRunner do
     # that requires Time.zone to be initialized. When the actual thread starts,
     # we need to initialize it, therefore this test is here.
     # If normalize_date stops using Time.zone
-    context 'when extractor calls ConnectorsSdk::Base::Adapter.normalize_data' do
+    context 'when extractor calls Connectors::Base::Adapter.normalize_data' do
       before(:each) do
         allow(connector).to receive(:extract) do
-          ConnectorsSdk::Base::Adapter.normalize_date('2014-12-04T11:02:37Z')
+          Connectors::Base::Adapter.normalize_date('2014-12-04T11:02:37Z')
         end
       end
 
       it 'does not raise an error' do
         expect(job).to_not receive(:fail)
-        expect(job).to receive(:update_status).with(ConnectorsShared::JobStatus::FINISHED)
+        expect(job).to receive(:update_status).with(Utility::JobStatus::FINISHED)
 
         job_runner.start_job(
           job: job,

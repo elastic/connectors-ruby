@@ -38,7 +38,7 @@ tag:
 
 build_gem:
 	mkdir -p .gems
-	gem build connectors_sdk.gemspec
+	gem build connectors.gemspec
 	gem build connectors_stubs.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/

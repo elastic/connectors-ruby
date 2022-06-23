@@ -6,12 +6,13 @@
 
 # frozen_string_literal: true
 
-$LOAD_PATH << '../'
+require 'connectors/base/config'
 
-require 'app/config'
+describe Connectors::Base::Config do
+  let(:cursors) { { 'cursorKey' => 'cursorValue' } }
+  subject { Connectors::Base::Config.new(:cursors => cursors) }
 
-module App
-  module ConsoleApp
-    puts 'Hello Connectors 3.0'
+  it 'has cursors' do
+    expect(subject.cursors).to eq(cursors)
   end
 end

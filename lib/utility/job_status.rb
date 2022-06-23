@@ -4,14 +4,15 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-# frozen_string_literal: true
+module Utility
+  class JobStatus
+    CREATED = 'created'
+    RUNNING = 'running'
+    FINISHED = 'finished'
+    FAILED = 'failed'
 
-$LOAD_PATH << '../'
-
-require 'app/config'
-
-module App
-  module ConsoleApp
-    puts 'Hello Connectors 3.0'
+    def self.is_valid?(status)
+      [CREATED, RUNNING, FINISHED, FAILED].include? status
+    end
   end
 end

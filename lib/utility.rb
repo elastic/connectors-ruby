@@ -4,14 +4,10 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-# frozen_string_literal: true
-
-$LOAD_PATH << '../'
-
-require 'app/config'
-
-module App
-  module ConsoleApp
-    puts 'Hello Connectors 3.0'
-  end
-end
+require 'utility/constants'
+require 'utility/errors'
+require 'utility/exception_tracking'
+require 'utility/extension_mapping_util'
+require 'utility/job_status'
+require 'utility/logger'
+require 'utility/monitor'
