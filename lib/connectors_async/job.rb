@@ -5,8 +5,8 @@
 #
 
 require 'concurrent/map'
-require 'connectors_shared/constants'
-require 'connectors_shared/job_status'
+require 'utility/constants'
+require 'utility/job_status'
 
 # The class is actually supported for single-threaded usage EXCEPT for :documents field
 # :documents are a Queue that's stated to be safe in a threaded environment
@@ -23,7 +23,7 @@ module ConnectorsAsync
 
       @data = {
         :job_id => job_id,
-        :status => ConnectorsShared::JobStatus::CREATED,
+        :status => Utility::JobStatus::CREATED,
         :documents => Queue.new # queue is thread-safe
       }
 
@@ -39,7 +39,7 @@ module ConnectorsAsync
     end
 
     def is_failed?
-      @data[:status] == ConnectorsShared::JobStatus::FAILED
+      @data[:status] == Utility::JobStatus::FAILED
     end
 
     def error
@@ -56,7 +56,7 @@ module ConnectorsAsync
 
     def update_status(new_status)
       raise StatusUpdateError if is_finished?
-      raise InvalidStatusError unless ConnectorsShared::JobStatus.is_valid?(new_status)
+      raise InvalidStatusError unless Utility::JobStatus.is_valid?(new_status)
 
       @data[:status] = new_status
       notify_changed
@@ -68,7 +68,7 @@ module ConnectorsAsync
     end
 
     def fail(e)
-      update_status(ConnectorsShared::JobStatus::FAILED)
+      update_status(Utility::JobStatus::FAILED)
 
       @data[:error] = e
     end
@@ -98,18 +98,18 @@ module ConnectorsAsync
     def is_finished?
       status = @data[:status]
 
-      [ConnectorsShared::JobStatus::FINISHED, ConnectorsShared::JobStatus::FAILED].include?(status)
+      [Utility::JobStatus::FINISHED, Utility::JobStatus::FAILED].include?(status)
     end
 
     def safe_to_clean_up?
       return true if is_finished? && @data[:documents].empty?
 
       # half an hour seems good enough, given that some connectors take 5-10 minutes to respond when throttled
-      Time.now - @last_updated_at > ConnectorsShared::Constants::STALE_JOB_TIMEOUT
+      Time.now - @last_updated_at > Utility::Constants::STALE_JOB_TIMEOUT
     end
 
     def should_wait?
-      @data[:documents].length > ConnectorsShared::Constants::JOB_QUEUE_SIZE_IDLE_THRESHOLD
+      @data[:documents].length > Utility::Constants::JOB_QUEUE_SIZE_IDLE_THRESHOLD
     end
 
     private

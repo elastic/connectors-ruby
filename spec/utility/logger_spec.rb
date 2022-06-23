@@ -1,15 +1,18 @@
 # frozen_string_literal: true
+
 #
 # Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'stubs/app_config'
-require 'app/config'
+require 'spec_helper'
 require 'utility/logger'
 
-logger = AppConfig.connectors_logger
-logger.level = App::Config['log_level'] || 'info'
+RSpec.describe Utility::Logger do
+  let(:message) { 'this is a test message' }
 
-Utility::Logger.setup!(logger)
+  it 'can give the connectors logger' do
+    expect { described_class.info(message) }.to output(/#{message}/).to_stdout_from_any_process
+  end
+end

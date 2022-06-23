@@ -10,7 +10,7 @@ Look into the Vault in the `ent-search-team/rubygem` secret.
 
 ## Unified release
 
-**MAJOR.MINOR.PATCH** should match the Elastic and Enterprise Search version it targets 
+**MAJOR.MINOR.PATCH** should match the Elastic and Enterprise Search version it targets
 and the *BUILD* number should be set to **0** the day the Connectors release is created
 to be included with the Enterprise Search distribution.
 
@@ -23,7 +23,7 @@ To release Connectors:
 - PR these changes to the appropriate Connectors release branch
 - Run `make release`
 
-A Gem will be published to RubyGems: https://rubygems.org/gems/connectors_sdk.
+A Gem will be published to RubyGems: #TODO: change the name, what's gonna be the new gem, if any is needed? https://rubygems.org/gems/connectors.
 
 Take care of the branching (minor releases only):
 

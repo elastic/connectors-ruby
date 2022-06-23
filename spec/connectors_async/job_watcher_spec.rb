@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors_async/job_watcher'
-require 'connectors_shared/exception_tracking'
+require 'utility/exception_tracking'
 
 describe ConnectorsAsync::JobWatcher do
   let(:job_store) { double }
@@ -46,7 +46,7 @@ describe ConnectorsAsync::JobWatcher do
     end
 
     it 'logs an error' do
-      expect(ConnectorsShared::ExceptionTracking).to receive(:log_exception)
+      expect(Utility::ExceptionTracking).to receive(:log_exception)
 
       job_watcher.watch
     end

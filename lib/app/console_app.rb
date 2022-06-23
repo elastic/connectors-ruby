@@ -8,18 +8,25 @@
 
 $LOAD_PATH << '../'
 
+require 'app/config'
 require 'connectors_sdk/gitlab/connector'
 
-puts 'Hello Connectors 3.0!'
-puts 'Please enter a command. Available options:'
-puts '- sync - start synchronization'
-puts '- status - check the status of a third-party service'
+module App
+  module ConsoleApp
+    puts 'Hello Connectors 3.0!'
+    puts 'Please enter a command. Available options:'
+    puts '- sync - start synchronization'
+    puts '- status - check the status of a third-party service'
 
-command = gets.chomp
+    command = gets.chomp
 
-if command.to_sym == :sync
-  connector = ConnectorsSdk::GitLab::Connector.new
-  connector.sync_content({})
-else
-  puts 'Sorry, this command is not yet implemented'
+    if command.to_sym == :sync
+      connector = ConnectorsSdk::GitLab::Connector.new
+      connector.sync_content({})
+    else
+      puts 'Sorry, this command is not yet implemented'
+    end
+  end
 end
+
+

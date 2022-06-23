@@ -1,15 +1,13 @@
-# frozen_string_literal: true
 #
 # Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'stubs/app_config'
-require 'app/config'
+require 'utility/constants'
+require 'utility/errors'
+require 'utility/exception_tracking'
+require 'utility/extension_mapping_util'
+require 'utility/job_status'
 require 'utility/logger'
-
-logger = AppConfig.connectors_logger
-logger.level = App::Config['log_level'] || 'info'
-
-Utility::Logger.setup!(logger)
+require 'utility/monitor'
