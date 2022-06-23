@@ -56,23 +56,6 @@ eshPipeline(
                 }
             },
             match_on_all_branches: true,
-       ],
-       [
-           name: 'Packaging',
-           type: 'script',
-           script: {
-               eshWithRbenv {
-                 if (isUnix()) {
-                   sh('curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64')
-                   sh('chmod +x yq')
-                   sh('YQ=`realpath yq` make install build')
-                 } else {
-                   bat('make install build')
-                 }
-               }
-           },
-           artifacts: [[pattern: 'app/.gems/*.gem']],
-           match_on_all_branches: true,
        ]
     ],
     slack_channel: 'ent-search-ingestion'

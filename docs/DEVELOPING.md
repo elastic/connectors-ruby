@@ -20,14 +20,6 @@ From the root level of this repository:
 make install
 ```
 
-### Building
-
-The repository can generate a ruby gem, if needed.
-
-```shell
-make build
-```
-
 ### Testing
 ```shell
 # ensure code standards
