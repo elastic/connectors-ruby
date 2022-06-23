@@ -10,9 +10,9 @@ require 'hashie'
 require 'json'
 require 'rack/utils'
 require 'active_support/core_ext/hash/indifferent_access'
-require 'connectors_sdk/gitlab/custom_client'
+require 'connectors/gitlab/custom_client'
 
-module ConnectorsSdk
+module Connectors
   module GitLab
     class Extractor
       PAGE_SIZE = 100 # max is 100
@@ -56,7 +56,7 @@ module ConnectorsSdk
       private
 
       def client
-        @client ||= ConnectorsSdk::GitLab::CustomClient.new(base_url: 'https://gitlab.com/api/v4')
+        @client ||= Connectors::GitLab::CustomClient.new(base_url: 'https://gitlab.com/api/v4')
       end
     end
   end

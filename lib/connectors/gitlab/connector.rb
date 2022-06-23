@@ -7,18 +7,18 @@
 # frozen_string_literal: true
 require 'active_support/core_ext/hash/indifferent_access'
 
-require 'connectors_sdk/base/connector'
-require 'connectors_sdk/gitlab/extractor'
-require 'connectors_sdk/utility/sink'
+require 'connectors/base/connector'
+require 'connectors/gitlab/extractor'
+require 'utility/sink'
 
-module ConnectorsSdk
+module Connectors
   module GitLab
-    class Connector < ConnectorsSdk::Base::Connector
+    class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
       def initialize
         super
-        @extractor = ConnectorsSdk::GitLab::Extractor.new
+        @extractor = Connectors::GitLab::Extractor.new
         @sink = Utility::Sink::ConsoleSink.new
       end
 

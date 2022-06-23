@@ -4,19 +4,19 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 require 'faraday_middleware/response/follow_redirects'
-require 'connectors_sdk/base/custom_client'
-require 'connectors_shared/middleware/bearer_auth'
-require 'connectors_shared/middleware/basic_auth'
-require 'connectors_shared/middleware/restrict_hostnames'
+require 'connectors/base/custom_client'
+require 'utility/middleware/bearer_auth'
+require 'utility/middleware/basic_auth'
+require 'utility/middleware/restrict_hostnames'
 
-require 'connectors_app/config'
+require 'app/config'
 
-module ConnectorsSdk
+module Connectors
   module GitLab
-    API_BASE_URL = ConnectorsApp::Config['gitlab']['api_base_url'] || 'https://gitlab.com/api/v4'
-    API_TOKEN = ConnectorsApp::Config['gitlab']['api_token']
+    API_BASE_URL = App::Config['gitlab']['api_base_url'] || 'https://gitlab.com/api/v4'
+    API_TOKEN = App::Config['gitlab']['api_token']
 
-    class CustomClient < ConnectorsSdk::Base::CustomClient
+    class CustomClient < Connectors::Base::CustomClient
       class ClientError < StandardError
         attr_reader :status_code, :endpoint
 
@@ -34,8 +34,8 @@ module ConnectorsSdk
       def additional_middleware
         [
           ::FaradayMiddleware::FollowRedirects,
-          [ConnectorsShared::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, API_BASE_URL] }],
-          [ConnectorsShared::Middleware::BearerAuth, { :bearer_auth_token => API_TOKEN }]
+          [Utility::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, API_BASE_URL] }],
+          [Utility::Middleware::BearerAuth, { :bearer_auth_token => API_TOKEN }]
         ]
       end
     end

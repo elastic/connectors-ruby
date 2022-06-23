@@ -9,7 +9,7 @@
 $LOAD_PATH << '../'
 
 require 'app/config'
-require 'connectors_sdk/gitlab/connector'
+require 'connectors/gitlab/connector'
 
 module App
   module ConsoleApp
@@ -21,7 +21,7 @@ module App
     command = gets.chomp
 
     if command.to_sym == :sync
-      connector = ConnectorsSdk::GitLab::Connector.new
+      connector = Connectors::GitLab::Connector.new
       connector.sync_content({})
     else
       puts 'Sorry, this command is not yet implemented'
