@@ -80,8 +80,8 @@ module ConnectorsSdk
           chunk_size = projects_chunk.size
           puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
           project[:files] = files
+          @sink.ingest_multiple(files)
         end
-        @sink.ingest_multiple(projects_chunk)
       rescue StandardError => e
         puts(e.message)
         puts(e.backtrace)
