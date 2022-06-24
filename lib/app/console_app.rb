@@ -15,18 +15,27 @@ module App
   module ConsoleApp
     extend self
 
+    INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
+
     def start_sync
-      connector = select_connector
+      puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
+      index_name = gets.chomp.strip
+      unless INDEX_NAME_REGEXP.match?(index_name)
+        puts "Index name #{index_name} contains symbols that aren't allowed!"
+        return
+      end
+
+      connector = select_connector({ :index_name => index_name })
 
       puts 'Starting content sync...'
-      connector.sync_content({})
+      connector.sync_content
     end
 
     def show_status
       connector = select_connector
 
       puts 'Checking status...'
-      puts connector.source_status({})
+      puts connector.source_status
       puts
     end
 
@@ -39,14 +48,14 @@ module App
       gets.chomp.to_sym
     end
 
-    def select_connector
+    def select_connector(params = {})
       puts 'Registered connectors:'
       connectors = registry.registered_connectors
       connectors.each_with_index { |name, index| puts "#{index} - #{name}" }
       puts
       puts 'Please enter the number of the connector you want:'
       order = gets.chomp.to_i
-      registry.connector(connectors[order])
+      registry.connector(connectors[order], params)
     end
 
     def registry

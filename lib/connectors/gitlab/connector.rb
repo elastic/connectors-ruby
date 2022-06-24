@@ -18,10 +18,18 @@ module Connectors
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
-      def initialize
-        super
+      def initialize(params)
+        super()
         @extractor = Connectors::GitLab::Extractor.new
-        @sink = Utility::Sink::ConsoleSink.new
+        @sinks =
+          [
+            Utility::Sink::ConsoleSink.new
+          ]
+        if params.present? && params[:index_name].present?
+          elastic_sink = Utility::Sink::ElasticSink.new
+          elastic_sink.index_name = params[:index_name]
+          @sinks.push(elastic_sink)
+        end
       end
 
       def display_name
@@ -41,15 +49,15 @@ module Connectors
         ]
       end
 
-      def sync_content(_params)
+      def sync_content(_params = {})
         extract_projects
       end
 
-      def deleted(_params)
+      def deleted(_params = {})
         []
       end
 
-      def permissions(_params)
+      def permissions(_params = {})
         []
       end
 
@@ -63,12 +71,16 @@ module Connectors
         Connectors::GitLab::CustomClient::ClientError
       end
 
+      def ingest_documents(docs)
+        @sinks.each { |sink| sink.ingest_multiple(docs) }
+      end
+
       def extract_projects
         next_page_link = nil
         loop do
           next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
             projects = projects_chunk.map { |p| Connectors::GitLab::Adapter.to_es_document(:project, p) }
-            @sink.ingest_multiple(projects)
+            ingest_documents(projects)
             extract_project_files(projects_chunk)
           end
           break unless next_page_link.present?
@@ -87,7 +99,7 @@ module Connectors
           puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
           files = files.map { |file| Connectors::GitLab::Adapter.to_es_document(:file, file) }
           project[:files] = files
-          @sink.ingest_multiple(files)
+          ingest_documents(files)
         end
       rescue StandardError => e
         puts(e.message)

@@ -19,30 +19,29 @@ module Connectors
 
       def self.to_es_document(type, source_doc)
         source_doc = source_doc.with_indifferent_access
-        result = source_doc.deep_dup
+        result = {}
         case type.to_sym
         when :project
-          result = {
-            :id => gitlab_id_to_es_id(source_doc[:id]),
-            :type => type,
-            :url => source_doc[:web_url],
-            :body => source_doc[:description],
-            :title => source_doc[:name],
-            :created_at => source_doc[:created_at],
-            :last_modified_at => source_doc[:last_activity_at],
-            :visibility => source_doc[:visibility],
-            :namespace => if source_doc[:namespace].nil?
-                            nil
-                          else
-                            source_doc[:namespace][:name]
-                          end
-          }
+          result.merge!(
+            {
+              :url => source_doc[:web_url],
+              :body => source_doc[:description],
+              :title => source_doc[:name],
+              :created_at => source_doc[:created_at],
+              :last_modified_at => source_doc[:last_activity_at],
+              :visibility => source_doc[:visibility],
+              :namespace => if source_doc[:namespace].nil?
+                              nil
+                            else
+                              source_doc[:namespace][:name]
+                            end
+            })
         else
           # don't remap
+          result.merge!(source_doc)
         end
-        if source_doc[:_allow_permissions].present?
-          result[:_allow_permissions] = source_doc[:_allow_permissions]
-        end
+        result[:id] = gitlab_id_to_es_id(source_doc[:id])
+        result[:type] = type
         result
       end
     end

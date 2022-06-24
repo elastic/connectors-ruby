@@ -21,10 +21,10 @@ module Connectors
         @connectors[name]
       end
 
-      def connector(name)
+      def connector(name, params = nil)
         connector_class = connector_class(name)
         if connector_class.present?
-          return connector_class.new
+          return params.present? ? connector_class.new(params) : connector_class.new
         end
         raise "Connector #{name} is not yet registered. You need to register it before use"
       end

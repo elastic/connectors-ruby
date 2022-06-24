@@ -1,3 +1,6 @@
+require 'elasticsearch'
+require 'active_support/json'
+
 module Utility
   module Sink
     class ConsoleSink
@@ -66,12 +69,13 @@ module Utility
     end
 
     class ElasticSink
+      attr_accessor :index_name
+
       def initialize
         @client = Elasticsearch::Client.new(
           user: 'elastic',
           password: 'changeme',
         )
-
         @queue = []
         @flush_threshold = 50
       end
@@ -86,11 +90,10 @@ module Utility
 
       def flush(size: nil)
         flush_size = size || @flush_threshold
-        flush if ready_to_flush?
-
-        data_to_flush = @queue.pop(flush_size)
-
-        send(data_to_flush)
+        if ready_to_flush?
+          data_to_flush = @queue.pop(flush_size)
+          send(data_to_flush)
+        end
       end
 
       def ingest_multiple(documents)
@@ -108,11 +111,12 @@ module Utility
       end
 
       private
+
       def send(documents)
         return if documents.empty?
 
         bulk_request = documents.map do |document|
-          { index:  { _index: 'salesforce-objects', _id: document[:id], data: document } }
+          { index:  { _index: index_name, _id: document[:id], data: document } }
         end
 
         puts "Request: #{bulk_request.to_json}"

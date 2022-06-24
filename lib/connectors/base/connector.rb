@@ -92,11 +92,11 @@ module Connectors
         authorization.access_token(params)
       end
 
-      def refresh(params)
+      def refresh(params = {})
         authorization.refresh(params)
       end
 
-      def source_status(params)
+      def source_status(params = {})
         health_check(params)
         { :status => 'OK', :statusCode => 200, :message => "Connected to #{display_name}" }
       rescue StandardError => e
