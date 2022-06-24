@@ -5,6 +5,7 @@
 #
 
 require 'utility/constants'
+require 'utility/elasticsearch_client'
 require 'utility/errors'
 require 'utility/exception_tracking'
 require 'utility/extension_mapping_util'

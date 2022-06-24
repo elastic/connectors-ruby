@@ -6,12 +6,16 @@
 
 # frozen_string_literal: true
 
-$LOAD_PATH << '../'
+module Connectors
+  class SyncStatus
+    COMPLETED = 'completed'
+    IN_PROGRESS = 'in_progress'
+    FAILED = 'failed'
 
-require 'app/connector'
-
-module App
-  module ConsoleApp
-    App::Connector.start!
+    STATUSES = [
+      COMPLETED,
+      IN_PROGRESS,
+      FAILED
+    ]
   end
 end

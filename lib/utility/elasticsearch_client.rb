@@ -17,6 +17,18 @@ module Utility
         client.cluster.health
       end
 
+      def search(arguments = {})
+        client.search(arguments)
+      end
+
+      def update(arguments = {})
+        client.update(arguments)
+      end
+
+      def bulk(arguments = {})
+        client.bulk(arguments)
+      end
+
       private
 
       def client

@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'utility'
 
 module Connectors
   module StubConnector
@@ -34,28 +35,12 @@ module Connectors
         true
       end
 
-      def document_batch(_params)
-        results = 30.times.map do |i|
-          {
-            :action => :create_or_update,
-            :document => {
-              :id => "document_#{i}",
-              :type => 'document',
-              :body => "contents for document number: #{i}"
-            },
-            :download => nil
-          }
-        end
-
-        [results, {}, true]
-      end
-
-      def deleted(_params)
-        []
-      end
-
-      def permissions(_params)
-        []
+      def sync(connector)
+        body = [
+          { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector'} } }
+        ]
+        Utility::ElasticsearchClient.bulk(:body => body)
+        complete_sync(connector)
       end
     end
   end
