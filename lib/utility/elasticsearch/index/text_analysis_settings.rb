@@ -157,156 +157,163 @@ module Utility
           }
         }.freeze
 
-        def analyzer_definitions
-          definitions = {}
+        NON_ICU_ANALYSIS_SETTINGS = {
+          tokenizer_name: 'standard', folding_filters: %w(cjk_width lowercase asciifolding)
+        }.freeze
 
-          definitions['i_prefix'] = {
-            tokenizer: smart_tokenizer_name,
-            filter: [
-              *folding_filters,
-              'front_ngram'
-            ]
-          }
+        ICU_ANALYSIS_SETTINGS = {
+          tokenizer_name: 'icu_tokenizer', folding_filters: %w(icu_folding)
+        }.freeze
 
-          definitions['q_prefix'] = {
-            tokenizer: smart_tokenizer_name,
-            filter: [
-              *folding_filters
-            ]
-          }
+        class << self
+          def analyzer_definitions(tokenizer_name, folding_filters)
+            definitions = {}
 
-          definitions['iq_text_base'] = {
-            tokenizer: smart_tokenizer_name,
-            filter: [
-              *folding_filters,
-              stop_words_filter_name
-            ]
-          }
+            definitions['i_prefix'] = {
+              tokenizer: tokenizer_name,
+              filter: [
+                *folding_filters,
+                'front_ngram'
+              ]
+            }
 
-          definitions['iq_text_stem'] = {
-            tokenizer: smart_tokenizer_name,
-            filter: [
-              *prepended_filters,
-              *folding_filters,
-              stop_words_filter_name,
-              stem_filter_name,
-              *postpended_filters
-            ]
-          }
+            definitions['q_prefix'] = {
+              tokenizer: tokenizer_name,
+              filter: [
+                *folding_filters
+              ]
+            }
 
-          definitions['iq_text_delimiter'] = {
-            tokenizer: 'whitespace',
-            filter: [
-              *prepended_filters,
-              'delimiter',
-              *folding_filters,
-              stop_words_filter_name,
-              stem_filter_name,
-              *postpended_filters
-            ]
-          }
+            definitions['iq_text_base'] = {
+              tokenizer: tokenizer_name,
+              filter: [
+                *folding_filters,
+                stop_words_filter_name
+              ]
+            }
 
-          definitions['i_text_bigram'] = {
-            tokenizer: smart_tokenizer_name,
-            filter: [
-              *folding_filters,
-              stem_filter_name,
-              'bigram_joiner',
-              'bigram_max_size'
-            ]
-          }
+            definitions['iq_text_stem'] = {
+              tokenizer: tokenizer_name,
+              filter: [
+                *prepended_filters,
+                *folding_filters,
+                stop_words_filter_name,
+                stem_filter_name,
+                *postpended_filters
+              ]
+            }
 
-          definitions['q_text_bigram'] = {
-            tokenizer: smart_tokenizer_name,
-            filter: [
-              *folding_filters,
-              stem_filter_name,
-              'bigram_joiner_unigrams',
-              'bigram_max_size'
-            ]
-          }
+            definitions['iq_text_delimiter'] = {
+              tokenizer: 'whitespace',
+              filter: [
+                *prepended_filters,
+                'delimiter',
+                *folding_filters,
+                stop_words_filter_name,
+                stem_filter_name,
+                *postpended_filters
+              ]
+            }
 
-          definitions
-        end
+            definitions['i_text_bigram'] = {
+              tokenizer: tokenizer_name,
+              filter: [
+                *folding_filters,
+                stem_filter_name,
+                'bigram_joiner',
+                'bigram_max_size'
+              ]
+            }
 
-        def smart_tokenizer_name
-          if AppConfig.use_analysis_icu?
-            'icu_tokenizer'
-          else
-            'standard'
+            definitions['q_text_bigram'] = {
+              tokenizer: tokenizer_name,
+              filter: [
+                *folding_filters,
+                stem_filter_name,
+                'bigram_joiner_unigrams',
+                'bigram_max_size'
+              ]
+            }
+
+            definitions
           end
-        end
 
-        def folding_filters
-          if AppConfig.use_analysis_icu?
-            ['icu_folding']
-          else
-            %w(cjk_width lowercase asciifolding)
+          def stop_words_filter_name
+            "#{language_code}-stop-words-filter"
           end
-        end
 
-        def stop_words_filter_name
-          "#{language_code}-stop-words-filter"
-        end
+          def language_name
+            LANGUAGE_DATA[language_code][:name]
+          end
 
-        def language_name
-          LANGUAGE_DATA[language_code][:name]
-        end
+          def stemmer_name
+            LANGUAGE_DATA[language_code][:stemmer]
+          end
 
-        def stemmer_name
-          LANGUAGE_DATA[language_code][:stemmer]
-        end
+          def stop_words_name_or_list
+            LANGUAGE_DATA[language_code][:stop_words]
+          end
 
-        def stop_words_name_or_list
-          LANGUAGE_DATA[language_code][:stop_words]
-        end
+          def custom_filter_definitions
+            LANGUAGE_DATA[language_code][:custom_filter_definitions] || {}
+          end
 
-        def custom_filter_definitions
-          LANGUAGE_DATA[language_code][:custom_filter_definitions] || {}
-        end
+          def prepended_filters
+            LANGUAGE_DATA[language_code][:prepended_filters] || []
+          end
 
-        def prepended_filters
-          LANGUAGE_DATA[language_code][:prepended_filters] || []
-        end
+          def postpended_filters
+            LANGUAGE_DATA[language_code][:postpended_filters] || []
+          end
 
-        def postpended_filters
-          LANGUAGE_DATA[language_code][:postpended_filters] || []
-        end
+          def stem_filter_name
+            "#{language_code}-stem-filter"
+          end
 
-        def stem_filter_name
-          "#{language_code}-stem-filter"
-        end
+          def filter_definitions
+            definitions = GENERIC_FILTERS.dup
 
-        def filter_definitions
-          definitions = GENERIC_FILTERS.dup
+            definitions[stem_filter_name] = {
+              type: 'stemmer',
+              name: stemmer_name
+            }
 
-          definitions[stem_filter_name] = {
-            type: 'stemmer',
-            name: stemmer_name
-          }
+            definitions[stop_words_filter_name] = {
+              type: 'stop',
+              stopwords: stop_words_name_or_list
+            }
 
-          definitions[stop_words_filter_name] = {
-            type: 'stop',
-            stopwords: stop_words_name_or_list
-          }
+            definitions.merge(custom_filter_definitions)
+          end
 
-          definitions.merge(custom_filter_definitions)
-        end
+          def icu_settings(analysis_icu)
+            return ICU_ANALYSIS_SETTINGS if analysis_icu
 
-        def to_hash()
-          {
-            analysis: {
-              analyzer: analyzer_definitions,
-              filter: filter_definitions
-            },
-            index: {
-              similarity: {
-                default: {
-                  type: 'BM25'
+            NON_ICU_ANALYSIS_SETTINGS
+          end
+
+          # TODO description
+          def lookup(language_code: DEFAULT_LANGUAGE, analysis_icu: false)
+            icu_settings = icu_settings(analysis_icu)
+            analyzer = analyzer_definitions(
+              icu_settings[:tokenizer],
+              icu_settings[:folding_filters]
+            )
+
+            {
+              analysis: {
+                analyzer: analyzer,
+                filter: filter_definitions
+              },
+              index: {
+                similarity: {
+                  default: {
+                    type: 'BM25'
+                  }
                 }
               }
             }
-          }
+          end
         end
       end
     end
