@@ -83,7 +83,9 @@ module Utility
               id: {
                 type: 'keyword'
               }
-            }
+            }.tap do |properties|
+              properties.merge!(WORKPLACE_SEARCH_SUBEXTRACTION_STAMP_FIELD_MAPPINGS) if search_index&.connector_search_index?
+            end
           }
         end
       end
