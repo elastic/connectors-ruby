@@ -13,11 +13,11 @@ module Utility
         ENUM_IGNORE_ABOVE = 2048
 
         WORKPLACE_SEARCH_SUBEXTRACTION_STAMP_FIELD_MAPPINGS = {
-          :_subextracted_as_of => {
-            :type => 'date'
+          _subextracted_as_of: {
+            type: 'date'
           },
-          :_subextracted_version => {
-            :type => 'keyword'
+          _subextracted_version: {
+            type: 'keyword'
           }
         }.freeze
 
