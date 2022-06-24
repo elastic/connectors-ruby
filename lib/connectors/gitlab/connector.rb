@@ -9,6 +9,8 @@ require 'active_support/core_ext/hash/indifferent_access'
 
 require 'connectors/base/connector'
 require 'connectors/gitlab/extractor'
+require 'connectors/gitlab/custom_client'
+require 'connectors/gitlab/adapter'
 require 'utility/sink'
 
 module Connectors
@@ -39,12 +41,7 @@ module Connectors
         ]
       end
 
-      def health_check(_params)
-        true
-      end
-
       def sync_content(_params)
-        puts 'Starting content synchronization...'
         extract_projects
       end
 
@@ -58,11 +55,20 @@ module Connectors
 
       private
 
+      def health_check(_params)
+        @extractor.health_check
+      end
+
+      def custom_client_error
+        Connectors::GitLab::CustomClient::ClientError
+      end
+
       def extract_projects
         next_page_link = nil
         loop do
           next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
-            @sink.ingest_multiple(projects_chunk)
+            projects = projects_chunk.map { |p| Connectors::GitLab::Adapter.to_es_document(:project, p) }
+            @sink.ingest_multiple(projects)
             extract_project_files(projects_chunk)
           end
           break unless next_page_link.present?
@@ -79,6 +85,7 @@ module Connectors
           files = @extractor.fetch_project_repository_files(project[:id])
           chunk_size = projects_chunk.size
           puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
+          files = files.map { |file| Connectors::GitLab::Adapter.to_es_document(:file, file) }
           project[:files] = files
           @sink.ingest_multiple(files)
         end

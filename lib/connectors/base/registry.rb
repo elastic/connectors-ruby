@@ -20,6 +20,18 @@ module Connectors
       def connector_class(name)
         @connectors[name]
       end
+
+      def connector(name)
+        connector_class = connector_class(name)
+        if connector_class.present?
+          return connector_class.new
+        end
+        raise "Connector #{name} is not yet registered. You need to register it before use"
+      end
+
+      def registered_connectors
+        @connectors.keys.sort
+      end
     end
 
     REGISTRY = Factory.new

@@ -48,9 +48,15 @@ module Connectors
           puts "Received #{response.status} status when fetching repository files for project #{project_id}"
           return []
         end
-        files = JSON.parse(response.body)
+        JSON.parse(response.body)
+      end
 
-        files.map { |file| file['path'] }
+      def health_check
+        # let's do a simple call to get the current user
+        response = client.get('user')
+        unless response.present? && response.status == 200
+          raise "Health check failed with response status #{response.status} and body #{response.body}"
+        end
       end
 
       private
