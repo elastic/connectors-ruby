@@ -9,7 +9,6 @@
 require 'app/connector'
 
 describe App::Connector do
-
   it 'should start only once' do
     allow(described_class).to receive(:start_polling_jobs)
     described_class.start!
