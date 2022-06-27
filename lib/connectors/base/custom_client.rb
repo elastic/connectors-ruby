@@ -101,7 +101,7 @@ module Connectors
           retry_after_secs = (retry_after.is_a?(Array) ? retry_after.first.to_i : retry_after.to_i) * multiplier
           retry_after_secs = 60 if retry_after_secs <= 0
           Utility::Logger.warn("Exceeded #{self.class} request limits. Going to sleep for #{retry_after_secs} seconds")
-          raise Utility::ThrottlingError.new(:suspend_until => DateTime.now + retry_after_secs.seconds, :cursors => options[:cursors])
+          raise Utility::ThrottlingError.new(:suspend_until => Utility.utc_now + retry_after_secs.seconds, :cursors => options[:cursors])
         else
           response
         end

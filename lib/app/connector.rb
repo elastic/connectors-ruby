@@ -98,7 +98,7 @@ module App
         last_synced = Time.parse(last_synced).utc
         sync_interval = connector['_source']['scheduling']['interval']
         cron_parser = cron_parser(sync_interval)
-        cron_parser && cron_parser.next(last_synced) < Time.now.utc
+        cron_parser && cron_parser.next(last_synced) < Utility.utc_now
       end
 
       def cron_parser(cronline)
@@ -113,8 +113,8 @@ module App
           :doc => {
             :sync_now => false,
             :sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now.utc,
-            :updated_at => Time.now.utc
+            :last_synced => Utility.utc_now,
+            :updated_at => Utility.utc_now
           }
         }
 
@@ -126,8 +126,8 @@ module App
         body = {
           :doc => {
             :sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
-            :last_synced => Time.now.utc,
-            :updated_at => Time.now.utc
+            :last_synced => Utility.utc_now,
+            :updated_at => Utility.utc_now
           }.tap do |doc|
             doc[:sync_error] = error if error
           end
