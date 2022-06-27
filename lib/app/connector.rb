@@ -22,6 +22,7 @@ module App
     )
     CONNECTORS_INDEX = '.elastic-connectors'
     QUERY_SIZE = 20
+    POLL_IDLING = 60
 
     @running = Concurrent::AtomicBoolean.new(false)
 
@@ -51,9 +52,8 @@ module App
           polling_jobs
         rescue StandardError => e
           Utility::Logger.error("Error happened during sync. error: #{e.message}")
-          raise
         ensure
-          sleep(60)
+          sleep(POLL_IDLING)
         end
       end
 
