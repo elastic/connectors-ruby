@@ -8,8 +8,8 @@
 
 $LOAD_PATH << '../'
 
+require 'app/connector'
+
 module App
-  module ConsoleApp
-    puts 'Hello Connectors 3.0'
-  end
+  App::Connector.start!
 end

@@ -6,10 +6,16 @@
 
 # frozen_string_literal: true
 
-$LOAD_PATH << '../'
+module Connectors
+  class SyncStatus
+    COMPLETED = 'completed'
+    IN_PROGRESS = 'in_progress'
+    FAILED = 'failed'
 
-module App
-  module ConsoleApp
-    puts 'Hello Connectors 3.0'
+    STATUSES = [
+      COMPLETED,
+      IN_PROGRESS,
+      FAILED
+    ]
   end
 end
