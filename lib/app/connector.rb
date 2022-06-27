@@ -48,7 +48,7 @@ module App
       def start_polling_jobs
         loop do
           polling_jobs
-        rescue Exception => e
+        rescue StandardError => e
           Utility::Logger.error("Error happened during sync. error: #{e.message}")
           raise
         ensure
@@ -64,20 +64,19 @@ module App
 
           connectors.each do |connector|
             service_type = connector['_source']['service_type']
-            Utility::Logger.info("Service type = #{service_type}")
 
             next unless should_sync?(connector)
             claim_job(connector)
 
             connector_class = Connectors::REGISTRY.connector_class(service_type)
             unless connector_class
-              report_error(connector, "#{service_type} is not a supported connector.")
+              complete_sync(connector, "#{service_type} is not a supported connector.")
               next
             end
 
             SYNC_JOB_POOL.post do
               connector_class.new.sync(connector) do |error|
-                complete_job(connector, error)
+                complete_sync(connector, error)
               end
             end
           end
