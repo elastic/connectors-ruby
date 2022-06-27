@@ -98,7 +98,7 @@ module App
         last_synced = Time.parse(last_synced).utc
         sync_interval = connector['_source']['scheduling']['interval']
         cron_parser = cron_parser(sync_interval)
-        cron_parser && cron_parser.next(last_synced) < Time.now
+        cron_parser && cron_parser.next(last_synced) < Time.now.utc
       end
 
       def cron_parser(cronline)
