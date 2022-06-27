@@ -10,7 +10,7 @@
 module Utility
   module Elasticsearch
     module Index
-      module TextAnalysisSettings
+      class TextAnalysisSettings
         UNIVERSAL = 'Universal'
 
         LANGUAGE_DATA = {
@@ -90,7 +90,7 @@ module Utility
             stemmer: 'light_portuguese',
             stop_words: '_portuguese_'
           },
-          'pt:' => {
+          'pt-br': {
             name: 'Portuguese (Brazil)',
             stemmer: 'brazilian',
             stop_words: '_brazilian_'
@@ -116,7 +116,7 @@ module Utility
         }.freeze
 
         DEFAULT_LANGUAGE = :en
-        # TODO: why to_s?
+
         SUPPORTED_LANGUAGE_CODES = LANGUAGE_DATA.keys.map(&:to_s)
         FRONT_NGRAM_MAX_GRAM = 12
 
@@ -165,155 +165,156 @@ module Utility
           tokenizer_name: 'icu_tokenizer', folding_filters: %w(icu_folding)
         }.freeze
 
-        class << self
-          def analyzer_definitions(tokenizer_name, folding_filters)
-            definitions = {}
+        def initialize(language_code: DEFAULT_LANGUAGE, analysis_icu: false)
+          @language_code = language_code
+          @analysis_icu = analysis_icu
+          @analysis_settings = icu_settings(analysis_icu)
+        end
 
-            definitions['i_prefix'] = {
-              tokenizer: tokenizer_name,
-              filter: [
-                *folding_filters,
-                'front_ngram'
-              ]
-            }
-
-            definitions['q_prefix'] = {
-              tokenizer: tokenizer_name,
-              filter: [
-                *folding_filters
-              ]
-            }
-
-            definitions['iq_text_base'] = {
-              tokenizer: tokenizer_name,
-              filter: [
-                *folding_filters,
-                stop_words_filter_name
-              ]
-            }
-
-            definitions['iq_text_stem'] = {
-              tokenizer: tokenizer_name,
-              filter: [
-                *prepended_filters,
-                *folding_filters,
-                stop_words_filter_name,
-                stem_filter_name,
-                *postpended_filters
-              ]
-            }
-
-            definitions['iq_text_delimiter'] = {
-              tokenizer: 'whitespace',
-              filter: [
-                *prepended_filters,
-                'delimiter',
-                *folding_filters,
-                stop_words_filter_name,
-                stem_filter_name,
-                *postpended_filters
-              ]
-            }
-
-            definitions['i_text_bigram'] = {
-              tokenizer: tokenizer_name,
-              filter: [
-                *folding_filters,
-                stem_filter_name,
-                'bigram_joiner',
-                'bigram_max_size'
-              ]
-            }
-
-            definitions['q_text_bigram'] = {
-              tokenizer: tokenizer_name,
-              filter: [
-                *folding_filters,
-                stem_filter_name,
-                'bigram_joiner_unigrams',
-                'bigram_max_size'
-              ]
-            }
-
-            definitions
-          end
-
-          def stop_words_filter_name
-            "#{language_code}-stop-words-filter"
-          end
-
-          def language_name
-            LANGUAGE_DATA[language_code][:name]
-          end
-
-          def stemmer_name
-            LANGUAGE_DATA[language_code][:stemmer]
-          end
-
-          def stop_words_name_or_list
-            LANGUAGE_DATA[language_code][:stop_words]
-          end
-
-          def custom_filter_definitions
-            LANGUAGE_DATA[language_code][:custom_filter_definitions] || {}
-          end
-
-          def prepended_filters
-            LANGUAGE_DATA[language_code][:prepended_filters] || []
-          end
-
-          def postpended_filters
-            LANGUAGE_DATA[language_code][:postpended_filters] || []
-          end
-
-          def stem_filter_name
-            "#{language_code}-stem-filter"
-          end
-
-          def filter_definitions
-            definitions = GENERIC_FILTERS.dup
-
-            definitions[stem_filter_name] = {
-              type: 'stemmer',
-              name: stemmer_name
-            }
-
-            definitions[stop_words_filter_name] = {
-              type: 'stop',
-              stopwords: stop_words_name_or_list
-            }
-
-            definitions.merge(custom_filter_definitions)
-          end
-
-          def icu_settings(analysis_icu)
-            return ICU_ANALYSIS_SETTINGS if analysis_icu
-
-            NON_ICU_ANALYSIS_SETTINGS
-          end
-
-          # TODO description
-          def lookup(language_code: DEFAULT_LANGUAGE, analysis_icu: false)
-            icu_settings = icu_settings(analysis_icu)
-            analyzer = analyzer_definitions(
-              icu_settings[:tokenizer],
-              icu_settings[:folding_filters]
-            )
-
-            {
-              analysis: {
-                analyzer: analyzer,
-                filter: filter_definitions
-              },
-              index: {
-                similarity: {
-                  default: {
-                    type: 'BM25'
-                  }
+        def to_hash
+          {
+            analysis: {
+              analyzer: analyzer_definitions,
+              filter: filter_definitions
+            },
+            index: {
+              similarity: {
+                default: {
+                  type: 'BM25'
                 }
               }
             }
-          end
+          }
+        end
+
+        private
+
+        attr_reader :language_code, :analysis_settings
+
+        def icu_settings(analysis_settings)
+          return ICU_ANALYSIS_SETTINGS if analysis_settings
+
+          NON_ICU_ANALYSIS_SETTINGS
+        end
+
+        def language_name
+          LANGUAGE_DATA[language_code][:name]
+        end
+
+        def stemmer_name
+          LANGUAGE_DATA[language_code][:stemmer]
+        end
+
+        def stop_words_name_or_list
+          LANGUAGE_DATA[language_code][:stop_words]
+        end
+
+        def custom_filter_definitions
+          LANGUAGE_DATA[language_code][:custom_filter_definitions] || {}
+        end
+
+        def prepended_filters
+          LANGUAGE_DATA[language_code][:prepended_filters] || []
+        end
+
+        def postpended_filters
+          LANGUAGE_DATA[language_code][:postpended_filters] || []
+        end
+
+        def stem_filter_name
+          "#{language_code}-stem-filter"
+        end
+
+        def stop_words_filter_name
+          "#{language_code}-stop-words-filter"
+        end
+
+        def filter_definitions
+          definitions = GENERIC_FILTERS.dup
+
+          definitions[stem_filter_name] = {
+            type: 'stemmer',
+            name: stemmer_name
+          }
+
+          definitions[stop_words_filter_name] = {
+            type: 'stop',
+            stopwords: stop_words_name_or_list
+          }
+
+          definitions.merge(custom_filter_definitions)
+        end
+
+        def analyzer_definitions
+          definitions = {}
+
+          definitions['i_prefix'] = {
+            tokenizer: analysis_settings[:tokenizer_name],
+            filter: [
+              *analysis_settings[:folding_filters],
+              'front_ngram'
+            ]
+          }
+
+          definitions['q_prefix'] = {
+            tokenizer: analysis_settings[:tokenizer_name],
+            filter: [
+              *analysis_settings[:folding_filters]
+            ]
+          }
+
+          definitions['iq_text_base'] = {
+            tokenizer: analysis_settings[:tokenizer_name],
+            filter: [
+              *analysis_settings[:folding_filters],
+              stop_words_filter_name
+            ]
+          }
+
+          definitions['iq_text_stem'] = {
+            tokenizer: analysis_settings[:tokenizer_name],
+            filter: [
+              *prepended_filters,
+              *analysis_settings[:folding_filters],
+              stop_words_filter_name,
+              stem_filter_name,
+              *postpended_filters
+            ]
+          }
+
+          definitions['iq_text_delimiter'] = {
+            tokenizer: 'whitespace',
+            filter: [
+              *prepended_filters,
+              'delimiter',
+              *analysis_settings[:folding_filters],
+              stop_words_filter_name,
+              stem_filter_name,
+              *postpended_filters
+            ]
+          }
+
+          definitions['i_text_bigram'] = {
+            tokenizer: analysis_settings[:tokenizer_name],
+            filter: [
+              *analysis_settings[:folding_filters],
+              stem_filter_name,
+              'bigram_joiner',
+              'bigram_max_size'
+            ]
+          }
+
+          definitions['q_text_bigram'] = {
+            tokenizer: analysis_settings[:tokenizer_name],
+            filter: [
+              *analysis_settings[:folding_filters],
+              stem_filter_name,
+              'bigram_joiner_unigrams',
+              'bigram_max_size'
+            ]
+          }
+
+          definitions
         end
       end
     end
