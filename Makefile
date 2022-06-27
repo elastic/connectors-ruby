@@ -59,6 +59,6 @@ run-docker:
 	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
 
 exec_app:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby app.rb
 
 run: | update_config_dev exec_app
