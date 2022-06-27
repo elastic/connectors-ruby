@@ -44,7 +44,7 @@ module Utility
       increment_window_index
     end
 
-    def note_error(error, id: Utility.utc_now.to_i)
+    def note_error(error, id: utc_now.to_i)
       stack_trace = EnterpriseSearch::ExceptionTracking.generate_stack_trace(error)
       error_message = EnterpriseSearch::ExceptionTracking.generate_error_message(error, nil, nil)
       @connector.log_debug("Message id: #{id} - #{error_message}\n#{stack_trace}")
