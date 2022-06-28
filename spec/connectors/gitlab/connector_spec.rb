@@ -7,6 +7,10 @@ describe Connectors::GitLab::Connector do
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { 'https://www.example.com' }
 
+  subject do
+    described_class.new('gitlab')
+  end
+
   context '#source_status' do
     it 'correctly returns true on 200' do
       stub_request(:get, "#{base_url}/user")

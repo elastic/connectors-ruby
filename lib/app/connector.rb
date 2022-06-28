@@ -41,7 +41,7 @@ module App
 
       private
 
-      attr_reader :running, :es_client
+      attr_reader :running
 
       def running!
         raise 'The connector app is already running!' unless running.make_true

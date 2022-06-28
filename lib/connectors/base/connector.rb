@@ -133,8 +133,6 @@ module Connectors
 
       private
 
-      attr_reader :es_client
-
       def es_client
         @es_client ||= Utility::EsClientFactory.client(index_name)
       end
