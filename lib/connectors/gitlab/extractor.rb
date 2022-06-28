@@ -17,6 +17,11 @@ module Connectors
     class Extractor
       PAGE_SIZE = 100 # max is 100
 
+      def initialize(base_url: nil)
+        super()
+        @base_url = base_url
+      end
+
       def yield_projects_page(next_page_link = nil)
         query_params = {
           :pagination => :keyset,
@@ -62,7 +67,7 @@ module Connectors
       private
 
       def client
-        @client ||= Connectors::GitLab::CustomClient.new(base_url: 'https://gitlab.com/api/v4')
+        @client ||= Connectors::GitLab::CustomClient.new(base_url: @base_url)
       end
     end
   end

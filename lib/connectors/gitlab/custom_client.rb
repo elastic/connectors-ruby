@@ -28,7 +28,7 @@ module Connectors
 
       def initialize(base_url:, api_token: API_TOKEN, ensure_fresh_auth: nil)
         @api_token = api_token
-        super(:base_url => base_url, :ensure_fresh_auth => ensure_fresh_auth)
+        super(:base_url => base_url || API_BASE_URL, :ensure_fresh_auth => ensure_fresh_auth)
       end
 
       def additional_middleware
