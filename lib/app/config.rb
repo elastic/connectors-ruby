@@ -24,7 +24,7 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     required(:elasticsearch).hash do
       optional(:cloud_id).value(:string)
       optional(:hosts).value(:string)
-      required(:api_key).value(:string)
+      required(:api_keys).filled(:hash)
     end
 
     required(:worker).hash do

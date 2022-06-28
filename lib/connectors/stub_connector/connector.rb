@@ -40,7 +40,7 @@ module Connectors
         body = [
           { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector' } } }
         ]
-        Utility::ElasticsearchClient.bulk(:body => body)
+        es_client.bulk(:body => body)
       rescue StandardError => e
         Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
         error = e.message

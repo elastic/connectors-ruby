@@ -11,6 +11,12 @@ require 'bson'
 module Connectors
   module Base
     class Connector
+      attr_reader :index_name
+
+      def initialize(index_name)
+        @index_name = index_name
+      end
+
       def sync(connector); end
 
       def extractor(params)
@@ -126,6 +132,12 @@ module Connectors
       end
 
       private
+
+      attr_reader :es_client
+
+      def es_client
+        @es_client ||= Utility::EsClientFactory.client(index_name)
+      end
 
       def convert_third_party_errors
         yield

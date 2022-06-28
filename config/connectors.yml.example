@@ -6,7 +6,8 @@ revision: "main"
 elasticsearch:
   cloud_id: "CHANGEME"
   hosts: "CHANGEME"
-  api_key: "CHANGEME"
+  api_keys:
+    index_name: "API key"
 
 worker:
   max_thread_count: 4

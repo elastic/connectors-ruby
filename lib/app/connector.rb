@@ -41,10 +41,14 @@ module App
 
       private
 
-      attr_reader :running
+      attr_reader :running, :es_client
 
       def running!
         raise 'The connector app is already running!' unless running.make_true
+      end
+
+      def es_client
+        @es_client ||= Utility::EsClientFactory.client
       end
 
       def start_polling_jobs
@@ -61,7 +65,7 @@ module App
       def polling_jobs
         from = 0
         loop do
-          response = Utility::ElasticsearchClient.search(:index => CONNECTORS_INDEX, :from => from, :size => QUERY_SIZE)
+          response = es_client.search(:index => CONNECTORS_INDEX, :from => from, :size => QUERY_SIZE)
           connectors = response['hits']['hits']
 
           connectors.each do |connector|
@@ -78,7 +82,7 @@ module App
             end
 
             SYNC_JOB_POOL.post do
-              connector_class.new.sync(connector) do |error|
+              connector_class.new(connector['_source']['index_name']).sync(connector) do |error|
                 complete_sync(connector, error)
               end
             end
@@ -96,14 +100,14 @@ module App
         last_synced = connector['_source']['last_synced']
         return true if last_synced.nil? || last_synced.empty?
 
-        last_synced = Time.parse(last_synced).utc
+        last_synced = Time.parse(last_synced)
         sync_interval = connector['_source']['scheduling']['interval']
         cron_parser = cron_parser(sync_interval)
-        cron_parser && cron_parser.next(last_synced) < Time.now.utc
+        cron_parser && cron_parser.next(last_synced) < Time.now
       end
 
       def cron_parser(cronline)
-        CronParser.new(cronline, ActiveSupport::TimeZone.new('UTC'))
+        CronParser.new(cronline)
       rescue ArgumentError => e
         Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
         nil
@@ -114,12 +118,11 @@ module App
           :doc => {
             :sync_now => false,
             :sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now.utc,
-            :updated_at => Time.now.utc
+            :last_synced => Time.now
           }
         }
 
-        Utility::ElasticsearchClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        es_client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         Utility::Logger.info("Successfully claimed job for connector #{connector['_id']}")
       end
 
@@ -127,18 +130,16 @@ module App
         body = {
           :doc => {
             :sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
-            :last_synced => Time.now.utc,
-            :updated_at => Time.now.utc
-          }.tap do |doc|
-            doc[:sync_error] = error if error
-          end
+            :sync_error => error,
+            :last_synced => Time.now
+          }
         }
 
-        Utility::ElasticsearchClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        es_client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         if error
-          Utility::Logger.info("Mark connector with error #{error}")
+          Utility::Logger.info("Failed to sync for connector #{connector['_id']} with error #{error}")
         else
-          Utility::Logger.info("Successfully complete job for connector #{connector['_id']}")
+          Utility::Logger.info("Successfully synced for connector #{connector['_id']}")
         end
       end
     end

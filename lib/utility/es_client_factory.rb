@@ -10,34 +10,21 @@ require 'elasticsearch'
 require 'app/config'
 
 module Utility
-  class ElasticsearchClient
+  class EsClientFactory
     class << self
-
-      def health
-        client.cluster.health
-      end
-
-      def search(arguments = {})
-        client.search(arguments)
-      end
-
-      def update(arguments = {})
-        client.update(arguments)
-      end
-
-      def bulk(arguments = {})
-        client.bulk(arguments)
+      def client(index_name = nil)
+        Elasticsearch::Client.new(connection_configs(index_name))
       end
 
       private
 
-      def client
-        @client ||= Elasticsearch::Client.new(connection_configs)
-      end
-
-      def connection_configs
+      def connection_configs(index_name)
         es_config = App::Config['elasticsearch']
-        configs = { :api_key => es_config['api_key'] }
+        index_name = es_config['api_keys'].keys.first if index_name.nil? || index_name.empty?
+        api_key = es_config['api_keys'][index_name]
+        raise "No API key found for index '#{index_name}'" if api_key.nil? || api_key.empty?
+        configs = { :api_key => api_key }
+
         if es_config['cloud_id']
           configs[:cloud_id] = es_config['cloud_id']
         elsif es_config['hosts']
@@ -50,3 +37,4 @@ module Utility
     end
   end
 end
+
