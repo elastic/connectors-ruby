@@ -20,10 +20,10 @@ module Connectors
 
       def initialize(params)
         super()
-        @extractor = Connectors::GitLab::Extractor.new
+        @extractor = Connectors::GitLab::Extractor.new(:base_url => params&.fetch(:base_url, nil))
         @sinks = [Utility::Sink::ConsoleSink.new]
         # if index name is specified, we need an elastic sink
-        if params.present? && params[:index_name].present?
+        if params&.fetch(:index_name, nil).present?
           elastic_sink = Utility::Sink::ElasticSink.new
           elastic_sink.index_name = params[:index_name]
           @sinks.push(elastic_sink)
