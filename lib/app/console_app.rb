@@ -58,6 +58,11 @@ module App
       registry.connector(connectors[order], params)
     end
 
+    def exit_normally(message = 'Kthxbye!... ¯\_(ツ)_/¯')
+      puts(message)
+      exit(true)
+    end
+
     def registry
       @registry = Connectors::Base::REGISTRY
     end
@@ -66,18 +71,23 @@ module App
 
     while true
       command = read_command
-      if command == :sync
+      case command
+      when :sync
         self.start_sync
-      elsif command == :status
+      when :status
         self.show_status
-      elsif command == :exit
-        puts('Kthxbye!... ¯\_(ツ)_/¯')
-        exit(0)
+      when :exit
+        self.exit_normally
       else
-        puts 'Sorry, this command is not yet implemented'
-        exit(0)
+        self.exit_normally('Sorry, this command is not yet implemented')
       end
     end
+  rescue SystemExit, Interrupt
+    self.exit_normally
+  rescue Exception => e
+    puts e.message
+    puts e.backtrace
+    exit(false)
   end
 end
 

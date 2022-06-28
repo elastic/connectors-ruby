@@ -1,6 +1,6 @@
 YQ ?= "yq"
 .phony: test lint autocorrect update_config build
-.phony: release_dev release build_gem install build-docker run-docker exec_app tag
+.phony: release_dev release build_gem install build-docker run-docker exec_app tag exec_command
 
 config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml

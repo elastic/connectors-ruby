@@ -21,10 +21,7 @@ module Connectors
       def initialize(params)
         super()
         @extractor = Connectors::GitLab::Extractor.new
-        @sinks =
-          [
-            Utility::Sink::ConsoleSink.new
-          ]
+        @sinks = [Utility::Sink::ConsoleSink.new]
         if params.present? && params[:index_name].present?
           elastic_sink = Utility::Sink::ElasticSink.new
           elastic_sink.index_name = params[:index_name]
