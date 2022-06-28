@@ -11,7 +11,7 @@ require 'bson'
 module Connectors
   module Base
     class Connector
-      def sync(connector); end
+      def sync_content(connector); end
 
       def extractor(params)
         content_source_id = params.fetch(:content_source_id)

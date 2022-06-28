@@ -138,6 +138,7 @@ GEM
     rainbow (3.1.1)
     rake (13.0.6)
     regexp_parser (2.2.1)
+    remedy (0.3.0)
     rexml (3.2.5)
     rspec-collection_matchers (1.2.0)
       rspec-expectations (>= 2.99.0.beta1)
@@ -209,7 +210,7 @@ DEPENDENCIES
   activesupport (= 5.2.6)
   attr_extras (~> 6.2.5)
   bson (~> 4.2.2)
-  bundler (= 2.3.10)
+  bundler (= 2.3.15)
   concurrent-ruby (~> 1.1.9)
   config (~> 4.0.0)
   debase (= 0.2.5.beta2)
@@ -225,6 +226,7 @@ DEPENDENCIES
   pry-nav
   pry-remote
   rack-test
+  remedy (~> 0.3.0)
   rspec-collection_matchers (~> 1.2.0)
   rspec-core (~> 3.10.1)
   rspec-mocks
@@ -243,4 +245,4 @@ RUBY VERSION
    ruby 2.6.9p207
 
 BUNDLED WITH
-   2.3.10
+   2.3.15

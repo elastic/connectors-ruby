@@ -10,12 +10,19 @@ $LOAD_PATH << '../'
 
 require 'app/config'
 require 'connectors/base/registry'
+require 'connectors/base/registry'
+require 'app/menu'
 
 module App
   module ConsoleApp
     extend self
 
     INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
+    @commands = [
+      { :command => :status, :hint => 'check the status of a third-party service' },
+      { :command => :sync, :hint => 'start synchronization' },
+      { :command => :exit, :hint => 'exit - end the program' }
+    ]
 
     def start_sync
       puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
@@ -40,12 +47,8 @@ module App
     end
 
     def read_command
-      puts 'Please enter a command. Available options:'
-      puts '- sync - start synchronization'
-      puts '- status - check the status of a third-party service'
-      puts '- exit - end the program'
-      puts
-      gets.chomp.to_sym
+      menu = App::Menu.new('Please select the command:', @commands)
+      menu.select_command
     end
 
     def select_connector(params = {})
@@ -68,6 +71,7 @@ module App
     end
 
     puts 'Hello Connectors 3.0!'
+    sleep(1)
 
     while true
       command = read_command

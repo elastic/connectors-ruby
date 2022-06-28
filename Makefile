@@ -1,6 +1,6 @@
 YQ ?= "yq"
 .phony: test lint autocorrect update_config build
-.phony: release_dev release build_gem install build-docker run-docker exec_app tag exec_command
+.phony: release_dev release build_gem install build-docker run-docker exec_app tag exec_cli
 
 config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml
@@ -61,7 +61,7 @@ run-docker:
 exec_app:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby app.rb
 
-exec_command:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb $1
+exec_cli:
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb
 
 run: | update_config_dev exec_app

@@ -78,7 +78,7 @@ module App
             end
 
             SYNC_JOB_POOL.post do
-              connector_class.new.sync(connector) do |error|
+              connector_class.new.sync_content(connector) do |error|
                 complete_sync(connector, error)
               end
             end

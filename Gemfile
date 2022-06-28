@@ -15,6 +15,7 @@ gem 'mime-types', '= 3.1'
 gem 'tzinfo-data', '= 1.2022.1'
 gem 'nokogiri', '>= 1.13.4', :require => false
 gem 'parse-cron', '~> 0.1.4'
+gem 'remedy', '~> 0.3.0'
 
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'

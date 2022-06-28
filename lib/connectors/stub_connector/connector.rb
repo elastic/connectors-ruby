@@ -35,7 +35,7 @@ module Connectors
         true
       end
 
-      def sync(connector)
+      def sync_content(connector)
         error = nil
         body = [
           { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector' } } }
