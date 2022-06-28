@@ -51,8 +51,9 @@ module App
         loop do
           polling_jobs
         rescue StandardError => e
-          Utility::Logger.error("Error happened during sync. error: #{e.message}")
+          Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
         ensure
+          Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
           sleep(POLL_IDLING)
         end
       end
