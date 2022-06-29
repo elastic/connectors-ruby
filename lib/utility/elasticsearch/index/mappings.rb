@@ -84,7 +84,7 @@ module Utility
                 type: 'keyword'
               }
             }.tap do |properties|
-              properties.merge!(WORKPLACE_SEARCH_SUBEXTRACTION_STAMP_FIELD_MAPPINGS) if search_index&.connector_search_index?
+              properties.merge!(WORKPLACE_SEARCH_SUBEXTRACTION_STAMP_FIELD_MAPPINGS) #if search_index&.connector_search_index? TODO: figure out what connector_search_index means
             end
           }
         end
