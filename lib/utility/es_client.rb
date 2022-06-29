@@ -10,20 +10,25 @@ require 'elasticsearch'
 require 'app/config'
 
 module Utility
-  class EsClientFactory
+  class EsClient
     class << self
-      def client(index_name = nil)
-        Elasticsearch::Client.new(connection_configs(index_name))
+      def method_missing(m, *args, &block)
+        client.send(m, *args, &block)
+      end
+
+      def respond_to_missing?(m, include_all = false)
+        client.respond_to?(m, include_all)
       end
 
       private
 
-      def connection_configs(index_name)
+      def client
+        @client ||= Elasticsearch::Client.new(connection_configs)
+      end
+
+      def connection_configs
         es_config = App::Config['elasticsearch']
-        index_name = es_config['api_keys'].keys.first if index_name.nil? || index_name.empty?
-        api_key = es_config['api_keys'][index_name]
-        raise "No API key found for index '#{index_name}'" if api_key.nil? || api_key.empty?
-        configs = { :api_key => api_key }
+        configs = { :api_key => es_config['api_key'] }
 
         if es_config['cloud_id']
           configs[:cloud_id] = es_config['cloud_id']

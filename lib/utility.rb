@@ -5,7 +5,7 @@
 #
 
 require 'utility/constants'
-require 'utility/es_client_factory'
+require 'utility/es_client'
 require 'utility/errors'
 require 'utility/exception_tracking'
 require 'utility/extension_mapping_util'

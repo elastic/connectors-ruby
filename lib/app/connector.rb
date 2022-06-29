@@ -29,10 +29,13 @@ module App
     class << self
 
       def start!
+        pre_flight_check
         running!
 
         Utility::Logger.info('Starting to process jobs.')
         start_polling_jobs
+      rescue StandardError => e
+        Utility::Logger.error(e.message)
       end
 
       def running?
@@ -41,14 +44,15 @@ module App
 
       private
 
-      attr_reader :running
+      attr_reader :running, :connector_klass
 
       def running!
         raise 'The connector app is already running!' unless running.make_true
       end
 
-      def es_client
-        @es_client ||= Utility::EsClientFactory.client
+      def pre_flight_check
+        @connector_klass = Connectors::REGISTRY.connector_class(App::Config['service_type'])
+        raise "#{App::Config['service_type']} is not a supported connector" if @connector_klass.nil?
       end
 
       def start_polling_jobs
@@ -63,33 +67,31 @@ module App
       end
 
       def polling_jobs
-        from = 0
-        loop do
-          response = es_client.search(:index => CONNECTORS_INDEX, :from => from, :size => QUERY_SIZE)
-          connectors = response['hits']['hits']
+        connector = Utility::EsClient.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'])
+        update_config_if_necessary(connector)
 
-          connectors.each do |connector|
-            service_type = connector['_source']['service_type']
-            Utility::Logger.info("Found connector with service type #{service_type}")
-            next unless should_sync?(connector)
-            Utility::Logger.info("Starting to sync for #{service_type}")
-            claim_job(connector)
+        return unless should_sync?(connector)
 
-            connector_class = Connectors::REGISTRY.connector_class(service_type)
-            unless connector_class
-              complete_sync(connector, "#{service_type} is not a supported connector.")
-              next
-            end
+        Utility::Logger.info("Starting to sync for connector #{connector['_id']}")
+        claim_job(connector)
 
-            SYNC_JOB_POOL.post do
-              connector_class.new(connector['_source']['index_name']).sync(connector) do |error|
-                complete_sync(connector, error)
-              end
-            end
+        SYNC_JOB_POOL.post do
+          connector_klass.new.sync(connector) do |error|
+            complete_sync(connector, error)
           end
+        end
+      end
 
-          break if connectors.count == 0
-          from += connectors.count
+      def update_config_if_necessary(connector)
+        configuration = connector['_source']['configuration']
+        if configuration.nil? || configuration.empty?
+          body = {
+            :doc => {
+              :configuration => connector_klass.new.configurable_fields
+            }
+          }
+          Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          Utility::Logger.info("Successfully updated configuration for connector #{connector['_id']}")
         end
       end
 
@@ -122,7 +124,7 @@ module App
           }
         }
 
-        es_client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         Utility::Logger.info("Successfully claimed job for connector #{connector['_id']}")
       end
 
@@ -135,7 +137,7 @@ module App
           }
         }
 
-        es_client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         if error
           Utility::Logger.info("Failed to sync for connector #{connector['_id']} with error #{error}")
         else

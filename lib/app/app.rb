@@ -9,6 +9,8 @@
 $LOAD_PATH << '../'
 
 require 'app/connector'
+require 'app/config'
+require 'utility'
 
 module App
   # Set UTC as the timezone

@@ -19,16 +19,12 @@ module Connectors
       end
 
       def configurable_fields
-        [
-          {
-            'key' => 'third_party_url',
-            'label' => 'Third Party URL'
-          },
-          {
-            'key' => 'third_party_api_key',
-            'label' => 'Third Party API Key'
+        {
+          'foo' => {
+            'label' => 'Foo',
+            'value' => nil
           }
-        ]
+        }
       end
 
       def health_check(_params)
@@ -40,7 +36,7 @@ module Connectors
         body = [
           { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector' } } }
         ]
-        es_client.bulk(:body => body)
+        Utility::EsClient.bulk(:body => body)
       rescue StandardError => e
         Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
         error = e.message
