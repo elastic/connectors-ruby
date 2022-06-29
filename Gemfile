@@ -48,3 +48,6 @@ gem 'elasticsearch'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'
+
+# Dependency for mongo connector
+gem 'mongo'
