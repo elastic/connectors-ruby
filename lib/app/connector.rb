@@ -9,6 +9,7 @@
 require 'active_support'
 require 'connectors'
 require 'cron_parser'
+require 'framework/connector_metadata'
 require 'utility'
 
 module App
@@ -100,7 +101,9 @@ module App
         Utility::Logger.info("Starting to sync for connector #{connector['_id']}")
         claim_job(connector)
 
-        connector_klass.new.sync_content(connector) do |error|
+        executer = connector_klass.new
+        connector_metadata = Framework::ConnectorMetadata.new(executer, connector)
+        executer.sync_content(connector_metadata) do |error|
           complete_sync(connector, error)
         end
       end
