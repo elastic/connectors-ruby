@@ -29,7 +29,6 @@ module Utility
       def connection_configs
         es_config = App::Config['elasticsearch']
         configs = { :api_key => es_config['api_key'] }
-
         if es_config['cloud_id']
           configs[:cloud_id] = es_config['cloud_id']
         elsif es_config['hosts']
