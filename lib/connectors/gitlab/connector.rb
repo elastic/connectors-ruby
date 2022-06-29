@@ -12,6 +12,7 @@ require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
 require 'utility/sink'
+require 'app/config'
 
 module Connectors
   module GitLab
@@ -21,13 +22,11 @@ module Connectors
       def initialize(params = nil)
         super()
         @extractor = Connectors::GitLab::Extractor.new(:base_url => params&.fetch(:base_url, nil))
-        @sinks = [Utility::Sink::ConsoleSink.new]
-        # if index name is specified, we need an elastic sink
-        if params&.fetch(:index_name, nil).present?
-          elastic_sink = Utility::Sink::ElasticSink.new
-          elastic_sink.index_name = params[:index_name]
-          @sinks.push(elastic_sink)
-        end
+        @sink = Utility::Sink::CombinedSink.new(
+          [Utility::Sink::ConsoleSink.new,
+           Utility::Sink::ElasticSink.new(params[:index_name])
+          ]
+        )
       end
 
       def display_name
@@ -38,11 +37,11 @@ module Connectors
         {
           'api_token' => {
             'label' => 'API Token',
-            'value' => nil
+            'value' => App::Config[:gitlab][:api_token]
           },
           'base_url' => {
-              'label' => 'Base URL',
-              'value' => nil
+            'label' => 'Base URL',
+            'value' => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
       end
@@ -69,16 +68,12 @@ module Connectors
         Connectors::GitLab::CustomClient::ClientError
       end
 
-      def ingest_documents(docs)
-        @sinks.each { |sink| sink.ingest_multiple(docs) }
-      end
-
       def extract_projects
         next_page_link = nil
         loop do
           next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
             projects = projects_chunk.map { |p| Connectors::GitLab::Adapter.to_es_document(:project, p) }
-            ingest_documents(projects)
+            @sink.ingest_multiple(projects)
             extract_project_files(projects_chunk)
           end
           break unless next_page_link.present?
@@ -97,7 +92,7 @@ module Connectors
           puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
           files = files.map { |file| Connectors::GitLab::Adapter.to_es_document(:file, file) }
           project[:files] = files
-          ingest_documents(files)
+          @sink.ingest_multiple(files)
         end
       rescue StandardError => e
         puts(e.message)

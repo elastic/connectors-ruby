@@ -12,6 +12,7 @@ require 'app/config'
 require 'connectors/base/registry'
 require 'connectors/base/registry'
 require 'app/menu'
+require 'app/connector'
 
 module App
 
@@ -20,7 +21,6 @@ module App
   module ConsoleApp
     extend self
 
-    INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
     @commands = [
       { :command => :sync, :hint => 'start synchronization' },
       { :command => :status, :hint => 'check the status of a third-party service' },
@@ -28,17 +28,8 @@ module App
     ]
 
     def start_sync
-      puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
-      index_name = gets.chomp.strip
-      unless INDEX_NAME_REGEXP.match?(index_name)
-        puts "Index name #{index_name} contains symbols that aren't allowed!"
-        return
-      end
-
-      connector = select_connector({ :index_name => index_name })
-
-      puts 'Starting content sync...'
-      connector.sync_content
+      puts 'Starting synchronization...'
+      App::Connector.sync_now
     end
 
     def show_status

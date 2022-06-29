@@ -17,11 +17,12 @@ module Connectors
     class Extractor
       PAGE_SIZE = 100 # max is 100
 
-      def initialize(base_url: nil)
+      def initialize(base_url: nil, api_token: nil, owned_only: true)
         super()
         @base_url = base_url
-        # by default, only get projects that user owns
-        @owned_only = true
+        @api_token = api_token
+        # only get projects that user owns
+        @owned_only = owned_only
       end
 
       def yield_projects_page(next_page_link = nil)
@@ -70,7 +71,7 @@ module Connectors
       private
 
       def client
-        @client ||= Connectors::GitLab::CustomClient.new(base_url: @base_url)
+        @client ||= Connectors::GitLab::CustomClient.new(base_url: @base_url, api_token: @api_token)
       end
     end
   end

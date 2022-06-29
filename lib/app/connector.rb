@@ -30,14 +30,31 @@ module App
 
       def start!
         pre_flight_check
+        ensure_index_exists
         running!
 
-        Utility::Logger.info('Starting to process jobs.')
+        Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
       end
 
       def running?
         running.true?
+      end
+
+      def sync_now
+        start! unless running?
+        connector = current_connector_config
+        sync_now = connector['_source']['sync_now']
+        unless sync_now.present?
+          body = {
+            :doc => {
+              :scheduling => { :enabled => true },
+              :sync_now => true
+            }
+          }
+          Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector['_id']}")
+        end
       end
 
       private
@@ -65,7 +82,7 @@ module App
       end
 
       def polling_jobs
-        connector = Utility::EsClient.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'])
+        connector = current_connector_config
         update_config_if_necessary(connector)
 
         return unless should_sync?(connector)
@@ -74,10 +91,18 @@ module App
         claim_job(connector)
 
         SYNC_JOB_POOL.post do
-          connector_klass.new.sync(connector) do |error|
+          connector_klass.new.sync_content(connector) do |error|
             complete_sync(connector, error)
           end
         end
+      end
+
+      def current_connector_config
+        Utility::EsClient.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'])
+      end
+
+      def ensure_index_exists
+        Utility::EsClient.indices.create(index: CONNECTORS_INDEX) unless Utility::EsClient.indices.exists?(index: CONNECTORS_INDEX)
       end
 
       def update_config_if_necessary(connector)

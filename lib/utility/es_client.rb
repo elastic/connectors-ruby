@@ -34,7 +34,7 @@ module Utility
         elsif es_config['hosts']
           configs[:hosts] = es_config['hosts']
         else
-          raise 'Either elasitcsearch.cloud_id or elasticsearch.hosts should be configured.'
+          raise 'Either elasticsearch.cloud_id or elasticsearch.hosts should be configured.'
         end
         configs
       end
