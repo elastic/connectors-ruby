@@ -11,5 +11,8 @@ $LOAD_PATH << '../'
 require 'app/connector'
 
 module App
+  # Set UTC as the timezone
+  ENV['TZ'] = 'UTC'
+
   App::Connector.start!
 end

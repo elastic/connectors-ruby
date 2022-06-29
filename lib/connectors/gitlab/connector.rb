@@ -23,16 +23,16 @@ module Connectors
       end
 
       def configurable_fields
-        [
-          {
-            'key' => 'api_token',
-            'label' => 'API Token'
+        {
+          'api_token' => {
+            'label' => 'API Token',
+            'value' => nil
           },
-          {
-            'key' => 'base_url',
-            'label' => 'Base URL'
+          'base_url' => {
+              'label' => 'Base URL',
+              'value' => nil
           }
-        ]
+        }
       end
 
       private
