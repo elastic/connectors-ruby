@@ -29,7 +29,7 @@ module Framework
     end
 
     def configured_fields
-      puts @elasticsearch_response[:_source] 
+      puts @elasticsearch_response[:_source]
       @elasticsearch_response[:_source][:configured_fields]
     end
 
@@ -38,7 +38,7 @@ module Framework
     def validate!
       expected_fields = @connector.configurable_fields.keys
       actual_fields = configured_fields.keys
-  
+
       raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
     end
   end
