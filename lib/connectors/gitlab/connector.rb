@@ -35,16 +35,16 @@ module Connectors
       end
 
       def configurable_fields
-        [
-          {
-            'key' => 'base_url',
-            'label' => 'Base URL'
+        {
+          'api_token' => {
+            'label' => 'API Token',
+            'value' => nil
           },
-          {
-            'key' => 'api_token',
-            'label' => 'API Token'
+          'base_url' => {
+              'label' => 'Base URL',
+              'value' => nil
           }
-        ]
+        }
       end
 
       def sync_content(_params = {})

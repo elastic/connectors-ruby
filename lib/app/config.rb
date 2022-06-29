@@ -27,10 +27,8 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       required(:api_key).value(:string)
     end
 
-    required(:worker).hash do
-      required(:max_thread_count).value(:integer)
-    end
-
+    required(:connector_package_id).value(:string)
+    required(:service_type).value(:string)
     required(:log_level).value(:string)
   end
 end

@@ -10,23 +10,14 @@ require 'elasticsearch'
 require 'app/config'
 
 module Utility
-  class ElasticsearchClient
+  class EsClient
     class << self
-
-      def health
-        client.cluster.health
+      def method_missing(m, *args, &block)
+        client.send(m, *args, &block)
       end
 
-      def search(arguments = {})
-        client.search(arguments)
-      end
-
-      def update(arguments = {})
-        client.update(arguments)
-      end
-
-      def bulk(arguments = {})
-        client.bulk(arguments)
+      def respond_to_missing?(m, include_all = false)
+        client.respond_to?(m, include_all)
       end
 
       private
