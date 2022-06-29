@@ -34,8 +34,6 @@ module App
 
         Utility::Logger.info('Starting to process jobs.')
         start_polling_jobs
-      rescue StandardError => e
-        Utility::Logger.error(e.message)
       end
 
       def running?
