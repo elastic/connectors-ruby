@@ -14,6 +14,9 @@ require 'connectors/base/registry'
 require 'app/menu'
 
 module App
+
+  ENV['TZ'] = 'UTC'
+
   module ConsoleApp
     extend self
 
@@ -21,7 +24,7 @@ module App
     @commands = [
       { :command => :sync, :hint => 'start synchronization' },
       { :command => :status, :hint => 'check the status of a third-party service' },
-      { :command => :exit, :hint => 'exit - end the program' }
+      { :command => :exit, :hint => 'end the program' }
     ]
 
     def start_sync
@@ -49,6 +52,8 @@ module App
     def read_command
       menu = App::Menu.new('Please select the command:', @commands)
       menu.select_command
+    rescue Interrupt
+      exit_normally
     end
 
     def wait_for_keypress(message = nil)
@@ -95,7 +100,9 @@ module App
         self.exit_normally('Sorry, this command is not yet implemented')
       end
     end
-  rescue SystemExit, Interrupt
+  rescue SystemExit
+    # nothing to see here
+  rescue Interrupt
     self.exit_normally
   rescue Exception => e
     puts e.message

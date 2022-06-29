@@ -33,6 +33,9 @@ module App
       display
       interaction = Remedy::Interaction.new
       interaction.loop do |key|
+        if key == nil
+          break
+        end
         case key.to_s.to_sym
         when :down
           index = @index + 1
