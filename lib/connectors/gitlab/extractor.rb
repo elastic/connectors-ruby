@@ -20,6 +20,8 @@ module Connectors
       def initialize(base_url: nil)
         super()
         @base_url = base_url
+        # by default, only get projects that user owns
+        @owned_only = true
       end
 
       def yield_projects_page(next_page_link = nil)
@@ -27,7 +29,8 @@ module Connectors
           :pagination => :keyset,
           :per_page => PAGE_SIZE,
           :order_by => :id,
-          :sort => :desc
+          :sort => :desc,
+          :owned => @owned_only
         }
 
         if next_page_link.present?

@@ -18,7 +18,9 @@ module App
       super()
       @index = 0
       @title = title
-      @items = items.map.with_index { |item, i| MenuItem.new(item[:command], item[:hint], i == 0) }
+      @items = items.map.with_index do |item, i|
+        item.is_a?(String) ? MenuItem.new(item, nil, i == 0) : MenuItem.new(item[:command], item[:hint], i == 0)
+      end
     end
 
     def select_item(index)
@@ -55,7 +57,7 @@ module App
       puts(title)
       @items.each do |item|
         print(item.selected ? '--> ' : '    ')
-        puts("#{item.command} - #{item.hint}")
+        puts item.hint.present? ? "#{item.hint} (#{item.command})" : item.command
       end
     end
 
@@ -84,7 +86,7 @@ module App
     attr_reader :hint
     attr_accessor :selected
 
-    def initialize(command, hint, selected = false)
+    def initialize(command, hint = nil, selected = false)
       super()
       @command = command
       @hint = hint

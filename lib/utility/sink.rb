@@ -6,86 +6,62 @@
 
 # frozen_string_literal: true
 
-require 'elasticsearch'
+require 'utility/es_client'
 require 'active_support/json'
+require 'active_support/core_ext/numeric/time'
 
 module Utility
   module Sink
-    class ConsoleSink
-      def ingest(document)
-        #LOUD
-        puts "=============================================================="
-        puts "Got a single document:"
-        puts document
-        puts "=============================================================="
-      end
+    extend self
 
-      def flush(size: nil)
-        #LOUD
-        puts "=============================================================="
-        puts "Flushing"
-        puts "=============================================================="
-      end
-
-      def ingest_multiple(documents)
-        #LOUD
-        puts "=============================================================="
-        puts "Got multiple documents:"
-        puts documents
-        puts "=============================================================="
-      end
-
-      def delete_multiple(ids)
-        #LOUD
-        puts "=============================================================="
-        puts "Deleting some stuff too"
-        puts ids
-        puts "=============================================================="
-      end
+    def print_delim
+      puts '----------------------------------------------------'
     end
 
-    class FileSink
-      DATA_FILES_PATH = '/tmp/data'.freeze
+    def print_header(header)
+      print_delim
+      puts header
+      print_delim
+    end
 
-      def initialize
-        Dir.mkdir(DATA_FILES_PATH) unless Dir.exist?(DATA_FILES_PATH)
-
-        @path = DATA_FILES_PATH
-      end
+    class ConsoleSink
+      include Sink
 
       def ingest(document)
-        File.write("#{@path}/#{document[:id]}.data", document)
+        #LOUD
+        print_header "Got a single document:"
       end
 
       def flush(size: nil)
-        # NO NEED TO FLUSH
-        # MEH
+        #LOUD
+        print_header "Flushing"
       end
 
       def ingest_multiple(documents)
-        documents.each do |doc|
-          ingest(doc)
-        end
-
-        puts "Saved #{documents.count} files"
+        #LOUD
+        print_header "Got multiple documents:"
+        puts documents
       end
 
       def delete_multiple(ids)
-        puts "I'm just a file, I won't do it!"
-        puts "Deleting ids: #{ids}"
+        #LOUD
+        print_header "Deleting some stuff too"
+        puts ids
       end
     end
 
     class ElasticSink
+      include Sink
+
       attr_accessor :index_name
 
-      def initialize
-        @client = Elasticsearch::Client.new(
-          user: 'elastic',
-          password: 'changeme',
-        )
+      def initialize(flush_threshold = 50, flush_interval = 1.minutes)
+        super()
+        @client = Utility::EsClient
         @queue = []
-        @flush_threshold = 50
+        @flush_threshold = flush_threshold
+        @flush_interval = flush_interval
+        @last_flush = Time.now
       end
 
       def ingest(document)
@@ -100,31 +76,30 @@ module Utility
         flush_size = size || @flush_threshold
         if ready_to_flush?
           data_to_flush = @queue.pop(flush_size)
-          send(data_to_flush)
+          send_data(data_to_flush)
+          @last_flush = Time.now
         end
       end
 
       def ingest_multiple(documents)
         documents.each { |doc| @queue << doc unless doc.blank? }
-
         flush if ready_to_flush?
       end
 
       def delete_multiple(ids)
         #LOUD
-        puts "=============================================================="
-        puts "Deleting some stuff too"
+        print_header "Deleting some stuff too"
         puts ids
-        puts "=============================================================="
+        print_delim
       end
 
       private
 
-      def send(documents)
+      def send_data(documents)
         return if documents.empty?
 
         bulk_request = documents.map do |document|
-          { index:  { _index: index_name, _id: document[:id], data: document } }
+          { index: { _index: index_name, _id: document[:id], data: document } }
         end
 
         puts "Request: #{bulk_request.to_json}"
@@ -133,8 +108,32 @@ module Utility
       end
 
       def ready_to_flush?
-        @queue.size >= @flush_threshold
+        @queue.size >= @flush_threshold || Time.now - @last_flush > @flush_interval
       end
+    end
+  end
+
+  class CombinedSink
+    include Sink
+
+    def initialize(sinks = [])
+      @sinks = sinks
+    end
+
+    def ingest(document)
+      @sinks.each { |sink| sink.ingest(document) }
+    end
+
+    def flush(size: nil)
+      @sinks.each { |sink| sink.flush(size: size) }
+    end
+
+    def ingest_multiple(documents)
+      @sinks.each { |sink| sink.ingest_multiple(documents) }
+    end
+
+    def delete_multiple(ids)
+      @sinks.each { |sink| sink.delete_multiple(ids) }
     end
   end
 end

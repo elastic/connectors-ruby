@@ -122,7 +122,7 @@ module Connectors
       end
 
       def configurable_fields
-        []
+        {}
       end
 
       private

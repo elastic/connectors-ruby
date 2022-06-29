@@ -24,7 +24,7 @@ module Connectors
       def connector(name, params = nil)
         klass = connector_class(name)
         if klass.present?
-          return params.present? ? klass.new(params) : klass.new
+          return params.nil? ? klass.new : klass.new(params)
         end
         raise "Connector #{name} is not yet registered. You need to register it before use"
       end

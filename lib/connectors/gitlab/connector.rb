@@ -18,7 +18,7 @@ module Connectors
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
-      def initialize(params)
+      def initialize(params = nil)
         super()
         @extractor = Connectors::GitLab::Extractor.new(:base_url => params&.fetch(:base_url, nil))
         @sinks = [Utility::Sink::ConsoleSink.new]
