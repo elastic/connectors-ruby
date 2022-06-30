@@ -31,7 +31,7 @@ describe Connectors::GitLab::Extractor do
 
   context '#yield_projects_page' do
     it 'correctly produces one page of documents' do
-      stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+      stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
         .to_return(:status => 200, :body => projects_json)
       link = subject.yield_projects_page do |result|
         expect(result).to_not be_nil
@@ -49,7 +49,7 @@ describe Connectors::GitLab::Extractor do
 
       context 'when next page' do
         before(:each) do
-          stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+          stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
             .to_return(
               :status => 200,
               :body => projects_json,
@@ -92,7 +92,7 @@ describe Connectors::GitLab::Extractor do
           end
 
           it 'returns nothing in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => project_members_json)
@@ -119,7 +119,7 @@ describe Connectors::GitLab::Extractor do
             ]
           end
           it 'returns empty permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
 
             subject.yield_projects_page do |result|
@@ -141,7 +141,7 @@ describe Connectors::GitLab::Extractor do
 
           # TODO permissions
           xit 'returns internal in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => '[]')
@@ -166,7 +166,7 @@ describe Connectors::GitLab::Extractor do
           end
           # TODO permissions
           xit 'returns actual users in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => project_members_json)
@@ -193,7 +193,7 @@ describe Connectors::GitLab::Extractor do
       xit 'uses the modified after date' do
         date_param = CGI.escape(modified_since.iso8601)
 
-        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc&last_activity_after=#{date_param}")
+        stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc&last_activity_after=#{date_param}")
           .to_return(:status => 200, :body => projects_json)
 
         result = subject.yield_projects_page(:modified_since => modified_since) do |result| end
