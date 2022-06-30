@@ -2,15 +2,12 @@
 
 require 'hashie/mash'
 require 'connectors/gitlab/connector'
+require 'connectors/gitlab/custom_client'
 
 describe Connectors::GitLab::Connector do
 
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
-  let(:base_url) { 'https://www.example.com' }
-
-  subject do
-    Connectors::GitLab::Connector.new({ :base_url => base_url })
-  end
+  let(:base_url) { Connectors::GitLab::DEFAULT_BASE_URL }
 
   context '#source_status' do
     it 'correctly returns true on 200' do

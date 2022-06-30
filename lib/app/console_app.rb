@@ -21,15 +21,18 @@ module App
   module ConsoleApp
     extend self
 
+    INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
+
     @commands = [
+      { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :sync, :hint => 'start synchronization' },
       { :command => :status, :hint => 'check the status of a third-party service' },
       { :command => :exit, :hint => 'end the program' }
     ]
 
     def start_sync
-      puts 'Starting synchronization...'
-      App::Connector.sync_now
+      puts 'Initiating synchronization...'
+      App::Connector.initiate_sync
     end
 
     def show_status
@@ -38,6 +41,19 @@ module App
       puts 'Checking status...'
       puts connector.source_status
       puts
+    end
+
+    def register_connector
+      puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
+      index_name = gets.chomp.strip
+      unless INDEX_NAME_REGEXP.match?(index_name)
+        puts "Index name #{index_name} contains symbols that aren't allowed!"
+        return
+      end
+
+      id = App::Connector.ensure_connector_registered(index_name)
+      App::Config[:connector_package_id] = id
+      puts "Connector #{id} registered successfully. Please store the ID in config file."
     end
 
     def read_command
@@ -56,7 +72,7 @@ module App
     end
 
     def select_connector(params = {})
-      puts 'Registered connectors:'
+      puts 'Provided connectors:'
 
       menu = App::Menu.new('Please select the connector:', registry.registered_connectors)
       connector_name = menu.select_command
@@ -85,6 +101,9 @@ module App
       when :status
         self.show_status
         wait_for_keypress('Status checked!')
+      when :register
+        self.register_connector
+        wait_for_keypress('Registered connector in Elasticsearch!')
       when :exit
         self.exit_normally
       else

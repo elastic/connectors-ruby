@@ -19,12 +19,16 @@ module Connectors
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
-      def initialize(params = nil)
+      def initialize
         super()
-        @extractor = Connectors::GitLab::Extractor.new(:base_url => params&.fetch(:base_url, nil))
+        fields = configurable_fields
+        @extractor = Connectors::GitLab::Extractor.new(
+          :base_url => @configurable_fields[:base_url][:value],
+          :api_token => @configurable_fields[:api_token][:value]
+        )
         @sink = Utility::Sink::CombinedSink.new(
           [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(params[:index_name])
+           Utility::Sink::ElasticSink.new(App::Config[:connector_package_id])
           ]
         )
       end
@@ -34,14 +38,14 @@ module Connectors
       end
 
       def configurable_fields
-        {
-          'api_token' => {
-            'label' => 'API Token',
-            'value' => App::Config[:gitlab][:api_token]
+        @configurable_fields ||= {
+          :api_token => {
+            :label => 'API Token',
+            :value => App::Config[:gitlab][:api_token]
           },
-          'base_url' => {
-            'label' => 'Base URL',
-            'value' => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
+          :base_url => {
+            :label => 'Base URL',
+            :value => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
       end
