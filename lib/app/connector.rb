@@ -7,39 +7,27 @@
 # frozen_string_literal: true
 
 require 'active_support'
-require 'concurrent-ruby'
 require 'connectors'
 require 'cron_parser'
 require 'utility'
 
 module App
   module Connector
-    SYNC_JOB_POOL = Concurrent::ThreadPoolExecutor.new(
-      :min_threads => 8,
-      :max_threads => 8,
-      :max_queue => 1_000,
-      :fallback_policy => :abort
-    )
     CONNECTORS_INDEX = '.elastic-connectors'
     QUERY_SIZE = 20
     POLL_IDLING = 60
 
-    @running = Concurrent::AtomicBoolean.new(false)
     @client = Utility::EsClient.new
 
     class << self
 
       def start!
         pre_flight_check
+
         ensure_index_exists(CONNECTORS_INDEX)
-        running!
 
         Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
-      end
-
-      def running?
-        running.true?
       end
 
       def initiate_sync
@@ -81,7 +69,7 @@ module App
 
       private
 
-      attr_reader :running, :connector_klass
+      attr_reader :connector_klass
 
       def running!
         raise 'The connector app is already running!' unless running.make_true
@@ -112,10 +100,8 @@ module App
         Utility::Logger.info("Starting to sync for connector #{connector['_id']}")
         claim_job(connector)
 
-        SYNC_JOB_POOL.post do
-          connector_klass.new.sync_content(connector) do |error|
-            complete_sync(connector, error)
-          end
+        connector_klass.new.sync_content(connector) do |error|
+          complete_sync(connector, error)
         end
       end
 
