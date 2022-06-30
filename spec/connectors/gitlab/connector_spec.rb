@@ -9,7 +9,6 @@ describe Connectors::GitLab::Connector do
   let(:base_url) { Connectors::GitLab::DEFAULT_BASE_URL }
   let(:app_config) { Hashie::Mash.new(:gitlab => { :base_url => base_url, :api_token => 'some_token' }) }
 
-
   context '#source_status' do
     before do
       stub_const('App::Config', app_config)
