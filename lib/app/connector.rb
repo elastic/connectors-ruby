@@ -58,17 +58,17 @@ module App
         start! unless running?
       end
 
-      def ensure_connector_registered(index_name)
+      def register_connector(index_name)
         connector_config = current_connector_config
         id = connector_config&.fetch('_id', nil)
         if connector_config.nil?
+          ensure_index_exists(index_name)
           body = {
             :scheduling => { :enabled => true },
             :index_name => index_name
           }
           response = @client.index(:index => CONNECTORS_INDEX, :body => body)
           id = response['_id']
-          ensure_index_exists(index_name)
           Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
         end
         id
@@ -118,7 +118,6 @@ module App
           end
         end
       end
-
 
       def ensure_index_exists(index_name)
         @client.indices.create(index: index_name) unless @client.indices.exists?(index: index_name)

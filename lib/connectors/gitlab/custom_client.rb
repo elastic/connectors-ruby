@@ -16,6 +16,8 @@ module Connectors
     DEFAULT_BASE_URL = 'https://gitlab.com/api/v4'
 
     class CustomClient < Connectors::Base::CustomClient
+      attr_reader :api_token
+
       class ClientError < StandardError
         attr_reader :status_code, :endpoint, :api_token
 
@@ -33,7 +35,7 @@ module Connectors
       def additional_middleware
         [
           ::FaradayMiddleware::FollowRedirects,
-          [Utility::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, base_url] }],
+          [Utility::Middleware::RestrictHostnames, { :allowed_hosts => [base_url, DEFAULT_BASE_URL] }],
           [Utility::Middleware::BearerAuth, { :bearer_auth_token => api_token }]
         ]
       end
