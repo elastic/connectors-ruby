@@ -5,7 +5,7 @@ revision: "main"
 
 elasticsearch:
   cloud_id: "CHANGEME"
-  hosts: "CHANGEME"
+  hosts: "http://localhost:9200"
   api_key: "CHANGEME"
 
 connector_package_id: "CHANGEME"
