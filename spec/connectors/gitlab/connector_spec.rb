@@ -5,7 +5,6 @@ require 'connectors/gitlab/connector'
 require 'connectors/gitlab/custom_client'
 
 describe Connectors::GitLab::Connector do
-
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { Connectors::GitLab::DEFAULT_BASE_URL }
 

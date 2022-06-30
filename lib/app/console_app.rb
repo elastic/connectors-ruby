@@ -10,12 +10,10 @@ $LOAD_PATH << '../'
 
 require 'app/config'
 require 'connectors/base/registry'
-require 'connectors/base/registry'
 require 'app/menu'
 require 'app/connector'
 
 module App
-
   ENV['TZ'] = 'UTC'
 
   module ConsoleApp
@@ -48,7 +46,7 @@ module App
       if id.present?
         puts "You already have registered a connector with ID: #{id}. Registering a new connector will not use the existing one."
         puts 'Are you sure you want to continue? (y/n)'
-        return unless gets.chomp.downcase == 'y'
+        return unless gets.chomp.casecmp('y').zero?
       end
       puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
       index_name = gets.chomp.strip
@@ -97,33 +95,31 @@ module App
     puts 'Hello Connectors 3.0!'
     sleep(1)
 
-    while true
+    loop do
       command = read_command
       case command
       when :sync
-        self.start_sync
+        start_sync
         wait_for_keypress('Sync finished!')
       when :status
-        self.show_status
+        show_status
         wait_for_keypress('Status checked!')
       when :register
-        self.register_connector
+        register_connector
         wait_for_keypress('Registered connector in Elasticsearch!')
       when :exit
-        self.exit_normally
+        exit_normally
       else
-        self.exit_normally('Sorry, this command is not yet implemented')
+        exit_normally('Sorry, this command is not yet implemented')
       end
     end
   rescue SystemExit
-    # nothing to see here
+    puts 'Exiting.'
   rescue Interrupt
-    self.exit_normally
-  rescue Exception => e
+    exit_normally
+  rescue StandardError => e
     puts e.message
     puts e.backtrace
     exit(false)
   end
 end
-
-

@@ -13,7 +13,7 @@ require 'utility/es_client'
 
 module Utility
   module Sink
-    extend self
+    module_function
 
     def print_delim
       puts '----------------------------------------------------'
@@ -28,21 +28,21 @@ module Utility
     class ConsoleSink
       include Sink
 
-      def ingest(document)
-        print_header "Got a single document:"
+      def ingest(_document)
+        print_header 'Got a single document:'
       end
 
       def flush(size: nil)
-        print_header "Flushing"
+        print_header 'Flushing'
       end
 
       def ingest_multiple(documents)
-        print_header "Got multiple documents:"
+        print_header 'Got multiple documents:'
         puts documents
       end
 
       def delete_multiple(ids)
-        print_header "Deleting some stuff too"
+        print_header 'Deleting some stuff too'
         puts ids
       end
     end
@@ -52,7 +52,7 @@ module Utility
 
       attr_accessor :index_name
 
-      def initialize(index_name, flush_threshold = 50, flush_interval = 1.minutes)
+      def initialize(_index_name, flush_threshold = 50, flush_interval = 1.minutes)
         super()
         @client = Utility::EsClient
         @queue = []
@@ -86,7 +86,7 @@ module Utility
       end
 
       def delete_multiple(ids)
-        print_header "Deleting some stuff too"
+        print_header 'Deleting some stuff too'
         puts ids
         print_delim
       end

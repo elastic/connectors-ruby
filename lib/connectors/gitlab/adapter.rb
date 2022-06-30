@@ -35,7 +35,8 @@ module Connectors
                             else
                               source_doc[:namespace][:name]
                             end
-            })
+            }
+          )
         else
           # don't remap
           result.merge!(source_doc)

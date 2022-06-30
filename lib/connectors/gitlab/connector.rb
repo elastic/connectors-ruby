@@ -21,15 +21,13 @@ module Connectors
 
       def initialize
         super()
-        fields = configurable_fields
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => @configurable_fields[:base_url][:value],
-          :api_token => @configurable_fields[:api_token][:value]
+          :base_url => configurable_fields[:base_url][:value],
+          :api_token => configurable_fields[:api_token][:value]
         )
         @sink = Utility::Sink::CombinedSink.new(
           [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(App::Config[:connector_package_id])
-          ]
+           Utility::Sink::ElasticSink.new(App::Config[:connector_package_id])]
         )
       end
 

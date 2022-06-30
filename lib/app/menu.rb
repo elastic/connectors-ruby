@@ -8,7 +8,6 @@
 require 'remedy'
 
 module App
-
   class Menu
     attr_reader :items
     attr_reader :title
@@ -33,7 +32,7 @@ module App
       display
       interaction = Remedy::Interaction.new
       interaction.loop do |key|
-        if key == nil
+        if key.nil?
           break
         end
         case key.to_s.to_sym
@@ -47,8 +46,6 @@ module App
           select_item(index)
         when :control_m
           return @items[@index].command
-        else
-          # nothing
         end
       end
     end
@@ -74,13 +71,21 @@ module App
 
       input = STDIN.getc
       if input == "\e"
-        input << STDIN.read_nonblock(3) rescue nil
-        input << STDIN.read_nonblock(2) rescue nil
+        begin
+          input << STDIN.read_nonblock(3)
+        rescue StandardError
+          nil
+        end
+        begin
+          input << STDIN.read_nonblock(2)
+        rescue StandardError
+          nil
+        end
       end
+      input
     ensure
       STDIN.echo = true
       STDIN.cooked!
-      return input
     end
   end
 

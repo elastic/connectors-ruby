@@ -1,5 +1,5 @@
 YQ ?= "yq"
-.phony: test lint autocorrect update_config build
+.phony: test lint autocorrect update_config build autocorrect-unsafe
 .phony: release_dev release build_gem install build-docker run-docker exec_app tag exec_cli
 
 config/connectors.yml:
@@ -13,6 +13,9 @@ lint: config/connectors.yml
 
 autocorrect: config/connectors.yml
 	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -a
+
+autocorrect-unsafe: config/connectors.yml
+	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -A
 
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want

@@ -16,7 +16,7 @@ describe App::Connector do
   end
 
   it 'should start only once' do
-    stub_request(:get, "http://localhost:9200/").to_return(status: 200, body: "", headers: {})
+    stub_request(:get, 'http://localhost:9200/').to_return(status: 200, body: '', headers: {})
 
     allow(described_class).to receive(:pre_flight_check)
     allow(described_class).to receive(:start_polling_jobs)
