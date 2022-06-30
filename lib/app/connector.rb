@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require 'active_support'
-require 'concurrent'
+require 'concurrent-ruby'
 require 'connectors'
 require 'cron_parser'
 require 'utility'
@@ -25,19 +25,58 @@ module App
     POLL_IDLING = 60
 
     @running = Concurrent::AtomicBoolean.new(false)
+    @client = Utility::EsClient.new
 
     class << self
 
       def start!
         pre_flight_check
+        ensure_index_exists(CONNECTORS_INDEX)
         running!
 
-        Utility::Logger.info('Starting to process jobs.')
+        Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
       end
 
       def running?
         running.true?
+      end
+
+      def initiate_sync
+        connector = current_connector_config
+        sync_now = connector&.dig('_source', 'sync_now')
+        unless sync_now.present?
+          body = {
+            :doc => {
+              :scheduling => { :enabled => true },
+              :sync_now => true
+            }
+          }
+          @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector['_id']}")
+        end
+        start! unless running?
+      end
+
+      def register_connector(index_name)
+        connector_config = current_connector_config
+        id = connector_config&.fetch('_id', nil)
+        if connector_config.nil?
+          ensure_index_exists(index_name)
+          body = {
+            :scheduling => { :enabled => true },
+            :index_name => index_name
+          }
+          response = @client.index(:index => CONNECTORS_INDEX, :body => body)
+          id = response['_id']
+          Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
+        end
+        id
+      end
+
+      def current_connector_config
+        response = @client.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
+        response['found'] ? response : nil
       end
 
       private
@@ -65,7 +104,7 @@ module App
       end
 
       def polling_jobs
-        connector = Utility::EsClient.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'])
+        connector = current_connector_config
         update_config_if_necessary(connector)
 
         return unless should_sync?(connector)
@@ -74,34 +113,42 @@ module App
         claim_job(connector)
 
         SYNC_JOB_POOL.post do
-          connector_klass.new.sync(connector) do |error|
+          connector_klass.new.sync_content(connector) do |error|
             complete_sync(connector, error)
           end
         end
       end
 
+      def ensure_index_exists(index_name)
+        @client.indices.create(index: index_name) unless @client.indices.exists?(index: index_name)
+      end
+
       def update_config_if_necessary(connector)
-        configuration = connector['_source']['configuration']
+        configuration = connector&.dig('_source', 'configuration')
         if configuration.nil? || configuration.empty?
           body = {
             :doc => {
               :configuration => connector_klass.new.configurable_fields
             }
           }
-          Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          if connector.present?
+            @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          else
+            raise "Connector config not found: #{connector}"
+          end
           Utility::Logger.info("Successfully updated configuration for connector #{connector['_id']}")
         end
       end
 
       def should_sync?(connector)
-        return false unless connector['_source']['scheduling']['enabled']
-        return true if connector['_source']['sync_now']
+        return false unless connector.dig('_source', 'scheduling', 'enabled')
+        return true if connector.dig('_source', 'sync_now')
 
-        last_synced = connector['_source']['last_synced']
+        last_synced = connector.dig('_source', 'last_synced')
         return true if last_synced.nil? || last_synced.empty?
 
         last_synced = Time.parse(last_synced)
-        sync_interval = connector['_source']['scheduling']['interval']
+        sync_interval = connector.dig('_source', 'scheduling', 'interval')
         cron_parser = cron_parser(sync_interval)
         cron_parser && cron_parser.next(last_synced) < Time.now
       end
@@ -122,7 +169,7 @@ module App
           }
         }
 
-        Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         Utility::Logger.info("Successfully claimed job for connector #{connector['_id']}")
       end
 
@@ -135,7 +182,7 @@ module App
           }
         }
 
-        Utility::EsClient.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         if error
           Utility::Logger.info("Failed to sync for connector #{connector['_id']} with error #{error}")
         else

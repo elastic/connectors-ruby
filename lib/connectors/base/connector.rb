@@ -11,7 +11,7 @@ require 'bson'
 module Connectors
   module Base
     class Connector
-      def sync(connector); end
+      def sync_content(connector); end
 
       def extractor(params)
         content_source_id = params.fetch(:content_source_id)
@@ -94,11 +94,11 @@ module Connectors
         authorization.access_token(params)
       end
 
-      def refresh(params)
+      def refresh(params = {})
         authorization.refresh(params)
       end
 
-      def source_status(params)
+      def source_status(params = {})
         health_check(params)
         { :status => 'OK', :statusCode => 200, :message => "Connected to #{display_name}" }
       rescue StandardError => e
@@ -122,7 +122,7 @@ module Connectors
       end
 
       def configurable_fields
-        []
+        {}
       end
 
       private

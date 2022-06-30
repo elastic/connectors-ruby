@@ -6,117 +6,72 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/extractor'
-require 'connectors/gitlab/custom_client'
-require 'connectors/gitlab/adapter'
-require 'connectors/gitlab/config'
+require 'hashie'
+require 'json'
 require 'rack/utils'
+require 'active_support/core_ext/hash/indifferent_access'
+require 'connectors/gitlab/custom_client'
 
 module Connectors
   module GitLab
-    class Extractor < Connectors::Base::Extractor
+    class Extractor
       PAGE_SIZE = 100 # max is 100
 
-      def yield_document_changes(modified_since: nil)
+      def initialize(base_url: nil, api_token: nil, owned_only: true)
+        super()
+        @base_url = base_url
+        @api_token = api_token
+        # only get projects that user owns
+        @owned_only = owned_only
+      end
+
+      def yield_projects_page(next_page_link = nil)
         query_params = {
           :pagination => :keyset,
           :per_page => PAGE_SIZE,
           :order_by => :id,
-          :sort => :desc
+          :sort => :desc,
+          :owned => @owned_only
         }
-        # looks like it's an incremental sync
-        if modified_since.present?
-          date_since = modified_since.is_a?(Time) ? modified_since : Time.new(modified_since)
-          query_params[:last_activity_after] = date_since.iso8601
-        end
 
-        next_page_link = nil
-
-        loop do
-          if next_page_link.present?
-            if (matcher = /(https?:[^>]*)/.match(next_page_link))
-              clean_query = URI.parse(matcher.captures[0]).query
-              query_params = Rack::Utils.parse_query(clean_query)
-            else
-              raise "Next page link has unexpected format: #{next_page_link}"
-            end
-          end
-          response = client.get('projects', query_params)
-
-          JSON.parse(response.body).map do |doc|
-            doc = doc.with_indifferent_access
-            if config.index_permissions
-              doc = doc.merge(project_permissions(doc[:id], doc[:visibility]))
-            end
-            yield :create_or_update, Connectors::GitLab::Adapter.to_es_document(:project, doc), nil
-          end
-
-          next_page_link = response.headers['Link'] || nil
-          break unless next_page_link.present?
-        end
-      end
-
-      def yield_deleted_ids(ids)
-        if ids.present?
-          ids.each do |id|
-            response = client.get("projects/#{id}")
-            if response.status == 404
-              # not found - assume deleted
-              yield id
-            else
-              unless response.success?
-                raise "Could not get a project by ID: #{id}, response code: #{response.status}, response: #{response.body}"
-              end
-            end
-          end
-        end
-      end
-
-      def yield_permissions(source_user_id)
-        result = []
-        if source_user_id.present?
-          result.push("user:#{source_user_id}")
-
-          user_response = client.get("users/#{source_user_id}")
-          if user_response.success?
-            username = JSON.parse(user_response.body).with_indifferent_access[:username]
-            query = { :external => true, :username => username }
-            external_response = client.get('users', query)
-            if external_response.success?
-              external_users = Hashie::Array.new(JSON.parse(external_response.body))
-              if external_users.empty?
-                # the user is not external
-                result.push('type:internal')
-              end
-            else
-              raise "Could not check external user status by ID: #{source_user_id}"
-            end
+        if next_page_link.present?
+          if (matcher = /(https?:[^>]*)/.match(next_page_link))
+            clean_query = URI.parse(matcher.captures[0]).query
+            query_params = Rack::Utils.parse_query(clean_query)
           else
-            raise "User isn't found by ID: #{source_user_id}"
+            raise "Next page link has unexpected format: #{next_page_link}"
           end
         end
-        yield result
+        response = client.get('projects', query_params)
+
+        projects_chunk = JSON.parse(response.body)
+        yield projects_chunk
+
+        # return next link
+        response.headers['Link'] || nil
+      end
+
+      def fetch_project_repository_files(project_id)
+        response = client.get("projects/#{project_id}/repository/tree")
+        if response.status != 200
+          puts "Received #{response.status} status when fetching repository files for project #{project_id}"
+          return []
+        end
+        JSON.parse(response.body)
+      end
+
+      def health_check
+        # let's do a simple call to get the current user
+        response = client.get('user')
+        unless response.present? && response.status == 200
+          raise "Health check failed with response status #{response.status} and body #{response.body}"
+        end
       end
 
       private
 
-      def project_permissions(id, visibility)
-        result = []
-        if visibility.to_sym == :public || !config.index_permissions
-          # visible-to-all
-          return {}
-        end
-        if visibility.to_sym == :internal
-          result.push('type:internal')
-        end
-        response = client.get("projects/#{id}/members/all")
-        if response.success?
-          members = Hashie::Array.new(JSON.parse(response.body))
-          result.concat(members.map { |user| "user:#{user[:id]}" })
-        else
-          raise "Could not get project members by project ID: #{id}, response code: #{response.status}, response: #{response.body}"
-        end
-        { :_allow_permissions => result }
+      def client
+        @client ||= Connectors::GitLab::CustomClient.new(base_url: @base_url, api_token: @api_token)
       end
     end
   end

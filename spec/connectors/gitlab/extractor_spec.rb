@@ -2,7 +2,6 @@
 
 require 'hashie/mash'
 require 'connectors/gitlab/extractor'
-require 'connectors/gitlab/config'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/connector'
 
@@ -15,7 +14,6 @@ describe Connectors::GitLab::Extractor do
   let(:project_members_json) { connectors_fixture_raw('gitlab/project_members.json') }
   let(:base_url) { 'https://www.example.com' }
 
-  let(:config) { Connectors::GitLab::Config.new(:cursors => {}, :index_permissions => false) }
   let(:cursors) { nil }
   let(:client_proc) do
     proc do
@@ -28,31 +26,22 @@ describe Connectors::GitLab::Extractor do
   let(:authorization_data_proc) { proc { {} } }
 
   subject do
-    described_class.new(
-      :content_source_id => 'gitlab_source_1',
-      :service_type => Connectors::GitLab::Connector::SERVICE_TYPE,
-      :config => config,
-      :features => [],
-      :client_proc => client_proc,
-      :authorization_data_proc => authorization_data_proc
-    )
+    Connectors::GitLab::Extractor.new(:base_url => base_url)
   end
 
-  context '#document_changes' do
+  context '#yield_projects_page' do
     it 'correctly produces one page of documents' do
-      stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+      stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
         .to_return(:status => 200, :body => projects_json)
-      result = subject.document_changes.to_a
+      link = subject.yield_projects_page do |result|
+        expect(result).to_not be_nil
+        expect(result.size).to eq(100)
 
-      expect(result).to_not be_nil
-      item = result[0]
-      expect(result.size).to eq(100)
-
-      expect(item[0]).to eq(:create_or_update)
-      expect(item[1]).to_not be_nil
-      expect(item[1][:title]).to_not be_nil
-      expect(item[1][:url]).to_not be_nil
-      expect(item[2]).to be_nil
+        item = result[0].with_indifferent_access
+        expect(item[:id]).to_not be_nil
+        expect(item[:name]).to_not be_nil
+      end
+      expect(link).to be_nil
     end
 
     context 'for multi-page results' do
@@ -60,7 +49,7 @@ describe Connectors::GitLab::Extractor do
 
       context 'when next page' do
         before(:each) do
-          stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+          stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
             .to_return(
               :status => 200,
               :body => projects_json,
@@ -71,17 +60,25 @@ describe Connectors::GitLab::Extractor do
           stub_request(:get, "#{base_url}/projects?id_before=35879340&imported=false&membership=false&order_by=id&owned=false&page=1&pagination=keyset&per_page=100&repository_checksum_failed=false&sort=desc&starred=false&statistics=false&wiki_checksum_failed=false&with_custom_attributes=false&with_issues_enabled=false&with_merge_requests_enabled=false")
             .to_return(
               :status => 200,
-              :body => projects_json
+              :body => '[]'
             )
         end
-        it 'uses the cursor link from parameters' do
-          result = subject.document_changes.to_a
-          expect(result.size).to eq(200)
 
-          expect(result[0][0]).to eq(:create_or_update)
-          expect(result[0][1][:title]).to_not be_nil
-          expect(result[0][1][:url]).to_not be_nil
-          expect(result[0][2]).to be_nil
+        it 'returns the cursor link from parameters' do
+          link = subject.yield_projects_page do |result|
+            expect(result.size).to eq(100)
+
+            item = result[0].with_indifferent_access
+            expect(item[:id]).to_not be_nil
+            expect(item[:name]).to_not be_nil
+          end
+          expect(link).to eq(link_header)
+        end
+
+        it 'uses the cursor link from parameters' do
+          subject.yield_projects_page(link_header) do |result|
+            expect(result.size).to eq(0)
+          end
         end
       end
 
@@ -94,18 +91,18 @@ describe Connectors::GitLab::Extractor do
           end
 
           it 'returns nothing in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => project_members_json)
 
-            result = subject.document_changes.to_a
+            subject.yield_projects_page do |result|
+              expect(result).to_not be_nil
+              expect(result.size).to eq(1)
 
-            expect(result).to_not be_nil
-            expect(result.size).to eq(1)
-
-            permissions = result[0][1][:_allow_permissions]
-            expect(permissions).to_not be_present
+              permissions = result[0][:_allow_permissions]
+              expect(permissions).to_not be_present
+            end
           end
         end
       end
@@ -121,16 +118,16 @@ describe Connectors::GitLab::Extractor do
             ]
           end
           it 'returns empty permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
 
-            result = subject.document_changes.to_a
+            subject.yield_projects_page do |result|
+              expect(result).to_not be_nil
+              expect(result.size).to eq(2)
 
-            expect(result).to_not be_nil
-            expect(result.size).to eq(2)
-
-            expect(result[0][1][:_allow_permissions]).to_not be_present
-            expect(result[0][1][:_allow_permissions]).to_not be_present
+              expect(result[0][:_allow_permissions]).to_not be_present
+              expect(result[0][:_allow_permissions]).to_not be_present
+            end
           end
         end
 
@@ -141,21 +138,22 @@ describe Connectors::GitLab::Extractor do
             ]
           end
 
-          it 'returns internal in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+          # TODO: permissions
+          xit 'returns internal in permissions' do
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => '[]')
 
-            result = subject.document_changes.to_a
+            subject.yield_projects_page do |result|
+              expect(result).to_not be_nil
+              expect(result.size).to eq(1)
 
-            expect(result).to_not be_nil
-            expect(result.size).to eq(1)
-
-            permissions = result[0][1][:_allow_permissions]
-            expect(permissions).to be_present
-            expect(permissions.size).to eq(1)
-            expect(permissions).to include('type:internal')
+              permissions = result[0][:_allow_permissions]
+              expect(permissions).to be_present
+              expect(permissions.size).to eq(1)
+              expect(permissions).to include('type:internal')
+            end
           end
         end
 
@@ -165,23 +163,23 @@ describe Connectors::GitLab::Extractor do
               { :id => 1, :visibility => :private }
             ]
           end
-
-          it 'returns actual users in permissions' do
-            stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc")
+          # TODO: permissions
+          xit 'returns actual users in permissions' do
+            stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
               .to_return(:status => 200, :body => JSON.dump(projects))
             stub_request(:get, "#{base_url}/projects/1/members/all")
               .to_return(:status => 200, :body => project_members_json)
 
-            result = subject.document_changes.to_a
+            subject.yield_projects_page do |result|
+              expect(result).to_not be_nil
+              expect(result.size).to eq(1)
 
-            expect(result).to_not be_nil
-            expect(result.size).to eq(1)
-
-            permissions = result[0][1][:_allow_permissions]
-            expect(permissions).to be_present
-            expect(permissions.size).to eq(3)
-            expect(permissions).to_not include('type:internal')
-            expect(permissions).to_not include('user:11', 'user:22', 'user:33')
+              permissions = result[0][:_allow_permissions]
+              expect(permissions).to be_present
+              expect(permissions.size).to eq(3)
+              expect(permissions).to_not include('type:internal')
+              expect(permissions).to_not include('user:11', 'user:22', 'user:33')
+            end
           end
         end
       end
@@ -190,16 +188,17 @@ describe Connectors::GitLab::Extractor do
     context 'for incremental sync' do
       let(:modified_since) { Time.now.days_ago(2) }
 
-      it 'uses the modified after date' do
+      # TODO: incremental
+      xit 'uses the modified after date' do
         date_param = CGI.escape(modified_since.iso8601)
 
-        stub_request(:get, "#{base_url}/projects?order_by=id&pagination=keyset&per_page=100&sort=desc&last_activity_after=#{date_param}")
+        stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc&last_activity_after=#{date_param}")
           .to_return(:status => 200, :body => projects_json)
 
-        result = subject.document_changes(:modified_since => modified_since).to_a
-
-        expect(result).to_not be_nil
-        expect(result.size).to eq(100)
+        subject.yield_projects_page(:modified_since => modified_since) do |result|
+          expect(result).to_not be_nil
+          expect(result.size).to eq(100)
+        end
       end
     end
   end
@@ -208,15 +207,17 @@ describe Connectors::GitLab::Extractor do
     let(:existing_id) { 36029109 }
     let(:non_existing_ids) { [123, 234, 345] }
 
-    it 'correctly gets non-existing ids' do
+    # TODO: deletions
+    xit 'correctly gets non-existing ids' do
       ids = non_existing_ids.dup.push(existing_id)
 
       non_existing_ids.each { |id| stub_request(:get, "#{base_url}/projects/#{id}").to_return(:status => 404) }
       stub_request(:get, "#{base_url}/projects/#{existing_id}")
         .to_return(:status => 200, :body => project_json)
 
-      result = subject.deleted_ids(ids).to_a
-      expect(result).to eq(non_existing_ids)
+      subject.deleted_ids(ids) do |result|
+        expect(result).to eq(non_existing_ids)
+      end
     end
   end
 
@@ -233,15 +234,17 @@ describe Connectors::GitLab::Extractor do
       stub_request(:get, "#{base_url}/users?external=true&username=#{user_name}").to_return(:body => '[]')
     end
 
-    it 'correctly sets permissions for internal user' do
-      permissions = subject.permissions(user_id).to_a
+    # TODO: permissions
+    xit 'correctly sets permissions for internal user' do
+      permissions = subject.permissions(user_id) do |result| end
       expect(permissions).to_not be_empty
       expect(permissions).to include("user:#{user_id}")
       expect(permissions).to include('type:internal')
     end
 
-    it 'correctly sets permissions for external user' do
-      permissions = subject.permissions(external_user_id).to_a
+    # TODO: permissions
+    xit 'correctly sets permissions for external user' do
+      permissions = subject.permissions(external_user_id) do |result| end
       expect(permissions).to_not be_empty
       expect(permissions).to include("user:#{external_user_id}")
       expect(permissions).to_not include('type:internal')

@@ -5,66 +5,101 @@
 #
 
 # frozen_string_literal: true
+require 'active_support/core_ext/hash/indifferent_access'
 
 require 'connectors/base/connector'
+require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
-require 'connectors/gitlab/config'
-require 'connectors/gitlab/extractor'
-require 'rack/utils'
+require 'utility/sink'
+require 'app/config'
 
 module Connectors
   module GitLab
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
+      def initialize
+        super()
+        @extractor = Connectors::GitLab::Extractor.new(
+          :base_url => configurable_fields[:base_url][:value],
+          :api_token => configurable_fields[:api_token][:value]
+        )
+        @sink = Utility::Sink::CombinedSink.new(
+          [Utility::Sink::ConsoleSink.new,
+           Utility::Sink::ElasticSink.new(App::Config[:connector_package_id])]
+        )
+      end
+
       def display_name
         'GitLab Connector'
       end
 
       def configurable_fields
-        {
-          'api_token' => {
-            'label' => 'API Token',
-            'value' => nil
+        @configurable_fields ||= {
+          :api_token => {
+            :label => 'API Token',
+            :value => App::Config[:gitlab][:api_token]
           },
-          'base_url' => {
-              'label' => 'Base URL',
-              'value' => nil
+          :base_url => {
+            :label => 'Base URL',
+            :value => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
       end
 
+      def sync_content(_params = {})
+        extract_projects
+      end
+
+      def deleted(_params = {})
+        []
+      end
+
+      def permissions(_params = {})
+        []
+      end
+
       private
 
-      def client(params)
-        Connectors::GitLab::CustomClient.new(
-          :base_url => params[:base_url] || Connectors::GitLab::API_BASE_URL,
-          :api_token => params[:api_token]
-        )
-      end
-
-      def config(params)
-        Connectors::GitLab::Config.new(
-          :cursors => params.fetch(:cursors, {}) || {},
-          :index_permissions => params.fetch(:index_permissions, false)
-        )
-      end
-
-      def extractor_class
-        Connectors::GitLab::Extractor
+      def health_check(_params)
+        @extractor.health_check
       end
 
       def custom_client_error
         Connectors::GitLab::CustomClient::ClientError
       end
 
-      def health_check(params)
-        # let's do a simple call
-        response = client(params).get('user')
-        unless response.present? && response.status == 200
-          raise "Health check failed with response status #{response.status} and body #{response.body}"
+      def extract_projects
+        next_page_link = nil
+        loop do
+          next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
+            projects = projects_chunk.map { |p| Connectors::GitLab::Adapter.to_es_document(:project, p) }
+            @sink.ingest_multiple(projects)
+            extract_project_files(projects_chunk)
+          end
+          break unless next_page_link.present?
         end
+      rescue StandardError => e
+        puts(e.message)
+        puts(e.backtrace)
+        raise e
+      end
+
+      def extract_project_files(projects_chunk)
+        projects_chunk.each_with_index do |project, idx|
+          project = project.with_indifferent_access
+          files = @extractor.fetch_project_repository_files(project[:id])
+          chunk_size = projects_chunk.size
+          puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
+          files = files.map { |file| Connectors::GitLab::Adapter.to_es_document(:file, file) }
+          project[:files] = files
+          @sink.ingest_multiple(files)
+        end
+      rescue StandardError => e
+        puts(e.message)
+        puts(e.backtrace)
+        raise e
       end
     end
   end
