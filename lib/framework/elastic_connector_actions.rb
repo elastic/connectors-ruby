@@ -13,8 +13,35 @@ module Framework
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
 
+    def self.ensure_index_exists(index_name)
+      Utility::Logger.info("Ensuring that index #{index_name} exists")
+      Utility::EsClient.instance.indices.create(index: index_name) unless Utility::EsClient.instance.indices.exists?(index: index_name)
+    end
+
+    def self.force_sync(connector_package_id)
+      body = {
+        :doc => {
+          :scheduling => { :enabled => true },
+          :sync_now => true
+        }
+      }
+
+      Utility::EsClient.instance.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+      Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_package_id}")
+    end
+
+    def self.create_connector(ingestion_index_name)
+      body = {
+        :scheduling => { :enabled => true },
+        :index_name => ingestion_index_name
+      }
+      response = Utility::EsClient.instance.index(:index => CONNECTORS_INDEX, :body => body)
+      id = response['_id']
+      Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
+    end
+
     def self.load_connector_settings(connector_package_id)
-      Utility::EsClient.get(:index => CONNECTORS_INDEX, :id => connector_package_id).with_indifferent_access
+      Utility::EsClient.instance.get(:index => CONNECTORS_INDEX, :id => connector_package_id).with_indifferent_access
     end
 
     def self.update_connector_configuration(connector_package_id, configuration)
@@ -24,7 +51,7 @@ module Framework
         }
       }
 
-      Utility::EsClient.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+      Utility::EsClient.instance.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
       Utility::Logger.info("Successfully updated configuration for connector #{connector_package_id}")
     end
 
@@ -37,7 +64,7 @@ module Framework
         }
       }
 
-      Utility::EsClient.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+      Utility::EsClient.instance.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
       Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
     end
 
@@ -50,7 +77,7 @@ module Framework
         }
       }
 
-      Utility::EsClient.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+      Utility::EsClient.instance.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
 
       if error
         Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{error}")

@@ -11,6 +11,10 @@ require 'app/config'
 
 module Utility
   class EsClient < Elasticsearch::Client
+    def self.instance
+      @client ||= new
+    end
+
     def initialize
       super(connection_configs)
     end

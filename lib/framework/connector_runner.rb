@@ -1,3 +1,11 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
+# frozen_string_literal: true
+
 require 'concurrent'
 require 'cron_parser'
 
@@ -30,7 +38,7 @@ module Framework
       ElasticConnectorActions.claim_job(@connector_settings.id)
 
       SYNC_JOB_POOL.post do
-        @connector_instance.sync(@connector_settings) do |error|
+        @connector_instance.sync_content(@connector_settings) do |error|
           ElasticConnectorActions.complete_sync(@connector_settings.id, error)
         end
       rescue StandardError => e
@@ -49,14 +57,12 @@ module Framework
       raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
     end
 
-
     def cron_parser(cronline)
       CronParser.new(cronline)
     rescue ArgumentError => e
       Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
       nil
     end
-
 
     def should_sync?
       return false unless @connector_settings.scheduling_settings[:enabled]
@@ -65,7 +71,7 @@ module Framework
       last_synced = @connector_settings.scheduling_settings[:last_synced]
       return true if last_synced.nil? || last_synced.empty? # first run
 
-      last_synced = Time.parse(last_synced) #TODO: unhandled exception
+      last_synced = Time.parse(last_synced) # TODO: unhandled exception
       sync_interval = scheduling_settings['interval']
       cron_parser = cron_parser(sync_interval)
       cron_parser && cron_parser.next(last_synced) < Time.now

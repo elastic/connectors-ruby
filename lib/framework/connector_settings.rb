@@ -1,3 +1,11 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
+# frozen_string_literal: true
+
 module Framework
   class ConnectorSettings
     def self.fetch(connector_package_id)
@@ -6,7 +14,7 @@ module Framework
       new(es_response)
     end
 
-    def id 
+    def id
       @elasticsearch_response[:_id]
     end
 
@@ -24,7 +32,7 @@ module Framework
 
     def configuration_initialized?
       return false if configuration.nil?
-      return configuration.present?
+      configuration.present?
     end
 
     def update_configuration(configuration)
@@ -32,6 +40,7 @@ module Framework
 
       @elasticsearch_response[:_source][:configuration] = configuration
     end
+
     private
 
     def initialize(es_response)
