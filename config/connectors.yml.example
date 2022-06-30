@@ -4,8 +4,8 @@ repository: "git@github.com:elastic/connectors.git"
 revision: "main"
 
 elasticsearch:
-  cloud_id: "CHANGEME"
-  hosts: "http://localhost:9200"
+#  cloud_id: "CHANGEME"
+  hosts: http://localhost:9200
   api_key: "CHANGEME"
 
 connector_package_id: "CHANGEME"
