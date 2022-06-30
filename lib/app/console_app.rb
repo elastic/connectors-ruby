@@ -44,16 +44,19 @@ module App
     end
 
     def register_connector
-      puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
-      index_name = gets.chomp.strip
-      unless INDEX_NAME_REGEXP.match?(index_name)
-        puts "Index name #{index_name} contains symbols that aren't allowed!"
-        return
-      end
+      id = App::Config['connector_package_id']
+      unless id.present?
+        puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
+        index_name = gets.chomp.strip
+        unless INDEX_NAME_REGEXP.match?(index_name)
+          puts "Index name #{index_name} contains symbols that aren't allowed!"
+          return
+        end
 
-      id = App::Connector.ensure_connector_registered(index_name)
-      App::Config[:connector_package_id] = id
-      puts "Connector #{id} registered successfully. Please store the ID in config file."
+        id = App::Connector.ensure_connector_registered(index_name)
+        App::Config[:connector_package_id] = id
+        puts "Connector #{id} registered successfully. Please store the ID in config file."
+      end
     end
 
     def read_command

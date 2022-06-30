@@ -74,6 +74,11 @@ module App
         id
       end
 
+      def current_connector_config
+        response = @client.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
+        response['found'] ? response : nil
+      end
+
       private
 
       attr_reader :running, :connector_klass
@@ -114,10 +119,6 @@ module App
         end
       end
 
-      def current_connector_config
-        response = @client.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
-        response['found'] ? response : nil
-      end
 
       def ensure_index_exists(index_name)
         @client.indices.create(index: index_name) unless @client.indices.exists?(index: index_name)
