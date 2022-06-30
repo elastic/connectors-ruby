@@ -26,6 +26,11 @@ module App
         pre_flight_check
 
         ensure_index_exists(CONNECTORS_INDEX)
+<<<<<<< HEAD
+=======
+
+        running!
+>>>>>>> 7738ff8 (WIP)
 
         Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
@@ -77,8 +82,7 @@ module App
       end
 
       def pre_flight_check
-        @connector_klass = Connectors::REGISTRY.connector_class(App::Config['service_type'])
-        raise "#{App::Config['service_type']} is not a supported connector" if @connector_klass.nil?
+        raise "#{App::Config['service_type']} is not a supported connector" unless Connectors::REGISTRY.registered?(App::Config['service_type']
       end
 
       def start_polling_jobs
