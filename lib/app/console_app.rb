@@ -46,7 +46,7 @@ module App
       if id.present?
         puts "You already have registered a connector with ID: #{id}. Registering a new connector will not use the existing one."
         puts 'Are you sure you want to continue? (y/n)'
-        return unless gets.chomp.casecmp('y').zero?
+        return false unless gets.chomp.casecmp('y')&.zero?
       end
       puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
       index_name = gets.chomp.strip
@@ -57,6 +57,7 @@ module App
       id = App::Connector.register_connector(index_name)
       App::Config[:connector_package_id] = id
       puts "Connector with ID #{id} registered successfully. Please store the ID in config file and restart the program."
+      true
     end
 
     def read_command
@@ -74,13 +75,13 @@ module App
       gets
     end
 
-    def select_connector(params = {})
+    def select_connector
       puts 'Provided connectors:'
 
       menu = App::Menu.new('Please select the connector:', registry.registered_connectors)
       connector_name = menu.select_command
 
-      registry.connector(connector_name, params)
+      registry.connector(connector_name)
     end
 
     def exit_normally(message = 'Kthxbye!... ¯\_(ツ)_/¯')
@@ -105,8 +106,11 @@ module App
         show_status
         wait_for_keypress('Status checked!')
       when :register
-        register_connector
-        wait_for_keypress('Registered connector in Elasticsearch!')
+        if register_connector
+          wait_for_keypress('Registered connector in Elasticsearch!')
+        else
+          wait_for_keypress('Registration canceled!')
+        end
       when :exit
         exit_normally
       else

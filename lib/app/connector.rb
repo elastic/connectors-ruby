@@ -18,6 +18,8 @@ module App
     POLL_IDLING = 60
 
     @client = Utility::EsClient.new
+    @running = false
+    @sync_running = false
 
     class << self
 
@@ -28,6 +30,7 @@ module App
 
         Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
+        @running = true
       end
 
       def initiate_sync
@@ -36,14 +39,13 @@ module App
         unless sync_now.present?
           body = {
             :doc => {
-              :scheduling => { :enabled => true },
               :sync_now => true
             }
           }
           @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
           Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector['_id']}")
         end
-        start! unless running?
+        start! unless @running
       end
 
       def register_connector(index_name)
@@ -52,44 +54,6 @@ module App
         if connector_config.nil?
           ensure_index_exists(index_name)
           body = {
-            :scheduling => { :enabled => true },
-            :index_name => index_name
-          }
-          response = @client.index(:index => CONNECTORS_INDEX, :body => body)
-          id = response['_id']
-          Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
-        end
-        id
-      end
-
-      def current_connector_config
-        response = @client.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
-        response['found'] ? response : nil
-      end
-
-      def initiate_sync
-        connector = current_connector_config
-        sync_now = connector&.dig('_source', 'sync_now')
-        unless sync_now.present?
-          body = {
-            :doc => {
-              :scheduling => { :enabled => true },
-              :sync_now => true
-            }
-          }
-          @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
-          Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector['_id']}")
-        end
-        start! unless running?
-      end
-
-      def register_connector(index_name)
-        connector_config = current_connector_config
-        id = connector_config&.fetch('_id', nil)
-        if connector_config.nil?
-          ensure_index_exists(index_name)
-          body = {
-            :scheduling => { :enabled => true },
             :index_name => index_name
           }
           response = @client.index(:index => CONNECTORS_INDEX, :body => body)
@@ -108,10 +72,6 @@ module App
 
       attr_reader :connector_klass
 
-      def running!
-        raise 'The connector app is already running!' unless running.make_true
-      end
-
       def pre_flight_check
         @connector_klass = Connectors::REGISTRY.connector_class(App::Config['service_type'])
         raise "#{App::Config['service_type']} is not a supported connector" if @connector_klass.nil?
@@ -123,8 +83,12 @@ module App
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
         ensure
-          Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
-          sleep(POLL_IDLING)
+          if @sync_running
+            Utility::Logger.info("Sync is running, no time to sleep!")
+          else
+            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
+            sleep(POLL_IDLING)
+          end
         end
       end
 
@@ -133,17 +97,13 @@ module App
         update_config_if_necessary(connector)
 
         return unless should_sync?(connector)
-
         Utility::Logger.info("Starting to sync for connector #{connector['_id']}")
         claim_job(connector)
+        @sync_running = true
 
         connector_klass.new.sync_content(connector) do |error|
           complete_sync(connector, error)
         end
-      end
-
-      def ensure_index_exists(index_name)
-        @client.indices.create(index: index_name) unless @client.indices.exists?(index: index_name)
       end
 
       def ensure_index_exists(index_name)
@@ -168,8 +128,8 @@ module App
       end
 
       def should_sync?(connector)
-        return false unless connector.dig('_source', 'scheduling', 'enabled')
         return true if connector.dig('_source', 'sync_now')
+        return false unless connector.dig('_source', 'scheduling', 'enabled')
 
         last_synced = connector.dig('_source', 'last_synced')
         return true if last_synced.nil? || last_synced.empty?
@@ -183,7 +143,7 @@ module App
       def cron_parser(cronline)
         CronParser.new(cronline)
       rescue ArgumentError => e
-        Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
+        Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message} \n #{e.backtrace}")
         nil
       end
 
@@ -201,15 +161,19 @@ module App
       end
 
       def complete_sync(connector, error = nil)
-        body = {
-          :doc => {
-            :sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
-            :sync_error => error,
-            :last_synced => Time.now
-          }
+        # was started by the user, not cron
+        # need to reset it if completed successfully
+        started_manually = connector.dig('_source', 'sync_now')
+        doc = {
+          :sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
+          :sync_error => error,
+          :last_synced => Time.now
         }
-
-        @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        if connector.dig('_source', 'sync_now') && error.nil?
+          doc[:sync_now] = false
+        end
+        @client.update(:index => connector['_index'], :id => connector['_id'], :body => { :doc => doc })
+        @sync_running = false
         if error
           Utility::Logger.info("Failed to sync for connector #{connector['_id']} with error #{error}")
         else
