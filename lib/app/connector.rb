@@ -7,39 +7,64 @@
 # frozen_string_literal: true
 
 require 'active_support'
-require 'concurrent-ruby'
 require 'connectors'
 require 'cron_parser'
 require 'utility'
 
 module App
   module Connector
-    SYNC_JOB_POOL = Concurrent::ThreadPoolExecutor.new(
-      :min_threads => 8,
-      :max_threads => 8,
-      :max_queue => 1_000,
-      :fallback_policy => :abort
-    )
     CONNECTORS_INDEX = '.elastic-connectors'
     QUERY_SIZE = 20
     POLL_IDLING = 60
 
-    @running = Concurrent::AtomicBoolean.new(false)
     @client = Utility::EsClient.new
 
     class << self
 
       def start!
         pre_flight_check
+
         ensure_index_exists(CONNECTORS_INDEX)
-        running!
 
         Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
       end
 
-      def running?
-        running.true?
+      def initiate_sync
+        connector = current_connector_config
+        sync_now = connector&.dig('_source', 'sync_now')
+        unless sync_now.present?
+          body = {
+            :doc => {
+              :scheduling => { :enabled => true },
+              :sync_now => true
+            }
+          }
+          @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector['_id']}")
+        end
+        start! unless running?
+      end
+
+      def register_connector(index_name)
+        connector_config = current_connector_config
+        id = connector_config&.fetch('_id', nil)
+        if connector_config.nil?
+          ensure_index_exists(index_name)
+          body = {
+            :scheduling => { :enabled => true },
+            :index_name => index_name
+          }
+          response = @client.index(:index => CONNECTORS_INDEX, :body => body)
+          id = response['_id']
+          Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
+        end
+        id
+      end
+
+      def current_connector_config
+        response = @client.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
+        response['found'] ? response : nil
       end
 
       def initiate_sync
@@ -81,7 +106,7 @@ module App
 
       private
 
-      attr_reader :running, :connector_klass
+      attr_reader :connector_klass
 
       def running!
         raise 'The connector app is already running!' unless running.make_true
@@ -112,11 +137,13 @@ module App
         Utility::Logger.info("Starting to sync for connector #{connector['_id']}")
         claim_job(connector)
 
-        SYNC_JOB_POOL.post do
-          connector_klass.new.sync_content(connector) do |error|
-            complete_sync(connector, error)
-          end
+        connector_klass.new.sync_content(connector) do |error|
+          complete_sync(connector, error)
         end
+      end
+
+      def ensure_index_exists(index_name)
+        @client.indices.create(index: index_name) unless @client.indices.exists?(index: index_name)
       end
 
       def ensure_index_exists(index_name)
