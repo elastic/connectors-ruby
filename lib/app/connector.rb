@@ -101,7 +101,7 @@ module App
         claim_job(connector)
         @sync_running = true
 
-        connector_klass.new.sync_content(connector) do |error|
+        connector_klass.new.sync_content_and_yield(connector) do |error|
           complete_sync(connector, error)
         end
       end

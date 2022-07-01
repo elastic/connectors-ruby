@@ -32,16 +32,10 @@ module Connectors
       end
 
       def sync_content(connector)
-        error = nil
         body = [
           { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector' } } }
         ]
         Utility::EsClient.bulk(:body => body)
-      rescue StandardError => e
-        Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
-        error = e.message
-      ensure
-        yield error
       end
     end
   end

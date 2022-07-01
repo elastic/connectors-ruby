@@ -11,6 +11,17 @@ require 'bson'
 module Connectors
   module Base
     class Connector
+      def sync_content_and_yield(connector)
+        error = nil
+        sync_content(connector)
+      rescue StandardError => e
+        Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
+        Utility.Logger.error(e.backtrace&.join("\n"))
+        error = e.message
+      ensure
+        yield error
+      end
+
       def sync_content(connector); end
 
       def extractor(params)
