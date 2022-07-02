@@ -34,7 +34,7 @@ module Connectors
       def sync_content(connector)
         error = nil
         body = [
-          { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector' } } }
+          { index: { _index: connector['index_name'], _id: 1, data: { name: 'stub connector' } } }
         ]
         Utility::EsClient.bulk(:body => body)
       rescue StandardError => e

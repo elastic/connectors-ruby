@@ -16,6 +16,10 @@ module Connectors
       @connectors[name] = klass
     end
 
+    def registered?(name)
+      @connectors.has_key?(name)
+    end
+
     def connector_class(name)
       @connectors[name]
     end
