@@ -7,7 +7,7 @@ require 'connectors/gitlab/custom_client'
 describe Connectors::GitLab::Connector do
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { Connectors::GitLab::DEFAULT_BASE_URL }
-  let(:app_config) do 
+  let(:app_config) do
     Hashie::Mash.new(
       :elasticsearch => { :api_key => 'hello-world', :hosts => 'localhost:9200' },
       :gitlab => { :base_url => base_url, :api_token => 'some_token' }
