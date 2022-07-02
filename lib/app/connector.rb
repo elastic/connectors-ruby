@@ -17,8 +17,6 @@ module App
     QUERY_SIZE = 20
     POLL_IDLING = 60
 
-    @client = Utility::EsClient.new
-
     class << self
 
       def start!
