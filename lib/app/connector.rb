@@ -38,7 +38,7 @@ module App
               :sync_now => true
             }
           }
-          @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+          Utility::EsClient.instance.update(:index => connector['_index'], :id => connector['_id'], :body => body)
           Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector['_id']}")
         end
         start! unless running?
@@ -53,7 +53,7 @@ module App
             :scheduling => { :enabled => true },
             :index_name => index_name
           }
-          response = @client.index(:index => CONNECTORS_INDEX, :body => body)
+          response = Utility::EsClient.instance.index(:index => CONNECTORS_INDEX, :body => body)
           id = response['_id']
           Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
         end
@@ -61,7 +61,7 @@ module App
       end
 
       def current_connector_config
-        response = @client.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
+        response = Utility::EsClient.instance.get(:index => CONNECTORS_INDEX, :id => App::Config['connector_package_id'], :ignore => 404)
         response['found'] ? response : nil
       end
 
@@ -104,7 +104,7 @@ module App
       end
 
       def ensure_index_exists(index_name)
-        @client.indices.create(index: index_name) unless @client.indices.exists?(index: index_name)
+        Utility::EsClient.instance.indices.create(index: index_name) unless Utility::EsClient.instance.indices.exists?(index: index_name)
       end
 
       def update_config_if_necessary(connector)
@@ -116,7 +116,7 @@ module App
             }
           }
           if connector.present?
-            @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+            Utility::EsClient.instance.update(:index => connector['_index'], :id => connector['_id'], :body => body)
           else
             raise "Connector config not found: #{connector}"
           end
@@ -153,7 +153,7 @@ module App
           }
         }
 
-        @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        Utility::EsClient.instance.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         Utility::Logger.info("Successfully claimed job for connector #{connector['_id']}")
       end
 
@@ -166,7 +166,7 @@ module App
           }
         }
 
-        @client.update(:index => connector['_index'], :id => connector['_id'], :body => body)
+        Utility::EsClient.instance.update(:index => connector['_index'], :id => connector['_id'], :body => body)
         if error
           Utility::Logger.info("Failed to sync for connector #{connector['_id']} with error #{error}")
         else
