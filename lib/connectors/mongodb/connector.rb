@@ -53,7 +53,7 @@ module Connectors
 
         custom_client.documents(:listingsAndReviews).each do |document|
           doc = document.with_indifferent_access
-          doc[:id] = doc['_id']
+          doc[:id] = doc.delete('_id')
           @sink.ingest(doc)
         end
       rescue StandardError => e
