@@ -25,10 +25,6 @@ module Connectors
           :base_url => configurable_fields[:base_url][:value],
           :api_token => configurable_fields[:api_token][:value]
         )
-        @sink = Utility::Sink::CombinedSink.new(
-          [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(App::Config[:connector_package_id])]
-        )
       end
 
       def display_name
@@ -48,8 +44,15 @@ module Connectors
         }
       end
 
-      def sync_content(_params = {})
-        extract_projects
+      def sync_content(connector)
+        sink = Utility::Sink::CombinedSink.new(
+          [
+            Utility::Sink::ConsoleSink.new,
+            Utility::Sink::ElasticSink.new(connector['_source']['index_name'])
+          ]
+        )
+
+        extract_projects(sink)
       end
 
       def deleted(_params = {})
@@ -70,13 +73,13 @@ module Connectors
         Connectors::GitLab::CustomClient::ClientError
       end
 
-      def extract_projects
+      def extract_projects(sink)
         next_page_link = nil
         loop do
           next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
             projects = projects_chunk.map { |p| Connectors::GitLab::Adapter.to_es_document(:project, p) }
-            @sink.ingest_multiple(projects)
-            extract_project_files(projects_chunk)
+            sink.ingest_multiple(projects)
+            extract_project_files(sink, projects_chunk)
           end
           break unless next_page_link.present?
         end
@@ -86,7 +89,7 @@ module Connectors
         raise e
       end
 
-      def extract_project_files(projects_chunk)
+      def extract_project_files(sink, projects_chunk)
         projects_chunk.each_with_index do |project, idx|
           project = project.with_indifferent_access
           files = @extractor.fetch_project_repository_files(project[:id])
@@ -94,7 +97,7 @@ module Connectors
           puts("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
           files = files.map { |file| Connectors::GitLab::Adapter.to_es_document(:file, file) }
           project[:files] = files
-          @sink.ingest_multiple(files)
+          sink.ingest_multiple(files)
         end
       rescue StandardError => e
         puts(e.message)

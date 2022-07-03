@@ -12,28 +12,57 @@ require 'concurrent-ruby'
 require 'utility/es_client'
 
 module Utility
-  module Sink
-    module_function
-
-    def print_delim
-      puts '----------------------------------------------------'
+  class Batcher
+    def initialize(sink, flush_threshold = 50)
+      # threshold and size are the same now, but it's good to separate the concepts:
+      # threshold is "when to start flushing", while "size" is the size of the batch
+      # that will be sent to the sink
+      @flush_threshold = flush_threshold
+      @flush_size = flush_threshold
+      @sink = sink
+      @queue = []
     end
 
-    def print_header(header)
-      print_delim
-      puts header
-      print_delim
+    def add(element)
+      @queue << element
+
+      flush if ready_to_flush?
     end
 
-    class ConsoleSink
-      include Sink
-
-      def ingest(_document)
-        print_header 'Got a single document:'
+    def add_multiple(elements)
+      elements.each do |element|
+        @queue << element
       end
 
-      def flush(size: nil)
-        print_header 'Flushing'
+      flush if ready_to_flush?
+    end
+
+    def flush
+      until @queue.empty?
+        items_to_ingest = @queue.pop(@flush_size)
+        @sink.ingest_multiple(items_to_ingest)
+      end
+    end
+
+    private
+
+    def ready_to_flush?
+      @queue.size >= @flush_threshold
+    end
+  end
+
+  module Sink
+    class Base
+      def with_batching(batch_size = 50)
+        batcher = Utility::Batcher.new(self, batch_size)
+        yield(batcher)
+        batcher.flush
+      end
+    end
+
+    class ConsoleSink < Sink::Base
+      def ingest(_document)
+        print_header 'Got a single document:'
       end
 
       def ingest_multiple(documents)
@@ -45,84 +74,63 @@ module Utility
         print_header 'Deleting some stuff too'
         puts ids
       end
-    end
-
-    class ElasticSink
-      include Sink
-
-      attr_accessor :index_name
-
-      def initialize(_index_name, flush_threshold = 50, flush_interval = 1.minutes)
-        super()
-        @client = Utility::EsClient
-        @queue = []
-        @flush_threshold = flush_threshold
-        @last_flush = Time.now
-        @flush_task = Concurrent::TimerTask.new(execution_interval: flush_interval) do
-          flush(:size => @queue.size, :force => true)
-        end
-        @flush_task.execute
-      end
-
-      def ingest(document)
-        return if document.blank?
-
-        @queue << document
-
-        flush if ready_to_flush?
-      end
-
-      def flush(size: nil, force: false)
-        flush_size = size || @flush_threshold
-        if force || ready_to_flush?
-          data_to_flush = @queue.pop(flush_size)
-          send_data(data_to_flush)
-        end
-      end
-
-      def ingest_multiple(documents)
-        documents.each { |doc| @queue << doc unless doc.blank? }
-        flush if ready_to_flush?
-      end
-
-      def delete_multiple(ids)
-        print_header 'Deleting some stuff too'
-        puts ids
-        print_delim
-      end
 
       private
 
-      def send_data(documents)
+      def print_delim
+        puts '----------------------------------------------------'
+      end
+
+      def print_header(header)
+        print_delim
+        puts header
+        print_delim
+      end
+    end
+
+    class ElasticSink < Sink::Base
+      class IndexingFailedError < StandardError; end
+
+      attr_accessor :index_name
+
+      def initialize(index_name, flush_threshold = 50)
+        @client = Utility::EsClient.new
+        @queue = []
+        @flush_threshold = flush_threshold
+        @index_name = index_name
+      end
+
+      def ingest(document)
+        ingest_multiple([document])
+      end
+
+      def ingest_multiple(documents)
         return if documents.empty?
 
         bulk_request = documents.map do |document|
           { index: { _index: index_name, _id: document[:id], data: document } }
         end
 
-        puts "Request: #{bulk_request.to_json}"
-        @client.bulk(body: bulk_request)
-        puts "SENT #{documents.size} documents to the index"
+        response = @client.bulk(body: bulk_request)
+
+        if response['errors']
+          first_error = response['items'][0]
+          raise IndexingFailedError.new("Failed to index documents into Elasticsearch.\nFirst error in response is: #{first_error.to_json}")
+        end
       end
 
-      def ready_to_flush?
-        @queue.size >= @flush_threshold
+      def delete_multiple(_ids)
+        raise 'not yet implemented'
       end
     end
 
-    class CombinedSink
-      include Sink
-
+    class CombinedSink < Sink::Base
       def initialize(sinks = [])
         @sinks = sinks
       end
 
       def ingest(document)
         @sinks.each { |sink| sink.ingest(document) }
-      end
-
-      def flush(size: nil)
-        @sinks.each { |sink| sink.flush(size: size) }
       end
 
       def ingest_multiple(documents)
