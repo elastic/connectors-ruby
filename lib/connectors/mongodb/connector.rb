@@ -51,11 +51,14 @@ module Connectors
 
         custom_client = Connectors::MongoDB::CustomClient.new(hostname, database)
 
-        custom_client.documents(:listingsAndReviews).each do |document|
-          doc = document.with_indifferent_access
-          doc[:id] = doc.delete('_id')
-          @sink.ingest(doc)
+        @sink.with_batching do |batcher|
+          custom_client.documents(:listingsAndReviews).each do |document|
+            doc = document.with_indifferent_access
+            doc[:id] = doc.delete('_id')
+            batcher.add(doc)
+          end
         end
+
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Failed to sync #{display_name}")
         error = e.message
