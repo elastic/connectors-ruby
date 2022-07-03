@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'utility/sink'
 require 'utility'
 
 module Connectors
@@ -35,28 +36,25 @@ module Connectors
         true
       end
 
-      def sync(connector)
+      def initialize
+        super()
+      end
+
+      def sync_content(connector)
         puts "connector is: #{connector}"
+        @sink = Utility::Sink::ElasticSink.new(connector['_source']['index_name'])
         error = nil
-        custom_client = Connectors::MongoDB::CustomClient.new('127.0.0.1:27021', 'sample_airbnb')
+        config = connector['_source']['configuration']
 
-        documents = custom_client.documents(:listingsAndReviews).to_a
+        hostname = config['mongodb_hostname']['value']
+        database = config['mongodb_database']['value']
 
-        puts "Found #{documents.size} documents!"
+        custom_client = Connectors::MongoDB::CustomClient.new(hostname, database)
 
-        batch = documents.shift(50)
-
-        while batch && batch.size > 0
-          bulk_requests = []
-          
-          batch.each do |doc|
-            bulk_requests << { index: { _index: connector['_source']['index_name'] } }
-            bulk_requests << { _id: doc[:id], data: doc }
-          end
-
-          Utility::EsClient.bulk(:body => bulk_requests)
-
-          batch = documents.shift(50)
+        custom_client.documents(:listingsAndReviews).each do |document|
+          doc = document.with_indifferent_access
+          doc[:id] = doc['_id']
+          @sink.ingest(doc)
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Failed to sync #{display_name}")
