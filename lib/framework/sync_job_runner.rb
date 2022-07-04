@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 
-require 'concurrent-ruby'
+require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
 

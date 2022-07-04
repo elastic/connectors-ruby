@@ -11,6 +11,17 @@ require 'app/config'
 
 module Utility
   class EsClient < Elasticsearch::Client
+    class IndexingFailedError < StandardError
+      def initialize(message, error = nil)
+        super(message)
+        @cause = error
+      end
+
+      def cause
+        @cause
+      end
+    end
+
     def initialize
       super(connection_configs)
     end
@@ -26,6 +37,20 @@ module Utility
         raise 'Either elasticsearch.cloud_id or elasticsearch.hosts should be configured.'
       end
       configs
+    end
+
+    def bulk(arguments = {})
+      raise_if_necessary(super(arguments))
+    end
+
+    private
+
+    def raise_if_necessary(response)
+      if response['errors']
+        first_error = response['items'][0]
+        raise IndexingFailedError.new("Failed to index documents into Elasticsearch.\nFirst error in response is: #{first_error.to_json}")
+      end
+      response
     end
   end
 end

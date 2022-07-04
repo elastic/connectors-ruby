@@ -53,10 +53,10 @@ module Utility
 
       attr_accessor :index_name
 
-      def initialize(_index_name, flush_threshold = 50, flush_interval = 10.seconds)
+      def initialize(index_name, flush_threshold = 50, flush_interval = 10.seconds)
         super()
-        @client = Utility::EsClient
-        @index_name = _index_name
+        @client = Utility::EsClient.new
+        @index_name = index_name
         @queue = []
         @flush_threshold = flush_threshold
         @last_flush = Time.now
@@ -99,12 +99,16 @@ module Utility
         return if documents.empty?
 
         bulk_request = documents.map do |document|
-          { index: { _index: index_name, _id: document[:id], data: document } }
+          { :index => { :_index => index_name, :_id => document[:id], :data => document } }
         end
-
-        Utility::Logger.info "Request: #{bulk_request.to_json}"
-        @client.bulk(:index => index_name, :body => bulk_request)
+        # Utility::Logger.info "Request: #{bulk_request.to_json}"
+        @client.bulk(:body => bulk_request)
         Utility::Logger.info "SENT #{documents.size} documents to the index #{index_name}"
+      rescue StandardError => e
+        Utility::Logger.error_with_backtrace(
+          message: "Failed to send data to the index #{index_name}: #{e.message}",
+          exception: e
+        )
       end
 
       def ready_to_flush?
