@@ -9,9 +9,11 @@
 $LOAD_PATH << '../'
 
 require 'app/config'
-require 'connectors/base/registry'
+require 'connectors/registry'
 require 'app/menu'
 require 'app/connector'
+require 'utility/logger'
+require 'framework/elastic_connector_actions'
 
 module App
   ENV['TZ'] = 'UTC'
@@ -22,15 +24,16 @@ module App
     INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
 
     @commands = [
-      { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :sync, :hint => 'start synchronization' },
+      { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :status, :hint => 'check the status of a third-party service' },
       { :command => :exit, :hint => 'end the program' }
     ]
 
     def start_sync
       puts 'Initiating synchronization...'
-      App::Connector.force_sync
+      Framework::ElasticConnectorActions.force_sync(App::Config[:connector_package_id])
+      App::Connector.start!
     end
 
     def show_status
@@ -54,9 +57,8 @@ module App
         puts "Index name #{index_name} contains symbols that aren't allowed!"
         return
       end
-      id = App::Connector.create_connector(index_name)
-      App::Config[:connector_package_id] = id
-      puts "Connector with ID #{id} registered successfully. Please store the ID in config file and restart the program."
+      created_id = App::Connector.create_connector(index_name, force: true)
+      App::Config[:connector_package_id] = created_id
       true
     end
 
@@ -101,13 +103,12 @@ module App
       case command
       when :sync
         start_sync
-        wait_for_keypress('Sync finished!')
       when :status
         show_status
         wait_for_keypress('Status checked!')
       when :register
         if register_connector
-          wait_for_keypress('Registered connector in Elasticsearch!')
+          wait_for_keypress('Please store connector ID in config file and restart the program.')
         else
           wait_for_keypress('Registration canceled!')
         end
@@ -122,8 +123,7 @@ module App
   rescue Interrupt
     exit_normally
   rescue StandardError => e
-    puts e.message
-    puts e.backtrace
+    Utility::Logger.error_with_backtrace(exception: e)
     exit(false)
   end
 end

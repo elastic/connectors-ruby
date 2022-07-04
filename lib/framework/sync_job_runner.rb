@@ -20,7 +20,7 @@ module Framework
   class SyncJobRunner
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @connector_instance = Connectors::REGISTRY.connector_class(@connector_settings.service_type).new
+      @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type)
     end
 
     def execute

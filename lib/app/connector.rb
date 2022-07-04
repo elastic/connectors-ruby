@@ -25,13 +25,12 @@ module App
         start_polling_jobs
       end
 
-      def create_connector(index_name)
+      def create_connector(index_name, force: false)
         connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
-        if connector_settings.nil?
-          Framework::ElasticConnectorActions.create_connector(index_name)
-
-          connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
+        if connector_settings.nil? || force
+          created_id = Framework::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
+          connector_settings = Framework::ConnectorSettings.fetch(created_id)
         end
 
         connector_settings.id
