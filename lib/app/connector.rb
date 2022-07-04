@@ -16,8 +16,6 @@ module App
   module Connector
     POLL_IDLING = (App::Config['idle_timeout'] || 60).to_i
 
-    @client = Utility::EsClient.new
-
     class << self
       def start!
         pre_flight_check
