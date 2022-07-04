@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'active_support/core_ext/object/blank'
+
 module Framework
   class ConnectorSettings
     def self.fetch(connector_package_id)
