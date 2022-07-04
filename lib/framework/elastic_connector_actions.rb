@@ -13,11 +13,6 @@ module Framework
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
 
-    def self.ensure_index_exists(index_name)
-      Utility::Logger.info("Ensuring that index #{index_name} exists")
-      client.indices.create(index: index_name) unless client.indices.exists?(index: index_name)
-    end
-
     def self.force_sync(connector_package_id)
       body = {
         :doc => {

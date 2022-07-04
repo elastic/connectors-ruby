@@ -29,7 +29,6 @@ module App
         connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
         if connector_settings.nil?
-          Framework::ElasticConnectorActions.ensure_index_exists(Framework::ElasticConnectorActions::CONNECTORS_INDEX)
           Framework::ElasticConnectorActions.create_connector(index_name)
 
           connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
