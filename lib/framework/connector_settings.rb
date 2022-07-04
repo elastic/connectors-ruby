@@ -23,7 +23,7 @@ module Framework
     end
 
     def configuration
-      @elasticsearch_response[:_source][:configuration]
+      self[:configuration]
     end
 
     def scheduling_settings
