@@ -23,15 +23,27 @@ module Connectors
     def connector_class(name)
       @connectors[name]
     end
+
+    def connector(name, params = nil)
+      klass = connector_class(name)
+      if klass.present?
+        return params.nil? ? klass.new : klass.new(params)
+      end
+      raise "Connector #{name} is not yet registered. You need to register it before use"
+    end
+
+    def registered_connectors
+      @connectors.keys.sort
+    end
   end
 
   REGISTRY = Factory.new
 
-  require_relative 'stub_connector/connector'
+  require_relative './stub_connector/connector'
   REGISTRY.register(Connectors::StubConnector::Connector::SERVICE_TYPE, Connectors::StubConnector::Connector)
 
   # loading plugins (might replace this with a directory scan and conventions on names)
-  require_relative 'gitlab/connector'
+  require_relative './gitlab/connector'
 
   REGISTRY.register(Connectors::GitLab::Connector::SERVICE_TYPE, Connectors::GitLab::Connector)
 end
