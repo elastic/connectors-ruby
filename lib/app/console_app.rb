@@ -30,7 +30,7 @@ module App
 
     def start_sync
       puts 'Initiating synchronization...'
-      App::Connector.initiate_sync
+      App::Connector.force_sync
     end
 
     def show_status
@@ -54,7 +54,7 @@ module App
         puts "Index name #{index_name} contains symbols that aren't allowed!"
         return
       end
-      id = App::Connector.register_connector(index_name)
+      id = App::Connector.create_connector(index_name)
       App::Config[:connector_package_id] = id
       puts "Connector with ID #{id} registered successfully. Please store the ID in config file and restart the program."
       true
