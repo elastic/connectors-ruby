@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'connectors_utility'
-  s.version     = '0.1'
+  s.version     = '0.2'
   s.homepage    = 'https://github.com/elastic/connectors'
   s.summary     = 'Gem containing shared Connector Services libraries'
   s.description = ''
