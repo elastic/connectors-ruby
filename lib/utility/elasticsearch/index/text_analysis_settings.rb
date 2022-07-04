@@ -171,7 +171,7 @@ module Utility
           @analysis_settings = icu_settings(analysis_icu)
         end
 
-        def to_hash
+        def to_h
           {
             analysis: {
               analyzer: analyzer_definitions,
@@ -248,7 +248,7 @@ module Utility
         def analyzer_definitions
           definitions = {}
 
-          definitions['i_prefix'] = {
+          definitions[:i_prefix] = {
             tokenizer: analysis_settings[:tokenizer_name],
             filter: [
               *analysis_settings[:folding_filters],
@@ -256,14 +256,14 @@ module Utility
             ]
           }
 
-          definitions['q_prefix'] = {
+          definitions[:q_prefix] = {
             tokenizer: analysis_settings[:tokenizer_name],
             filter: [
               *analysis_settings[:folding_filters]
             ]
           }
 
-          definitions['iq_text_base'] = {
+          definitions[:iq_text_base] = {
             tokenizer: analysis_settings[:tokenizer_name],
             filter: [
               *analysis_settings[:folding_filters],
@@ -271,7 +271,7 @@ module Utility
             ]
           }
 
-          definitions['iq_text_stem'] = {
+          definitions[:iq_text_stem] = {
             tokenizer: analysis_settings[:tokenizer_name],
             filter: [
               *prepended_filters,
@@ -282,7 +282,7 @@ module Utility
             ]
           }
 
-          definitions['iq_text_delimiter'] = {
+          definitions[:iq_text_delimiter] = {
             tokenizer: 'whitespace',
             filter: [
               *prepended_filters,
@@ -294,7 +294,7 @@ module Utility
             ]
           }
 
-          definitions['i_text_bigram'] = {
+          definitions[:i_text_bigram] = {
             tokenizer: analysis_settings[:tokenizer_name],
             filter: [
               *analysis_settings[:folding_filters],
@@ -304,7 +304,7 @@ module Utility
             ]
           }
 
-          definitions['q_text_bigram'] = {
+          definitions[:q_text_bigram] = {
             tokenizer: analysis_settings[:tokenizer_name],
             filter: [
               *analysis_settings[:folding_filters],
