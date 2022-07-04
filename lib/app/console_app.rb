@@ -89,7 +89,7 @@ module App
     end
 
     def registry
-      @registry = Connectors::Base::REGISTRY
+      @registry = Connectors::REGISTRY
     end
 
     puts 'Hello Connectors 3.0!'
