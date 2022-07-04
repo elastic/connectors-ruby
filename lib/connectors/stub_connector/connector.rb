@@ -36,7 +36,7 @@ module Connectors
         body = [
           { index: { _index: connector['_source']['index_name'], _id: 1, data: { name: 'stub connector' } } }
         ]
-        Utility::EsClient.instance.bulk(:body => body)
+        Utility::EsClient.client.bulk(:body => body)
       rescue StandardError => e
         Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
         error = e.message

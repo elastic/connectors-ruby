@@ -12,16 +12,12 @@ require 'app/config'
 module Utility
   class EsClient
     class << self
-
-      def instance
-        client
+      def client
+        @client ||= Elasticsearch::Client.new(connection_configs)
       end
 
       private
 
-      def client
-        @client ||= Elasticsearch::Client.new(connection_configs)
-      end
 
       def connection_configs
         es_config = App::Config['elasticsearch']

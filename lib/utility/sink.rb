@@ -54,7 +54,7 @@ module Utility
 
       def initialize(_index_name, flush_threshold = 50, flush_interval = 1.minutes)
         super()
-        @client = Utility::EsClient.instance
+        @client = Utility::EsClient.client
         @queue = []
         @flush_threshold = flush_threshold
         @last_flush = Time.now
