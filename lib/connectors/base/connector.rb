@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'bson'
+require 'utility/logger'
 
 module Connectors
   module Base
@@ -15,8 +16,7 @@ module Connectors
         error = nil
         sync_content(connector)
       rescue StandardError => e
-        Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
-        Utility.Logger.error(e.backtrace&.join("\n"))
+        Utility::Logger.error_with_backtrace(message: "Error happened when syncing #{display_name}", exception: e)
         error = e.message
       ensure
         yield error
@@ -26,7 +26,7 @@ module Connectors
         error = nil
         sync(connector)
       rescue StandardError => e
-        Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
+        Utility::Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
         error = e.message
       ensure
         yield error

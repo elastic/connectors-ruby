@@ -14,6 +14,7 @@ require 'app/menu'
 require 'app/connector'
 require 'utility/logger'
 require 'framework/elastic_connector_actions'
+require 'framework/connector_settings'
 
 module App
   ENV['TZ'] = 'UTC'
@@ -32,7 +33,11 @@ module App
 
     def start_sync
       puts 'Initiating synchronization...'
-      Framework::ElasticConnectorActions.force_sync(App::Config[:connector_package_id])
+      # these might not have been created without kibana
+      connector_id = App::Config[:connector_package_id]
+      config_settings = Framework::ConnectorSettings.fetch(connector_id)
+      Framework::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      Framework::ElasticConnectorActions.force_sync(connector_id)
       App::Connector.start!
     end
 
@@ -57,6 +62,9 @@ module App
         puts "Index name #{index_name} contains symbols that aren't allowed!"
         return
       end
+      # these might not have been created without kibana
+      Framework::ElasticConnectorActions.ensure_config_index_exists
+      # create the connector
       created_id = App::Connector.create_connector(index_name, force: true)
       App::Config[:connector_package_id] = created_id
       true

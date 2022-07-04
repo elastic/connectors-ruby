@@ -55,8 +55,9 @@ module Framework
     end
 
     def should_sync?
-      return false unless @connector_settings.scheduling_settings[:enabled]
+      # sync_now should have priority over cron
       return true if @connector_settings[:sync_now]
+      return false unless @connector_settings.scheduling_settings[:enabled]
 
       last_synced = @connector_settings.scheduling_settings[:last_synced]
       return true if last_synced.nil? || last_synced.empty? # first run

@@ -20,7 +20,6 @@ module Framework
           :sync_now => true
         }
       }
-
       client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
       Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_package_id}")
     end
@@ -85,6 +84,16 @@ module Framework
 
     def self.client
       @client ||= Utility::EsClient.new
+    end
+
+    # should only be used in CLI
+    def self.ensure_index_exists(index_name)
+      client.indices.create(:index => index_name) unless client.indices.exists?(:index => index_name)
+    end
+
+    # should only be used in CLI
+    def self.ensure_config_index_exists
+      ensure_index_exists(CONNECTORS_INDEX)
     end
   end
 end

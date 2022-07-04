@@ -22,8 +22,8 @@ module Framework
       @elasticsearch_response[:_id]
     end
 
-    def [](index)
-      @elasticsearch_response[:_source][index]
+    def [](property_name)
+      @elasticsearch_response[:_source][property_name]
     end
 
     def service_type
