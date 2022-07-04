@@ -82,7 +82,7 @@ module Framework
     end
 
     def self.client
-      @client ||= Utility::EsClient.new
+      Utility::EsClient.client
     end
   end
 end

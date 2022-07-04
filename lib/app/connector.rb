@@ -15,8 +15,6 @@ module App
   module Connector
     POLL_IDLING = 60
 
-    @client = Utility::EsClient.new
-
     class << self
       def start!
         pre_flight_check
