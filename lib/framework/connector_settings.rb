@@ -24,12 +24,16 @@ module Framework
       @elasticsearch_response[:_source][index]
     end
 
+    def service_type
+      self[:service_type]
+    end
+
     def configuration
       self[:configuration]
     end
 
     def scheduling_settings
-      self['scheduling']
+      self[:scheduling]
     end
 
     def configuration_initialized?

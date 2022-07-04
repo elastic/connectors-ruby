@@ -57,15 +57,9 @@ module App
       end
 
       def create_sync_job_runner
-        connector_instance = Connectors::REGISTRY.connector_class(App::Config['service_type']).new
         connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
-        connector_settings.update_configuration(connector_instance.configurable_fields) unless connector_settings.configuration_initialized?
-
-        Framework::SyncJobRunner.new(
-          connector_settings: connector_settings,
-          connector_instance: connector_instance
-        )
+        Framework::SyncJobRunner.new(connector_settings)
       end
     end
   end

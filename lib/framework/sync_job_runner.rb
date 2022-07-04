@@ -8,6 +8,7 @@
 
 require 'concurrent'
 require 'cron_parser'
+require 'connectors/registry'
 
 module Framework
   class IncompatibleConfigurableFieldsError < StandardError
@@ -17,9 +18,9 @@ module Framework
   end
 
   class SyncJobRunner
-    def initialize(connector_settings:, connector_instance:)
+    def initialize(connector_settings)
       @connector_settings = connector_settings
-      @connector_instance = connector_instance
+      @connector_instance = Connectors::REGISTRY.connector_class(@connector_settings.service_type).new
     end
 
     def execute
