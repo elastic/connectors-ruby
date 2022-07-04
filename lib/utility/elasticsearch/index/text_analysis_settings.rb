@@ -197,10 +197,6 @@ module Utility
           NON_ICU_ANALYSIS_SETTINGS
         end
 
-        def language_name
-          LANGUAGE_DATA[language_code][:name]
-        end
-
         def stemmer_name
           LANGUAGE_DATA[language_code][:stemmer]
         end
