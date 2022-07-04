@@ -22,7 +22,7 @@ module App
         Utility::Logger.info('Starting to process jobs...')
         start_polling_jobs
       end
-      
+
       def create_connector(index_name)
         connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
@@ -31,6 +31,9 @@ module App
 
           connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
         end
+
+        connector_settings.id
+      end
 
       private
 
