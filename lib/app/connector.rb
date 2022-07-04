@@ -10,10 +10,11 @@ require 'active_support'
 require 'connectors'
 require 'framework'
 require 'utility'
+require 'app/config'
 
 module App
   module Connector
-    POLL_IDLING = 60
+    POLL_IDLING = (App::Config['idle_timeout'] || 60).to_i
 
     @client = Utility::EsClient.new
 
@@ -45,13 +46,14 @@ module App
       def start_polling_jobs
         loop do
           job_runner = create_sync_job_runner
-
           job_runner.execute
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
         ensure
-          Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
-          sleep(POLL_IDLING)
+          if POLL_IDLING > 0
+            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
+            sleep(POLL_IDLING)
+          end
         end
       end
 

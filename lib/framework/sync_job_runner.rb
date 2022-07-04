@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 
-require 'concurrent'
+require 'concurrent-ruby'
 require 'cron_parser'
 require 'connectors/registry'
 
@@ -56,14 +56,18 @@ module Framework
 
     def should_sync?
       # sync_now should have priority over cron
-      return true if @connector_settings[:sync_now]
-      return false unless @connector_settings.scheduling_settings[:enabled]
+      return true if @connector_settings[:sync_now] == true
+      scheduling_settings = @connector_settings.scheduling_settings
+      return false unless scheduling_settings[:enabled] == true
 
-      last_synced = @connector_settings.scheduling_settings[:last_synced]
+      last_synced = scheduling_settings[:last_synced]
       return true if last_synced.nil? || last_synced.empty? # first run
 
       last_synced = Time.parse(last_synced) # TODO: unhandled exception
       sync_interval = scheduling_settings['interval']
+      if sync_interval.nil? || sync_interval.empty? # no interval configured
+        return false
+      end
       cron_parser = cron_parser(sync_interval)
       cron_parser && cron_parser.next(last_synced) < Time.now
     end
