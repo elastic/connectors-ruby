@@ -22,7 +22,17 @@ module Connectors
         yield error
       end
 
-      def sync_content(connector); end
+      def sync_content(connector)
+        error = nil
+        sync(connector)
+      rescue StandardError => e
+        Utility.Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
+        error = e.message
+      ensure
+        yield error
+      end
+
+      def sync(connector); end
 
       def extractor(params)
         content_source_id = params.fetch(:content_source_id)

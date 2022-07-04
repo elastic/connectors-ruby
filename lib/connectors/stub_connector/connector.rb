@@ -31,7 +31,7 @@ module Connectors
         true
       end
 
-      def sync_content(connector)
+      def sync(connector)
         body = [
           { index: { _index: connector['index_name'], _id: 1, data: { name: 'stub connector' } } }
         ]

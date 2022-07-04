@@ -48,7 +48,7 @@ module Connectors
         }
       end
 
-      def sync_content(connector = {})
+      def sync(connector = {})
         extract_projects
       end
 
@@ -79,9 +79,6 @@ module Connectors
             extract_project_files(projects_chunk)
           end
           break unless next_page_link.present?
-        end
-        if block_given?
-          yield
         end
       rescue StandardError => e
         puts(e.message)
