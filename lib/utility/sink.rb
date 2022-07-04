@@ -30,11 +30,7 @@ module Utility
     end
 
     def add_multiple(elements)
-      elements.each do |element|
-        @queue << element
-      end
-
-      flush if ready_to_flush?
+      elements.each { |element| add(element) }
     end
 
     def flush
