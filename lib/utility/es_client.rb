@@ -18,7 +18,6 @@ module Utility
 
       private
 
-
       def connection_configs
         es_config = App::Config['elasticsearch']
         configs = { :api_key => es_config['api_key'] }
