@@ -87,7 +87,7 @@ module Framework
     end
 
     def self.client
-      Utility::EsClient.client
+      @client ||= Utility::EsClient.new
     end
 
     # should only be used in CLI
