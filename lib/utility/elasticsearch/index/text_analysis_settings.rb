@@ -12,6 +12,8 @@ module Utility
   module Elasticsearch
     module Index
       class TextAnalysisSettings
+        class UnsupportedLanguageCode < StandardError; end
+
         DEFAULT_LANGUAGE = :en
         FRONT_NGRAM_MAX_GRAM = 12
         LANGUAGE_DATA_FILE_PATH = File.join(File.dirname(__FILE__), 'language_data.yml')
@@ -63,6 +65,9 @@ module Utility
 
         def initialize(language_code: DEFAULT_LANGUAGE, analysis_icu: false)
           @language_code = language_code.to_sym
+
+          raise UnsupportedLanguageCode unless language_data[language_code]
+
           @analysis_icu = analysis_icu
           @analysis_settings = icu_settings(analysis_icu)
         end
@@ -114,11 +119,11 @@ module Utility
         end
 
         def stem_filter_name
-          "#{language_code}-stem-filter"
+          "#{language_code}-stem-filter".to_sym
         end
 
         def stop_words_filter_name
-          "#{language_code}-stop-words-filter"
+          "#{language_code}-stop-words-filter".to_sym
         end
 
         def filter_definitions

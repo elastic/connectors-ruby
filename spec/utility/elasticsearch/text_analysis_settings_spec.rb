@@ -5,7 +5,7 @@
 # or more contributor license agreements. Licensed under the Elastic License;
 # you may not use this file except in compliance with the Elastic License.
 #
-
+require 'pry'
 require 'spec_helper'
 require 'utility/elasticsearch/index/text_analysis_settings'
 
@@ -28,7 +28,7 @@ describe Utility::Elasticsearch::Index::TextAnalysisSettings do
       let(:analysis_icu) { false }
 
       it { is_expected.to be_kind_of(Hash) }
-      it { is_expected.to include(:analysis => include(:analyzer => hash_including(*expected_analyzer_keys))) }
+      it { is_expected.to include(analysis: include(:analyzer => hash_including(*expected_analyzer_keys))) }
 
       it 'has non icu folding filters' do
         expect(filters).to include(*non_icu_filters)
@@ -43,7 +43,7 @@ describe Utility::Elasticsearch::Index::TextAnalysisSettings do
       let(:analysis_icu) { true }
 
       it { is_expected.to be_kind_of(Hash) }
-      it { is_expected.to include(:analysis => include(:analyzer => hash_including(*expected_analyzer_keys))) }
+      it { is_expected.to include(analysis: include(analyzer: hash_including(*expected_analyzer_keys))) }
 
       it 'does not have non icu folding filters' do
         expect(filters).not_to include(*non_icu_filters)
@@ -52,6 +52,27 @@ describe Utility::Elasticsearch::Index::TextAnalysisSettings do
       it 'has icu folding filters' do
         expect(filters).to include(*icu_filters)
       end
+    end
+
+    context 'when the language_code is not supported' do
+      let(:language_code) { :unsupported_language_code }
+      let(:analysis_icu) { false }
+
+      it 'raises an error' do
+        expect { described_class.new(language_code: language_code, analysis_icu: analysis_icu) }.to raise_error(
+          Utility::Elasticsearch::Index::TextAnalysisSettings::UnsupportedLanguageCode
+        )
+      end
+    end
+
+    context 'when the language_code is supported' do
+      let(:language_code) { :fr }
+      let(:analysis_icu) { false }
+      let(:subject) { described_class.new(language_code: language_code, analysis_icu: analysis_icu).to_h[:analysis][:filter] }
+
+      it { is_expected.to have_key(:"#{language_code}-stem-filter") }
+      it { is_expected.to have_key(:"#{language_code}-stop-words-filter") }
+      it { is_expected.to have_key(:"#{language_code}-elision") }
     end
   end
 end
