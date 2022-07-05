@@ -65,9 +65,20 @@ module App
       # these might not have been created without kibana
       Framework::ElasticConnectorActions.ensure_connectors_index_exists
       # create the connector
-      created_id = App::Connector.create_connector(index_name, force: true)
+      created_id = create_connector(index_name, force: true)
       App::Config[:connector_package_id] = created_id
       true
+    end
+
+    def create_connector(index_name, force: false)
+      connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
+
+      if connector_settings.nil? || force
+        created_id = Framework::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
+        connector_settings = Framework::ConnectorSettings.fetch(created_id)
+      end
+
+      connector_settings.id
     end
 
     def read_command
