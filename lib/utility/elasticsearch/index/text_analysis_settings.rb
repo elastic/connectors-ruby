@@ -5,7 +5,6 @@
 #
 
 # frozen_string_literal: true
-# analyzer = Swiftype::TextAnalysis.new(:ru).to_hash
 
 module Utility
   module Elasticsearch
