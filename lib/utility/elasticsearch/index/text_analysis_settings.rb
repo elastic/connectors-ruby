@@ -6,118 +6,15 @@
 
 # frozen_string_literal: true
 
+require 'yaml'
+
 module Utility
   module Elasticsearch
     module Index
       class TextAnalysisSettings
-        UNIVERSAL = 'Universal'
-
-        LANGUAGE_DATA = {
-          da: {
-            name: 'Danish',
-            stemmer: 'danish',
-            stop_words: '_danish_'
-          },
-          de: {
-            name: 'German',
-            stemmer: 'light_german',
-            stop_words: '_german_'
-          },
-          en: {
-            name: 'English',
-            stemmer: 'light_english',
-            stop_words: '_english_'
-          },
-          es: {
-            name: 'Spanish',
-            stemmer: 'light_spanish',
-            stop_words: '_spanish_'
-          },
-          fr: {
-            name: 'French',
-            stemmer: 'light_french',
-            stop_words: '_french_',
-            custom_filter_definitions: {
-              'fr-elision' => {
-                'type' => 'elision',
-                'articles' => %w[l m t qu n s j d c jusqu quoiqu lorsqu puisqu],
-                'articles_case' => true
-              }
-            },
-            prepended_filters: [
-              'fr-elision'
-            ]
-          },
-          it: {
-            name: 'Italian',
-            stemmer: 'light_italian',
-            stop_words: '_italian_',
-            custom_filter_definitions: {
-              'it-elision' => {
-                'type' => 'elision',
-                'articles' => %w[c l all dall dell nell sull coll pell gl agl dagl degl negl sugl un m t s v d],
-                'articles_case' => true
-              }
-            },
-            prepended_filters: [
-              'it-elision'
-            ]
-          },
-          ja: {
-            name: 'Japanese',
-            stemmer: 'light_english',
-            stop_words: '_english_',
-            postpended_filters: [
-              'cjk_bigram'
-            ]
-          },
-          ko: {
-            name: 'Korean',
-            stemmer: 'light_english',
-            stop_words: '_english_',
-            postpended_filters: [
-              'cjk_bigram'
-            ]
-          },
-          nl: {
-            name: 'Dutch',
-            stemmer: 'dutch',
-            stop_words: '_dutch_'
-          },
-          pt: {
-            name: 'Portuguese',
-            stemmer: 'light_portuguese',
-            stop_words: '_portuguese_'
-          },
-          'pt-br': {
-            name: 'Portuguese (Brazil)',
-            stemmer: 'brazilian',
-            stop_words: '_brazilian_'
-          },
-          ru: {
-            name: 'Russian',
-            stemmer: 'russian',
-            stop_words: '_russian_'
-          },
-          th: {
-            name: 'Thai',
-            stemmer: 'light_english',
-            stop_words: '_thai_'
-          },
-          zh: {
-            name: 'Chinese',
-            stemmer: 'light_english',
-            stop_words: '_english_',
-            postpended_filters: [
-              'cjk_bigram'
-            ]
-          }
-        }.freeze
-
         DEFAULT_LANGUAGE = :en
-
-        SUPPORTED_LANGUAGE_CODES = LANGUAGE_DATA.keys.map(&:to_s)
         FRONT_NGRAM_MAX_GRAM = 12
+        LANGUAGE_DATA_FILE_PATH = File.join(File.dirname(__FILE__), 'language_data.yml')
 
         GENERIC_FILTERS = {
           front_ngram: {
@@ -165,7 +62,7 @@ module Utility
         }.freeze
 
         def initialize(language_code: DEFAULT_LANGUAGE, analysis_icu: false)
-          @language_code = language_code
+          @language_code = language_code.to_sym
           @analysis_icu = analysis_icu
           @analysis_settings = icu_settings(analysis_icu)
         end
@@ -197,23 +94,23 @@ module Utility
         end
 
         def stemmer_name
-          LANGUAGE_DATA[language_code][:stemmer]
+          language_data[language_code][:stemmer]
         end
 
         def stop_words_name_or_list
-          LANGUAGE_DATA[language_code][:stop_words]
+          language_data[language_code][:stop_words]
         end
 
         def custom_filter_definitions
-          LANGUAGE_DATA[language_code][:custom_filter_definitions] || {}
+          language_data[language_code][:custom_filter_definitions] || {}
         end
 
         def prepended_filters
-          LANGUAGE_DATA[language_code][:prepended_filters] || []
+          language_data[language_code][:prepended_filters] || []
         end
 
         def postpended_filters
-          LANGUAGE_DATA[language_code][:postpended_filters] || []
+          language_data[language_code][:postpended_filters] || []
         end
 
         def stem_filter_name
@@ -310,6 +207,13 @@ module Utility
           }
 
           definitions
+        end
+
+        def language_data
+          @language_data ||= YAML.safe_load(
+            File.read(LANGUAGE_DATA_FILE_PATH),
+            symbolize_names: true
+          )
         end
       end
     end
