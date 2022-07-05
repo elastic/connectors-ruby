@@ -66,6 +66,7 @@ module Framework
       last_synced = Time.parse(last_synced) # TODO: unhandled exception
       sync_interval = scheduling_settings['interval']
       if sync_interval.nil? || sync_interval.empty? # no interval configured
+        Utility::Logger.debug("No sync interval configured for connector #{@connector_settings['_id']}")
         return false
       end
       cron_parser = cron_parser(sync_interval)

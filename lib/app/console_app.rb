@@ -52,7 +52,7 @@ module App
     def register_connector
       id = App::Config['connector_package_id']
       if id.present?
-        puts "You already have registered a connector with ID: #{id}. Registering a new connector will not use the existing one."
+        puts "You already have registered a connector with ID: #{id}. Registering a new connector will overwrite the existing one."
         puts 'Are you sure you want to continue? (y/n)'
         return false unless gets.chomp.casecmp('y')&.zero?
       end
