@@ -60,7 +60,7 @@ module App
       index_name = gets.chomp.strip
       unless INDEX_NAME_REGEXP.match?(index_name)
         puts "Index name #{index_name} contains symbols that aren't allowed!"
-        return
+        return false
       end
       # these might not have been created without kibana
       Framework::ElasticConnectorActions.ensure_config_index_exists
