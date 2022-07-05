@@ -26,22 +26,6 @@ module Utility
             dynamic: true,
             dynamic_templates: [
               {
-                permissions: {
-                  match: '_*_permissions',
-                  mapping: {
-                    type: 'keyword'
-                  }
-                }
-              },
-              {
-                thumbnails: {
-                  match: '_thumbnail_*',
-                  mapping: {
-                    type: 'binary'
-                  }
-                }
-              },
-              {
                 data: {
                   match_mapping_type: 'string',
                   mapping: {
