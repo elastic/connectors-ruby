@@ -17,9 +17,7 @@ module Utility
         @cause = error
       end
 
-      def cause
-        @cause
-      end
+      attr_reader :cause
     end
 
     def initialize
@@ -34,7 +32,7 @@ module Utility
       elsif es_config['hosts']
         configs[:hosts] = es_config['hosts']
       else
-        raise 'Either elasitcsearch.cloud_id or elasticsearch.hosts should be configured.'
+        raise 'Either elasticsearch.cloud_id or elasticsearch.hosts should be configured.'
       end
       configs
     end

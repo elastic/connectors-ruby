@@ -46,7 +46,7 @@ module Connectors
         }
       end
 
-      def sync(connector = {})
+      def sync(_connector = {})
         config = Framework::ConnectorSettings.fetch(App::Config[:connector_package_id])
         @sink = Utility::Sink::CombinedSink.new(
           [Utility::Sink::ConsoleSink.new,

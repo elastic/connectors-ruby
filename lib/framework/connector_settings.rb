@@ -25,7 +25,7 @@ module Framework
     end
 
     def [](property_name)
-      # TODO handle not found
+      # TODO: handle not found
       @elasticsearch_response[:_source][property_name]
     end
 
