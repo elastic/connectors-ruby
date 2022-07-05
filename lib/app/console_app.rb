@@ -63,7 +63,7 @@ module App
         return false
       end
       # these might not have been created without kibana
-      Framework::ElasticConnectorActions.ensure_config_index_exists
+      Framework::ElasticConnectorActions.ensure_connectors_index_exists
       # create the connector
       created_id = App::Connector.create_connector(index_name, force: true)
       App::Config[:connector_package_id] = created_id
