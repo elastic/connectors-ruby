@@ -18,9 +18,9 @@ module Framework
   end
 
   class SyncJobRunner
-    def initialize(connector_settings)
+    def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
-      @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type)
+      @connector_instance = Connectors::REGISTRY.connector(service_type)
     end
 
     def execute
