@@ -11,3 +11,5 @@ elasticsearch:
 connector_package_id: "CHANGEME"
 service_type: "CHANGEME"
 log_level: info
+
+idle_timeout: 60

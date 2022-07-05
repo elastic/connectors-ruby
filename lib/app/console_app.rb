@@ -9,9 +9,12 @@
 $LOAD_PATH << '../'
 
 require 'app/config'
-require 'connectors/base/registry'
+require 'connectors/registry'
 require 'app/menu'
 require 'app/connector'
+require 'utility/logger'
+require 'framework/elastic_connector_actions'
+require 'framework/connector_settings'
 
 module App
   ENV['TZ'] = 'UTC'
@@ -22,15 +25,20 @@ module App
     INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
 
     @commands = [
-      { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :sync, :hint => 'start synchronization' },
+      { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :status, :hint => 'check the status of a third-party service' },
       { :command => :exit, :hint => 'end the program' }
     ]
 
     def start_sync
       puts 'Initiating synchronization...'
-      App::Connector.force_sync
+      # these might not have been created without kibana
+      connector_id = App::Config[:connector_package_id]
+      config_settings = Framework::ConnectorSettings.fetch(connector_id)
+      Framework::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      Framework::ElasticConnectorActions.force_sync(connector_id)
+      App::Connector.start!
     end
 
     def show_status
@@ -44,19 +52,33 @@ module App
     def register_connector
       id = App::Config['connector_package_id']
       if id.present?
-        puts "You already have registered a connector with ID: #{id}. Registering a new connector will not use the existing one."
+        puts "You already have registered a connector with ID: #{id}. Registering a new connector will overwrite the existing one."
         puts 'Are you sure you want to continue? (y/n)'
-        return unless gets.chomp.casecmp('y').zero?
+        return false unless gets.chomp.casecmp('y')&.zero?
       end
       puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
       index_name = gets.chomp.strip
       unless INDEX_NAME_REGEXP.match?(index_name)
         puts "Index name #{index_name} contains symbols that aren't allowed!"
-        return
+        return false
       end
-      id = App::Connector.create_connector(index_name)
-      App::Config[:connector_package_id] = id
-      puts "Connector with ID #{id} registered successfully. Please store the ID in config file and restart the program."
+      # these might not have been created without kibana
+      Framework::ElasticConnectorActions.ensure_connectors_index_exists
+      # create the connector
+      created_id = create_connector(index_name, force: true)
+      App::Config[:connector_package_id] = created_id
+      true
+    end
+
+    def create_connector(index_name, force: false)
+      connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
+
+      if connector_settings.nil? || force
+        created_id = Framework::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
+        connector_settings = Framework::ConnectorSettings.fetch(created_id)
+      end
+
+      connector_settings.id
     end
 
     def read_command
@@ -74,13 +96,13 @@ module App
       gets
     end
 
-    def select_connector(params = {})
+    def select_connector
       puts 'Provided connectors:'
 
       menu = App::Menu.new('Please select the connector:', registry.registered_connectors)
       connector_name = menu.select_command
 
-      registry.connector(connector_name, params)
+      registry.connector(connector_name)
     end
 
     def exit_normally(message = 'Kthxbye!... ¯\_(ツ)_/¯')
@@ -100,13 +122,15 @@ module App
       case command
       when :sync
         start_sync
-        wait_for_keypress('Sync finished!')
       when :status
         show_status
         wait_for_keypress('Status checked!')
       when :register
-        register_connector
-        wait_for_keypress('Registered connector in Elasticsearch!')
+        if register_connector
+          wait_for_keypress('Please store connector ID in config file and restart the program.')
+        else
+          wait_for_keypress('Registration canceled!')
+        end
       when :exit
         exit_normally
       else
@@ -118,8 +142,7 @@ module App
   rescue Interrupt
     exit_normally
   rescue StandardError => e
-    puts e.message
-    puts e.backtrace
+    Utility::Logger.error_with_backtrace(exception: e)
     exit(false)
   end
 end

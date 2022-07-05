@@ -28,6 +28,16 @@ module Utility
           logger.public_send(level, message)
         end
       end
+
+      def error_with_backtrace(message: nil, exception: nil, prog_name: nil)
+        logger.error(prog_name) { message } if message
+        logger.error exception.message if exception
+        logger.error exception.backtrace.join("\n") if exception
+      end
+
+      def new_line
+        logger.info("\n")
+      end
     end
   end
 end

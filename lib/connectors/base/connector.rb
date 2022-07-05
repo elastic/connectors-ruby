@@ -7,11 +7,32 @@
 # frozen_string_literal: true
 
 require 'bson'
+require 'utility/logger'
 
 module Connectors
   module Base
     class Connector
-      def sync_content(connector); end
+      def sync_content_and_yield(connector)
+        error = nil
+        sync_content(connector)
+      rescue StandardError => e
+        Utility::Logger.error_with_backtrace(message: "Error happened when syncing #{display_name}", exception: e)
+        error = e.message
+      ensure
+        yield error
+      end
+
+      def sync_content(connector)
+        error = nil
+        sync(connector)
+      rescue StandardError => e
+        Utility::Logger.error("Error happened when syncing #{display_name}. Error: #{e.message}")
+        error = e.message
+      ensure
+        yield error
+      end
+
+      def sync(connector); end
 
       def extractor(params)
         content_source_id = params.fetch(:content_source_id)

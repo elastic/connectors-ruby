@@ -20,23 +20,24 @@ module Framework
           :sync_now => true
         }
       }
-
       client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
       Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_package_id}")
     end
 
-    def self.create_connector(ingestion_index_name)
+    def self.create_connector(index_name, service_type)
       body = {
         :scheduling => { :enabled => true },
-        :index_name => ingestion_index_name
+        :index_name => index_name,
+        :service_type => service_type
       }
       response = client.index(:index => CONNECTORS_INDEX, :body => body)
-      id = response['_id']
-      Utility::Logger.info("Successfully registered connector #{index_name} with ID #{id}")
+      created_id = response['_id']
+      Utility::Logger.info("Successfully registered connector #{index_name} with ID #{created_id}")
+      created_id
     end
 
     def self.load_connector_settings(connector_package_id)
-      client.get(:index => CONNECTORS_INDEX, :id => connector_package_id).with_indifferent_access
+      client.get(:index => CONNECTORS_INDEX, :id => connector_package_id, :ignore => 404).with_indifferent_access
     end
 
     def self.update_connector_configuration(connector_package_id, configuration)
@@ -82,7 +83,17 @@ module Framework
     end
 
     def self.client
-      Utility::EsClient.client
+      @client ||= Utility::EsClient.new
+    end
+
+    # should only be used in CLI
+    def self.ensure_index_exists(index_name)
+      client.indices.create(:index => index_name) unless client.indices.exists?(:index => index_name)
+    end
+
+    # should only be used in CLI
+    def self.ensure_connectors_index_exists
+      ensure_index_exists(CONNECTORS_INDEX)
     end
   end
 end

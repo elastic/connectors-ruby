@@ -7,12 +7,16 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/object/blank'
+require 'utility/logger'
 
 module Framework
   class ConnectorSettings
     def self.fetch(connector_package_id)
       es_response = ElasticConnectorActions.load_connector_settings(connector_package_id)
-
+      if es_response['found'] == false
+        Utility::Logger.debug("Connector settings not found for connector_package_id: #{connector_package_id}")
+        return nil
+      end
       new(es_response)
     end
 
@@ -20,8 +24,9 @@ module Framework
       @elasticsearch_response[:_id]
     end
 
-    def [](index)
-      @elasticsearch_response[:_source][index]
+    def [](property_name)
+      # TODO: handle not found
+      @elasticsearch_response[:_source][property_name]
     end
 
     def service_type

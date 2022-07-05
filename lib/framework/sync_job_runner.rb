@@ -20,7 +20,7 @@ module Framework
   class SyncJobRunner
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @connector_instance = Connectors::REGISTRY.connector_class(@connector_settings.service_type).new
+      @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type)
     end
 
     def execute
@@ -55,14 +55,20 @@ module Framework
     end
 
     def should_sync?
-      return false unless @connector_settings.scheduling_settings[:enabled]
-      return true if @connector_settings[:sync_now]
+      # sync_now should have priority over cron
+      return true if @connector_settings[:sync_now] == true
+      scheduling_settings = @connector_settings.scheduling_settings
+      return false unless scheduling_settings[:enabled] == true
 
-      last_synced = @connector_settings.scheduling_settings[:last_synced]
+      last_synced = @connector_settings[:last_synced]
       return true if last_synced.nil? || last_synced.empty? # first run
 
       last_synced = Time.parse(last_synced) # TODO: unhandled exception
       sync_interval = scheduling_settings['interval']
+      if sync_interval.nil? || sync_interval.empty? # no interval configured
+        Utility::Logger.debug("No sync interval configured for connector #{@connector_settings['_id']}")
+        return false
+      end
       cron_parser = cron_parser(sync_interval)
       cron_parser && cron_parser.next(last_synced) < Time.now
     end
