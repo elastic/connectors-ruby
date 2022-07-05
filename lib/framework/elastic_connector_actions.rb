@@ -56,9 +56,7 @@ module Framework
         :doc => {
           :sync_now => false,
           :sync_status => Connectors::SyncStatus::IN_PROGRESS,
-          :scheduling => {
-            :last_synced => Time.now # TODO not sure if this is the right place to set this
-          }
+          :last_synced => Time.now
         }
       }
 
@@ -71,9 +69,7 @@ module Framework
         :doc => {
           :sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
           :sync_error => error,
-          :scheduling => {
-            :last_synced => Time.now
-          }
+          :last_synced => Time.now
         }
       }
 

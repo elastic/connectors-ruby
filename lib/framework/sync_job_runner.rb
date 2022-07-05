@@ -60,7 +60,7 @@ module Framework
       scheduling_settings = @connector_settings.scheduling_settings
       return false unless scheduling_settings[:enabled] == true
 
-      last_synced = scheduling_settings[:last_synced]
+      last_synced = @connector_settings[:last_synced]
       return true if last_synced.nil? || last_synced.empty? # first run
 
       last_synced = Time.parse(last_synced) # TODO: unhandled exception
