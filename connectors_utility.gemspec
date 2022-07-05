@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'connectors_utility'
-  s.version     = '0.2'
+  s.version     = '0.5'
   s.homepage    = 'https://github.com/elastic/connectors'
   s.summary     = 'Gem containing shared Connector Services libraries'
   s.description = ''
@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
                     lib/connectors_utility.rb
                     lib/utility/elasticsearch/index/text_analysis_settings.rb
                     lib/utility/elasticsearch/index/mappings.rb
+                    lib/utility/elasticsearch/index/language_data.yml
                   ]
   s.license     = 'Elastic-2.0'
 end
