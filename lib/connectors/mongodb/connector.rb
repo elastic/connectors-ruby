@@ -20,16 +20,14 @@ module Connectors
       end
 
       def configurable_fields
-        [
-          {
-            'key' => 'mongodb_hostname',
-            'label' => 'MongoDB server hostname'
-          },
-          {
-            'key' => 'mongodb_database',
-            'label' => 'MongoDB Database'
-          }
-        ]
+        {
+           'mongodb_hostname' => {
+             'label' => 'MongoDB server hostname'
+           },
+           'mongodb_database' => {
+             'label' => 'MongoDB Database'
+           }
+        }
       end
 
       def health_check(_params)
@@ -42,9 +40,9 @@ module Connectors
 
       def sync_content(connector)
         puts "connector is: #{connector}"
-        @sink = Utility::Sink::ElasticSink.new(connector['_source']['index_name'])
+        @sink = Utility::Sink::ElasticSink.new(connector['index_name'])
         error = nil
-        config = connector['_source']['configuration']
+        config = connector['configuration']
 
         hostname = config['mongodb_hostname']['value']
         database = config['mongodb_database']['value']
