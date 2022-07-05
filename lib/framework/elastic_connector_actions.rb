@@ -96,7 +96,7 @@ module Framework
     end
 
     # should only be used in CLI
-    def self.ensure_config_index_exists
+    def self.ensure_connectors_index_exists
       ensure_index_exists(CONNECTORS_INDEX)
     end
   end
