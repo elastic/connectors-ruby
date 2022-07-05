@@ -30,6 +30,12 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     required(:connector_package_id).value(:string)
     required(:service_type).value(:string)
     required(:log_level).value(:string)
+
+    optional(:idle_timeout).value(:integer)
+
+    optional(:gitlab).hash do
+      required(:api_token).value(:string)
+    end
   end
 end
 
