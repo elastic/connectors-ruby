@@ -36,7 +36,7 @@ module Core
       error = nil
 
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
-      ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
       @connector_instance.yield_documents(@connector_settings) do |document|
         @sink.ingest(document)
@@ -44,7 +44,7 @@ module Core
     rescue StandardError => e
       error = e
     ensure
-      ElasticConnectorActions.complete_sync(@connector_settings.id, error)
+      ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, error)
     end
 
     private
