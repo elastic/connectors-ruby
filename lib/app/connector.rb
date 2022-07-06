@@ -47,7 +47,7 @@ module App
       def create_sync_job_runner
         connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
-        Core::SyncJobRunner.new(connector_settings)
+        Core::SyncJobRunner.new(connector_settings, App::Config['service_type'])
       end
     end
   end

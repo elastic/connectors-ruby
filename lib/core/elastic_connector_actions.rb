@@ -41,14 +41,17 @@ module Core
     end
 
     def self.update_connector_configuration(connector_package_id, configuration)
-      body = {
-        :doc => {
-          :configuration => configuration
-        }
-      }
+      update_connector_data(connector_package_id, :configuration, configuration)
+    end
 
-      client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
-      Utility::Logger.info("Successfully updated configuration for connector #{connector_package_id}")
+    def self.enable_connector_scheduling(connector_package_id, cron_expression)
+      payload = { :enabled => true, :interval => cron_expression }
+      update_connector_data(connector_package_id, :scheduling, payload)
+    end
+
+    def self.disable_connector_scheduling(connector_package_id)
+      payload = { :enabled => false }
+      update_connector_data(connector_package_id, :scheduling, payload)
     end
 
     def self.claim_job(connector_package_id)
@@ -94,6 +97,16 @@ module Core
     # should only be used in CLI
     def self.ensure_connectors_index_exists
       ensure_index_exists(CONNECTORS_INDEX)
+    end
+
+    def self.update_connector_data(connector_package_id, field_name, value)
+      body = {
+        :doc => {
+          field_name => value
+        }
+      }
+      client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+      Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_package_id}")
     end
   end
 end
