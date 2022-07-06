@@ -8,11 +8,11 @@
 
 $LOAD_PATH << '../'
 
-require 'app/connector'
+require 'app/worker'
 
 module App
   # Set UTC as the timezone
   ENV['TZ'] = 'UTC'
 
-  App::Connector.start!
+  App::Worker.start!
 end

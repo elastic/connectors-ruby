@@ -13,7 +13,7 @@ require 'utility'
 require 'app/config'
 
 module App
-  module Connector
+  module Worker
     POLL_IDLING = (App::Config['idle_timeout'] || 60).to_i
 
     class << self
