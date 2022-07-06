@@ -81,6 +81,10 @@ module Connectors
       def yield_project_files(projects_chunk)
         projects_chunk.each_with_index do |project, idx|
           project = project.with_indifferent_access
+
+          chunk_size = projects_chunk.size
+          Utility::Logger.info("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
+
           files = @extractor.fetch_project_repository_files(project[:id])
 
           yield files
