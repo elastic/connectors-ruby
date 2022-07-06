@@ -9,7 +9,7 @@
 require 'active_support/core_ext/object/blank'
 require 'utility/logger'
 
-module Framework
+module Core
   class ConnectorSettings
     def self.fetch(connector_package_id)
       es_response = ElasticConnectorActions.load_connector_settings(connector_package_id)

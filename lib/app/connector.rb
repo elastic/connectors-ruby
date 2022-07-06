@@ -8,7 +8,7 @@
 
 require 'active_support'
 require 'connectors'
-require 'framework'
+require 'core'
 require 'utility'
 require 'app/config'
 
@@ -45,9 +45,9 @@ module App
       end
 
       def create_sync_job_runner
-        connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
+        connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
-        Framework::SyncJobRunner.new(connector_settings)
+        Core::SyncJobRunner.new(connector_settings)
       end
     end
   end
