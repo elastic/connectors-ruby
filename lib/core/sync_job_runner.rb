@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'app/config'
 require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
