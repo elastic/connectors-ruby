@@ -28,6 +28,8 @@ module App
 
       def pre_flight_check
         raise "#{App::Config['service_type']} is not a supported connector" unless Connectors::REGISTRY.registered?(App::Config['service_type'])
+        Framework::ElasticConnectorActions.ensure_connectors_index_exists
+        Framework::ElasticConnectorActions.ensure_job_index_exists
       end
 
       def start_polling_jobs

@@ -12,49 +12,52 @@ require 'utility'
 module Core
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
+    JOB_INDEX = '.elastic-connectors-sync-logs'
 
-    def self.force_sync(connector_package_id)
-      body = {
-        :doc => {
-          :scheduling => { :enabled => true },
-          :sync_now => true
+    class << self
+
+      def force_sync(connector_package_id)
+        body = {
+          :doc => {
+            :scheduling => { :enabled => true },
+            :sync_now => true
+          }
         }
-      }
-      client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
-      Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_package_id}")
-    end
+        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_package_id}")
+      end
 
-    def self.create_connector(index_name, service_type)
-      body = {
-        :scheduling => { :enabled => true },
-        :index_name => index_name,
-        :service_type => service_type
-      }
-      response = client.index(:index => CONNECTORS_INDEX, :body => body)
-      created_id = response['_id']
-      Utility::Logger.info("Successfully registered connector #{index_name} with ID #{created_id}")
-      created_id
-    end
+      def create_connector(index_name, service_type)
+        body = {
+          :scheduling => { :enabled => true },
+          :index_name => index_name,
+          :service_type => service_type
+        }
+        response = client.index(:index => CONNECTORS_INDEX, :body => body)
+        created_id = response['_id']
+        Utility::Logger.info("Successfully registered connector #{index_name} with ID #{created_id}")
+        created_id
+      end
 
-    def self.load_connector_settings(connector_package_id)
-      client.get(:index => CONNECTORS_INDEX, :id => connector_package_id, :ignore => 404).with_indifferent_access
-    end
+      def load_connector_settings(connector_package_id)
+        client.get(:index => CONNECTORS_INDEX, :id => connector_package_id, :ignore => 404).with_indifferent_access
+      end
 
-    def self.update_connector_configuration(connector_package_id, configuration)
+    def update_connector_configuration(connector_package_id, configuration)
       update_connector_field(connector_package_id, :configuration, configuration)
     end
 
-    def self.enable_connector_scheduling(connector_package_id, cron_expression)
+    def enable_connector_scheduling(connector_package_id, cron_expression)
       payload = { :enabled => true, :interval => cron_expression }
       update_connector_field(connector_package_id, :scheduling, payload)
     end
 
-    def self.disable_connector_scheduling(connector_package_id)
+    def disable_connector_scheduling(connector_package_id)
       payload = { :enabled => false }
       update_connector_field(connector_package_id, :scheduling, payload)
     end
 
-    def self.claim_job(connector_package_id)
+    def claim_job(connector_package_id)
       body = {
         :doc => {
           :sync_now => false,
@@ -67,7 +70,7 @@ module Core
       Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
     end
 
-    def self.complete_sync(connector_package_id, error)
+    def complete_sync(connector_package_id, error)
       body = {
         :doc => {
           :last_sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
@@ -85,21 +88,62 @@ module Core
       end
     end
 
-    def self.client
-      @client ||= Utility::EsClient.new
+      def client
+        @client ||= Utility::EsClient.new
+      end
+
+      # should only be used in CLI
+      def ensure_index_exists(index_name, body = {})
+        client.indices.create(:index => index_name, :body => body) unless client.indices.exists?(:index => index_name)
+      end
+
+      # should only be used in CLI
+      def ensure_connectors_index_exists
+        body = {
+          :mappings => {
+            :properties => {
+              :api_key_id => { :type => :keyword },
+              :configuration => { :type => :object },
+              :error => { :type => :text },
+              :index_name => { :type => :keyword },
+              :last_seen => { :type => :date },
+              :last_synced => { :type => :date },
+              :scheduling => {
+                :properties => {
+                  :enabled => { :type => :boolean },
+                  :interval => { :type => :text }
+                }
+              },
+              :service_type => { :type => :keyword },
+              :status => { :type => :keyword },
+              :sync_error => { :type => :text },
+              :sync_now => { :type => :boolean },
+              :sync_status => { :type => :keyword }
+            }
+          }
+        }
+        ensure_index_exists(CONNECTORS_INDEX, body)
+      end
+
+      def ensure_job_index_exists
+        body = {
+          :mappings => {
+            :properties => {
+              :connector_id => { :type => :keyword },
+              :status => { :type => :keyword },
+              :error => { :type => :text },
+              :indexed_document_count => { :type => :integer },
+              :deleted_document_count => { :type => :integer },
+              :created_at => { :type => :date },
+              :completed_at => { :type => :date }
+            }
+          }
+        }
+        ensure_index_exists(JOB_INDEX, body)
+      end
     end
 
-    # should only be used in CLI
-    def self.ensure_index_exists(index_name)
-      client.indices.create(:index => index_name) unless client.indices.exists?(:index => index_name)
-    end
-
-    # should only be used in CLI
-    def self.ensure_connectors_index_exists
-      ensure_index_exists(CONNECTORS_INDEX)
-    end
-
-    def self.update_connector_field(connector_package_id, field_name, value)
+    def update_connector_field(connector_package_id, field_name, value)
       body = {
         :doc => {
           field_name => value
