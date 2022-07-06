@@ -12,7 +12,7 @@ require 'utility'
 module Core
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
-    JOB_INDEX = '.elastic-connectors-sync-logs'
+    JOB_INDEX = '.elastic-connectors-sync-jobs'
 
     class << self
 
@@ -97,6 +97,11 @@ module Core
         client.indices.create(:index => index_name, :body => body) unless client.indices.exists?(:index => index_name)
       end
 
+      def ensure_alias_exists(alias_name, body = {})
+        body[:aliases] = { alias_name => { :is_write_index => true } }
+        client.indices.create(:index => "#{alias_name}_v1", :body => body) unless client.indices.exists?(:index => alias_name)
+      end
+
       # should only be used in CLI
       def ensure_connectors_index_exists
         body = {
@@ -122,7 +127,7 @@ module Core
             }
           }
         }
-        ensure_index_exists(CONNECTORS_INDEX, body)
+        ensure_alias_exists(CONNECTORS_INDEX, body)
       end
 
       def ensure_job_index_exists
@@ -139,7 +144,7 @@ module Core
             }
           }
         }
-        ensure_index_exists(JOB_INDEX, body)
+        ensure_alias_exists(JOB_INDEX, body)
       end
     end
 
