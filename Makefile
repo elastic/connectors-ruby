@@ -41,8 +41,7 @@ tag:
 
 build_gem:
 	mkdir -p .gems
-	gem build connectors.gemspec
-	gem build connectors_stubs.gemspec
+	gem build connectors_utilities.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
 	echo "DO NOT FORGET TO UPDATE ENT-SEARCH"
