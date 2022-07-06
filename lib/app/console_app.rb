@@ -89,7 +89,7 @@ module App
       CronParser.new(cronline)
       true
     rescue ArgumentError
-      return false
+      false
     end
 
     def enable_scheduling
@@ -108,14 +108,14 @@ module App
       return unless connector_registered?
       id = App::Config['connector_package_id']
       puts "Are you sure you want to disable scheduling for connector #{id}? (y/n)"
-      return unless gets.chomp.strip.downcase == 'y'
+      return unless gets.chomp.strip.casecmp('y').zero?
       Core::ElasticConnectorActions.disable_connector_scheduling(id)
     end
 
     def connector_registered?(warn_if_not: true)
       result = App::Config['connector_package_id'].present?
       if warn_if_not && !result
-        "You have no connector ID yet. Register a new connector before continuing."
+        'You have no connector ID yet. Register a new connector before continuing.'
       end
       result
     end
