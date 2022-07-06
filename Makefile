@@ -44,14 +44,16 @@ tag:
 
 build_gem:
 	mkdir -p .gems
-	gem build connectors_sdk.gemspec
-	gem build connectors_stubs.gemspec
+	bundle _$(shell cat .bundler-version)_ exec gem build connectors_sdk.gemspec
+	bundle _$(shell cat .bundler-version)_ exec gem build connectors_stubs.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
 	echo "DO NOT FORGET TO UPDATE ENT-SEARCH"
 
 push_gem:
-	gem push .gems/*
+	gem push .gems/connectors_sdk*
+	gem push .gems/connectors_stubs*
+    
 
 install:
 	rbenv install -s
