@@ -31,9 +31,9 @@ module Connectors
         true
       end
 
-      def sync(connector)
-        super
-        @sink.ingest({ :id => 1, :name => 'stub connector' })
+      def yield_documents(connector)
+        data = { name: 'stub connector' }
+        yield data
       end
     end
   end

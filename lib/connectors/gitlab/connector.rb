@@ -22,10 +22,9 @@ module Connectors
       def initialize
         super()
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => configurable_fields[:base_url][:value],
-          :api_token => configurable_fields[:api_token][:value]
+          :base_url => configurable_fields['base_url'][:value],
+          :api_token => configurable_fields['api_token'][:value]
         )
-        @sink = nil # later set in sync
       end
 
       def display_name
@@ -34,11 +33,11 @@ module Connectors
 
       def configurable_fields
         @configurable_fields ||= {
-          :api_token => {
+          'api_token' => {
             :label => 'API Token',
             :value => App::Config[:gitlab][:api_token]
           },
-          :base_url => {
+          'base_url' => {
             :label => 'Base URL',
             :value => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
