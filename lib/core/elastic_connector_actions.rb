@@ -9,7 +9,7 @@
 require 'active_support/core_ext/hash'
 require 'utility'
 
-module Framework
+module Core
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
 

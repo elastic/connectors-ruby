@@ -13,8 +13,8 @@ require 'connectors/registry'
 require 'app/menu'
 require 'app/connector'
 require 'utility/logger'
-require 'framework/elastic_connector_actions'
-require 'framework/connector_settings'
+require 'core/elastic_connector_actions'
+require 'core/connector_settings'
 
 module App
   ENV['TZ'] = 'UTC'
@@ -35,9 +35,9 @@ module App
       puts 'Initiating synchronization...'
       # these might not have been created without kibana
       connector_id = App::Config[:connector_package_id]
-      config_settings = Framework::ConnectorSettings.fetch(connector_id)
-      Framework::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
-      Framework::ElasticConnectorActions.force_sync(connector_id)
+      config_settings = Core::ConnectorSettings.fetch(connector_id)
+      Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      Core::ElasticConnectorActions.force_sync(connector_id)
       App::Connector.start!
     end
 
@@ -63,7 +63,7 @@ module App
         return false
       end
       # these might not have been created without kibana
-      Framework::ElasticConnectorActions.ensure_connectors_index_exists
+      Core::ElasticConnectorActions.ensure_connectors_index_exists
       # create the connector
       created_id = create_connector(index_name, force: true)
       App::Config[:connector_package_id] = created_id
@@ -71,11 +71,11 @@ module App
     end
 
     def create_connector(index_name, force: false)
-      connector_settings = Framework::ConnectorSettings.fetch(App::Config['connector_package_id'])
+      connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
 
       if connector_settings.nil? || force
-        created_id = Framework::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
-        connector_settings = Framework::ConnectorSettings.fetch(created_id)
+        created_id = Core::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
+        connector_settings = Core::ConnectorSettings.fetch(created_id)
       end
 
       connector_settings.id

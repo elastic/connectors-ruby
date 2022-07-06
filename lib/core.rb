@@ -6,6 +6,6 @@
 
 # frozen_string_literal: true
 
-require 'framework/connector_settings'
-require 'framework/sync_job_runner'
-require 'framework/elastic_connector_actions'
+require 'core/connector_settings'
+require 'core/sync_job_runner'
+require 'core/elastic_connector_actions'

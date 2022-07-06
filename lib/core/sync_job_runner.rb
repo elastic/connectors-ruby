@@ -10,7 +10,7 @@ require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
 
-module Framework
+module Core
   class IncompatibleConfigurableFieldsError < StandardError
     def initialize(expected_fields, actual_fields)
       super("Connector expected configurable fields: #{expected_fields}, actual stored fields: #{actual_fields}")
