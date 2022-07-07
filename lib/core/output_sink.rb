@@ -10,4 +10,4 @@ require 'core/output_sink/elastic_sink'
 require 'core/output_sink/console_sink'
 require 'core/output_sink/combined_sink'
 
-module Core::OutputSink ; end
+module Core::OutputSink; end

@@ -30,6 +30,7 @@ module Core::OutputSink
     end
 
     private
+
     def print_delim
       Utility::Logger.info '----------------------------------------------------'
     end

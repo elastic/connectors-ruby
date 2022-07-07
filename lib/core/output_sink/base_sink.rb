@@ -7,21 +7,21 @@
 # frozen_string_literal: true
 
 module Core
-  module OutputSink 
+  module OutputSink
     class BaseSink
-      def ingest(document)
+      def ingest(_document)
         raise 'not implemented'
       end
 
-      def ingest_multiple(documents)
+      def ingest_multiple(_documents)
         raise 'not implemented'
       end
 
-      def delete_multiple(ids)
+      def delete_multiple(_ids)
         raise 'not implemented'
       end
 
-      def flush(size: nil)
+      def flush(_size: nil)
         raise 'not implemented'
       end
     end
