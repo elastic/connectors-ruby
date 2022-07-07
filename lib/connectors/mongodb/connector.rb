@@ -13,7 +13,7 @@ require 'utility'
 module Connectors
   module MongoDB
     class Connector < Connectors::Base::Connector
-      SERVICE_TYPE = 'mongodb'
+      SERVICE_TYPE = 'mongo'
 
       def display_name
         'MongoDB'
@@ -21,17 +21,20 @@ module Connectors
 
       def configurable_fields
         {
-           'mongodb_hostname' => {
-             'label' => 'MongoDB server hostname'
+           'host' => {
+             'label' => 'MongoDB Server Hostname'
            },
-           'mongodb_database' => {
+           'database' => {
              'label' => 'MongoDB Database'
+           },
+           'collection' => {
+             'label' => 'MongoDB Collection'
            }
         }
       end
 
       def health_check(_params)
-        true
+        Connectors::MongoDB::CustomClient.new(hostname, database)
       end
 
       def initialize
@@ -39,30 +42,27 @@ module Connectors
       end
 
       def sync_content(connector)
-        puts "connector is: #{connector}"
+        puts "connector is: #{connector.to_json}"
         @sink = Utility::Sink::ElasticSink.new(connector['index_name'])
-        error = nil
-        config = connector['configuration']
 
-        hostname = config['mongodb_hostname']['value']
-        database = config['mongodb_database']['value']
+        config = connector.configuration
+
+        hostname = config['host']['value']
+        database = config['database']['value']
+        collection = config['collection']['value']
 
         custom_client = Connectors::MongoDB::CustomClient.new(hostname, database)
 
-        @sink.with_batching do |batcher|
-          custom_client.documents(:listingsAndReviews).each do |document|
-            doc = document.with_indifferent_access
-            doc[:id] = doc.delete('_id')
-            batcher.add(doc)
-          end
+        custom_client.documents(collection).each do |document|
+          doc = document.with_indifferent_access
+          @sink.ingest(doc)
         end
-
-      rescue StandardError => e
-        Utility::ExceptionTracking.log_exception(e, "Failed to sync #{display_name}")
-        error = e.message
-      ensure
-        yield error
       end
+    end
+
+
+    def transform!(mongodb_document)
+      mongodb_document[:id] = mongodb_document.delete('_id')
     end
   end
 end
