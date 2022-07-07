@@ -31,7 +31,7 @@ module Connectors
         true
       end
 
-      def yield_documents(connector)
+      def yield_documents(_connector)
         data = { name: 'stub connector' }
         yield data
       end

@@ -68,12 +68,10 @@ module Connectors
         Connectors::GitLab::CustomClient::ClientError
       end
 
-      def yield_projects
+      def yield_projects(&block)
         next_page_link = nil
         loop do
-          next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
-            yield projects_chunk
-          end
+          next_page_link = @extractor.yield_projects_page(next_page_link, &block)
           break unless next_page_link.present?
         end
       end
