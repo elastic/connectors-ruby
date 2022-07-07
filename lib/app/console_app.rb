@@ -11,7 +11,7 @@ $LOAD_PATH << '../'
 require 'app/config'
 require 'connectors/registry'
 require 'app/menu'
-require 'app/connector'
+require 'app/worker'
 require 'utility/logger'
 require 'core/elastic_connector_actions'
 require 'core/connector_settings'
@@ -53,7 +53,7 @@ module App
       config_settings = Core::ConnectorSettings.fetch(connector_id)
       Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
       Core::ElasticConnectorActions.force_sync(connector_id)
-      App::Connector.start!
+      App::Worker.start!
     end
 
     def show_status

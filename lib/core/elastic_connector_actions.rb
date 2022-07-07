@@ -58,7 +58,7 @@ module Core
       body = {
         :doc => {
           :sync_now => false,
-          :sync_status => Connectors::SyncStatus::IN_PROGRESS,
+          :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
           :last_synced => Time.now
         }
       }
@@ -70,8 +70,8 @@ module Core
     def self.complete_sync(connector_package_id, error)
       body = {
         :doc => {
-          :sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
-          :sync_error => error,
+          :last_sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
+          :last_sync_error => error,
           :last_synced => Time.now
         }
       }

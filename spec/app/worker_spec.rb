@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'app/connector'
+require 'app/worker'
 
-describe App::Connector do
+describe App::Worker do
   it 'should raise error for invalid service type' do
     allow(App::Config).to receive(:[]).with('service_type').and_return('foobar')
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(nil)
