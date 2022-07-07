@@ -11,7 +11,11 @@ require 'core/output_sink/console_sink'
 require 'core/output_sink/combined_sink'
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 module Core::OutputSink; end
 =======
 module Core::OutputSink ; end
 >>>>>>> 973c1b0 (Move sinks to core and its own namespace)
+=======
+module Core::OutputSink; end
+>>>>>>> 8de590c (Fix linters)

@@ -31,9 +31,13 @@ module Core::OutputSink
 
     private
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> 973c1b0 (Move sinks to core and its own namespace)
+=======
+
+>>>>>>> 8de590c (Fix linters)
     def print_delim
       Utility::Logger.info '----------------------------------------------------'
     end
