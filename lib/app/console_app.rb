@@ -100,7 +100,7 @@ module App
       if previous_schedule.present?
         puts "Please enter a valid crontab expression for scheduling. Previous schedule was: #{previous_schedule}."
       else
-        puts "Please enter a valid crontab expression for scheduling."
+        puts 'Please enter a valid crontab expression for scheduling.'
       end
       cron_expression = gets.chomp.strip
       unless validate_cronline(cron_expression)
