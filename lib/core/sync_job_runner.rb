@@ -18,9 +18,9 @@ module Core
   end
 
   class SyncJobRunner
-    def initialize(connector_settings)
+    def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
-      @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type)
+      @connector_instance = Connectors::REGISTRY.connector(service_type)
     end
 
     def execute
@@ -56,9 +56,15 @@ module Core
 
     def should_sync?
       # sync_now should have priority over cron
-      return true if @connector_settings[:sync_now] == true
+      if @connector_settings[:sync_now] == true
+        Utility::Logger.info("Connector #{@connector_settings['_id']} is manually triggered to sync now")
+        return true
+      end
       scheduling_settings = @connector_settings.scheduling_settings
-      return false unless scheduling_settings[:enabled] == true
+      unless scheduling_settings.present? && scheduling_settings[:enabled] == true
+        Utility::Logger.info("Connector #{@connector_settings['_id']} scheduling is disabled")
+        return false
+      end
 
       last_synced = @connector_settings[:last_synced]
       return true if last_synced.nil? || last_synced.empty? # first run
@@ -70,7 +76,11 @@ module Core
         return false
       end
       cron_parser = cron_parser(sync_interval)
-      cron_parser && cron_parser.next(last_synced) < Time.now
+      if cron_parser && cron_parser.next(last_synced) < Time.now
+        Utility::Logger.info("Connector #{@connector_settings['_id']} sync is triggered by cron schedule #{sync_interval}")
+        return true
+      end
+      false
     end
   end
 end

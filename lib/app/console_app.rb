@@ -15,6 +15,7 @@ require 'app/worker'
 require 'utility/logger'
 require 'core/elastic_connector_actions'
 require 'core/connector_settings'
+require 'cron_parser'
 
 module App
   ENV['TZ'] = 'UTC'
@@ -26,14 +27,28 @@ module App
 
     @commands = [
       { :command => :sync, :hint => 'start synchronization' },
+      { :command => :sync_now, :hint => 'start synchronization NOW' },
       { :command => :register, :hint => 'register connector with Elasticsearch' },
+      { :command => :scheduling_on, :hint => 'enable connector scheduling' },
+      { :command => :scheduling_off, :hint => 'disable connector scheduling' },
       { :command => :status, :hint => 'check the status of a third-party service' },
       { :command => :exit, :hint => 'end the program' }
     ]
 
     def start_sync
-      puts 'Initiating synchronization...'
-      # these might not have been created without kibana
+      return unless connector_registered?
+
+      puts 'Starting synchronization runner...'
+      connector_id = App::Config[:connector_package_id]
+      config_settings = Core::ConnectorSettings.fetch(connector_id)
+      Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      App::Connector.start!
+    end
+
+    def start_sync_now
+      return unless connector_registered?
+
+      puts 'Initiating synchronization NOW...'
       connector_id = App::Config[:connector_package_id]
       config_settings = Core::ConnectorSettings.fetch(connector_id)
       Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
@@ -68,6 +83,47 @@ module App
       created_id = create_connector(index_name, force: true)
       App::Config[:connector_package_id] = created_id
       true
+    end
+
+    def validate_cronline(cronline)
+      CronParser.new(cronline)
+      true
+    rescue ArgumentError
+      false
+    end
+
+    def enable_scheduling
+      return unless connector_registered?
+      id = App::Config['connector_package_id']
+
+      previous_schedule = Core::ConnectorSettings.fetch(id)&.scheduling_settings&.fetch(:interval, nil)
+      if previous_schedule.present?
+        puts "Please enter a valid crontab expression for scheduling. Previous schedule was: #{previous_schedule}."
+      else
+        puts 'Please enter a valid crontab expression for scheduling.'
+      end
+      cron_expression = gets.chomp.strip
+      unless validate_cronline(cron_expression)
+        puts "Cron expression #{cron_expression} isn't valid!"
+        return
+      end
+      Core::ElasticConnectorActions.enable_connector_scheduling(id, cron_expression)
+    end
+
+    def disable_scheduling
+      return unless connector_registered?
+      id = App::Config['connector_package_id']
+      puts "Are you sure you want to disable scheduling for connector #{id}? (y/n)"
+      return unless gets.chomp.strip.casecmp('y').zero?
+      Core::ElasticConnectorActions.disable_connector_scheduling(id)
+    end
+
+    def connector_registered?(warn_if_not: true)
+      result = App::Config['connector_package_id'].present?
+      if warn_if_not && !result
+        'You have no connector ID yet. Register a new connector before continuing.'
+      end
+      result
     end
 
     def create_connector(index_name, force: false)
@@ -122,6 +178,8 @@ module App
       case command
       when :sync
         start_sync
+      when :sync_now
+        start_sync_now
       when :status
         show_status
         wait_for_keypress('Status checked!')
@@ -131,6 +189,12 @@ module App
         else
           wait_for_keypress('Registration canceled!')
         end
+      when :scheduling_on
+        enable_scheduling
+        wait_for_keypress('Scheduling enabled! Start synchronization to see it in action.')
+      when :scheduling_off
+        disable_scheduling
+        wait_for_keypress('Scheduling disabled! Starting synchronization will have no effect now.')
       when :exit
         exit_normally
       else
