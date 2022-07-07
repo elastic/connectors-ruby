@@ -14,13 +14,13 @@ describe Utility::Elasticsearch::Index::TextAnalysisSettings do
       expect(described_class.new).to be_kind_of(Utility::Elasticsearch::Index::TextAnalysisSettings)
     end
 
-    it 'accept a symbol as an language_code' do
+    it 'accept symbols as language_code' do
       expect { described_class.new(language_code: :de) }.not_to raise_error(
         Utility::Elasticsearch::Index::TextAnalysisSettings::UnsupportedLanguageCode
       )
     end
 
-    it 'accept a string as an language_code' do
+    it 'accept strings as language_code' do
       expect { described_class.new(language_code: 'de') }.not_to raise_error(
         Utility::Elasticsearch::Index::TextAnalysisSettings::UnsupportedLanguageCode
       )
