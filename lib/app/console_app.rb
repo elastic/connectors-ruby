@@ -95,7 +95,13 @@ module App
     def enable_scheduling
       return unless connector_registered?
       id = App::Config['connector_package_id']
-      puts 'Please enter a valid crontab expression for scheduling.'
+
+      previous_schedule = Core::ConnectorSettings.fetch(id)&.scheduling_settings&.fetch(:interval, nil)
+      if previous_schedule.present?
+        puts "Please enter a valid crontab expression for scheduling. Previous schedule was: #{previous_schedule}."
+      else
+        puts "Please enter a valid crontab expression for scheduling."
+      end
       cron_expression = gets.chomp.strip
       unless validate_cronline(cron_expression)
         puts "Cron expression #{cron_expression} isn't valid!"

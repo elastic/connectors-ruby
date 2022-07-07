@@ -57,7 +57,7 @@ module Core
     def should_sync?
       # sync_now should have priority over cron
       if @connector_settings[:sync_now] == true
-        Utility::Logger.info("Connector #{@connector_settings['_id']} is configured to sync now")
+        Utility::Logger.info("Connector #{@connector_settings['_id']} is manually triggered to sync now")
         return true
       end
       scheduling_settings = @connector_settings.scheduling_settings
@@ -77,7 +77,7 @@ module Core
       end
       cron_parser = cron_parser(sync_interval)
       if cron_parser && cron_parser.next(last_synced) < Time.now
-        Utility::Logger.info("Connector #{@connector_settings['_id']} should sync now based on the interval #{sync_interval}")
+        Utility::Logger.info("Connector #{@connector_settings['_id']} sync is triggered by cron schedule #{sync_interval}")
         return true
       end
       false

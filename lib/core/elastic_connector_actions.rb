@@ -41,17 +41,17 @@ module Core
     end
 
     def self.update_connector_configuration(connector_package_id, configuration)
-      update_connector_data(connector_package_id, :configuration, configuration)
+      update_connector_field(connector_package_id, :configuration, configuration)
     end
 
     def self.enable_connector_scheduling(connector_package_id, cron_expression)
       payload = { :enabled => true, :interval => cron_expression }
-      update_connector_data(connector_package_id, :scheduling, payload)
+      update_connector_field(connector_package_id, :scheduling, payload)
     end
 
     def self.disable_connector_scheduling(connector_package_id)
       payload = { :enabled => false }
-      update_connector_data(connector_package_id, :scheduling, payload)
+      update_connector_field(connector_package_id, :scheduling, payload)
     end
 
     def self.claim_job(connector_package_id)
@@ -99,7 +99,7 @@ module Core
       ensure_index_exists(CONNECTORS_INDEX)
     end
 
-    def self.update_connector_data(connector_package_id, field_name, value)
+    def self.update_connector_field(connector_package_id, field_name, value)
       body = {
         :doc => {
           field_name => value
