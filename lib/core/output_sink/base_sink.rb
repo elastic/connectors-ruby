@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 module Core
+<<<<<<< HEAD
   module OutputSink
     class BaseSink
       def ingest(_document)
@@ -22,6 +23,23 @@ module Core
       end
 
       def flush(_size: nil)
+=======
+  module OutputSink 
+    class BaseSink
+      def ingest(document)
+        raise 'not implemented'
+      end
+
+      def ingest_multiple(documents)
+        raise 'not implemented'
+      end
+
+      def delete_multiple(ids)
+        raise 'not implemented'
+      end
+
+      def flush(size: nil)
+>>>>>>> 973c1b0 (Move sinks to core and its own namespace)
         raise 'not implemented'
       end
     end
