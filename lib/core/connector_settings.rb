@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/object/blank'
 require 'utility/logger'
 
@@ -17,7 +18,7 @@ module Core
         Utility::Logger.debug("Connector settings not found for connector_package_id: #{connector_package_id}")
         return nil
       end
-      new(es_response)
+      new(es_response.with_indifferent_access)
     end
 
     def id
