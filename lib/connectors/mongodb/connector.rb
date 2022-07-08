@@ -40,18 +40,31 @@ module Connectors
 
         config = connector.configuration
 
-        hostname = config['host']['value']
+        host = config['host']['value']
         database = config['database']['value']
         collection = config['collection']['value']
 
-        custom_client = Connectors::MongoDB::CustomClient.new(hostname, database)
+        mongodb_client = create_client(host, database)
 
-        custom_client.documents(collection).each do |document|
+        mongodb_client[collection].find.each do |document|
           doc = document.with_indifferent_access
           transform!(doc)
 
           @sink.ingest(doc)
         end
+      end
+      
+      def create_client(host, database)
+        client = Mongo::Client.new([host],
+                                    :connect => :direct,
+                                    :database => database)
+
+        Utility::Logger.debug("Existing Databases #{mongodb_client.database_names}")
+        Utility::Logger.debug('Existing Collections:')
+
+        mongodb_client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+
+        client
       end
 
       def transform!(mongodb_document)
