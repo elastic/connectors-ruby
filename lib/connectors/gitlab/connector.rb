@@ -46,10 +46,7 @@ module Connectors
       end
 
       def sync(connector_settings)
-        @sink = Utility::Sink::CombinedSink.new(
-          [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(connector_settings[:index_name])]
-        )
+        super
         extract_projects
       end
 
