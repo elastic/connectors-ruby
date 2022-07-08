@@ -11,8 +11,9 @@ require 'utility/logger'
 
 module Core::OutputSink
   class ConsoleSink < Core::OutputSink::BaseSink
-    def ingest(_document)
+    def ingest(document)
       print_header 'Got a single document:'
+      Utility::Logger.info document
     end
 
     def flush(size: nil)

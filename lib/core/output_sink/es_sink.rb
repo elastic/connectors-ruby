@@ -13,7 +13,7 @@ require 'utility/es_client'
 require 'utility/logger'
 
 module Core::OutputSink
-  class ElasticSink < Core::OutputSink::BaseSink
+  class EsSink < Core::OutputSink::BaseSink
     attr_accessor :index_name
 
     def initialize(index_name, flush_threshold = 50, flush_interval = 10.seconds)
