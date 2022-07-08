@@ -33,11 +33,11 @@ module Connectors
 
       def configurable_fields
         @configurable_fields ||= {
-          'api_token' => {
+          :api_token => {
             :label => 'API Token',
             :value => App::Config[:gitlab][:api_token]
           },
-          'base_url' => {
+          :base_url => {
             :label => 'Base URL',
             :value => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
