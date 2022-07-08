@@ -20,14 +20,14 @@ module Connectors
 
       def configurable_fields
         {
-           'host' => {
-             'label' => 'MongoDB Server Hostname'
+           :host => {
+             :label => 'MongoDB Server Hostname'
            },
-           'database' => {
-             'label' => 'MongoDB Database'
+           :database => {
+             :label => 'MongoDB Database'
            },
-           'collection' => {
-             'label' => 'MongoDB Collection'
+           :collection => {
+             :label => 'MongoDB Collection'
            }
         }
       end
