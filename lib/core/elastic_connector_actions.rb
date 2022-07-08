@@ -154,16 +154,16 @@ module Core
         }
         ensure_index_exists("#{JOB_INDEX}-v1", system_index_body(:alias_name => JOB_INDEX, :mappings => mappings))
       end
-    end
 
-    def update_connector_field(connector_package_id, field_name, value)
-      body = {
-        :doc => {
-          field_name => value
+      def update_connector_field(connector_package_id, field_name, value)
+        body = {
+          :doc => {
+            field_name => value
+          }
         }
-      }
-      client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
-      Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_package_id}")
+        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_package_id}")
+      end
     end
   end
 end
