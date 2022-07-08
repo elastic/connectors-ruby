@@ -42,7 +42,6 @@ module Core
     end
 
     def configuration_initialized?
-      return false if configuration.nil?
       configuration.present?
     end
 
