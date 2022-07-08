@@ -11,10 +11,10 @@ require 'utility/elasticsearch/index/mappings'
 
 describe Utility::Elasticsearch::Index::Mappings do
   describe '#default_text_fields_mappings' do
-    subject { Utility::Elasticsearch::Index::Mappings.default_text_fields_mappings(search_index: search_index) }
+    subject { Utility::Elasticsearch::Index::Mappings.default_text_fields_mappings(connectors_index: connectors_index) }
 
     context 'when the index is a search index' do
-      let(:search_index) { true }
+      let(:connectors_index) { true }
 
       it { is_expected.to be_kind_of(Hash) }
       it { is_expected.to include(dynamic: true, dynamic_templates: Array, properties: Hash) }
@@ -22,7 +22,7 @@ describe Utility::Elasticsearch::Index::Mappings do
     end
 
     context 'when the index is not a search index' do
-      let(:search_index) { false }
+      let(:connectors_index) { false }
 
       it { is_expected.to be_kind_of(Hash) }
       it { is_expected.to include(dynamic: true, dynamic_templates: Array, properties: Hash) }
