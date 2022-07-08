@@ -10,7 +10,7 @@ require 'core/output_sink'
 require 'utility/logger'
 
 module Core::OutputSink
-  class ElasticSink < Core::OutputSink::BaseSink
+  class ConsoleSink < Core::OutputSink::BaseSink
     def ingest(_document)
       print_header 'Got a single document:'
     end
