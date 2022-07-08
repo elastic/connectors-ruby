@@ -57,6 +57,11 @@ module Core
         update_connector_field(connector_package_id, :scheduling, payload)
       end
 
+      def set_configurable_field(connector_package_id, field_name, value)
+        payload = { field_name => value }
+        update_connector_field(connector_package_id, :configuration, payload)
+      end
+
       def claim_job(connector_package_id)
         body = {
           :doc => {
@@ -65,19 +70,6 @@ module Core
             :last_synced => Time.now
           }
         }
-    def self.set_configurable_field(connector_package_id, field_name, value)
-      payload = { field_name => value }
-      update_connector_field(connector_package_id, :configuration, payload)
-    end
-
-    def self.claim_job(connector_package_id)
-      body = {
-        :doc => {
-          :sync_now => false,
-          :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-          :last_synced => Time.now
-        }
-      }
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
         Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
