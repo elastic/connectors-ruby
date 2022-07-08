@@ -54,6 +54,11 @@ module Core
       update_connector_field(connector_package_id, :scheduling, payload)
     end
 
+    def self.set_configurable_field(connector_package_id, field_name, value)
+      payload = { field_name => value }
+      update_connector_field(connector_package_id, :configuration, payload)
+    end
+
     def self.claim_job(connector_package_id)
       body = {
         :doc => {

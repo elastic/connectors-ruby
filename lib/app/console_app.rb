@@ -31,6 +31,8 @@ module App
       { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :scheduling_on, :hint => 'enable connector scheduling' },
       { :command => :scheduling_off, :hint => 'disable connector scheduling' },
+      { :command => :set_configurable_field, :hint => 'update the values of configurable fields' },
+      { :command => :read_configurable_fields, :hint => 'read the stored values of configurable fields' },
       { :command => :status, :hint => 'check the status of a third-party service' },
       { :command => :exit, :hint => 'end the program' }
     ]
@@ -57,7 +59,8 @@ module App
     end
 
     def show_status
-      connector = select_connector
+      return unless connector_registered?
+      connector = current_connector
 
       puts 'Checking status...'
       puts connector.source_status
@@ -69,7 +72,7 @@ module App
       if id.present?
         puts "You already have registered a connector with ID: #{id}. Registering a new connector will overwrite the existing one."
         puts 'Are you sure you want to continue? (y/n)'
-        return false unless gets.chomp.casecmp('y')&.zero?
+        return false unless gets.chomp.strip.casecmp('y').zero?
       end
       puts 'Please enter index name for data ingestion. Use only letters, underscored and dashes.'
       index_name = gets.chomp.strip
@@ -102,7 +105,7 @@ module App
       else
         puts 'Please enter a valid crontab expression for scheduling.'
       end
-      cron_expression = gets.chomp.strip
+      cron_expression = gets.chomp.strip.downcase
       unless validate_cronline(cron_expression)
         puts "Cron expression #{cron_expression} isn't valid!"
         return
@@ -152,13 +155,13 @@ module App
       gets
     end
 
-    def select_connector
-      puts 'Provided connectors:'
-
-      menu = App::Menu.new('Please select the connector:', registry.registered_connectors)
-      connector_name = menu.select_command
-
-      registry.connector(connector_name)
+    def current_connector
+      service_type = App::Config['service_type']
+      if service_type.present?
+        return registry.connector(service_type)
+      end
+      puts 'You have not set connector service type in settings. Please do so before continuing.'
+      nil
     end
 
     def exit_normally(message = 'Kthxbye!... ¯\_(ツ)_/¯')
@@ -172,6 +175,45 @@ module App
 
     puts 'Hello Connectors 3.0!'
     sleep(1)
+
+    def set_configurable_field
+      return unless connector_registered?
+      id = App::Config['connector_package_id']
+
+      connector = current_connector
+      current_values = Core::ConnectorSettings.fetch(id)&.configuration
+      return unless connector.present?
+
+      puts 'Provided configurable fields:'
+      fields = connector.configurable_fields.each_key.map do |key|
+        field = connector.configurable_fields[key].with_indifferent_access
+        current_value = current_values&.fetch(key, nil)
+        { :command => key, :hint => "#{field[:label]} (current value: #{current_value}, default: #{field[:value]})" }
+      end
+
+      menu = App::Menu.new('Please select the configurable field:', fields)
+      field_name = menu.select_command
+
+      puts 'Please enter the new value:'
+      new_value = gets.chomp.strip
+      Core::ElasticConnectorActions.set_configurable_field(id, field_name, new_value)
+    end
+
+    def read_configurable_fields
+      return unless connector_registered?
+      id = App::Config['connector_package_id']
+
+      connector = current_connector
+      current_values = Core::ConnectorSettings.fetch(id)&.configuration
+      return unless connector.present?
+
+      puts 'Persisted values of configurable fields:'
+      connector.configurable_fields.each_key.each do |key|
+        field = connector.configurable_fields[key].with_indifferent_access
+        current_value = current_values&.fetch(key, nil)
+        puts "* #{field[:label]} - current value: #{current_value}, default: #{field[:value]}"
+      end
+    end
 
     loop do
       command = read_command
@@ -195,6 +237,12 @@ module App
       when :scheduling_off
         disable_scheduling
         wait_for_keypress('Scheduling disabled! Starting synchronization will have no effect now.')
+      when :set_configurable_field
+        set_configurable_field
+        wait_for_keypress('Configurable field is updated!')
+      when :read_configurable_fields
+        read_configurable_fields
+        wait_for_keypress
       when :exit
         exit_normally
       else
