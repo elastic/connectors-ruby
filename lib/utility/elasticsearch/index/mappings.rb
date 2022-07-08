@@ -21,7 +21,7 @@ module Utility
           }
         }.freeze
 
-        def self.default_text_fields_mappings(search_index:)
+        def self.default_text_fields_mappings(connectors_index:)
           {
             dynamic: true,
             dynamic_templates: [
@@ -68,7 +68,7 @@ module Utility
                 type: 'keyword'
               }
             }.tap do |properties|
-              properties.merge!(WORKPLACE_SEARCH_SUBEXTRACTION_STAMP_FIELD_MAPPINGS) if search_index
+              properties.merge!(WORKPLACE_SEARCH_SUBEXTRACTION_STAMP_FIELD_MAPPINGS) if connectors_index
             end
           }
         end
