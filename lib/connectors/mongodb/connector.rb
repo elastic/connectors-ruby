@@ -7,8 +7,6 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
-require 'utility/sink'
-require 'utility'
 
 module Connectors
   module MongoDB
@@ -37,11 +35,7 @@ module Connectors
         Connectors::MongoDB::CustomClient.new(hostname, database)
       end
 
-      def initialize
-        super()
-      end
-
-      def sync_content(connector)
+      def sync(connector)
         super(connector)
 
         config = connector.configuration
@@ -59,11 +53,10 @@ module Connectors
           @sink.ingest(doc)
         end
       end
-    end
 
-
-    def transform!(mongodb_document)
-      mongodb_document[:id] = mongodb_document.delete(:_id)
+      def transform!(mongodb_document)
+        mongodb_document[:id] = mongodb_document.delete(:_id)
+      end
     end
   end
 end
