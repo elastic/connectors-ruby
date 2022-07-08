@@ -43,8 +43,8 @@ module Core
     private
 
     def validate_configuration!
-      expected_fields = @connector_instance.configurable_fields.keys.map { |field| field.to_s }
-      actual_fields = @connector_settings.configuration.keys.map { |field| field.to_s }
+      expected_fields = @connector_instance.configurable_fields.keys.map(&:to_s)
+      actual_fields = @connector_settings.configuration.keys.map(&:to_s)
 
       raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
     end
