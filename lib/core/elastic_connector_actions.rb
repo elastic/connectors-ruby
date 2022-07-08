@@ -76,6 +76,7 @@ module Core
         body = {
           :connector_id => connector_package_id,
           :status => Connectors::SyncStatus::IN_PROGRESS,
+          :worker_hostname => Socket.gethostname,
           :created_at => Time.now
         }
         job = client.index(:index => JOB_INDEX, :body => body)
@@ -165,6 +166,7 @@ module Core
             :connector_id => { :type => :keyword },
             :status => { :type => :keyword },
             :error => { :type => :text },
+            :worker_hostname => { :type => :keyword },
             :indexed_document_count => { :type => :integer },
             :deleted_document_count => { :type => :integer },
             :created_at => { :type => :date },
