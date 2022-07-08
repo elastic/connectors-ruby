@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'bson'
+require 'core/output_sink'
 require 'utility/logger'
 
 module Connectors
@@ -33,7 +34,7 @@ module Connectors
       end
 
       def sync(connector)
-        @sink = Utility::Sink::CombinedSink.new(
+        @sink = Core::OutputSink::CombinedSink.new(
           [Core::OutputSink::ConsoleSink.new,
            Core::OutputSink::EsSink.new(connector['index_name'])]
         )
