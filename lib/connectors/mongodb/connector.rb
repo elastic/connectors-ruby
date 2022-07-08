@@ -41,9 +41,9 @@ module Connectors
 
         config = connector.configuration
 
-        host = config['host']['value']
-        database = config['database']['value']
-        collection = config['collection']['value']
+        host = config[:host][:value]
+        database = config[:database][:value]
+        collection = config[:collection][:value]
 
         mongodb_client = create_client(host, database)
 
@@ -54,11 +54,11 @@ module Connectors
           @sink.ingest(doc)
         end
       end
-      
+
       def create_client(host, database)
         client = Mongo::Client.new([host],
-                                    :connect => :direct,
-                                    :database => database)
+                                   :connect => :direct,
+                                   :database => database)
 
         Utility::Logger.debug("Existing Databases #{client.database_names}")
         Utility::Logger.debug('Existing Collections:')
