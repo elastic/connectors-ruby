@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'mongo'
 require 'connectors/base/connector'
 
 module Connectors
@@ -59,10 +60,10 @@ module Connectors
                                     :connect => :direct,
                                     :database => database)
 
-        Utility::Logger.debug("Existing Databases #{mongodb_client.database_names}")
+        Utility::Logger.debug("Existing Databases #{client.database_names}")
         Utility::Logger.debug('Existing Collections:')
 
-        mongodb_client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+        client.collections.each { |coll| Utility::Logger.debug(coll.name) }
 
         client
       end

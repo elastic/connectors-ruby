@@ -50,4 +50,4 @@ gem 'elasticsearch'
 gem 'signet', '~> 0.16.0'
 
 # Dependency for mongo connector
-gem 'mongo'
+gem 'mongo', '~> 2.4.3'

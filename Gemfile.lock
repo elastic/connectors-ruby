@@ -223,7 +223,7 @@ DEPENDENCIES
   hashie (~> 5.0.0)
   httpclient (~> 2.8.3)
   mime-types (= 3.1)
-  mongo
+  mongo (~> 2.4.3)
   nokogiri (>= 1.13.4)
   parse-cron (~> 0.1.4)
   pry-nav
