@@ -46,4 +46,7 @@ module Connectors
   require_relative './gitlab/connector'
 
   REGISTRY.register(Connectors::GitLab::Connector::SERVICE_TYPE, Connectors::GitLab::Connector)
+
+  require_relative 'mongodb/connector'
+  REGISTRY.register(Connectors::MongoDB::Connector::SERVICE_TYPE, Connectors::MongoDB::Connector)
 end
