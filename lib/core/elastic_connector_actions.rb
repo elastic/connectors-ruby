@@ -71,46 +71,46 @@ module Core
           }
         }
 
-      client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
 
-      body = {
-        :connector_id => connector_package_id,
-        :status => Connectors::SyncStatus::IN_PROGRESS,
-        :created_at => Time.now
-      }
-      job = client.index(:index => JOB_INDEX, :body => body)
-
-      Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
-      job['_id']
-    end
-
-    def complete_sync(connector_package_id, job_id, status)
-      sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
-
-      body = {
-        :doc => {
-          :last_sync_status => sync_status,
-          :last_sync_error => status[:error],
-          :last_synced => Time.now
+        body = {
+          :connector_id => connector_package_id,
+          :status => Connectors::SyncStatus::IN_PROGRESS,
+          :created_at => Time.now
         }
-      }
+        job = client.index(:index => JOB_INDEX, :body => body)
+
+        Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
+        job['_id']
+      end
+
+      def complete_sync(connector_package_id, job_id, status)
+        sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
+
+        body = {
+          :doc => {
+            :last_sync_status => sync_status,
+            :last_sync_error => status[:error],
+            :last_synced => Time.now
+          }
+        }
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
 
-      body = {
-        :doc => {
-            :status => sync_status,
-            :completed_at => Time.now
-        }.merge(status)
-      }
-      client.update(:index => JOB_INDEX, :id => job_id, :body => body)
+        body = {
+          :doc => {
+              :status => sync_status,
+              :completed_at => Time.now
+          }.merge(status)
+        }
+        client.update(:index => JOB_INDEX, :id => job_id, :body => body)
 
-      if status[:error]
-        Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{status[:error]}")
-      else
-        Utility::Logger.info("Successfully synced for connector #{connector_package_id}")
+        if status[:error]
+          Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{status[:error]}")
+        else
+          Utility::Logger.info("Successfully synced for connector #{connector_package_id}")
+        end
       end
-    end
 
       def client
         @client ||= Utility::EsClient.new
