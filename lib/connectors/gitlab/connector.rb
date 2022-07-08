@@ -46,7 +46,7 @@ module Connectors
       end
 
       def sync(connector_settings)
-        super
+        super(connector_settings)
 
         extract_projects
       end
