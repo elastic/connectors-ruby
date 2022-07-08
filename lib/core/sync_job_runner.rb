@@ -24,6 +24,10 @@ module Core
     end
 
     def execute
+      unless @connector_settings.configuration_initialized?
+        @connector_settings.update_configuration(@connector_instance.configurable_fields)
+      end
+
       validate_configuration!
 
       return unless should_sync?
@@ -39,8 +43,6 @@ module Core
     private
 
     def validate_configuration!
-      return unless @connector_settings.configuration_initialized?
-
       expected_fields = @connector_instance.configurable_fields.keys
       actual_fields = @connector_settings.configuration.keys
 

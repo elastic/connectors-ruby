@@ -32,7 +32,12 @@ module Connectors
         yield error
       end
 
-      def sync(connector); end
+      def sync(connector)
+        @sink = Utility::Sink::CombinedSink.new(
+          [Core::OutputSink::ConsoleSink.new,
+           Core::OutputSink::EsSink.new(connector['index_name'])]
+        )
+      end
 
       def source_status(params = {})
         health_check(params)

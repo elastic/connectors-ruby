@@ -11,7 +11,7 @@ require 'connectors/base/connector'
 require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
-require 'utility/sink'
+require 'core/output_sink'
 require 'app/config'
 
 module Connectors
@@ -46,10 +46,8 @@ module Connectors
       end
 
       def sync(connector_settings)
-        @sink = Utility::Sink::CombinedSink.new(
-          [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(connector_settings[:index_name])]
-        )
+        super
+
         extract_projects
       end
 
