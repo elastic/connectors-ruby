@@ -9,7 +9,7 @@
 require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
-require 'utility/sink'
+require 'core/output_sink'
 
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
@@ -21,7 +21,7 @@ module Core
   class SyncJobRunner
     def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
-      @sink = Utility::Sink::ElasticSink.new(connector_settings.index_name)
+      @sink = Core::OutputSink::ElasticSink.new(connector_settings.index_name)
       @connector_instance = Connectors::REGISTRY.connector(service_type)
     end
 
