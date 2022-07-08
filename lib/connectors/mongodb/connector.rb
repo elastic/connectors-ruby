@@ -42,8 +42,7 @@ module Connectors
       end
 
       def sync_content(connector)
-        puts "connector is: #{connector.to_json}"
-        @sink = Utility::Sink::ElasticSink.new(connector['index_name'])
+        super(connector)
 
         config = connector.configuration
 
@@ -55,6 +54,8 @@ module Connectors
 
         custom_client.documents(collection).each do |document|
           doc = document.with_indifferent_access
+          transform!(doc)
+
           @sink.ingest(doc)
         end
       end
@@ -62,7 +63,7 @@ module Connectors
 
 
     def transform!(mongodb_document)
-      mongodb_document[:id] = mongodb_document.delete('_id')
+      mongodb_document[:id] = mongodb_document.delete(:_id)
     end
   end
 end
