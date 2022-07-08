@@ -11,7 +11,7 @@ require 'connectors/base/connector'
 require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
-require 'utility/sink'
+require 'core/output_sink'
 require 'app/config'
 
 module Connectors
@@ -47,6 +47,7 @@ module Connectors
 
       def sync(connector_settings)
         super
+
         extract_projects
       end
 

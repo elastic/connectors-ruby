@@ -34,8 +34,8 @@ module Connectors
 
       def sync(connector)
         @sink = Utility::Sink::CombinedSink.new(
-          [Utility::Sink::ConsoleSink.new,
-           Utility::Sink::ElasticSink.new(connector['index_name'])]
+          [Core::OutputSink::ConsoleSink.new,
+           Core::OutputSink::EsSink.new(connector['index_name'])]
         )
       end
 
