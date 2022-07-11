@@ -30,6 +30,10 @@ module Core
       @elasticsearch_response[:_source][property_name]
     end
 
+    def index_name
+      self[:index_name]
+    end
+
     def service_type
       self[:service_type]
     end

@@ -36,9 +36,7 @@ module Connectors
         Connectors::MongoDB::CustomClient.new(hostname, database)
       end
 
-      def sync(connector)
-        super(connector)
-
+      def yield_documents(connector)
         config = connector.configuration
 
         host = config[:host][:value]
@@ -51,7 +49,7 @@ module Connectors
           doc = document.with_indifferent_access
           transform!(doc)
 
-          @sink.ingest(doc)
+          yield doc
         end
       end
 
