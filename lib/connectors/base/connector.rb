@@ -29,7 +29,7 @@ module Connectors
 
       def source_status(params = {})
         health_check(params)
-        { :status => 'OK', :statusCode => 200, :message => "Connected to #{display_name}" }
+        { :status => 'OK', :statusCode => 200, :message => "Connected to #{self.class.display_name}" }
       rescue StandardError => e
         { :status => 'FAILURE', :statusCode => e.is_a?(custom_client_error) ? e.status_code : 500, :message => e.message }
       end
