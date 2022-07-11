@@ -19,4 +19,4 @@ idle_timeout: 60
 # see https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-icu.html
 use_analysis_icu: false
 # language code to use for the content indices
-content_indexes_language_code: en
+content_language_code: en
