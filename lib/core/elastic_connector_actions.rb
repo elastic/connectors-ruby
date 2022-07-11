@@ -7,7 +7,8 @@
 # frozen_string_literal: true
 #
 require 'active_support/core_ext/hash'
-require 'utility'
+require 'utility/elasticsearch/index/mappings'
+require 'utility/elasticsearch/index/text_analysis_settings'
 
 module Core
   class ElasticConnectorActions
@@ -95,6 +96,15 @@ module Core
 
       def client
         @client ||= Utility::EsClient.new
+      end
+
+      # should only be used in CLI
+      def ensure_content_index_exists(index_name, use_icu_locale = false, language_code = nil)
+        settings  = Utility::Elasticsearch::Index::TextAnalysisSettings.new(:language_code => language_code, :analysis_icu => use_icu_locale).to_h
+        mappings = Utility::Elasticsearch::Index::Mappings.default_text_fields_mappings(:connectors_index => true)
+
+        body_payload = { settings: settings, mappings: mappings }
+        ensure_index_exists(index_name, body_payload)
       end
 
       # should only be used in CLI
