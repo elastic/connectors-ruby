@@ -185,11 +185,12 @@ module App
       id = App::Config['connector_package_id']
 
       connector = current_connector
+      connector_class = connector.class
       current_values = Core::ConnectorSettings.fetch(id)&.configuration
       return unless connector.present?
 
       puts 'Provided configurable fields:'
-      configurable_fields = connector.configurable_fields
+      configurable_fields = connector_class.configurable_fields
       fields = configurable_fields.each_key.map do |key|
         field = configurable_fields[key].with_indifferent_access
         current_value = current_values&.fetch(key, nil)
@@ -210,12 +211,14 @@ module App
       id = App::Config['connector_package_id']
 
       connector = current_connector
+      connector_class = connector.class
+
       current_values = Core::ConnectorSettings.fetch(id)&.configuration
       return unless connector.present?
 
       puts 'Persisted values of configurable fields:'
-      connector.configurable_fields.each_key.each do |key|
-        field = connector.configurable_fields[key].with_indifferent_access
+      connector_class.configurable_fields.each_key.each do |key|
+        field = connector_class.configurable_fields[key].with_indifferent_access
         current_value = current_values&.fetch(key, nil)
         puts "* #{field[:label]} - current value: #{current_value}, default: #{field[:value]}"
       end

@@ -14,11 +14,11 @@ module Connectors
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'mongo'
 
-      def display_name
+      def self.display_name
         'MongoDB'
       end
 
-      def configurable_fields
+      def self.configurable_fields
         {
            :host => {
              :label => 'MongoDB Server Hostname'

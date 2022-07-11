@@ -14,11 +14,11 @@ module Connectors
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'stub_connector'
 
-      def display_name
+      def self.display_name
         'Stub Connector'
       end
 
-      def configurable_fields
+      def self.configurable_fields
         {
           'foo' => {
             'label' => 'Foo',

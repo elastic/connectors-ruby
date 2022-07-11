@@ -23,6 +23,7 @@ module Core
     def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name)
+      @connector_class = Connectors::REGISTRY.connector_class(service_type)
       @connector_instance = Connectors::REGISTRY.connector(service_type)
       @status = {
         :indexed_document_count => 0,
@@ -33,7 +34,7 @@ module Core
 
     def execute
       unless @connector_settings.configuration_initialized?
-        @connector_settings.update_configuration(@connector_instance.configurable_fields)
+        @connector_settings.update_configuration(@connector_class.configurable_fields)
       end
 
       validate_configuration!
@@ -60,7 +61,7 @@ module Core
     private
 
     def validate_configuration!
-      expected_fields = @connector_instance.configurable_fields.keys.map(&:to_s).sort
+      expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
       raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
