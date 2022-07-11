@@ -57,8 +57,8 @@ module Core
         update_connector_field(connector_package_id, :scheduling, payload)
       end
 
-      def set_configurable_field(connector_package_id, field_name, value)
-        payload = { field_name => value }
+      def set_configurable_field(connector_package_id, field_name, label, value)
+        payload = { field_name => { :value => value, :label => label } }
         update_connector_field(connector_package_id, :configuration, payload)
       end
 
