@@ -135,7 +135,7 @@ module Core
           existing = response[index_name]['mappings']
           if existing.empty?
             Utility::Logger.info("Index #{index_name} has no mappings. Creating...")
-            client.indices.create(:index => index_name, :body => body)
+            client.indices.put_mapping(:index => index_name, :body => body[:mappings])
           else
             Utility::Logger.info("Index #{index_name} already has mappings: #{existing}. Skipping...")
           end
