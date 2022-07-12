@@ -17,7 +17,9 @@ require 'app/config'
 module Connectors
   module GitLab
     class Connector < Connectors::Base::Connector
-      SERVICE_TYPE = 'gitlab'
+      def self.service_type
+        'gitlab'
+      end
 
       def self.display_name
         'GitLab Connector'

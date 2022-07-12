@@ -21,8 +21,8 @@ module Connectors
         {}
       end
 
-      def service_type
-        self.class::SERVICE_TYPE
+      def self.service_type
+        raise 'Not implemented for this connector'
       end
 
       def yield_documents(connector_settings); end

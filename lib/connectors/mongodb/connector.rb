@@ -12,7 +12,9 @@ require 'connectors/base/connector'
 module Connectors
   module MongoDB
     class Connector < Connectors::Base::Connector
-      SERVICE_TYPE = 'mongo'
+      def self.service_type
+        'mongo'
+      end
 
       def self.display_name
         'MongoDB'

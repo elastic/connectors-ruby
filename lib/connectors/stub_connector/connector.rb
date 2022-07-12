@@ -12,7 +12,9 @@ require 'utility'
 module Connectors
   module StubConnector
     class Connector < Connectors::Base::Connector
-      SERVICE_TYPE = 'stub_connector'
+      def self.service_type
+        'stub_connector'
+      end
 
       def self.display_name
         'Stub Connector'
