@@ -75,7 +75,6 @@ module Core
       ids_to_delete.each do |id_to_delete|
         @sink.delete(id_to_delete)
       end
-
     rescue StandardError => e
       @status[:error] = e.message
       Utility::ExceptionTracking.log_exception(e)
