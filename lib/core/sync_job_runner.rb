@@ -6,9 +6,11 @@
 
 # frozen_string_literal: true
 
+require 'app/config'
 require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
+require 'core/output_sink'
 
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
@@ -20,7 +22,13 @@ module Core
   class SyncJobRunner
     def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
+      @sink = Core::OutputSink::EsSink.new(connector_settings.index_name)
       @connector_instance = Connectors::REGISTRY.connector(service_type)
+      @status = {
+        :indexed_document_count => 0,
+        :deleted_document_count => 0,
+        :error => nil
+      }
     end
 
     def execute
@@ -29,15 +37,19 @@ module Core
       end
 
       validate_configuration!
-
       return unless should_sync?
 
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
-      ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
-      @connector_instance.sync_content(@connector_settings) do |error|
-        ElasticConnectorActions.complete_sync(@connector_settings.id, error)
+      @connector_instance.yield_documents(@connector_settings) do |document|
+        @sink.ingest(document)
+        @status[:indexed_document_count] += 1
       end
+    rescue StandardError => e
+      @status[:error] = e.message
+    ensure
+      ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
     end
 
     private

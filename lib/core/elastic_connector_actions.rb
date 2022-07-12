@@ -58,8 +58,8 @@ module Core
         update_connector_field(connector_package_id, :scheduling, payload)
       end
 
-      def set_configurable_field(connector_package_id, field_name, value)
-        payload = { field_name => value }
+      def set_configurable_field(connector_package_id, field_name, label, value)
+        payload = { field_name => { :value => value, :label => label } }
         update_connector_field(connector_package_id, :configuration, payload)
       end
 
@@ -73,22 +73,42 @@ module Core
         }
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+
+        body = {
+          :connector_id => connector_package_id,
+          :status => Connectors::SyncStatus::IN_PROGRESS,
+          :worker_hostname => Socket.gethostname,
+          :created_at => Time.now
+        }
+        job = client.index(:index => JOB_INDEX, :body => body)
+
         Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
+        job['_id']
       end
 
-      def complete_sync(connector_package_id, error)
+      def complete_sync(connector_package_id, job_id, status)
+        sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
+
         body = {
           :doc => {
-            :last_sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
-            :last_sync_error => error,
+            :last_sync_status => sync_status,
+            :last_sync_error => status[:error],
             :last_synced => Time.now
           }
         }
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
 
-        if error
-          Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{error}")
+        body = {
+          :doc => {
+              :status => sync_status,
+              :completed_at => Time.now
+          }.merge(status)
+        }
+        client.update(:index => JOB_INDEX, :id => job_id, :body => body)
+
+        if status[:error]
+          Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{status[:error]}")
         else
           Utility::Logger.info("Successfully synced for connector #{connector_package_id}")
         end
@@ -156,6 +176,7 @@ module Core
             :connector_id => { :type => :keyword },
             :status => { :type => :keyword },
             :error => { :type => :text },
+            :worker_hostname => { :type => :keyword },
             :indexed_document_count => { :type => :integer },
             :deleted_document_count => { :type => :integer },
             :created_at => { :type => :date },

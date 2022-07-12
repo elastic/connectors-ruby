@@ -189,18 +189,20 @@ module App
       return unless connector.present?
 
       puts 'Provided configurable fields:'
-      fields = connector.configurable_fields.each_key.map do |key|
-        field = connector.configurable_fields[key].with_indifferent_access
+      configurable_fields = connector.configurable_fields
+      fields = configurable_fields.each_key.map do |key|
+        field = configurable_fields[key].with_indifferent_access
         current_value = current_values&.fetch(key, nil)
         { :command => key, :hint => "#{field[:label]} (current value: #{current_value}, default: #{field[:value]})" }
       end
 
       menu = App::Menu.new('Please select the configurable field:', fields)
       field_name = menu.select_command
+      field_label = configurable_fields.dig(field_name, :label)
 
       puts 'Please enter the new value:'
       new_value = gets.chomp.strip
-      Core::ElasticConnectorActions.set_configurable_field(id, field_name, new_value)
+      Core::ElasticConnectorActions.set_configurable_field(id, field_name, field_label, new_value)
     end
 
     def read_configurable_fields
