@@ -133,9 +133,14 @@ module Core
           Utility::Logger.info("Index #{index_name} already exists. Checking mappings...")
           response = client.indices.get_mapping(:index => index_name)
           existing = response[index_name]['mappings']
+          Utility::Logger.info("New settings/mappings: #{body}")
           if existing.empty?
-            Utility::Logger.info("Index #{index_name} has no mappings. Creating...")
-            client.indices.put_mapping(:index => index_name, :body => body[:mappings])
+            Utility::Logger.info("Index #{index_name} has no mappings. Closing to create settings and mappings...")
+            client.indices.close(:index => index_name)
+            client.indices.put_settings(:index => index_name, :body => body[:settings], :expand_wildcards => 'all')
+            client.indices.put_mapping(:index => index_name, :body => body[:mappings], :expand_wildcards => 'all')
+            client.indices.open(:index => index_name)
+            Utility::Logger.info("Index #{index_name} mappings added. Index reopened.")
           else
             Utility::Logger.info("Index #{index_name} already has mappings: #{existing}. Skipping...")
           end
