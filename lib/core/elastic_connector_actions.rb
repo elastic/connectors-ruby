@@ -136,8 +136,7 @@ module Core
         end
       end
 
-      def client
-        @client ||= Utility::EsClient.new
+      def fetch_existing_document_ids(index_name)
       end
 
       # should only be used in CLI
@@ -234,6 +233,10 @@ module Core
         }
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
         Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_package_id}")
+      end
+
+      def client
+        @client ||= Utility::EsClient.new
       end
     end
   end
