@@ -147,7 +147,8 @@ module Core
             :id => pit_id,
             :keep_alive => '1m'
           },
-          :size => page_size
+          :size => page_size,
+          :_source => false
         }
         loop do
           response = client.search(:body => body)
