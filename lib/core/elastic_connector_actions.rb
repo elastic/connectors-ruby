@@ -101,8 +101,8 @@ module Core
 
         body = {
           :doc => {
-              :status => sync_status,
-              :completed_at => Time.now
+            :status => sync_status,
+            :completed_at => Time.now
           }.merge(status)
         }
         client.update(:index => JOB_INDEX, :id => job_id, :body => body)
@@ -129,7 +129,20 @@ module Core
 
       # should only be used in CLI
       def ensure_index_exists(index_name, body = {})
-        client.indices.create(:index => index_name, :body => body) unless client.indices.exists?(:index => index_name)
+        if client.indices.exists?(:index => index_name)
+          Utility::Logger.info("Index #{index_name} already exists. Checking mappings...")
+          response = client.indices.get_mapping(:index => index_name)
+          existing = response[index_name]['mappings']
+          if existing.empty?
+            Utility::Logger.info("Index #{index_name} has no mappings. Creating...")
+            client.indices.create(:index => index_name, :body => body)
+          else
+            Utility::Logger.info("Index #{index_name} already has mappings: #{existing}. Skipping...")
+          end
+        else
+          client.indices.create(:index => index_name, :body => body)
+          Utility::Logger.info("Created index #{index_name}")
+        end
       end
 
       def system_index_body(alias_name: nil, mappings: nil)
