@@ -11,7 +11,7 @@ are subject to change and are not covered by the support SLA of general release
 (GA) features. Elastic plans to promote this feature to GA in a future release.
 
 Note #2: The `main` branch of this repository is currently being heavily reworked. If you want to use the
-connector packages now, it would be advisable to check out/fork the [latest stable branch](https://github.com/elastic/connectors/tree/8.3).
+connector packages now, it would be advisable to check out/fork the [latest stable branch](https://github.com/elastic/connectors-ruby/tree/8.3).
 
 ### System Requirements
 
