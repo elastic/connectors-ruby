@@ -9,6 +9,8 @@
 require 'active_support/core_ext/hash'
 require 'utility/elasticsearch/index/mappings'
 require 'utility/elasticsearch/index/text_analysis_settings'
+require 'connectors/connector_status'
+require 'connectors/sync_status'
 
 module Core
   class ElasticConnectorActions
@@ -84,6 +86,16 @@ module Core
 
         Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
         job['_id']
+      end
+
+      def update_connector_status(connector_package_id, status)
+        body = {
+          :doc => {
+            :status => status
+          }
+        }
+
+        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
       end
 
       def complete_sync(connector_package_id, job_id, status)
