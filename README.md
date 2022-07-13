@@ -10,8 +10,7 @@ Note #1: The connector framework is a tech preview feature. Tech preview feature
 are subject to change and are not covered by the support SLA of general release
 (GA) features. Elastic plans to promote this feature to GA in a future release.
 
-Note #2: The `main` branch of this repository is currently being heavily reworked. If you want to use the
-connector packages now, it would be advisable to check out/fork the [latest stable branch](https://github.com/elastic/connectors/tree/8.3).
+Note #2: If you are looking for the version of the connector framework that is described in [Bring Your Own Connector](https://www.elastic.co/blog/bring-your-own-enterprise-search-connector) blog article that was describing the version from the 8.3 release, it would be advisable to check out/fork the [relevant branch](https://github.com/elastic/connectors/tree/8.3).
 
 ### System Requirements
 
@@ -31,13 +30,45 @@ and the tools we use. Once installed, you can run the `specs` using `make.bat`
 
 ### Running the connector
 
-TBD
+There's a `Makefile` in the root of the repository. You can run the `make` command to build the project:
+
+```bash
+make build
+```
+
+This command, apart from building the code, will also create the [configuration file](config/connectors.yml).
+
+You can run the connector application using this command:
+
+```bash
+make run
+```
+
+However, `make run` needs some required data to be present in the [configuration file](config/connectors.yml), namely, the connector package ID and the service type. There's also some settings for the ICU Analysis Plugin (see below) that are required for applying correct mappings to the content indices. Example of the configuration values:
+
+```yaml
+connector_package_id: my-connector-package-id
+service_type: gitlab
+
+# how often the connector should check for scheduled sync jobs
+idle_timeout: 10
+
+# ICU Analysis Plugin is used (false by default)
+# turn this on if the ICU plugin - International Components for Unicode - is installed in your Elasticsearch instance
+# see https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-icu.html
+use_analysis_icu: false
+# language to use for the content indices
+content_language_code: en
+```
+
+Each connector application instance represents a single connector package. This means that currently, it's not supported to try and synchronize multiple service types in the same connector application. It's also recommended to use a separate index for each connector package. Otherwise, it's not guaranteed that the connector will be able to synchronize the data correctly.
 
 ### Running the connector with Docker
 
 You can run the web server using our Dockerfile.
 
 First, build the Docker image with:
+
 ```shell
 make build-docker
 ```
@@ -45,6 +76,7 @@ make build-docker
 The stdout will display the generated API key.
 
 Then, you can run the server within Docker with:
+
 ```shell
 make run-docker
 ```
