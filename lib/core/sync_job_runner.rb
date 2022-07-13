@@ -41,12 +41,6 @@ module Core
 
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
 
-      Core::ElasticConnectorActions.ensure_content_index_exists(
-        @connector_settings.index_name,
-        App::Config[:use_analysis_icu],
-        App::Config[:content_language_code]
-      )
-
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
       @connector_instance.yield_documents(@connector_settings) do |document|
