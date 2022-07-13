@@ -97,7 +97,7 @@ This repository is always growing! At the moment, the connectors currently avail
 
 Don't see the connector you're looking for? If it is in the list of [Workplace Search Content Sources](https://www.elastic.co/guide/en/workplace-search/current/workplace-search-content-sources.html), it is probably on our roadmap to move here! See our [Getting Support](./docs/SUPPORT.md) guide for ways to reach out.
 
-Not seeing the connector you want there, either? We encourage community contirubions! See our [Contributors Guide](./docs/CONTRIBUTING.md).
+Not seeing the connector you want there, either? We encourage community contributions! See our [Contributors Guide](./docs/CONTRIBUTING.md).
 
 ### Sinatra Console
 run `make console`
