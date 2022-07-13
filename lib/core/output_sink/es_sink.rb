@@ -68,11 +68,6 @@ module Core::OutputSink
 
       @client.bulk(:body => ops)
       Utility::Logger.info "Sent #{ops.size} operations to the index #{index_name}"
-    rescue StandardError => e
-      Utility::Logger.error_with_backtrace(
-        message: "Failed to send operations to the index #{index_name}: #{e.message}",
-        exception: e
-      )
     end
 
     def ready_to_flush?
