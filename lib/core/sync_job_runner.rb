@@ -40,6 +40,7 @@ module Core
       return unless should_sync?
 
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
+
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
       @connector_instance.yield_documents(@connector_settings) do |document|
@@ -49,7 +50,11 @@ module Core
     rescue StandardError => e
       @status[:error] = e.message
     ensure
-      ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
+      if job_id.present?
+        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
+      else
+        Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}")
+      end
     end
 
     private

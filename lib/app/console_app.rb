@@ -43,21 +43,23 @@ module App
       puts 'Starting synchronization runner...'
       connector_id = App::Config[:connector_package_id]
       config_settings = Core::ConnectorSettings.fetch(connector_id)
-      Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      Core::ElasticConnectorActions.ensure_content_index_exists(
+        config_settings[:index_name],
+        App::Config[:use_analysis_icu],
+        App::Config[:content_language_code]
+      )
       Core::ElasticConnectorActions.ensure_job_index_exists
-      App::Connector.start!
+      App::Worker.start!
     end
 
     def start_sync_now
       return unless connector_registered?
-
       puts 'Initiating synchronization NOW...'
       connector_id = App::Config[:connector_package_id]
-      config_settings = Core::ConnectorSettings.fetch(connector_id)
-      Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
-      Core::ElasticConnectorActions.ensure_job_index_exists
       Core::ElasticConnectorActions.force_sync(connector_id)
-      App::Worker.start!
+
+      # Starting synchronization runner...
+      start_sync
     end
 
     def show_status
