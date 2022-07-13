@@ -31,7 +31,7 @@ module Core::OutputSink
     end
 
     def delete_multiple(ids)
-      print_header 'Deleting several ids'
+      print_header "Deleting several ids: #{ids}"
       Utility::Logger.info ids
     end
 
