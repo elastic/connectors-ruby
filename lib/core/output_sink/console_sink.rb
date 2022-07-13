@@ -26,7 +26,7 @@ module Core::OutputSink
     end
 
     def delete(id)
-      print_header 'Deleting single id'
+      print_header "Deleting single id: #{id}"
       Utility::Logger.info id
     end
 
