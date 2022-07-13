@@ -13,7 +13,7 @@ gem 'activesupport', '5.2.6'
 gem 'bson', '~> 4.2.2'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data', '= 1.2022.1'
-gem 'nokogiri', '>= 1.13.4', :require => false
+gem 'nokogiri', '>= 1.13.7', :require => false
 gem 'parse-cron', '~> 0.1.4'
 gem 'remedy', '~> 0.3.0'
 
@@ -25,6 +25,7 @@ group :test do
   gem 'rubocop-performance', '1.11.5'
   gem 'rspec-mocks'
   gem 'webmock'
+  gem 'rack', '>= 2.2.3.1'
   gem 'rack-test'
   gem 'ruby-debug-ide'
   gem 'pry-remote'
