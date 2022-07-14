@@ -18,11 +18,11 @@ module Connectors
     class Connector < Connectors::Base::Connector
       SERVICE_TYPE = 'gitlab'
 
-      def initialize
-        super()
+      def initialize(local_configuration = {})
+        super(local_configuration)
         @extractor = Connectors::GitLab::Extractor.new(
           :base_url => configurable_fields[:base_url][:value],
-          :api_token => local_configuration[:api_token]
+          :api_token => @local_configuration[:api_token]
         )
       end
 
@@ -34,7 +34,7 @@ module Connectors
         @configurable_fields ||= {
           :base_url => {
             :label => 'Base URL',
-            :value => local_configuration[:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
+            :value => @local_configuration[:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
       end

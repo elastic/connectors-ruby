@@ -14,7 +14,15 @@ require 'app/config'
 module Connectors
   module Base
     class Connector
-      def yield_documents(connector_settings); end
+      def initialize(local_configuration = {})
+        # connector-specific configuration that comes from the local yaml config file
+        # should be stored under the section that has the same name as the connector service_type
+        @local_configuration = local_configuration || {}
+      end
+
+      def yield_documents(connector_settings)
+        ;
+      end
 
       def source_status(params = {})
         health_check(params)
@@ -33,12 +41,6 @@ module Connectors
 
       def configurable_fields
         {}
-      end
-
-      # connector-specific configuration that comes from the local yaml config file
-      # should be stored under the section that has the same name as the connector service_type
-      def local_configuration
-        App::Config[service_type] || {}
       end
     end
   end
