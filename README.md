@@ -36,7 +36,7 @@ There's a `Makefile` in the root of the repository. You can run the `make` comma
 make build
 ```
 
-This command, apart from building the code, will also create the [configuration file](config/connectors.yml).
+This command, apart from building the code, will also create the configuration file `config/connectors.yml`.
 
 You can run the connector application using this command:
 
@@ -44,15 +44,20 @@ You can run the connector application using this command:
 make run
 ```
 
-However, `make run` needs some required data to be present in the [configuration file](config/connectors.yml), namely, the connector package ID and the service type. There's also some settings for the ICU Analysis Plugin (see below) that are required for applying correct mappings to the content indices. Example of the configuration values:
+However, `make run` needs some required data to be present in the configuration file `config/connectors.yml`, namely, the connector package ID and the service type. 
 
 ```yaml
 connector_package_id: my-connector-package-id
 service_type: gitlab
+```
 
-# how often the connector should check for scheduled sync jobs
-idle_timeout: 10
+There's also some optional settings for the ICU Analysis Plugin (see below) that are required for applying correct mappings to the content indices.
 
+NOTE: these are only needed for registering connectors bypassing the Kibana UI, e.g. [via the CLI](#the-cli).
+
+Example of the configuration values:
+
+```yaml
 # ICU Analysis Plugin is used (false by default)
 # turn this on if the ICU plugin - International Components for Unicode - is installed in your Elasticsearch instance
 # see https://www.elastic.co/guide/en/elasticsearch/plugins/current/analysis-icu.html
@@ -63,7 +68,7 @@ content_language_code: en
 
 Each connector application instance represents a single connector package. This means that currently, it's not supported to try and synchronize multiple service types in the same connector application. It's also recommended to use a separate index for each connector package. Otherwise, it's not guaranteed that the connector will be able to synchronize the data correctly.
 
-The connector package ID is generated when the connector is first registered with Enterprise Search. You can find the connector package ID in the Enterprise Search UI, on the page called `Content` under the `Enterprise Search` tab. When you click the `Create new index` button on this page, you will see several ingestion methods available. One of them is called `Build a connector package` - this is what the current repository represents. The connector package ID is created after you specify the index name and select the index language from a provided select list. This connector package ID should then be added to the `connector_package_id` setting in the [configuration file](config/connectors.yml), together with the language code that you selected for the index as `content_language_code`.
+The connector package ID is generated when the connector is first registered with Enterprise Search. You can find the connector package ID in the Enterprise Search UI, on the page called `Content` under the `Enterprise Search` tab. When you click the `Create new index` button on this page, you will see several ingestion methods available. One of them is called `Build a connector package` - this is what the current repository represents. The connector package ID is created after you specify the index name and select the index language from a provided select list. This connector package ID should then be added to the `connector_package_id` setting in the configuration file `config/connectors.yml`, together with the language code that you selected for the index as `content_language_code`.
 
 There's also another option to generate a connector package ID _omitting the Kibana UI_ - [via the experimental CLI](#cli_registering_connectors). 
 
@@ -91,7 +96,7 @@ Then, you can run the server within Docker with:
 make run-docker
 ```
 
-## The CLI
+## <a name="the-cli"></a> The CLI
 
 There's an experimental CLI that you can also use to interact with the connector. 
 
@@ -105,7 +110,7 @@ make exec_cli
 
 ### <a name="cli_registering_connectors"></a> Registering connectors
 
-The command that you need to use is `register connector with Elasticsearch`. It will bring up the following prompt:
+The menu option that you need to use is `register connector with Elasticsearch (register)`. It will bring up the following prompt:
 
 ```bash
 You already have registered a connector with ID: CHANGEME. Registering a new connector will overwrite the existing one.
@@ -133,7 +138,7 @@ As said, pressing any key will again display the CLI menu. You need to select th
 
 #### Scheduling connectors via the CLI
 
-The CLI has a menu option called `enable connector scheduling`.
+The CLI has a menu option called `enable connector scheduling (scheduling_on)`.
 
 ```bash
 Please select the command:
@@ -161,11 +166,74 @@ Press any key to continue...
 
 As you can see, the scheduling has been updated. Now, the `make run` command will actually try to synchronize the data every two minutes.
 
+#### Disabling connector scheduling via the CLI
+
 #### Scheduling connectors via the Kibana UI
+
+Use the menu option called `disable connector scheduling (scheduling_off)` to disable the connector scheduling. This will result in the following prompt:
+
+```bash
+Are you sure you want to disable scheduling for connector 1WGc7YEBRpZatOEsiw4f? (y/n)
+y
+I, [2022-07-14T15:03:22.675244 #91015]  INFO -- : Successfully updated field scheduling connector 1WGc7YEBRpZatOEsiw4f
+Scheduling disabled! Starting synchronization will have no effect now.
+Press any key to continue...
+```
+
+After this, `make run` will not try to synchronize the data anymore.
+
+#### Disabling connector scheduling via the Kibana UI
 
 TODO
 
-### Updating configuration values
+#### Updating the values of configurable fields
+
+The configurable fields are the fields that are part of the connector configuration. They are connector-specific and their list is defined in the `configurable_fields` method of the connector class. The CLI has a menu option called `update the values of configurable fields (set_configurable_field)` to update the values of the configurable fields. This menu option only works with one selected field at a time, so if you need to reconfigure several fields, you need to select and change them one by one. The flow looks approximately like this:
+
+```bash
+ 
+Please select the configurable field:
+--> Base URL (current value: {"label"=>"API Base Url", "value"=>"https://gitlab.com/api/v4"}, default: https://gitlab.com/api/v4) (base_url)
+Please enter the new value:
+https://some/other/url
+I, [2022-07-14T15:08:21.909539 #92618]  INFO -- : Successfully updated field configuration connector 1WGc7YEBRpZatOEsiw4f
+Configurable field is updated!
+Press any key to continue...
+```
+
+In this example, we updated the `base_url` field to the new value.
+
+#### Reading the values of configurable fields
+
+The menu command is called `read the stored values of configurable fields (read_configurable_fields)` and it will read both the currently persisted values from Elasticsearch and the defaults that are specified in the `configurable_fields` method of the connector class. If there are several fields, the command will display them all as a list. The flow looks this way:
+
+```bash
+Persisted values of configurable fields:
+* Base URL - current value: {"label"=>"Base URL", "value"=>"https://some/other/url"}, default: https://gitlab.com/api/v4
+Press any key to continue...  
+```
+
+#### Doing an ad-hoc synchronization
+
+Use the `start one-time synchronization NOW (sync_now)` menu option to do a one-off synchronization. This will not start the synchronization in the background, but will instead do it immediately. After the synchronization is done, the control will return back to the CLI.
+
+```bash
+
+#### Checking the third-party service status
+
+Use the CLI menu option called `check the status of a third-party service`. This will result in the following output:
+
+```bash
+Checking status...
+{:status=>"OK", :statusCode=>200, :message=>"Connected to GitLab Connector"}
+
+Status checked!
+Press any key to continue...
+```
+
+The connector implements a simple health check. It will check the status of the third-party service and return a JSON object with the status. The health check implementation may vary from connector to connector.
+
+### Updating configuration file values
 
 You can update the git branch, revision and project version in the `connectors.yml` file to your current values by
 running this command:
@@ -175,7 +243,19 @@ make refresh_config
 ```
 
 This command is also included in every `make run`, so when you re-run the app using the makefile, these values are updated, too.
-They are exposed in the root endpoint mentioned above. 
+They are exposed in the root endpoint mentioned above.
+
+
+#### Kicking the tires with the CLI
+
+NOTE: this is an experimental feature. It is not yet ready for production use and is therefore not a recommended way to set up the connector. However, if you want to just try registering and synchronizing a connector to quickly see if it works, you can use the CLI. The flow would look like this:
+
+ * use the `register` command to create a new connector and get a connector package ID;
+ * write the connector package ID into the `connectors.yml` file;
+ * use the `scheduling_on` command to set the synchronization schedule;
+ * do the `make run` command to start the synchronization flow.
+
+Alternatively, you can run the one-time synchronization manually by using the `sync_now` CLI command instead of the last step.
 
 ### Configuration
 
