@@ -20,9 +20,7 @@ module Connectors
         @local_configuration = local_configuration || {}
       end
 
-      def yield_documents(connector_settings)
-        ;
-      end
+      def yield_documents(connector_settings); end
 
       def source_status(params = {})
         health_check(params)
