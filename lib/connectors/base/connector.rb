@@ -38,7 +38,7 @@ module Connectors
         health_check(params)
         { :status => 'OK', :statusCode => 200, :message => "Connected to #{self.class.display_name}" }
       rescue StandardError => e
-        { :status => 'FAILURE', :statusCode => e.is_a?(custom_client_error) ? e.status_code : 500, :message => e.message }
+        { :status => 'FAILURE', :statusCode => 500, :message => e.message }
       end
     end
   end

@@ -11,6 +11,7 @@ require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
 require 'core/output_sink'
+require 'utility'
 
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
@@ -34,12 +35,25 @@ module Core
 
     def execute
       unless @connector_settings.configuration_initialized?
-        @connector_settings.update_configuration(@connector_class.configurable_fields)
+        @connector_settings.initialize_configuration(@connector_class.configurable_fields)
       end
 
       validate_configuration!
-      return unless should_sync?
+      if @connector_instance.source_status[:status] == 'OK'
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
+      else
+        Utility::Logger.error("Connector #{@connector_settings['_id']} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
 
+        return
+      end
+
+      do_sync! if should_sync?
+    end
+
+    private
+
+    def do_sync!
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
@@ -50,6 +64,8 @@ module Core
       end
     rescue StandardError => e
       @status[:error] = e.message
+      Utility::ExceptionTracking.log_exception(e)
+      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
     ensure
       if job_id.present?
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
@@ -57,8 +73,6 @@ module Core
         Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}")
       end
     end
-
-    private
 
     def validate_configuration!
       expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort

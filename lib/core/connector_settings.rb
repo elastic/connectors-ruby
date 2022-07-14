@@ -50,8 +50,12 @@ module Core
       configuration.present?
     end
 
-    def update_configuration(configuration)
+    def initialize_configuration(configuration)
+      # TODO: actually check it on the level lower, so that desync does not happen if configuration was updated elsewhere
+      raise 'Configuration is already initialized!' if configuration_initialized?
+
       ElasticConnectorActions.update_connector_configuration(id, configuration) # TODO: I don't like that it's hidden here now
+      ElasticConnectorActions.update_connector_status(id, Connectors::ConnectorStatus::NEEDS_CONFIGURATION)
 
       @elasticsearch_response[:_source][:configuration] = configuration
     end
