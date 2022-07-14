@@ -12,6 +12,10 @@ are subject to change and are not covered by the support SLA of general release
 
 Note #2: If you are looking for the version of the connector framework that is described in [Bring Your Own Connector](https://www.elastic.co/blog/bring-your-own-enterprise-search-connector) blog article that was describing the version from the 8.3 release, it would be advisable to check out/fork the [relevant branch](https://github.com/elastic/connectors-ruby/tree/8.3).
 
+## Connector Packages
+
+The connector packages are available in the [lib/connectors](lib/connectors) directory. The list of implemented connectors is subject to change, as we are constantly working to add new connectors. Bring your own connector and add it to our framework!
+
 ### System Requirements
 
 Under Linux or Macos, you can run the application using Docker or directly on your system.
@@ -203,6 +207,8 @@ Press any key to continue...
 
 In this example, we updated the `base_url` field to the new value.
 
+NOTE: In general, it's not recommended to put any sensitive data (credentials, API keys, etc.) in the configurable fields. It's better to store them in a `config/connectors.yml` or another local file which is NOT under source control, or read them from the environment variables. The configuration file path is described in the section [Local connector properties](#local-connector-properties). 
+
 #### Reading the values of configurable fields
 
 The menu command is called `read the stored values of configurable fields (read_configurable_fields)` and it will read both the currently persisted values from Elasticsearch and the defaults that are specified in the `configurable_fields` method of the connector class. If there are several fields, the command will display them all as a list. The flow looks this way:
@@ -272,6 +278,22 @@ not change the one in the dev tree.
 
 When the connector application is launched, it will pick [config/connectors.yml](config/connectors.yml) by default, 
 but you can provide your own configuration file by using the **CONNECTORS_CONFIG** env.
+
+#### <a name="local-connector-properties></a>Local connector properties
+
+Sensitive data, such as API keys, credentials, etc. could also be stored in the configuration file, provided that it's NOT under source control. Every connector reads this file on creation and is looking for the section called `<service_type>`, where `service_type` is the name that was provided in the corresponding property of the configuration file. You can look at it as a short identifier allowing you to specify which third-party service is behind the connector, or anything to help identify which connector you're running. Example:
+
+```yaml
+service_type: gitlab
+gitlab:
+  api_key: <your-api-key>
+```
+
+This way, you're saying that the connector is for GitLab, and there you're providing the API key for GitLab. And it also means that the `GitLab::Connector` class will have a @local_configuration variable that will contain whatever is in the `gitlab` section of the configuration file. So inside the connector class, you can access the API key like this:
+
+```ruby
+@local_configuration[:api_token]
+```
 
 ### Contribute 🚀
 We welcome contributors to the project. Before you begin, please read the [Connectors Contributor's Guide](./docs/CONTRIBUTING.md).
