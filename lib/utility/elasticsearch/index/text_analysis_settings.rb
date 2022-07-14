@@ -66,7 +66,7 @@ module Utility
         def initialize(language_code: nil, analysis_icu: false)
           @language_code = (language_code || DEFAULT_LANGUAGE).to_sym
 
-          raise UnsupportedLanguageCode unless language_data[@language_code]
+          raise UnsupportedLanguageCode, "Language '#{language_code}' is not supported" unless language_data[@language_code]
 
           @analysis_icu = analysis_icu
           @analysis_settings = icu_settings(analysis_icu)
