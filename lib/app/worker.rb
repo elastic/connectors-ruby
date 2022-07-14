@@ -11,6 +11,7 @@ require 'connectors'
 require 'core'
 require 'utility'
 require 'app/config'
+require 'concurrent'
 
 module App
   module Worker
@@ -21,6 +22,7 @@ module App
         pre_flight_check
 
         Utility::Logger.info('Starting to process jobs...')
+        start_heartbeat_task
         start_polling_jobs
       end
 
@@ -36,6 +38,19 @@ module App
           App::Config[:use_analysis_icu],
           App::Config[:content_language_code]
         )
+      end
+
+      def start_heartbeat_task
+        interval_seconds = 5
+        Utility::Logger.debug("Starting heartbeat timer task with interval #{interval_seconds} seconds.")
+        task = Concurrent::TimerTask.new(execution_interval: interval_seconds) do
+          Utility::Logger.debug("Sending heartbeat for the connector")
+          Core::ElasticConnectorActions.heartbeat(App::Config['connector_package_id'])
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer terminated due to unexpected error.')
+        end
+
+        task.execute
       end
 
       def start_polling_jobs
