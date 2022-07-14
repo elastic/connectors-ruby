@@ -34,6 +34,10 @@ module Core
       self[:index_name]
     end
 
+    def connector_status
+      self[:status]
+    end
+
     def service_type
       self[:service_type]
     end
