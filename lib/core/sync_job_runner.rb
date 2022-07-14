@@ -74,8 +74,6 @@ module Core
       end
     end
 
-    private
-
     def validate_configuration!
       expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
