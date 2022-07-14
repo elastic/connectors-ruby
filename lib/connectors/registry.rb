@@ -41,13 +41,13 @@ module Connectors
   REGISTRY = Factory.new
 
   require_relative './stub_connector/connector'
-  REGISTRY.register(Connectors::StubConnector::Connector::SERVICE_TYPE, Connectors::StubConnector::Connector)
+  REGISTRY.register(Connectors::StubConnector::Connector.service_type, Connectors::StubConnector::Connector)
 
   # loading plugins (might replace this with a directory scan and conventions on names)
   require_relative './gitlab/connector'
 
-  REGISTRY.register(Connectors::GitLab::Connector::SERVICE_TYPE, Connectors::GitLab::Connector)
+  REGISTRY.register(Connectors::GitLab::Connector.service_type, Connectors::GitLab::Connector)
 
   require_relative 'mongodb/connector'
-  REGISTRY.register(Connectors::MongoDB::Connector::SERVICE_TYPE, Connectors::MongoDB::Connector)
+  REGISTRY.register(Connectors::MongoDB::Connector.service_type, Connectors::MongoDB::Connector)
 end

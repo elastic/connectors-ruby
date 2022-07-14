@@ -85,5 +85,16 @@ describe Utility::Elasticsearch::Index::TextAnalysisSettings do
       it { is_expected.to have_key(:"#{language_code}-stop-words-filter") }
       it { is_expected.to have_key(:"#{language_code}-elision") }
     end
+
+    context 'when language_code is nil' do
+      let(:language_code) { nil }
+      let(:analysis_icu) { false }
+      let(:subject) { described_class.new(language_code: language_code, analysis_icu: analysis_icu).to_h }
+
+      it 'fallbacks to english' do
+        english_settings = described_class.new(language_code: :en, analysis_icu: analysis_icu)
+        expect(subject).to eq(english_settings.to_h)
+      end
+    end
   end
 end

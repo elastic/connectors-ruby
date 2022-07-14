@@ -16,27 +16,29 @@ require 'core/output_sink'
 module Connectors
   module GitLab
     class Connector < Connectors::Base::Connector
-      SERVICE_TYPE = 'gitlab'
-
-      def initialize(local_configuration = {})
-        super(local_configuration)
-        @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => configurable_fields[:base_url][:value],
-          :api_token => @local_configuration[:api_token]
-        )
+      def self.service_type
+        'gitlab'
       end
 
-      def display_name
+      def self.display_name
         'GitLab Connector'
       end
 
-      def configurable_fields
-        @configurable_fields ||= {
+      def self.configurable_fields
+        {
           :base_url => {
             :label => 'Base URL',
             :value => @local_configuration[:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
+      end
+
+      def initialize(local_configuration = {})
+        super(local_configuration)
+        @extractor = Connectors::GitLab::Extractor.new(
+          :base_url => self.class.configurable_fields[:base_url][:value],
+          :api_token => self.class.configurable_fields[:api_token][:value]
+        )
       end
 
       def yield_documents(_connector_settings)

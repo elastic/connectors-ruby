@@ -10,7 +10,7 @@
     prune-dead-branches: true
     scm:
       - github:
-          repo: connectors
+          repo: connectors-ruby
           repo-owner: elastic
           reference-repo: /var/lib/jenkins/.git-references/connectors.git
           disable-pr-notifications: true
