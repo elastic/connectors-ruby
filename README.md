@@ -57,7 +57,7 @@ service_type: gitlab
 
 There's also some optional settings for the ICU Analysis Plugin (see below) that are required for applying correct mappings to the content indices.
 
-NOTE: these are only needed for registering connectors bypassing the Kibana UI, e.g. [via the CLI](#the-cli).
+> NOTE: these are only needed for registering connectors bypassing the Kibana UI, e.g. [via the CLI](#the-cli).
 
 Example of the configuration values:
 
@@ -80,7 +80,7 @@ The service_type is the type of service that the connector is connecting to. It'
 
 After the connector is registered and the ID is stored in the configuration file, you can run the connector application using the `make run` command.
 
-NOTE: by default, the connector has no schedule. So when you register a connector, it will NOT be immediately synchronized. See the [Scheduling connectors](#cli_scheduling_connectors) section for more information. 
+> NOTE: by default, the connector has no schedule. So when you register a connector, it will NOT be immediately synchronized. See the [Scheduling connectors](#cli_scheduling_connectors) section for more information. 
 
 ### Running the connector with Docker
 
@@ -92,8 +92,6 @@ First, build the Docker image with:
 make build-docker
 ```
 
-The stdout will display the generated API key.
-
 Then, you can run the server within Docker with:
 
 ```shell
@@ -104,7 +102,7 @@ make run-docker
 
 There's an experimental CLI that you can also use to interact with the connector. 
 
-NOTE: the CLI is a work in progress and though available, should be used at your own risk. It's not yet a fully functional feature and has no parity with the Enterprise Search UI. However, it's a good starting point for experimenting with the connector and it does contain some useful commands.
+> NOTE: the CLI is a work in progress and though available, should be used at your own risk. It's not yet a fully functional feature and has no parity with the Enterprise Search UI. However, it's a good starting point for experimenting with the connector and it does contain some useful commands.
 
 Running this command in the root of the repository will bring up the CLI menu:
 
@@ -122,6 +120,8 @@ Are you sure you want to continue? (y/n)
 ```
 
 The `CHANGEME` is a placeholder that we're using in the example config file, so you can safely overlook this warning and proceed. In case the connector was already registered, the real connector package ID will be displayed instead. You should confirm the overwrite if you want to discard the previously registered connector and its data. You will also need to manually drop the index that was created for the previously registered connector, especially if you want to use the same name for the newly created index.
+
+> NOTE: if you plan to use this index to create an App Search engine, then its name should start with the prefix `search-` as described in the [relevant documentation](https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-create.html). The [Elasticsearch index engines](https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines-create.html) feature is currently in technical preview.
 
 Confirming the overwrite will result in the following output:
 
@@ -207,7 +207,7 @@ Press any key to continue...
 
 In this example, we updated the `base_url` field to the new value.
 
-NOTE: In general, it's not recommended to put any sensitive data (credentials, API keys, etc.) in the configurable fields. It's better to store them in a `config/connectors.yml` or another local file which is NOT under source control, or read them from the environment variables. The configuration file path is described in the section [Local connector properties](#local-connector-properties). 
+> NOTE: In general, it's not recommended to put any sensitive data (credentials, API keys, etc.) in the configurable fields. It's better to store them in a `config/connectors.yml` or another local file which is NOT under source control, or read them from the environment variables. The configuration file path is described in the section [Local connector properties](#local-connector-properties). 
 
 #### Reading the values of configurable fields
 
@@ -254,7 +254,7 @@ They are exposed in the root endpoint mentioned above.
 
 #### Kicking the tires with the CLI
 
-NOTE: this is an experimental feature. It is not yet ready for production use and is therefore not a recommended way to set up the connector. However, if you want to just try registering and synchronizing a connector to quickly see if it works, you can use the CLI. The flow would look like this:
+> NOTE: As stated above, this is an experimental feature. It is not yet ready for production use and is therefore not a recommended way to set up the connector. However, if you want to just try registering and synchronizing a connector to quickly see if it works, you can use the CLI. The flow would look like this:
 
  * use the `register` command to create a new connector and get a connector package ID;
  * write the connector package ID into the `connectors.yml` file;
@@ -286,7 +286,7 @@ Sensitive data, such as API keys, credentials, etc. could also be stored in the 
 ```yaml
 service_type: gitlab
 gitlab:
-  api_key: <your-api-key>
+  api_token: <your-api-key>
 ```
 
 This way, you're saying that the connector is for GitLab, and there you're providing the API key for GitLab. And it also means that the `GitLab::Connector` class will have a @local_configuration variable that will contain whatever is in the `gitlab` section of the configuration file. So inside the connector class, you can access the API key like this:
