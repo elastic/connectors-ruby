@@ -10,7 +10,7 @@
 eshPipeline(
     timeout: 45,
     project_name: 'Connectors',
-    repository: 'connectors',
+    repository: 'connectors-ruby',
     stage_name: 'Connectors Unit Tests',
     stages: [
        [
