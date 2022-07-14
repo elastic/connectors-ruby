@@ -14,11 +14,11 @@ describe Connectors::GitLab::Connector do
     )
   end
 
-  context '#source_status' do
-    before do
-      stub_const('App::Config', app_config)
-    end
+  subject do
+    Connectors::GitLab::Connector.new(app_config)
+  end
 
+  context '#source_status' do
     it 'correctly returns true on 200' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 200, :body => user_json)

@@ -27,7 +27,8 @@ module Connectors
     def connector(name, params = nil)
       klass = connector_class(name)
       if klass.present?
-        return params.nil? ? klass.new : klass.new(params)
+        local_configuration = App::Config[name]
+        return params.nil? ? klass.new(local_configuration) : klass.new(local_configuration, params)
       end
       raise "Connector #{name} is not yet registered. You need to register it before use"
     end

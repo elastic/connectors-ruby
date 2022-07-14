@@ -12,7 +12,6 @@ require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
 require 'core/output_sink'
-require 'app/config'
 
 module Connectors
   module GitLab
@@ -27,22 +26,18 @@ module Connectors
 
       def self.configurable_fields
         {
-          :api_token => {
-            :label => 'API Token',
-            :value => App::Config[:gitlab][:api_token]
-          },
           :base_url => {
             :label => 'Base URL',
-            :value => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
+            :value => Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
       end
 
-      def initialize
-        super()
+      def initialize(local_configuration = {})
+        super(local_configuration)
         @extractor = Connectors::GitLab::Extractor.new(
           :base_url => self.class.configurable_fields[:base_url][:value],
-          :api_token => self.class.configurable_fields[:api_token][:value]
+          :api_token => @local_configuration[:api_token]
         )
       end
 

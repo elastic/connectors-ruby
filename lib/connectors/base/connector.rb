@@ -9,6 +9,7 @@
 require 'bson'
 require 'core/output_sink'
 require 'utility/logger'
+require 'app/config'
 
 module Connectors
   module Base
@@ -23,6 +24,12 @@ module Connectors
 
       def self.service_type
         raise 'Not implemented for this connector'
+      end
+
+      def initialize(local_configuration = {})
+        # connector-specific configuration that comes from the local yaml config file
+        # should be stored under the section that has the same name as the connector service_type
+        @local_configuration = local_configuration || {}
       end
 
       def yield_documents(connector_settings); end
