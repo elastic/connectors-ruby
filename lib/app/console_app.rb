@@ -26,8 +26,7 @@ module App
     INDEX_NAME_REGEXP = /[a-zA-Z]+[\d_\-a-zA-Z]*/
 
     @commands = [
-      { :command => :sync, :hint => 'start synchronization' },
-      { :command => :sync_now, :hint => 'start synchronization NOW' },
+      { :command => :sync_now, :hint => 'start one-time synchronization NOW' },
       { :command => :register, :hint => 'register connector with Elasticsearch' },
       { :command => :scheduling_on, :hint => 'enable connector scheduling' },
       { :command => :scheduling_off, :hint => 'disable connector scheduling' },
@@ -37,29 +36,20 @@ module App
       { :command => :exit, :hint => 'end the program' }
     ]
 
-    def start_sync
-      return unless connector_registered?
-
-      puts 'Starting synchronization runner...'
-      connector_id = App::Config[:connector_package_id]
-      config_settings = Core::ConnectorSettings.fetch(connector_id)
-      Core::ElasticConnectorActions.ensure_content_index_exists(
-        config_settings[:index_name],
-        App::Config[:use_analysis_icu],
-        App::Config[:content_language_code]
-      )
-      Core::ElasticConnectorActions.ensure_job_index_exists
-      App::Worker.start!
-    end
-
     def start_sync_now
       return unless connector_registered?
       puts 'Initiating synchronization NOW...'
       connector_id = App::Config[:connector_package_id]
       Core::ElasticConnectorActions.force_sync(connector_id)
 
-      # Starting synchronization runner...
-      start_sync
+      Core::ElasticConnectorActions.ensure_connectors_index_exists
+      config_settings = Core::ConnectorSettings.fetch(connector_id)
+      Core::ElasticConnectorActions.ensure_content_index_exists(
+        config_settings[:index_name],
+        App::Config[:use_analysis_icu],
+        App::Config[:content_language_code]
+      )
+      Core::SyncJobRunner.new(config_settings, App::Config[:service_type]).execute
     end
 
     def show_status
@@ -227,10 +217,9 @@ module App
     loop do
       command = read_command
       case command
-      when :sync
-        start_sync
       when :sync_now
         start_sync_now
+        wait_for_keypress('Synchronization finished!')
       when :status
         show_status
         wait_for_keypress('Status checked!')
