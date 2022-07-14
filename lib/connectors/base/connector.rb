@@ -9,6 +9,7 @@
 require 'bson'
 require 'core/output_sink'
 require 'utility/logger'
+require 'app/config'
 
 module Connectors
   module Base
@@ -32,6 +33,12 @@ module Connectors
 
       def configurable_fields
         {}
+      end
+
+      # connector-specific configuration that comes from the local yaml config file
+      # should be stored under the section that has the same name as the connector service_type
+      def local_configuration
+        App::Config[service_type] || {}
       end
     end
   end
