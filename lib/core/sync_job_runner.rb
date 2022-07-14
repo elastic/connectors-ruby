@@ -11,6 +11,7 @@ require 'concurrent'
 require 'cron_parser'
 require 'connectors/registry'
 require 'core/output_sink'
+require 'utility'
 
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
@@ -23,6 +24,7 @@ module Core
     def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name)
+      @connector_class = Connectors::REGISTRY.connector_class(service_type)
       @connector_instance = Connectors::REGISTRY.connector(service_type)
       @status = {
         :indexed_document_count => 0,
@@ -33,13 +35,27 @@ module Core
 
     def execute
       unless @connector_settings.configuration_initialized?
-        @connector_settings.update_configuration(@connector_instance.configurable_fields)
+        @connector_settings.initialize_configuration(@connector_class.configurable_fields)
       end
 
       validate_configuration!
-      return unless should_sync?
+      if @connector_instance.source_status[:status] == 'OK'
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
+      else
+        Utility::Logger.error("Connector #{@connector_settings['_id']} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
 
+        return
+      end
+
+      do_sync! if should_sync?
+    end
+
+    private
+
+    def do_sync!
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
+
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
       @connector_instance.yield_documents(@connector_settings) do |document|
@@ -48,15 +64,19 @@ module Core
       end
     rescue StandardError => e
       @status[:error] = e.message
+      Utility::ExceptionTracking.log_exception(e)
+      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
     ensure
-      ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
+      if job_id.present?
+        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
+      else
+        Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}")
+      end
     end
 
-    private
-
     def validate_configuration!
-      expected_fields = @connector_instance.configurable_fields.keys.map(&:to_s)
-      actual_fields = @connector_settings.configuration.keys.map(&:to_s)
+      expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
+      actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
       raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
     end

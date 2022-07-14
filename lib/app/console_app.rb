@@ -43,21 +43,23 @@ module App
       puts 'Starting synchronization runner...'
       connector_id = App::Config[:connector_package_id]
       config_settings = Core::ConnectorSettings.fetch(connector_id)
-      Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
+      Core::ElasticConnectorActions.ensure_content_index_exists(
+        config_settings[:index_name],
+        App::Config[:use_analysis_icu],
+        App::Config[:content_language_code]
+      )
       Core::ElasticConnectorActions.ensure_job_index_exists
-      App::Connector.start!
+      App::Worker.start!
     end
 
     def start_sync_now
       return unless connector_registered?
-
       puts 'Initiating synchronization NOW...'
       connector_id = App::Config[:connector_package_id]
-      config_settings = Core::ConnectorSettings.fetch(connector_id)
-      Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name])
-      Core::ElasticConnectorActions.ensure_job_index_exists
       Core::ElasticConnectorActions.force_sync(connector_id)
-      App::Worker.start!
+
+      # Starting synchronization runner...
+      start_sync
     end
 
     def show_status
@@ -183,11 +185,12 @@ module App
       id = App::Config['connector_package_id']
 
       connector = current_connector
+      connector_class = connector.class
       current_values = Core::ConnectorSettings.fetch(id)&.configuration
       return unless connector.present?
 
       puts 'Provided configurable fields:'
-      configurable_fields = connector.configurable_fields
+      configurable_fields = connector_class.configurable_fields
       fields = configurable_fields.each_key.map do |key|
         field = configurable_fields[key].with_indifferent_access
         current_value = current_values&.fetch(key, nil)
@@ -208,12 +211,14 @@ module App
       id = App::Config['connector_package_id']
 
       connector = current_connector
+      connector_class = connector.class
+
       current_values = Core::ConnectorSettings.fetch(id)&.configuration
       return unless connector.present?
 
       puts 'Persisted values of configurable fields:'
-      connector.configurable_fields.each_key.each do |key|
-        field = connector.configurable_fields[key].with_indifferent_access
+      connector_class.configurable_fields.each_key.each do |key|
+        field = connector_class.configurable_fields[key].with_indifferent_access
         current_value = current_values&.fetch(key, nil)
         puts "* #{field[:label]} - current value: #{current_value}, default: #{field[:value]}"
       end

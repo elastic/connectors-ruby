@@ -12,36 +12,33 @@ require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
 require 'core/output_sink'
-require 'app/config'
 
 module Connectors
   module GitLab
     class Connector < Connectors::Base::Connector
-      SERVICE_TYPE = 'gitlab'
-
-      def initialize
-        super()
-        @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => configurable_fields[:base_url][:value],
-          :api_token => configurable_fields[:api_token][:value]
-        )
+      def self.service_type
+        'gitlab'
       end
 
-      def display_name
+      def self.display_name
         'GitLab Connector'
       end
 
-      def configurable_fields
-        @configurable_fields ||= {
-          :api_token => {
-            :label => 'API Token',
-            :value => App::Config[:gitlab][:api_token]
-          },
+      def self.configurable_fields
+        {
           :base_url => {
             :label => 'Base URL',
-            :value => App::Config[:gitlab][:api_base_url] || Connectors::GitLab::DEFAULT_BASE_URL
+            :value => Connectors::GitLab::DEFAULT_BASE_URL
           }
         }
+      end
+
+      def initialize(local_configuration = {})
+        super(local_configuration)
+        @extractor = Connectors::GitLab::Extractor.new(
+          :base_url => self.class.configurable_fields[:base_url][:value],
+          :api_token => @local_configuration[:api_token]
+        )
       end
 
       def yield_documents(_connector_settings)
