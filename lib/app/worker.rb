@@ -41,7 +41,7 @@ module App
       end
 
       def start_heartbeat_task
-        interval_seconds = 5
+        interval_seconds = 60 # seconds
         Utility::Logger.debug("Starting heartbeat timer task with interval #{interval_seconds} seconds.")
         task = Concurrent::TimerTask.new(execution_interval: interval_seconds) do
           Utility::Logger.debug("Sending heartbeat for the connector")
