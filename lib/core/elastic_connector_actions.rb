@@ -7,7 +7,8 @@
 # frozen_string_literal: true
 #
 require 'active_support/core_ext/hash'
-require 'utility'
+require 'utility/elasticsearch/index/mappings'
+require 'utility/elasticsearch/index/text_analysis_settings'
 
 module Core
   class ElasticConnectorActions
@@ -72,22 +73,42 @@ module Core
         }
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+
+        body = {
+          :connector_id => connector_package_id,
+          :status => Connectors::SyncStatus::IN_PROGRESS,
+          :worker_hostname => Socket.gethostname,
+          :created_at => Time.now
+        }
+        job = client.index(:index => JOB_INDEX, :body => body)
+
         Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
+        job['_id']
       end
 
-      def complete_sync(connector_package_id, error)
+      def complete_sync(connector_package_id, job_id, status)
+        sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
+
         body = {
           :doc => {
-            :last_sync_status => error.nil? ? Connectors::SyncStatus::COMPLETED : Connectors::SyncStatus::FAILED,
-            :last_sync_error => error,
+            :last_sync_status => sync_status,
+            :last_sync_error => status[:error],
             :last_synced => Time.now
           }
         }
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
 
-        if error
-          Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{error}")
+        body = {
+          :doc => {
+            :status => sync_status,
+            :completed_at => Time.now
+          }.merge(status)
+        }
+        client.update(:index => JOB_INDEX, :id => job_id, :body => body)
+
+        if status[:error]
+          Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{status[:error]}")
         else
           Utility::Logger.info("Successfully synced for connector #{connector_package_id}")
         end
@@ -98,8 +119,35 @@ module Core
       end
 
       # should only be used in CLI
+      def ensure_content_index_exists(index_name, use_icu_locale = false, language_code = nil)
+        settings = Utility::Elasticsearch::Index::TextAnalysisSettings.new(:language_code => language_code, :analysis_icu => use_icu_locale).to_h
+        mappings = Utility::Elasticsearch::Index::Mappings.default_text_fields_mappings(:connectors_index => true)
+
+        body_payload = { settings: settings, mappings: mappings }
+        ensure_index_exists(index_name, body_payload)
+      end
+
+      # should only be used in CLI
       def ensure_index_exists(index_name, body = {})
-        client.indices.create(:index => index_name, :body => body) unless client.indices.exists?(:index => index_name)
+        if client.indices.exists?(:index => index_name)
+          Utility::Logger.info("Index #{index_name} already exists. Checking mappings...")
+          response = client.indices.get_mapping(:index => index_name)
+          existing = response[index_name]['mappings']
+          Utility::Logger.info("New settings/mappings: #{body}")
+          if existing.empty?
+            Utility::Logger.info("Index #{index_name} has no mappings. Closing to create settings and mappings...")
+            client.indices.close(:index => index_name)
+            client.indices.put_settings(:index => index_name, :body => body[:settings], :expand_wildcards => 'all')
+            client.indices.put_mapping(:index => index_name, :body => body[:mappings], :expand_wildcards => 'all')
+            client.indices.open(:index => index_name)
+            Utility::Logger.info("Index #{index_name} mappings added. Index reopened.")
+          else
+            Utility::Logger.info("Index #{index_name} already has mappings: #{existing}. Skipping...")
+          end
+        else
+          client.indices.create(:index => index_name, :body => body)
+          Utility::Logger.info("Created index #{index_name}")
+        end
       end
 
       def system_index_body(alias_name: nil, mappings: nil)
@@ -146,6 +194,7 @@ module Core
             :connector_id => { :type => :keyword },
             :status => { :type => :keyword },
             :error => { :type => :text },
+            :worker_hostname => { :type => :keyword },
             :indexed_document_count => { :type => :integer },
             :deleted_document_count => { :type => :integer },
             :created_at => { :type => :date },

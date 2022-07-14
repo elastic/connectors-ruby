@@ -8,7 +8,7 @@ You may also want to read the [development guide](./DEVELOPING.md).
 
 * Prior to opening a pull request, please:
     * Read the entirety of this document
-    * [Create an issue](https://github.com/elastic/connectors/issues) to discuss the scope of your proposal.
+    * [Create an issue](https://github.com/elastic/connectors-ruby/issues) to discuss the scope of your proposal.
     * Sign the [Contributor License Agreement](https://www.elastic.co/contributor-agreement/). We are not asking you to
       assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all
       contributors in order to assure our users of the origin and continuing existence of the code. You only need to 
