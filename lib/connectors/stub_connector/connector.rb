@@ -29,11 +29,18 @@ module Connectors
         }
       end
 
+      def initialize(local_configuration:, connector_settings:)
+        super(
+          local_configuration: local_configuration,
+          connector_settings: connector_settings
+        )
+      end
+
       def health_check(_params)
         true
       end
 
-      def yield_documents(_connector)
+      def yield_documents
         data = { name: 'stub connector' }
         yield data
       end

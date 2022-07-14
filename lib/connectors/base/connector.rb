@@ -26,13 +26,14 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      def initialize(local_configuration = {})
+      def initialize(local_configuration:, connector_settings:)
         # connector-specific configuration that comes from the local yaml config file
         # should be stored under the section that has the same name as the connector service_type
         @local_configuration = local_configuration || {}
+        @connector_settings = connector_settings
       end
 
-      def yield_documents(connector_settings); end
+      def yield_documents; end
 
       def source_status(params = {})
         health_check(params)
