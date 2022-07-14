@@ -10,7 +10,7 @@ Note #1: The connector framework is a tech preview feature. Tech preview feature
 are subject to change and are not covered by the support SLA of general release
 (GA) features. Elastic plans to promote this feature to GA in a future release.
 
-Note #2: If you are looking for the version of the connector framework that is described in [Bring Your Own Connector](https://www.elastic.co/blog/bring-your-own-enterprise-search-connector) blog article that was describing the version from the 8.3 release, it would be advisable to check out/fork the [relevant branch](https://github.com/elastic/connectors/tree/8.3).
+Note #2: If you are looking for the version of the connector framework that is described in [Bring Your Own Connector](https://www.elastic.co/blog/bring-your-own-enterprise-search-connector) blog article that was describing the version from the 8.3 release, it would be advisable to check out/fork the [relevant branch](https://github.com/elastic/connectors-ruby/tree/8.3).
 
 ### System Requirements
 
