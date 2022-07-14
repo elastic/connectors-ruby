@@ -10,12 +10,17 @@ describe Connectors::GitLab::Connector do
   let(:app_config) do
     Hashie::Mash.new(
       :elasticsearch => { :api_key => 'hello-world', :hosts => 'localhost:9200' },
-      :gitlab => { :base_url => base_url, :api_token => 'some_token' }
+      :gitlab => { :api_token => 'some_token' }
+    )
+  end
+  let(:connector_settings) do
+    Hashie::Mash.new(
+      :configuration => { :base_url => { :value => base_url } }
     )
   end
 
   subject do
-    Connectors::GitLab::Connector.new(app_config)
+    Connectors::GitLab::Connector.new(local_configuration: app_config, connector_settings: connector_settings)
   end
 
   context '#source_status' do
