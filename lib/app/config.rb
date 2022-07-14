@@ -36,6 +36,9 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:gitlab).hash do
       required(:api_token).value(:string)
     end
+
+    required(:use_analysis_icu).value(:bool)
+    required(:content_language_code).value(:string)
   end
 end
 
