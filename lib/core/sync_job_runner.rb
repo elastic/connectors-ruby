@@ -39,10 +39,22 @@ module Core
       end
 
       validate_configuration!
-      return unless should_sync?
+      if @connector_instance.source_status[:status] == 'OK'
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
+      else
+        Utility::Logger.error("Connector #{@connector_settings['_id']} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
 
+        return
+      end
+
+      do_sync! if should_sync?
+    end
+
+    private
+
+    def do_sync!
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
-      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
@@ -52,7 +64,7 @@ module Core
       end
     rescue StandardError => e
       @status[:error] = e.message
-      Utility::ExceptionTracking::log_exception(e)
+      Utility::ExceptionTracking.log_exception(e)
       ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
     ensure
       if job_id.present?
