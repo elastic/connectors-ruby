@@ -40,7 +40,7 @@ module Core
     end
 
     def connector_status_allows_sync?
-      Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC.include?(connector_status) 
+      Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC.include?(connector_status)
     end
 
     def service_type
