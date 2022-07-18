@@ -34,14 +34,12 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration: {}, connector_settings: {})
+      def initialize(local_configuration: {}, remote_configuration: {})
         super
 
-        config = connector_settings.configuration
-
-        @host = config[:host][:value]
-        @database = config[:database][:value]
-        @collection = config[:collection][:value]
+        @host = remote_configuration[:host][:value]
+        @database = remote_configuration[:database][:value]
+        @collection = remote_configuration[:collection][:value]
       end
 
       def health_check(_params)

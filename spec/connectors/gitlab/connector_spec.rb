@@ -13,14 +13,14 @@ describe Connectors::GitLab::Connector do
       :gitlab => { :api_token => 'some_token' }
     )
   end
-  let(:connector_settings) do
-    Hashie::Mash.new(
-      :configuration => { :base_url => { :value => base_url } }
-    )
+  let(:remote_config) do
+    {
+      :base_url => { :value => base_url }
+    }
   end
 
   subject do
-    Connectors::GitLab::Connector.new(local_configuration: app_config, connector_settings: connector_settings)
+    Connectors::GitLab::Connector.new(local_configuration: app_config, remote_configuration: remote_config)
   end
 
   context '#source_status' do

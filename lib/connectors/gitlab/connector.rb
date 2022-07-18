@@ -33,12 +33,12 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration: {}, connector_settings: {})
+      def initialize(local_configuration: {}, remote_configuration: {})
         super
 
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => connector_settings.configuration[:base_url][:value],
-          :api_token => @local_configuration[:api_token]
+          :base_url => remote_configuration[:base_url][:value],
+          :api_token => local_configuration[:api_token]
         )
       end
 
