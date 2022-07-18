@@ -41,11 +41,12 @@ module App
       end
 
       def start_heartbeat_task
+        connector_package_id = App::Config['connector_package_id']
         interval_seconds = 60 # seconds
         Utility::Logger.debug("Starting heartbeat timer task with interval #{interval_seconds} seconds.")
         task = Concurrent::TimerTask.new(execution_interval: interval_seconds) do
-          Utility::Logger.debug("Sending heartbeat for the connector")
-          Core::ElasticConnectorActions.heartbeat(App::Config['connector_package_id'])
+          Utility::Logger.debug("Sending heartbeat for the connector #{connector_package_id}")
+          Core::ElasticConnectorActions.heartbeat(connector_package_id)
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
         end
