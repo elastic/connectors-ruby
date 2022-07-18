@@ -1,6 +1,6 @@
 # general metadata
 version: "CHANGEME"
-repository: "git@github.com:elastic/connectors.git"
+repository: "git@github.com:elastic/connectors-ruby.git"
 revision: "main"
 
 elasticsearch:
