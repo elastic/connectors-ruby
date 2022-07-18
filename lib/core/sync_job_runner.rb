@@ -62,6 +62,8 @@ module Core
         @sink.ingest(document)
         @status[:indexed_document_count] += 1
       end
+
+      @sink.flush
     rescue StandardError => e
       @status[:error] = e.message
       Utility::ExceptionTracking.log_exception(e)
