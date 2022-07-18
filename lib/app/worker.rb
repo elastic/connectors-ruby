@@ -47,7 +47,7 @@ module App
           Utility::Logger.debug("Sending heartbeat for the connector")
           Core::ElasticConnectorActions.heartbeat(App::Config['connector_package_id'])
         rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer terminated due to unexpected error.')
+          Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
         end
 
         task.execute
