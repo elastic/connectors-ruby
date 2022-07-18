@@ -8,9 +8,10 @@
 
 require 'app/config'
 require 'concurrent'
-require 'cron_parser'
+require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
+require 'cron_parser'
 require 'utility'
 
 module Core
@@ -40,8 +41,8 @@ module Core
 
       validate_configuration!
 
-      if @connector_settings.status == Connectors::ConnectorStatus::NEEDS_CONFIGURATION
-        Utility::Logger.error("Connector #{@connector_settings['_id']} still needs configuration.")
+      unless @connector_settings.connector_status_allows_sync?
+        Utility::Logger.info("Connector #{@connector_settings['_id']} is in status #{@connector_settings.connector_status} and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
 
         return
       end

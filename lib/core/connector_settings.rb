@@ -8,6 +8,7 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/object/blank'
+require 'connectors/connector_status'
 require 'utility/logger'
 
 module Core
@@ -36,6 +37,10 @@ module Core
 
     def connector_status
       self[:status]
+    end
+
+    def connector_status_allows_sync?
+      Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC.include?(connector_status) 
     end
 
     def service_type
