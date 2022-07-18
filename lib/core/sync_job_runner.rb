@@ -58,11 +58,20 @@ module Core
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
+      incoming_ids = []
+      existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
+
       @connector_instance.yield_documents do |document|
         @sink.ingest(document)
+        incoming_ids << document[:id]
         @status[:indexed_document_count] += 1
       end
 
+      ids_to_delete = existing_ids - incoming_ids.uniq
+
+      Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}")
+
+      @sink.delete_multiple(ids_to_delete)
       @sink.flush
     rescue StandardError => e
       @status[:error] = e.message

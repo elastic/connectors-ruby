@@ -136,8 +136,30 @@ module Core
         end
       end
 
-      def client
-        @client ||= Utility::EsClient.new
+      def fetch_document_ids(index_name)
+        result = []
+        page_size = 1000
+        pit_id = client.open_point_in_time(:index => index_name, :keep_alive => '1m', :expand_wildcards => 'all')['id']
+        body = {
+          :query => { :match_all => {} },
+          :sort => [{ :id => { :order => :asc } }],
+          :pit => {
+            :id => pit_id,
+            :keep_alive => '1m'
+          },
+          :size => page_size,
+          :_source => false
+        }
+        loop do
+          response = client.search(:body => body)
+          hits = response['hits']['hits']
+          ids = hits.map { |h| h['_id'] }
+          result += ids
+          body[:search_after] = hits.last['sort']
+          break if hits.size < page_size
+        end
+        client.close_point_in_time(:index => index_name, :body => { :id => pit_id })
+        result
       end
 
       # should only be used in CLI
@@ -234,6 +256,10 @@ module Core
         }
         client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
         Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_package_id}")
+      end
+
+      def client
+        @client ||= Utility::EsClient.new
       end
     end
   end
