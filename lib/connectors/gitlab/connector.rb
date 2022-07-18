@@ -33,15 +33,16 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration = {})
-        super(local_configuration)
+      def initialize(local_configuration: {}, remote_configuration: {})
+        super
+
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => self.class.configurable_fields[:base_url][:value],
-          :api_token => @local_configuration[:api_token]
+          :base_url => remote_configuration[:base_url][:value],
+          :api_token => local_configuration[:api_token]
         )
       end
 
-      def yield_documents(_connector_settings)
+      def yield_documents
         yield_projects do |projects_chunk|
           projects_chunk.each do |project|
             yield Connectors::GitLab::Adapter.to_es_document(:project, project)
