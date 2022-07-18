@@ -21,5 +21,11 @@ module Connectors
       CONNECTED,
       ERROR
     ]
+
+    STATUSES_ALLOWING_SYNC = [
+      CONFIGURED,
+      CONNECTED,
+      ERROR
+    ]
   end
 end

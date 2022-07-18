@@ -8,9 +8,10 @@
 
 require 'app/config'
 require 'concurrent'
-require 'cron_parser'
+require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
+require 'cron_parser'
 require 'utility'
 
 module Core
@@ -39,14 +40,21 @@ module Core
       end
 
       validate_configuration!
-      if @connector_instance.source_status[:status] == 'OK'
-        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
-      else
+
+      unless @connector_settings.connector_status_allows_sync?
+        Utility::Logger.info("Connector #{@connector_settings['_id']} is in status \"#{@connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
+
+        return
+      end
+
+      if @connector_instance.source_status[:status] != 'OK'
         Utility::Logger.error("Connector #{@connector_settings['_id']} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
         ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
 
         return
       end
+
+      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
 
       do_sync! if should_sync?
     end
