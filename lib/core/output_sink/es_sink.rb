@@ -34,9 +34,10 @@ module Core::OutputSink
     def flush(size: nil)
       flush_size = size || @flush_threshold
 
-      data_to_flush = @queue.pop(flush_size)
-
-      send_data(data_to_flush)
+      while @queue.any?
+        data_to_flush = @queue.pop(flush_size)
+        send_data(data_to_flush)
+      end
     end
 
     def ingest_multiple(documents)
