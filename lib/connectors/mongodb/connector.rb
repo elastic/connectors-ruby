@@ -37,9 +37,9 @@ module Connectors
       def initialize(local_configuration: {}, remote_configuration: {})
         super
 
-        @host = remote_configuration[:host][:value]
-        @database = remote_configuration[:database][:value]
-        @collection = remote_configuration[:collection][:value]
+        @host = remote_configuration.dig(:host, :value)
+        @database = remote_configuration.dig(:database, :value)
+        @collection = remote_configuration.dig(:collection, :value)
       end
 
       def health_check(_params)

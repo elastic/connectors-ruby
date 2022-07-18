@@ -37,7 +37,7 @@ module Connectors
         super
 
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => remote_configuration[:base_url][:value],
+          :base_url => remote_configuration.dig(:base_url, :value),
           :api_token => local_configuration[:api_token]
         )
       end
