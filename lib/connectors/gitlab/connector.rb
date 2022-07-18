@@ -63,9 +63,6 @@ module Connectors
       def custom_client_error
         Connectors::GitLab::CustomClient::ClientError
       end
-
-      def yield_projects(&block)
-      end
     end
   end
 end
