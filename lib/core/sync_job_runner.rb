@@ -26,11 +26,6 @@ module Core
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name)
       @connector_class = Connectors::REGISTRY.connector_class(service_type)
       @connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
-      @status = {
-        :indexed_document_count => 0,
-        :deleted_document_count => 0,
-        :error => nil
-      }
     end
 
     def execute
@@ -54,21 +49,27 @@ module Core
     private
 
     def do_sync!
+      sync_status = {
+        :indexed_document_count => 0,
+        :deleted_document_count => 0,
+        :error => nil
+      }
+
       Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
       @connector_instance.yield_documents do |document|
         @sink.ingest(document)
-        @status[:indexed_document_count] += 1
+        sync_status[:indexed_document_count] += 1
       end
     rescue StandardError => e
-      @status[:error] = e.message
+      sync_status[:error] = e.message
       Utility::ExceptionTracking.log_exception(e)
       ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
     ensure
       if job_id.present?
-        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
+        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, sync_status.dup)
       else
         Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}")
       end
