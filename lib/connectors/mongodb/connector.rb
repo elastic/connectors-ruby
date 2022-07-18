@@ -34,11 +34,8 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration:, connector_settings:)
-        super(
-          local_configuration: local_configuration,
-          connector_settings: connector_settings
-        )
+      def initialize(local_configuration: {}, connector_settings: {})
+        super
 
         config = connector_settings.configuration
 

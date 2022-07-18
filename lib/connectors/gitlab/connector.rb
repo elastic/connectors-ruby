@@ -33,11 +33,8 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration:, connector_settings:)
-        super(
-          local_configuration: local_configuration,
-          connector_settings: connector_settings
-        )
+      def initialize(local_configuration: {}, connector_settings: {})
+        super
 
         @extractor = Connectors::GitLab::Extractor.new(
           :base_url => connector_settings.configuration[:base_url][:value],
