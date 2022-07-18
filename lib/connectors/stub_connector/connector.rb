@@ -30,10 +30,7 @@ module Connectors
       end
 
       def initialize(local_configuration:, connector_settings:)
-        super(
-          local_configuration: local_configuration,
-          connector_settings: connector_settings
-        )
+        super
       end
 
       def health_check(_params)
