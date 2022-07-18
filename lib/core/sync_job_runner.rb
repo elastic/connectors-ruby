@@ -25,7 +25,7 @@ module Core
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name)
       @connector_class = Connectors::REGISTRY.connector_class(service_type)
-      @connector_instance = Connectors::REGISTRY.connector(service_type)
+      @connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
       @status = {
         :indexed_document_count => 0,
         :deleted_document_count => 0,
@@ -61,7 +61,7 @@ module Core
       incoming_ids = []
       existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
 
-      @connector_instance.yield_documents(@connector_settings) do |document|
+      @connector_instance.yield_documents do |document|
         @sink.ingest(document)
         incoming_ids << document[:id]
         @status[:indexed_document_count] += 1
@@ -72,6 +72,7 @@ module Core
       Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}")
 
       @sink.delete_multiple(ids_to_delete)
+      @sink.flush
     rescue StandardError => e
       @status[:error] = e.message
       Utility::ExceptionTracking.log_exception(e)

@@ -33,25 +33,24 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration = {})
-        super(local_configuration)
+      def initialize(local_configuration: {}, remote_configuration: {})
+        super
+
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => self.class.configurable_fields[:base_url][:value],
-          :api_token => @local_configuration[:api_token]
+          :base_url => remote_configuration.dig(:base_url, :value),
+          :api_token => local_configuration[:api_token]
         )
       end
 
-      def yield_documents(_connector_settings)
-        yield_projects do |projects_chunk|
-          projects_chunk.each do |project|
-            yield Connectors::GitLab::Adapter.to_es_document(:project, project)
-
-            yield_project_files(projects_chunk) do |files|
-              files.each do |file|
-                yield Connectors::GitLab::Adapter.to_es_document(:file, file)
-              end
+      def yield_documents
+        next_page_link = nil
+        loop do
+          next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
+            projects_chunk.each do |project|
+              yield Connectors::GitLab::Adapter.to_es_document(:project, project)
             end
           end
+          break unless next_page_link.present?
         end
       end
 
@@ -63,27 +62,6 @@ module Connectors
 
       def custom_client_error
         Connectors::GitLab::CustomClient::ClientError
-      end
-
-      def yield_projects(&block)
-        next_page_link = nil
-        loop do
-          next_page_link = @extractor.yield_projects_page(next_page_link, &block)
-          break unless next_page_link.present?
-        end
-      end
-
-      def yield_project_files(projects_chunk)
-        projects_chunk.each_with_index do |project, idx|
-          project = project.with_indifferent_access
-
-          chunk_size = projects_chunk.size
-          Utility::Logger.info("Fetching files for project #{project[:id]} (#{idx + 1} out of #{chunk_size})...")
-
-          files = @extractor.fetch_project_repository_files(project[:id])
-
-          yield files
-        end
       end
     end
   end
