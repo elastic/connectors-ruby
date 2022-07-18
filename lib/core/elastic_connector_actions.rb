@@ -88,6 +88,16 @@ module Core
         job['_id']
       end
 
+      def heartbeat(connector_package_id)
+        body = {
+          :doc => {
+            :last_seen => Time.now
+          }
+        }
+
+        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+      end
+
       def update_connector_status(connector_package_id, status)
         body = {
           :doc => {
