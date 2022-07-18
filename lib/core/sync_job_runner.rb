@@ -34,7 +34,6 @@ module Core
     end
 
     def execute
-      job_id = nil
       unless @connector_settings.configuration_initialized?
         @connector_settings.initialize_configuration(@connector_class.configurable_fields)
       end
