@@ -1,4 +1,4 @@
-.PHONY: run-stack
+.PHONY: run-stack stop-stack load-data
 
 export VERSION=8.4.0-SNAPSHOT
 
