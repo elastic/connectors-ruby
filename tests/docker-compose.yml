@@ -29,9 +29,8 @@ services:
     image: mongo:latest
     volumes:
       - mongo:/data/db
-      - ./rs-init.sh:/scripts/rs-init.sh
     networks:
-      - mongors-network
+      - mongo-network
     ports:
       - 27017:27017
     restart: always
@@ -85,7 +84,7 @@ services:
       - esnet
 
 networks:
-  mongors-network:
+  mongo-network:
     driver: bridge
   esnet:
 
