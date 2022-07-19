@@ -9,10 +9,16 @@
 $LOAD_PATH << '../'
 
 require 'app/worker'
+require 'app/config'
+require 'utility/logger'
 
 module App
   # Set UTC as the timezone
   ENV['TZ'] = 'UTC'
+
+  logger = Logger.new(STDOUT)
+  logger.level = App::Config['log_level']
+  Utility::Logger.setup!(logger)
 
   App::Worker.start!
 end
