@@ -15,8 +15,8 @@ module Utility
 
       delegate :formatter, :formatter=, :to => :logger
 
-      def setup!(logger)
-        @logger = logger
+      def level=(log_level)
+        logger.level = log_level
       end
 
       def logger
