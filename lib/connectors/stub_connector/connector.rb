@@ -29,7 +29,7 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration: {}, remote_config: {})
+      def initialize(local_configuration: {}, remote_configuration: {})
         super
       end
 
@@ -38,7 +38,7 @@ module Connectors
       end
 
       def yield_documents
-        data = { name: 'stub connector' }
+        data = { id: '123', name: 'stub connector' }
         yield data
       end
     end
