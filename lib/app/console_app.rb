@@ -19,6 +19,7 @@ require 'cron_parser'
 
 module App
   ENV['TZ'] = 'UTC'
+  Utility::Logger.level = App::Config['log_level']
 
   module ConsoleApp
     extend self

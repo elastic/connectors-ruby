@@ -16,9 +16,7 @@ module App
   # Set UTC as the timezone
   ENV['TZ'] = 'UTC'
 
-  logger = Logger.new(STDOUT)
-  logger.level = App::Config['log_level']
-  Utility::Logger.setup!(logger)
+  Utility::Logger.level = App::Config['log_level']
 
   App::Worker.start!
 end
