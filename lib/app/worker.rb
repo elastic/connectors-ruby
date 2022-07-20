@@ -32,7 +32,7 @@ module App
         raise "#{App::Config['service_type']} is not a supported connector" unless Connectors::REGISTRY.registered?(App::Config['service_type'])
         Core::ElasticConnectorActions.ensure_connectors_index_exists
         Core::ElasticConnectorActions.ensure_job_index_exists
-        connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_id'])
+        connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
         Core::ElasticConnectorActions.ensure_content_index_exists(
           connector_settings.index_name,
           App::Config[:use_analysis_icu],
@@ -41,7 +41,7 @@ module App
       end
 
       def start_heartbeat_task
-        connector_id = App::Config['connector_id']
+        connector_id = App::Config[:connector_id]
         interval_seconds = 60 # seconds
         Utility::Logger.debug("Starting heartbeat timer task with interval #{interval_seconds} seconds.")
         task = Concurrent::TimerTask.new(execution_interval: interval_seconds) do
@@ -69,7 +69,7 @@ module App
       end
 
       def create_sync_job_runner
-        connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_id'])
+        connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
 
         Core::SyncJobRunner.new(connector_settings, App::Config['service_type'])
       end

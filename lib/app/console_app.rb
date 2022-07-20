@@ -36,10 +36,17 @@ module App
       { :command => :exit, :hint => 'end the program' }
     ]
 
+    def connector_id
+      App::Config[:connector_id]
+    end
+
+    def update_connector_id(connector_id)
+      App::Config[:connector_id] = connector_id
+    end
+
     def start_sync_now
       return unless connector_registered?
       puts 'Initiating synchronization NOW...'
-      connector_id = App::Config[:connector_id]
       Core::ElasticConnectorActions.force_sync(connector_id)
 
       Core::ElasticConnectorActions.ensure_connectors_index_exists
@@ -62,9 +69,8 @@ module App
     end
 
     def register_connector
-      id = App::Config['connector_id']
-      if id.present?
-        puts "You already have registered a connector with ID: #{id}. Registering a new connector will overwrite the existing one."
+      if connector_id.present?
+        puts "You already have registered a connector with ID: #{connector_id}. Registering a new connector will overwrite the existing one."
         puts 'Are you sure you want to continue? (y/n)'
         return false unless gets.chomp.strip.casecmp('y').zero?
       end
@@ -78,7 +84,7 @@ module App
       Core::ElasticConnectorActions.ensure_connectors_index_exists
       # create the connector
       created_id = create_connector(index_name, force: true)
-      App::Config[:connector_id] = created_id
+      update_connector_id(created_id)
       true
     end
 
@@ -91,9 +97,8 @@ module App
 
     def enable_scheduling
       return unless connector_registered?
-      id = App::Config['connector_id']
 
-      previous_schedule = Core::ConnectorSettings.fetch(id)&.scheduling_settings&.fetch(:interval, nil)
+      previous_schedule = Core::ConnectorSettings.fetch(connector_id)&.scheduling_settings&.fetch(:interval, nil)
       if previous_schedule.present?
         puts "Please enter a valid crontab expression for scheduling. Previous schedule was: #{previous_schedule}."
       else
@@ -104,19 +109,18 @@ module App
         puts "Cron expression #{cron_expression} isn't valid!"
         return
       end
-      Core::ElasticConnectorActions.enable_connector_scheduling(id, cron_expression)
+      Core::ElasticConnectorActions.enable_connector_scheduling(connector_id, cron_expression)
     end
 
     def disable_scheduling
       return unless connector_registered?
-      id = App::Config['connector_id']
-      puts "Are you sure you want to disable scheduling for connector #{id}? (y/n)"
+      puts "Are you sure you want to disable scheduling for connector #{connector_id}? (y/n)"
       return unless gets.chomp.strip.casecmp('y').zero?
-      Core::ElasticConnectorActions.disable_connector_scheduling(id)
+      Core::ElasticConnectorActions.disable_connector_scheduling(connector_id)
     end
 
     def connector_registered?(warn_if_not: true)
-      result = App::Config['connector_id'].present?
+      result = connector_id.present?
       if warn_if_not && !result
         'You have no connector ID yet. Register a new connector before continuing.'
       end
@@ -124,7 +128,7 @@ module App
     end
 
     def create_connector(index_name, force: false)
-      connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_id'])
+      connector_settings = Core::ConnectorSettings.fetch(connector_id)
 
       if connector_settings.nil? || force
         created_id = Core::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
@@ -172,11 +176,10 @@ module App
 
     def set_configurable_field
       return unless connector_registered?
-      id = App::Config['connector_id']
 
       connector = current_connector
       connector_class = connector.class
-      current_values = Core::ConnectorSettings.fetch(id)&.configuration
+      current_values = Core::ConnectorSettings.fetch(connector_id)&.configuration
       return unless connector.present?
 
       puts 'Provided configurable fields:'
@@ -193,17 +196,16 @@ module App
 
       puts 'Please enter the new value:'
       new_value = gets.chomp.strip
-      Core::ElasticConnectorActions.set_configurable_field(id, field_name, field_label, new_value)
+      Core::ElasticConnectorActions.set_configurable_field(connector_id, field_name, field_label, new_value)
     end
 
     def read_configurable_fields
       return unless connector_registered?
-      id = App::Config['connector_id']
 
       connector = current_connector
       connector_class = connector.class
 
-      current_values = Core::ConnectorSettings.fetch(id)&.configuration
+      current_values = Core::ConnectorSettings.fetch(connector_id)&.configuration
       return unless connector.present?
 
       puts 'Persisted values of configurable fields:'
