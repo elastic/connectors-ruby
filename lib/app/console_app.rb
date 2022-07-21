@@ -155,9 +155,10 @@ module App
     end
 
     def current_connector
+      connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
       service_type = App::Config['service_type']
       if service_type.present?
-        return registry.connector(service_type)
+        return registry.connector(service_type, connector_settings.configuration)
       end
       puts 'You have not set connector service type in settings. Please do so before continuing.'
       nil
