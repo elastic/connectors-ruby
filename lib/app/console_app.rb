@@ -155,7 +155,7 @@ module App
     end
 
     def current_connector
-      connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
+      connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
       service_type = App::Config['service_type']
       if service_type.present?
         return registry.connector(service_type, connector_settings.configuration)
