@@ -9,4 +9,4 @@ stop-stack:
 	docker-compose down --volumes
 
 load-data:
-	../loadsample.sh
+	./loadsample.sh
