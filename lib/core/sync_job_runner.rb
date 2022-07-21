@@ -47,15 +47,6 @@ module Core
         return
       end
 
-      if @connector_instance.source_status[:status] != 'OK'
-        Utility::Logger.error("Connector #{@connector_settings.id} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
-        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
-
-        return
-      end
-
-      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
-
       do_sync! if should_sync?
     end
 

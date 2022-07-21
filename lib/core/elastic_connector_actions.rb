@@ -84,12 +84,18 @@ module Core
         job['_id']
       end
 
-      def heartbeat(connector_id)
+      def heartbeat(connector_id, service_type)
         body = {
           :doc => {
             :last_seen => Time.now
           }
         }
+
+        connector_setting = Core::ConnectorSettings.fetch(connector_id)
+        if connector_setting.connector_status_allows_sync?
+          connector_instance = Connectors::REGISTRY.connector(service_type, connector_setting.configuration)
+          body[:doc][:status] = connector_instance.source_status[:status] == 'OK' ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
+        end
 
         client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
       end
