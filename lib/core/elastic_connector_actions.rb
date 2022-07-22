@@ -19,15 +19,15 @@ module Core
 
     class << self
 
-      def force_sync(connector_package_id)
+      def force_sync(connector_id)
         body = {
           :doc => {
             :scheduling => { :enabled => true },
             :sync_now => true
           }
         }
-        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
-        Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_package_id}")
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_id}")
       end
 
       def create_connector(index_name, service_type)
@@ -42,30 +42,30 @@ module Core
         created_id
       end
 
-      def load_connector_settings(connector_package_id)
-        client.get(:index => CONNECTORS_INDEX, :id => connector_package_id, :ignore => 404).with_indifferent_access
+      def load_connector_settings(connector_id)
+        client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
-      def update_connector_configuration(connector_package_id, configuration)
-        update_connector_field(connector_package_id, :configuration, configuration)
+      def update_connector_configuration(connector_id, configuration)
+        update_connector_field(connector_id, :configuration, configuration)
       end
 
-      def enable_connector_scheduling(connector_package_id, cron_expression)
+      def enable_connector_scheduling(connector_id, cron_expression)
         payload = { :enabled => true, :interval => cron_expression }
-        update_connector_field(connector_package_id, :scheduling, payload)
+        update_connector_field(connector_id, :scheduling, payload)
       end
 
-      def disable_connector_scheduling(connector_package_id)
+      def disable_connector_scheduling(connector_id)
         payload = { :enabled => false }
-        update_connector_field(connector_package_id, :scheduling, payload)
+        update_connector_field(connector_id, :scheduling, payload)
       end
 
-      def set_configurable_field(connector_package_id, field_name, label, value)
+      def set_configurable_field(connector_id, field_name, label, value)
         payload = { field_name => { :value => value, :label => label } }
-        update_connector_field(connector_package_id, :configuration, payload)
+        update_connector_field(connector_id, :configuration, payload)
       end
 
-      def claim_job(connector_package_id)
+      def claim_job(connector_id)
         body = {
           :doc => {
             :sync_now => false,
@@ -74,41 +74,41 @@ module Core
           }
         }
 
-        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
 
         body = {
-          :connector_id => connector_package_id,
+          :connector_id => connector_id,
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now
         }
         job = client.index(:index => JOB_INDEX, :body => body)
 
-        Utility::Logger.info("Successfully claimed job for connector #{connector_package_id}")
+        Utility::Logger.info("Successfully claimed job for connector #{connector_id}")
         job['_id']
       end
 
-      def heartbeat(connector_package_id)
+      def heartbeat(connector_id)
         body = {
           :doc => {
             :last_seen => Time.now
           }
         }
 
-        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
       end
 
-      def update_connector_status(connector_package_id, status)
+      def update_connector_status(connector_id, status)
         body = {
           :doc => {
             :status => status
           }
         }
 
-        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
       end
 
-      def complete_sync(connector_package_id, job_id, status)
+      def complete_sync(connector_id, job_id, status)
         sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
 
         body = {
@@ -119,7 +119,7 @@ module Core
           }
         }
 
-        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
 
         body = {
           :doc => {
@@ -130,9 +130,9 @@ module Core
         client.update(:index => JOB_INDEX, :id => job_id, :body => body)
 
         if status[:error]
-          Utility::Logger.info("Failed to sync for connector #{connector_package_id} with error #{status[:error]}")
+          Utility::Logger.info("Failed to sync for connector #{connector_id} with error #{status[:error]}")
         else
-          Utility::Logger.info("Successfully synced for connector #{connector_package_id}")
+          Utility::Logger.info("Successfully synced for connector #{connector_id}")
         end
       end
 
@@ -248,14 +248,14 @@ module Core
         ensure_index_exists("#{JOB_INDEX}-v1", system_index_body(:alias_name => JOB_INDEX, :mappings => mappings))
       end
 
-      def update_connector_field(connector_package_id, field_name, value)
+      def update_connector_field(connector_id, field_name, value)
         body = {
           :doc => {
             field_name => value
           }
         }
-        client.update(:index => CONNECTORS_INDEX, :id => connector_package_id, :body => body)
-        Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_package_id}")
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_id}")
       end
 
       def client

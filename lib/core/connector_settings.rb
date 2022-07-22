@@ -13,10 +13,10 @@ require 'utility/logger'
 
 module Core
   class ConnectorSettings
-    def self.fetch(connector_package_id)
-      es_response = ElasticConnectorActions.load_connector_settings(connector_package_id)
+    def self.fetch(connector_id)
+      es_response = ElasticConnectorActions.load_connector_settings(connector_id)
       if es_response['found'] == false
-        Utility::Logger.debug("Connector settings not found for connector_package_id: #{connector_package_id}")
+        Utility::Logger.debug("Connector settings not found for connector_id: #{connector_id}")
         return nil
       end
       new(es_response.with_indifferent_access)

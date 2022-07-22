@@ -8,7 +8,7 @@ elasticsearch:
   hosts: http://localhost:9200
   api_key: "CHANGEME"
 
-connector_package_id: "CHANGEME"
+connector_id: "CHANGEME"
 service_type: "CHANGEME"
 log_level: info
 
