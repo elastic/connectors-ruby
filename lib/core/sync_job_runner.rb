@@ -42,13 +42,13 @@ module Core
       validate_configuration!
 
       unless @connector_settings.connector_status_allows_sync?
-        Utility::Logger.info("Connector #{@connector_settings['_id']} is in status \"#{@connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
+        Utility::Logger.info("Connector #{@connector_settings.id} is in status \"#{@connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
 
         return
       end
 
       if @connector_instance.source_status[:status] != 'OK'
-        Utility::Logger.error("Connector #{@connector_settings['_id']} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
+        Utility::Logger.error("Connector #{@connector_settings.id} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
         ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
 
         return
@@ -62,7 +62,7 @@ module Core
     private
 
     def do_sync!
-      Utility::Logger.info("Starting to sync for connector #{@connector_settings['_id']}")
+      Utility::Logger.info("Starting to sync for connector #{@connector_settings.id}")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
@@ -110,12 +110,12 @@ module Core
     def should_sync?
       # sync_now should have priority over cron
       if @connector_settings[:sync_now] == true
-        Utility::Logger.info("Connector #{@connector_settings['_id']} is manually triggered to sync now")
+        Utility::Logger.info("Connector #{@connector_settings.id} is manually triggered to sync now")
         return true
       end
       scheduling_settings = @connector_settings.scheduling_settings
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.info("Connector #{@connector_settings['_id']} scheduling is disabled")
+        Utility::Logger.info("Connector #{@connector_settings.id} scheduling is disabled")
         return false
       end
 
@@ -125,12 +125,12 @@ module Core
       last_synced = Time.parse(last_synced) # TODO: unhandled exception
       sync_interval = scheduling_settings['interval']
       if sync_interval.nil? || sync_interval.empty? # no interval configured
-        Utility::Logger.debug("No sync interval configured for connector #{@connector_settings['_id']}")
+        Utility::Logger.debug("No sync interval configured for connector #{@connector_settings.id}")
         return false
       end
       cron_parser = cron_parser(sync_interval)
       if cron_parser && cron_parser.next(last_synced) < Time.now
-        Utility::Logger.info("Connector #{@connector_settings['_id']} sync is triggered by cron schedule #{sync_interval}")
+        Utility::Logger.info("Connector #{@connector_settings.id} sync is triggered by cron schedule #{sync_interval}")
         return true
       end
       false
