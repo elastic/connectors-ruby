@@ -8,10 +8,6 @@ require 'logger'
 
 class AppConfig
   class << self
-    def connectors_logger
-      Logger.new(STDOUT)
-    end
-
     def connectors
       {
         'transient_server_error_retry_delay_minutes' => 5
