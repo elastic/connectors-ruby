@@ -155,8 +155,8 @@ module Core
           hits = response['hits']['hits']
           ids = hits.map { |h| h['_id'] }
           result += ids
-          body[:search_after] = hits.last['sort']
           break if hits.size < page_size
+          body[:search_after] = hits.last['sort']
         end
         client.close_point_in_time(:index => index_name, :body => { :id => pit_id })
         result
