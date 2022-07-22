@@ -40,7 +40,7 @@ module Core::OutputSink
     def flush(size: nil)
       flush_size = size || @flush_threshold
 
-      while @queue.any?
+      while @operation_queue.any?
         data_to_flush = @operation_queue.pop(flush_size)
         send_data(data_to_flush)
       end
