@@ -15,6 +15,8 @@ require 'core/output_sink'
 
 module Connectors
   module GitLab
+    class InvalidConfigurationError < StandardError; end
+
     class Connector < Connectors::Base::Connector
       def self.service_type
         'gitlab'
@@ -36,9 +38,11 @@ module Connectors
       def initialize(local_configuration: {}, remote_configuration: {})
         super
 
+        raise InvalidConfigurationError.new("Configuration section \"#{self.class.service_type}\" is required but not provided.") if !local_configuration
+
         @extractor = Connectors::GitLab::Extractor.new(
           :base_url => remote_configuration.dig(:base_url, :value),
-          :api_token => local_configuration[:api_token]
+          :api_token => local_configuration.dig(:api_token)
         )
       end
 
