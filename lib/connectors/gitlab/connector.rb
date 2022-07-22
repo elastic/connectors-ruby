@@ -38,11 +38,11 @@ module Connectors
       def initialize(local_configuration: {}, remote_configuration: {})
         super
 
-        raise InvalidConfigurationError.new("Configuration section \"#{self.class.service_type}\" is required but not provided.") if !local_configuration
+        raise InvalidConfigurationError.new("Configuration section \"#{self.class.service_type}\" is required but not provided.") unless local_configuration
 
         @extractor = Connectors::GitLab::Extractor.new(
           :base_url => remote_configuration.dig(:base_url, :value),
-          :api_token => local_configuration.dig(:api_token)
+          :api_token => local_configuration[:api_token]
         )
       end
 
