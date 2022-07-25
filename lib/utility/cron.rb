@@ -32,6 +32,11 @@ module Utility
         @day_of_week = m[7]
         @year = m[9]
       }
+
+      # ? for day of week means - "any day of week that matches other part of regex" if, for example particular day of month is provided.
+      # We don't actually support it :/
+      @day_of_week = '*' if @day_of_week == '?'
+
       # Unix cron has five: minute, hour, day, month, and dayofweek
       # Quartz adds seconds, day_of_month and year XXX
       converted_expression = "#{@minutes} #{@hours} #{@day_of_month} #{@month} #{@day_of_week}"
