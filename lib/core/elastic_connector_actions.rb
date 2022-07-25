@@ -27,7 +27,6 @@ module Core
           }
         }
         client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
-        Utility::Logger.info("Successfully pushed sync_now flag for connector #{connector_id}")
       end
 
       def create_connector(index_name, service_type)
@@ -38,7 +37,6 @@ module Core
         }
         response = client.index(:index => CONNECTORS_INDEX, :body => body)
         created_id = response['_id']
-        Utility::Logger.info("Successfully registered connector #{index_name} with ID #{created_id}")
         created_id
       end
 
@@ -84,7 +82,6 @@ module Core
         }
         job = client.index(:index => JOB_INDEX, :body => body)
 
-        Utility::Logger.info("Successfully claimed job for connector #{connector_id}")
         job['_id']
       end
 
@@ -128,12 +125,6 @@ module Core
           }.merge(status)
         }
         client.update(:index => JOB_INDEX, :id => job_id, :body => body)
-
-        if status[:error]
-          Utility::Logger.info("Failed to sync for connector #{connector_id} with error #{status[:error]}")
-        else
-          Utility::Logger.info("Successfully synced for connector #{connector_id}")
-        end
       end
 
       def fetch_document_ids(index_name)
@@ -181,23 +172,23 @@ module Core
       # should only be used in CLI
       def ensure_index_exists(index_name, body = {})
         if client.indices.exists?(:index => index_name)
-          Utility::Logger.info("Index #{index_name} already exists. Checking mappings...")
+          Utility::Logger.debug("Index #{index_name} already exists. Checking mappings...")
           response = client.indices.get_mapping(:index => index_name)
           existing = response[index_name]['mappings']
-          Utility::Logger.info("New settings/mappings: #{body}")
+          Utility::Logger.debug("New settings/mappings: #{body}")
           if existing.empty?
-            Utility::Logger.info("Index #{index_name} has no mappings. Closing to create settings and mappings...")
+            Utility::Logger.debug("Index #{index_name} has no mappings. Closing to create settings and mappings...")
             client.indices.close(:index => index_name)
             client.indices.put_settings(:index => index_name, :body => body[:settings], :expand_wildcards => 'all')
             client.indices.put_mapping(:index => index_name, :body => body[:mappings], :expand_wildcards => 'all')
             client.indices.open(:index => index_name)
-            Utility::Logger.info("Index #{index_name} mappings added. Index reopened.")
+            Utility::Logger.debug("Index #{index_name} mappings added. Index reopened.")
           else
-            Utility::Logger.info("Index #{index_name} already has mappings: #{existing}. Skipping...")
+            Utility::Logger.debug("Index #{index_name} already has mappings: #{existing}. Skipping...")
           end
         else
           client.indices.create(:index => index_name, :body => body)
-          Utility::Logger.info("Created index #{index_name}")
+          Utility::Logger.debug("Created index #{index_name}")
         end
       end
 
@@ -262,7 +253,6 @@ module Core
           }
         }
         client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
-        Utility::Logger.info("Successfully updated field #{field_name} connector #{connector_id}")
       end
 
       def client

@@ -19,9 +19,10 @@ module App
 
     class << self
       def start!
+        Utility::Logger.info('Running pre-flight check.')
         pre_flight_check
 
-        Utility::Logger.info('Starting to process jobs...')
+        Utility::Logger.info('Starting connector service workers.')
         start_heartbeat_task
         start_polling_jobs
       end
@@ -51,10 +52,13 @@ module App
           Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
         end
 
+        Utility::Logger.info("Successfully started heartbeat task.")
+
         task.execute
       end
 
       def start_polling_jobs
+        Utility::Logger.info("Polling Elasticsearch for synchronisation jobs to run.")
         loop do
           job_runner = create_sync_job_runner
           job_runner.execute
@@ -62,7 +66,7 @@ module App
           Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
         ensure
           if POLL_IDLING > 0
-            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
+            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds.")
             sleep(POLL_IDLING)
           end
         end
