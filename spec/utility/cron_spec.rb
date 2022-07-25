@@ -12,7 +12,15 @@ require 'utility/cron'
 RSpec.describe Utility::Cron do
 
   it 'supports various expressions' do
-    expect(subject.convert_expression_from_quartz_to_unix("0 15 10 ? * 6#3")).to eq('15 10 ? * 6#3')
+
+    conversions = [
+      ["0 15 10 ? * 6#3", '15 10 ? * 6#3'],
+      ['0 15 10 * * ? 2005', '15 10 * * *']
+    ]
+
+    conversions.each do |quartz, crontab|
+      expect(subject.convert_expression_from_quartz_to_unix(quartz)).to eq(crontab)
+    end
 
   end
 end
