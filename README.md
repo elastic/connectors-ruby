@@ -1,4 +1,4 @@
-# Elastic Enterprise Search Connectors 
+# Elastic Enterprise Search Connectors
 
 ![logo](logo-enterprise-search.png)
 
@@ -59,7 +59,7 @@ make refresh_config
 ```
 
 This command is also included in every `make run`, so when you re-run the app using the makefile, these values are updated, too.
-They are exposed in the root endpoint mentioned above. 
+They are exposed in the root endpoint mentioned above.
 
 ### Configuration
 
@@ -74,8 +74,13 @@ the metadata they need.
 The build process might change it on-the-fly when the Gem is created but will
 not change the one in the dev tree.
 
-When the connector application is launched, it will pick `config/connectors.yml` by default, 
+When the connector application is launched, it will pick `config/connectors.yml` by default,
 but you can provide your own configuration file by using the **CONNECTORS_CONFIG** env.
+
+
+### Connector protocol
+
+These connectors are built according to our [Connector Protocol](./docs/CONNECTOR_PROTOCOL.md). If you want to build your own connector or update an existing, please make sure to adhere to that protocol.
 
 ### Contribute 🚀
 We welcome contributors to the project. Before you begin, please read the [Connectors Contributor's Guide](./docs/CONTRIBUTING.md).
@@ -88,3 +93,4 @@ We welcome contributors to the project. Before you begin, please read the [Conne
 - [Developer guide](./docs/DEVELOPING.md)
 - [Security Policy](./docs/SECURITY.md)
 - [Elastic-internal guide](./docs/INTERNAL.md)
+- [Connector Protocol](./docs/CONNECTOR_PROTOCOL.md)
