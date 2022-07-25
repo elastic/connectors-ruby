@@ -42,7 +42,7 @@ module Core
         created_id
       end
 
-      def load_connector_settings(connector_id)
+      def get_connector(connector_id)
         client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 

@@ -13,13 +13,15 @@ require 'utility/logger'
 
 module Core
   class ConnectorSettings
+    # Error Classes
+    class ConnectorNotFoundError < StandardError; end
+
     def self.fetch(connector_id)
-      es_response = ElasticConnectorActions.load_connector_settings(connector_id)
-      if es_response['found'] == false
-        Utility::Logger.debug("Connector settings not found for connector_id: #{connector_id}")
-        return nil
-      end
-      new(es_response.with_indifferent_access)
+      es_response = ElasticConnectorActions.get_connector(connector_id)
+        .with_indifferent_access
+
+      raise ConnectorNotFoundError.new("Connector with id=#{connector_id} was not found.") unless es_response[:found]
+      new(es_response)
     end
 
     def id
