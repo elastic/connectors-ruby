@@ -38,7 +38,7 @@ module Utility
       @day_of_week = '*' if @day_of_week == '?'
 
       # Unix cron has five: minute, hour, day, month, and dayofweek
-      # Quartz adds seconds, day_of_month and year XXX
+      # Quartz adds seconds and year
       converted_expression = "#{@minutes} #{@hours} #{@day_of_month} #{@month} #{@day_of_week}"
 
       Utility::Logger.debug("Converted Quartz Cron expression \"#{expression}\" to Standard Cron Expression \"#{converted_expression}\"")
