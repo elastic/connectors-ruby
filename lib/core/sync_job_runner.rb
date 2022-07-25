@@ -11,6 +11,7 @@ require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
+require 'cron_parser'
 require 'utility'
 
 module Core
@@ -100,7 +101,7 @@ module Core
     end
 
     def cron_parser(cronline)
-      QuartzCron.new(cronline)
+      CronParser.new(Utility::Cron.convert_from_quartz_format(cronline))
     rescue ArgumentError => e
       Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
       nil
