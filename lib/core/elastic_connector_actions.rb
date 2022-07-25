@@ -160,7 +160,7 @@ module Core
             break if hits.size < page_size
 
             body[:search_after] = hits.last['sort']
-            body[:pit] = response['pit_id']
+            body[:pit][:id] = response['pit_id']
           end
         ensure
           client.close_point_in_time(:index => index_name, :body => { :id => pit_id })
