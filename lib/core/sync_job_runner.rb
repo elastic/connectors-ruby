@@ -101,7 +101,7 @@ module Core
     end
 
     def cron_parser(cronline)
-      CronParser.new(Utility::Cron.convert_from_quartz_format(cronline))
+      CronParser.new(Utility::Cron.convert_expression_from_quartz_to_unix(cronline))
     rescue ArgumentError => e
       Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
       nil

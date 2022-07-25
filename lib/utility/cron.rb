@@ -14,7 +14,7 @@ module Utility
 
   # see https://github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/java/org/quartz/CronExpression.java
   module Cron
-    def self.convert_from_quartz_format(expression)
+    def self.convert_expression_from_quartz_to_unix(expression)
       @seconds = '*'
       @minutes = '*'
       @hours = '*'
