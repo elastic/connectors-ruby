@@ -36,8 +36,7 @@ module Core
           :service_type => service_type
         }
         response = client.index(:index => CONNECTORS_INDEX, :body => body)
-        created_id = response['_id']
-        created_id
+        response['_id']
       end
 
       def load_connector_settings(connector_id)

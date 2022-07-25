@@ -52,13 +52,13 @@ module App
           Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
         end
 
-        Utility::Logger.info("Successfully started heartbeat task.")
+        Utility::Logger.info('Successfully started heartbeat task.')
 
         task.execute
       end
 
       def start_polling_jobs
-        Utility::Logger.info("Polling Elasticsearch for synchronisation jobs to run.")
+        Utility::Logger.info('Polling Elasticsearch for synchronisation jobs to run.')
         loop do
           job_runner = create_sync_job_runner
           job_runner.execute
