@@ -14,6 +14,14 @@ module Utility
 
   # see https://github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/java/org/quartz/CronExpression.java
   module Cron
+    def self.check(expr)
+      raise StandardError.new('Unsupported expression {expr}') if expr.include?('#')
+      raise StandardError.new('Unsupported expression {expr}') if expr.include?('L')
+      raise StandardError.new('Unsupported expression {expr}') if expr.include?('W') && !expr.include?('WED')
+
+      expr
+    end
+
     def self.convert_expression_from_quartz_to_unix(expression)
       @seconds = '*'
       @minutes = '*'
@@ -23,19 +31,22 @@ module Utility
       @day_of_week = '*'
       @year = '*'
 
-      expression.match(CRON_REGEXP) { |m|
+      # ? is not supported
+      converted_expression = expression.tr('?', '*')
+
+      matched = false
+      converted_expression.match(CRON_REGEXP) { |m|
         @seconds = m[2]
         @minutes = m[3]
         @hours = m[4]
-        @day_of_month = m[5]
-        @month = m[6]
-        @day_of_week = m[7]
+        @day_of_month = check(m[5])
+        @month = check(m[6])
+        @day_of_week = check(m[7])
         @year = m[9]
+        matched = true
       }
 
-      # ? for day of week means - "any day of week that matches other part of regex" if, for example particular day of month is provided.
-      # We don't actually support it :/
-      @day_of_week = '*' if @day_of_week == '?'
+      raise StandardError.new('Unknown format {expression}') unless matched
 
       # Unix cron has five: minute, hour, day, month, and dayofweek
       # Quartz adds seconds and year
