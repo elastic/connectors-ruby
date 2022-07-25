@@ -31,7 +31,7 @@ RSpec.describe Utility::Cron do
     ]
 
     conversions.each do |quartz, crontab|
-      expect(subject.convert_expression_from_quartz_to_unix(quartz)).to eq(crontab)
+      expect(subject.quartz_to_crontab(quartz)).to eq(crontab)
     end
 
     unsupported = ['0 15 10 ? * 6#3', '0 15 10 L * ?',
@@ -41,7 +41,7 @@ RSpec.describe Utility::Cron do
                    '0 15 10 ? * 6#3']
 
     unsupported.each do |quartz|
-      expect { subject.convert_expression_from_quartz_to_unix(quartz) }.to raise_error(Exception)
+      expect { subject.quartz_to_crontab(quartz) }.to raise_error(Exception)
     end
   end
 end
