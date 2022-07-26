@@ -2,14 +2,14 @@ require_relative 'lib/app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_utility'
-  s.version     = App::Config['version']
+  s.version     = App::Config[:version]
   s.homepage    = 'https://github.com/elastic/connectors-ruby'
   s.summary     = 'Gem containing shared Connector Services libraries'
   s.description = ''
   s.authors     = ['Elastic']
   s.metadata    = {
-    "revision" => App::Config['revision'],
-    "repository" => App::Config['repository']
+    "revision" => App::Config[:revision],
+    "repository" => App::Config[:repository]
   }
   s.email       = 'ent-search-dev@elastic.co'
   s.files       = %w[
