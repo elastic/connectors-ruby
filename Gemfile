@@ -13,6 +13,7 @@ gem 'activesupport', '5.2.6'
 gem 'bson', '~> 4.2.2'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data', '= 1.2022.1'
+gem 'tzinfo', '1.2.10'
 gem 'nokogiri', '>= 1.13.7', :require => false
 gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'

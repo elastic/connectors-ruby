@@ -16,8 +16,8 @@ require 'utility'
 
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
-    def initialize(expected_fields, actual_fields)
-      super("Connector expected configurable fields: #{expected_fields}, actual stored fields: #{actual_fields}")
+    def initialize(service_type, expected_fields, actual_fields)
+      super("Connector of service_type '#{service_type}' expected configurable fields: #{expected_fields}, actual stored fields: #{actual_fields}")
     end
   end
 
@@ -62,12 +62,16 @@ module Core
     private
 
     def do_sync!
-      Utility::Logger.info("Starting to sync for connector #{@connector_settings.id}")
+      Utility::Logger.info("Starting sync for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
+      Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
+
       incoming_ids = []
       existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
+
+      Utility::Logger.debug("#{existing_ids} documents are present in index #{@connector_settings.index_name}.")
 
       @connector_instance.yield_documents do |document|
         @sink.ingest(document)
@@ -77,7 +81,7 @@ module Core
 
       ids_to_delete = existing_ids - incoming_ids.uniq
 
-      Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}")
+      Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
 
       @sink.delete_multiple(ids_to_delete)
       @sink.flush
@@ -87,9 +91,18 @@ module Core
       ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
     ensure
       if job_id.present?
+        Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
+        Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
+
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
+
+        if @status[:error]
+          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error #{@status[:error]}.")
+        else
+          Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
+        end
       else
-        Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}")
+        Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}.")
       end
     end
 
@@ -97,7 +110,7 @@ module Core
       expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
-      raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
+      raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
     end
 
     def cron_parser(cronline)
@@ -110,12 +123,12 @@ module Core
     def should_sync?
       # sync_now should have priority over cron
       if @connector_settings[:sync_now] == true
-        Utility::Logger.info("Connector #{@connector_settings.id} is manually triggered to sync now")
+        Utility::Logger.info("Connector #{@connector_settings.id} is manually triggered to sync now.")
         return true
       end
       scheduling_settings = @connector_settings.scheduling_settings
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.info("Connector #{@connector_settings.id} scheduling is disabled")
+        Utility::Logger.info("Connector #{@connector_settings.id} scheduling is disabled.")
         return false
       end
 
