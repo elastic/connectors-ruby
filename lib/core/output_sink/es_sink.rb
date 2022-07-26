@@ -47,12 +47,12 @@ module Core::OutputSink
     end
 
     def ingest_multiple(documents)
-      Utility::Logger.info "Enqueueing #{documents&.size} documents to the index #{index_name}"
+      Utility::Logger.debug "Enqueueing #{documents&.size} documents to the index #{index_name}."
       documents.each { |doc| ingest(doc) }
     end
 
     def delete_multiple(ids)
-      Utility::Logger.info "Enqueueing #{ids&.size} ids to delete from the index #{index_name}"
+      Utility::Logger.debug "Enqueueing #{ids&.size} ids to delete from the index #{index_name}."
       ids.each { |id| delete(id) }
     end
 
@@ -62,7 +62,7 @@ module Core::OutputSink
       return if ops.empty?
 
       @client.bulk(:body => ops)
-      Utility::Logger.info "Sent #{ops.size} operations to the index #{index_name}"
+      Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
     end
 
     def ready_to_flush?

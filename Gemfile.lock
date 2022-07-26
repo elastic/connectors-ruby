@@ -192,7 +192,7 @@ GEM
     thread_safe (0.3.6)
     thread_safe (0.3.6-java)
     timecop (0.9.4)
-    tzinfo (1.2.9)
+    tzinfo (1.2.10)
       thread_safe (~> 0.1)
     tzinfo-data (1.2022.1)
       tzinfo (>= 1.0.0)
@@ -242,6 +242,7 @@ DEPENDENCIES
   simplecov
   simplecov-material
   timecop
+  tzinfo (= 1.2.10)
   tzinfo-data (= 1.2022.1)
   webmock
 
