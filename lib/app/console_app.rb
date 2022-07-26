@@ -49,7 +49,7 @@ module App
       return unless connector_registered?
       puts 'Initiating synchronization NOW...'
       Core::ElasticConnectorActions.force_sync(connector_id)
-      puts "Successfully scheduled an on-demand sync for connector #{connector_id}"
+      puts "Successfully synced for connector #{connector_id}"
 
       Core::ElasticConnectorActions.ensure_connectors_index_exists
       config_settings = Core::ConnectorSettings.fetch(connector_id)
