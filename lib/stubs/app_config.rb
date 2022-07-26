@@ -4,8 +4,6 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'logger'
-
 class AppConfig
   class << self
     def connectors
