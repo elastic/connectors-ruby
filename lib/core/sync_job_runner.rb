@@ -16,8 +16,8 @@ require 'utility'
 
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
-    def initialize(expected_fields, actual_fields)
-      super("Connector expected configurable fields: #{expected_fields}, actual stored fields: #{actual_fields}")
+    def initialize(service_type, expected_fields, actual_fields)
+      super("Connector of service_type '#{service_type}' expected configurable fields: #{expected_fields}, actual stored fields: #{actual_fields}")
     end
   end
 
@@ -110,7 +110,7 @@ module Core
       expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
-      raise IncompatibleConfigurableFieldsError.new(expected_fields, actual_fields) if expected_fields != actual_fields
+      raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
     end
 
     def cron_parser(cronline)
