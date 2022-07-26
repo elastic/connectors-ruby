@@ -22,7 +22,7 @@ module Utility
       expr
     end
 
-    def self.convert_expression_from_quartz_to_unix(expression)
+    def self.quartz_to_crontab(expression)
       @seconds = '*'
       @minutes = '*'
       @hours = '*'
