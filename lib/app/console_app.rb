@@ -132,13 +132,14 @@ module App
     end
 
     def create_connector(index_name, force: false)
-      connector_settings = Core::ConnectorSettings.fetch(connector_id)
+      id = connector_id
+      if force || Core::ElasticConnectorActions.get_connector(connector_id)[:found] == false
+        id = Core::ElasticConnectorActions.create_connector(index_name, App::Config[:service_type])
 
-      if connector_settings.nil? || force
-        created_id = Core::ElasticConnectorActions.create_connector(index_name, App::Config[:service_type])
         puts "Successfully registered connector #{index_name} with ID #{created_id}"
-        connector_settings = Core::ConnectorSettings.fetch(created_id)
       end
+
+      connector_settings = Core::ConnectorSettings.fetch(id)
 
       connector_settings.id
     end
