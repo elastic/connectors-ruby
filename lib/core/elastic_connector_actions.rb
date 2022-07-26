@@ -137,28 +137,35 @@ module Core
       end
 
       def fetch_document_ids(index_name)
-        result = []
         page_size = 1000
-        pit_id = client.open_point_in_time(:index => index_name, :keep_alive => '1m', :expand_wildcards => 'all')['id']
-        body = {
-          :query => { :match_all => {} },
-          :sort => [{ :id => { :order => :asc } }],
-          :pit => {
-            :id => pit_id,
-            :keep_alive => '1m'
-          },
-          :size => page_size,
-          :_source => false
-        }
-        loop do
-          response = client.search(:body => body)
-          hits = response['hits']['hits']
-          ids = hits.map { |h| h['_id'] }
-          result += ids
-          break if hits.size < page_size
-          body[:search_after] = hits.last['sort']
+        result = []
+        begin
+          pit_id = client.open_point_in_time(:index => index_name, :keep_alive => '1m', :expand_wildcards => 'all')['id']
+          body = {
+            :query => { :match_all => {} },
+            :sort => [{ :id => { :order => :asc } }],
+            :pit => {
+              :id => pit_id,
+              :keep_alive => '1m'
+            },
+            :size => page_size,
+            :_source => false
+          }
+          loop do
+            response = client.search(:body => body)
+            hits = response['hits']['hits']
+
+            ids = hits.map { |h| h['_id'] }
+            result += ids
+            break if hits.size < page_size
+
+            body[:search_after] = hits.last['sort']
+            body[:pit][:id] = response['pit_id']
+          end
+        ensure
+          client.close_point_in_time(:index => index_name, :body => { :id => pit_id })
         end
-        client.close_point_in_time(:index => index_name, :body => { :id => pit_id })
+
         result
       end
 
