@@ -49,6 +49,7 @@ module App
       return unless connector_registered?
       puts 'Initiating synchronization NOW...'
       Core::ElasticConnectorActions.force_sync(connector_id)
+      puts "Successfully synced for connector #{connector_id}"
 
       Core::ElasticConnectorActions.ensure_connectors_index_exists
       config_settings = Core::ConnectorSettings.fetch(connector_id)
@@ -111,6 +112,7 @@ module App
         return
       end
       Core::ElasticConnectorActions.enable_connector_scheduling(connector_id, cron_expression)
+      puts "Enabled scheduling for connector #{connector_id} with cron expression #{cron_expression}"
     end
 
     def disable_scheduling
@@ -118,6 +120,7 @@ module App
       puts "Are you sure you want to disable scheduling for connector #{connector_id}? (y/n)"
       return unless gets.chomp.strip.casecmp('y').zero?
       Core::ElasticConnectorActions.disable_connector_scheduling(connector_id)
+      puts "Disabled scheduling for connector #{connector_id}"
     end
 
     def connector_registered?(warn_if_not: true)
@@ -133,6 +136,7 @@ module App
 
       if connector_settings.nil? || force
         created_id = Core::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
+        puts "Successfully registered connector #{index_name} with ID #{created_id}"
         connector_settings = Core::ConnectorSettings.fetch(created_id)
       end
 
@@ -199,6 +203,7 @@ module App
       puts 'Please enter the new value:'
       new_value = gets.chomp.strip
       Core::ElasticConnectorActions.set_configurable_field(connector_id, field_name, field_label, new_value)
+      Utility::Logger.debug("Successfully updated field #{field_name} for connector #{connector_id} to #{new_value}")
     end
 
     def read_configurable_fields
