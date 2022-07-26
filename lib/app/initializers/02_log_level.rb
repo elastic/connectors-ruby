@@ -10,6 +10,6 @@ require 'app/config'
 require 'utility/logger'
 
 logger = AppConfig.connectors_logger
-logger.level = App::Config['log_level'] || 'info'
+logger.level = App::Config[:log_level] || 'info'
 
 Utility::Logger.setup!(logger)
