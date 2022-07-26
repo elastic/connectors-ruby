@@ -10,7 +10,7 @@ require 'app/worker'
 
 describe App::Worker do
   it 'should raise error for invalid service type' do
-    allow(App::Config).to receive(:[]).with('service_type').and_return('foobar')
+    allow(App::Config).to receive(:[]).with(:service_type).and_return('foobar')
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(nil)
     expect { described_class.start! }.to raise_error('foobar is not a supported connector')
   end

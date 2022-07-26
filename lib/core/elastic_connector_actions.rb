@@ -195,7 +195,9 @@ module Core
         body = {
           :settings => {
             :index => {
-              :hidden => true
+              :hidden => true,
+              :number_of_replicas => 0,
+              :auto_expand_replicas => '0-5'
             }
           }
         }
