@@ -130,7 +130,7 @@ module App
 
     def create_connector(index_name, force: false)
       id = connector_id
-      if Core::ElasticConnectorActions.get_connector(connector_id)[:found] == false || force
+      if force || Core::ElasticConnectorActions.get_connector(connector_id)[:found] == false
         id = Core::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
       end
 
