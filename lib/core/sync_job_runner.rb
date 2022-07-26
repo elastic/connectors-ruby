@@ -114,7 +114,7 @@ module Core
     end
 
     def cron_parser(cronline)
-      Fugit::Cron.do_parse(Utility::Cron.convert_expression_from_quartz_to_unix(cronline))
+      Fugit::Cron.do_parse(Utility::Cron.quartz_to_crontab(cronline))
     rescue ArgumentError => e
       Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
       nil
