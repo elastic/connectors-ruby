@@ -83,7 +83,11 @@ module Core
 
       Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
 
-      @sink.delete_multiple(ids_to_delete)
+      ids_to_delete.each do |id|
+        @sink.delete(id)
+        @status[:deleted_document_count] += 1
+      end
+
       @sink.flush
     rescue StandardError => e
       @status[:error] = e.message
