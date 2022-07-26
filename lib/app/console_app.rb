@@ -19,7 +19,7 @@ require 'cron_parser'
 
 module App
   ENV['TZ'] = 'UTC'
-  Utility::Logger.level = App::Config['log_level']
+  Utility::Logger.level = App::Config[:log_level]
 
   module ConsoleApp
     extend self
@@ -135,7 +135,7 @@ module App
       connector_settings = Core::ConnectorSettings.fetch(connector_id)
 
       if connector_settings.nil? || force
-        created_id = Core::ElasticConnectorActions.create_connector(index_name, App::Config['service_type'])
+        created_id = Core::ElasticConnectorActions.create_connector(index_name, App::Config[:service_type])
         puts "Successfully registered connector #{index_name} with ID #{created_id}"
         connector_settings = Core::ConnectorSettings.fetch(created_id)
       end
@@ -160,7 +160,7 @@ module App
 
     def current_connector
       connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
-      service_type = App::Config['service_type']
+      service_type = App::Config[:service_type]
       if service_type.present?
         return registry.connector(service_type, connector_settings.configuration)
       end
