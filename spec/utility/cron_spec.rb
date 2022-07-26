@@ -6,6 +6,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'fugit'
 require 'spec_helper'
 require 'utility/cron'
 
@@ -32,6 +33,7 @@ RSpec.describe Utility::Cron do
 
     conversions.each do |quartz, crontab|
       expect(subject.quartz_to_crontab(quartz)).to eq(crontab)
+      expect(Fugit::Cron.do_parse(crontab).next_time).to be > Time.now
     end
 
     unsupported = ['0 15 10 ? * 6#3', '0 15 10 L * ?',

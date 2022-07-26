@@ -11,7 +11,7 @@ require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
-require 'cron_parser'
+require 'fugit'
 require 'utility'
 
 module Core
@@ -101,7 +101,7 @@ module Core
     end
 
     def cron_parser(cronline)
-      CronParser.new(Utility::Cron.convert_expression_from_quartz_to_unix(cronline))
+      Fugit::Cron.do_parse(Utility::Cron.convert_expression_from_quartz_to_unix(cronline))
     rescue ArgumentError => e
       Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
       nil
@@ -129,7 +129,7 @@ module Core
         return false
       end
       cron_parser = cron_parser(sync_interval)
-      if cron_parser && cron_parser.next(last_synced) < Time.now
+      if cron_parser && cron_parser.next_time(last_synced) < Time.now
         Utility::Logger.info("Connector #{@connector_settings.id} sync is triggered by cron schedule #{sync_interval}")
         return true
       end

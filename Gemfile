@@ -14,7 +14,7 @@ gem 'bson', '~> 4.2.2'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data', '= 1.2022.1'
 gem 'nokogiri', '>= 1.13.7', :require => false
-gem 'parse-cron', '~> 0.1.4'
+gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
 
 group :test do
