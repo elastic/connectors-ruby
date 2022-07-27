@@ -44,22 +44,22 @@ module Core
       end
 
       def update_connector_configuration(connector_id, configuration)
-        update_connector_field(connector_id, :configuration, configuration)
+        update_connector_fields(connector_id, :configuration => configuration)
       end
 
       def enable_connector_scheduling(connector_id, cron_expression)
         payload = { :enabled => true, :interval => cron_expression }
-        update_connector_field(connector_id, :scheduling, payload)
+        update_connector_fields(connector_id, :scheduling => payload)
       end
 
       def disable_connector_scheduling(connector_id)
         payload = { :enabled => false }
-        update_connector_field(connector_id, :scheduling, payload)
+        update_connector_fields(connector_id, :scheduling => payload)
       end
 
       def set_configurable_field(connector_id, field_name, label, value)
         payload = { field_name => { :value => value, :label => label } }
-        update_connector_field(connector_id, :configuration, payload)
+        update_connector_fields(connector_id, :configuration => payload)
       end
 
       def claim_job(connector_id)
@@ -82,22 +82,6 @@ module Core
         job = client.index(:index => JOB_INDEX, :body => body)
 
         job['_id']
-      end
-
-      def heartbeat(connector_id, service_type)
-        body = {
-          :doc => {
-            :last_seen => Time.now
-          }
-        }
-
-        connector_setting = Core::ConnectorSettings.fetch(connector_id)
-        if connector_setting.connector_status_allows_sync?
-          connector_instance = Connectors::REGISTRY.connector(service_type, connector_setting.configuration)
-          body[:doc][:status] = connector_instance.source_status[:status] == 'OK' ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
-        end
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
       end
 
       def update_connector_status(connector_id, status)
@@ -248,13 +232,9 @@ module Core
         ensure_index_exists("#{JOB_INDEX}-v1", system_index_body(:alias_name => JOB_INDEX, :mappings => mappings))
       end
 
-      def update_connector_field(connector_id, field_name, value)
-        body = {
-          :doc => {
-            field_name => value
-          }
-        }
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+      def update_connector_fields(connector_id, doc = {})
+        return if doc.empty?
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => { :doc => doc })
       end
 
       def client

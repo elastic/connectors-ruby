@@ -35,17 +35,13 @@ module Core
     end
 
     def execute
-      unless @connector_settings.configuration_initialized?
-        @connector_settings.initialize_configuration(@connector_class.configurable_fields)
-      end
-
-      validate_configuration!
-
       unless @connector_settings.connector_status_allows_sync?
         Utility::Logger.info("Connector #{@connector_settings.id} is in status \"#{@connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
 
         return
       end
+
+      validate_configuration!
 
       do_sync! if should_sync?
     end
