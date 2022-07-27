@@ -15,7 +15,7 @@ require 'app/worker'
 require 'utility/logger'
 require 'core/elastic_connector_actions'
 require 'core/connector_settings'
-require 'cron_parser'
+require 'fugit'
 
 module App
   ENV['TZ'] = 'UTC'
@@ -87,7 +87,7 @@ module App
     end
 
     def validate_cronline(cronline)
-      CronParser.new(cronline)
+      Fugit::Cron.do_parse(cronline)
       true
     rescue ArgumentError
       false
