@@ -77,7 +77,7 @@ This is our main communication index, used to communicate the connector's config
   last_sync_status: string;  -> last sync Enum, see below
   scheduling: {
     enabled: boolean; -> Is sync schedule enabled?
-    interval: string; -> cron syntax
+    interval: string; -> Quartz Cron syntax
   };
   service_type: string; -> Optional, used for UI sugar
   status: string;       -> Enum, see below
