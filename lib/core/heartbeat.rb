@@ -22,7 +22,13 @@ module Core
         if connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
           connector_class = Connectors::REGISTRY.connector_class(service_type)
           doc[:configuration] = connector_class.configurable_fields
-          doc[:status] = Connectors::ConnectorStatus::NEEDS_CONFIGURATION
+
+          new_connector_status = if configuration.values.all? { |setting| setting[:value] }
+            Connectors::ConnectorStatus::CONFIGURED
+          else
+            Connectors::ConnectorStatus::NEEDS_CONFIGURATION
+          end
+          doc[:status] = new_connector_status
         elsif connector_settings.connector_status_allows_sync?
           connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
           doc[:status] = connector_instance.source_status[:status] == 'OK' ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
