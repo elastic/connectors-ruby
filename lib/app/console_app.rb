@@ -13,6 +13,7 @@ require 'connectors/registry'
 require 'app/menu'
 require 'app/worker'
 require 'utility/logger'
+require 'utility/cron'
 require 'core/elastic_connector_actions'
 require 'core/connector_settings'
 require 'fugit'
@@ -87,7 +88,7 @@ module App
     end
 
     def validate_cronline(cronline)
-      Fugit::Cron.do_parse(cronline)
+      Fugit::Cron.do_parse(Utility::Cron.quartz_to_crontab(cronline))
       true
     rescue ArgumentError
       false
@@ -104,7 +105,7 @@ module App
       end
       cron_expression = gets.chomp.strip.downcase
       unless validate_cronline(cron_expression)
-        puts "Cron expression #{cron_expression} isn't valid!"
+        puts "Quartz Cron expression #{cron_expression} isn't valid!"
         return
       end
       Core::ElasticConnectorActions.enable_connector_scheduling(connector_id, cron_expression)
