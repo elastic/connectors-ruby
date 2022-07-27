@@ -69,10 +69,10 @@ module Core
 
       # We want to set connector to CONFIGURED status if all configurable fields have default values
       new_connector_status = if configuration.values.all? { |setting| setting[:value] }
-        Connectors::ConnectorStatus::CONFIGURED
-      else
-        Connectors::ConnectorStatus::NEEDS_CONFIGURATION
-      end
+                               Connectors::ConnectorStatus::CONFIGURED
+                             else
+                               Connectors::ConnectorStatus::NEEDS_CONFIGURATION
+                             end
 
       ElasticConnectorActions.update_connector_status(id, new_connector_status)
 
