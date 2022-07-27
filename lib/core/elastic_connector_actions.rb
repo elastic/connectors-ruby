@@ -20,13 +20,7 @@ module Core
     class << self
 
       def force_sync(connector_id)
-        body = {
-          :doc => {
-            :scheduling => { :enabled => true },
-            :sync_now => true
-          }
-        }
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id, :scheduling => { :enabled => true }, :sync_now => true)
       end
 
       def create_connector(index_name, service_type)
@@ -63,15 +57,10 @@ module Core
       end
 
       def claim_job(connector_id)
-        body = {
-          :doc => {
-            :sync_now => false,
-            :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id,
+                                :sync_now => false,
+                                :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
+                                :last_synced => Time.now)
 
         body = {
           :connector_id => connector_id,
@@ -85,27 +74,16 @@ module Core
       end
 
       def update_connector_status(connector_id, status)
-        body = {
-          :doc => {
-            :status => status
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id, :status => status)
       end
 
       def complete_sync(connector_id, job_id, status)
         sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
 
-        body = {
-          :doc => {
-            :last_sync_status => sync_status,
-            :last_sync_error => status[:error],
-            :last_synced => Time.now
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id,
+                                :last_sync_status => sync_status,
+                                :last_sync_error => status[:error],
+                                :last_synced => Time.now)
 
         body = {
           :doc => {

@@ -58,7 +58,7 @@ module Core
       incoming_ids = []
       existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
 
-      Utility::Logger.debug("#{existing_ids} documents are present in index #{@connector_settings.index_name}.")
+      Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
       @connector_instance.yield_documents do |document|
         @sink.ingest(document)
