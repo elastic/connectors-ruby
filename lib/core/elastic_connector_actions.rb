@@ -20,13 +20,7 @@ module Core
     class << self
 
       def force_sync(connector_id)
-        body = {
-          :doc => {
-            :scheduling => { :enabled => true },
-            :sync_now => true
-          }
-        }
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id, :scheduling => { :enabled => true }, :sync_now => true)
       end
 
       def create_connector(index_name, service_type)
@@ -44,34 +38,29 @@ module Core
       end
 
       def update_connector_configuration(connector_id, configuration)
-        update_connector_field(connector_id, :configuration, configuration)
+        update_connector_fields(connector_id, :configuration => configuration)
       end
 
       def enable_connector_scheduling(connector_id, cron_expression)
         payload = { :enabled => true, :interval => cron_expression }
-        update_connector_field(connector_id, :scheduling, payload)
+        update_connector_fields(connector_id, :scheduling => payload)
       end
 
       def disable_connector_scheduling(connector_id)
         payload = { :enabled => false }
-        update_connector_field(connector_id, :scheduling, payload)
+        update_connector_fields(connector_id, :scheduling => payload)
       end
 
       def set_configurable_field(connector_id, field_name, label, value)
         payload = { field_name => { :value => value, :label => label } }
-        update_connector_field(connector_id, :configuration, payload)
+        update_connector_fields(connector_id, :configuration => payload)
       end
 
       def claim_job(connector_id)
-        body = {
-          :doc => {
-            :sync_now => false,
-            :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id,
+                                :sync_now => false,
+                                :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
+                                :last_synced => Time.now)
 
         body = {
           :connector_id => connector_id,
@@ -84,38 +73,17 @@ module Core
         job['_id']
       end
 
-      def heartbeat(connector_id)
-        body = {
-          :doc => {
-            :last_seen => Time.now
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
-      end
-
       def update_connector_status(connector_id, status)
-        body = {
-          :doc => {
-            :status => status
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id, :status => status)
       end
 
       def complete_sync(connector_id, job_id, status)
         sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
 
-        body = {
-          :doc => {
-            :last_sync_status => sync_status,
-            :last_sync_error => status[:error],
-            :last_synced => Time.now
-          }
-        }
-
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+        update_connector_fields(connector_id,
+                                :last_sync_status => sync_status,
+                                :last_sync_error => status[:error],
+                                :last_synced => Time.now)
 
         body = {
           :doc => {
@@ -242,13 +210,9 @@ module Core
         ensure_index_exists("#{JOB_INDEX}-v1", system_index_body(:alias_name => JOB_INDEX, :mappings => mappings))
       end
 
-      def update_connector_field(connector_id, field_name, value)
-        body = {
-          :doc => {
-            field_name => value
-          }
-        }
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => body)
+      def update_connector_fields(connector_id, doc = {})
+        return if doc.empty?
+        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => { :doc => doc })
       end
 
       def client

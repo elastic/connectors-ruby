@@ -57,29 +57,6 @@ module Core
       self[:scheduling]
     end
 
-    def configuration_initialized?
-      configuration.present?
-    end
-
-    def initialize_configuration(configuration)
-      # TODO: actually check it on the level lower, so that desync does not happen if configuration was updated elsewhere
-      raise 'Configuration is already initialized!' if configuration_initialized?
-
-      ElasticConnectorActions.update_connector_configuration(id, configuration) # TODO: I don't like that it's hidden here now
-
-      # We want to set connector to CONFIGURED status if all configurable fields have default values
-      new_connector_status = if configuration.values.all? { |setting| setting[:value] }
-                               Connectors::ConnectorStatus::CONFIGURED
-                             else
-                               Connectors::ConnectorStatus::NEEDS_CONFIGURATION
-                             end
-
-      ElasticConnectorActions.update_connector_status(id, new_connector_status)
-
-      @elasticsearch_response[:_source][:configuration] = configuration
-      @elasticsearch_response[:status] = new_connector_status
-    end
-
     private
 
     def initialize(es_response)
