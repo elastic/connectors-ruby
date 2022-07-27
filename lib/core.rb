@@ -9,3 +9,4 @@
 require 'core/connector_settings'
 require 'core/sync_job_runner'
 require 'core/elastic_connector_actions'
+require 'core/heartbeat'
