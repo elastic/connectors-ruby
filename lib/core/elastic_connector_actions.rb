@@ -160,28 +160,23 @@ module Core
       end
 
       # should only be used in CLI
-      def ensure_content_index_exists(index_name, use_icu_locale = false, language_code = nil)
-        settings = Utility::Elasticsearch::Index::TextAnalysisSettings.new(:language_code => language_code, :analysis_icu => use_icu_locale).to_h
+      def ensure_content_index_exists(index_name)
         mappings = Utility::Elasticsearch::Index::Mappings.default_text_fields_mappings(:connectors_index => true)
-
-        body_payload = { settings: settings, mappings: mappings }
-        ensure_index_exists(index_name, body_payload)
+        ensure_index_exists(index_name, { mappings: mappings })
       end
 
       # should only be used in CLI
       def ensure_index_exists(index_name, body = {})
         if client.indices.exists?(:index => index_name)
+          return unless body[:mappings]
           Utility::Logger.debug("Index #{index_name} already exists. Checking mappings...")
+          Utility::Logger.debug("New mappings: #{body[:mappings]}")
           response = client.indices.get_mapping(:index => index_name)
           existing = response[index_name]['mappings']
-          Utility::Logger.debug("New settings/mappings: #{body}")
           if existing.empty?
-            Utility::Logger.debug("Index #{index_name} has no mappings. Closing to create settings and mappings...")
-            client.indices.close(:index => index_name)
-            client.indices.put_settings(:index => index_name, :body => body[:settings], :expand_wildcards => 'all')
+            Utility::Logger.debug("Index #{index_name} has no mappings. Adding mappings...")
             client.indices.put_mapping(:index => index_name, :body => body[:mappings], :expand_wildcards => 'all')
-            client.indices.open(:index => index_name)
-            Utility::Logger.debug("Index #{index_name} mappings added. Index reopened.")
+            Utility::Logger.debug("Index #{index_name} mappings added.")
           else
             Utility::Logger.debug("Index #{index_name} already has mappings: #{existing}. Skipping...")
           end

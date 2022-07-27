@@ -53,11 +53,7 @@ module App
 
       Core::ElasticConnectorActions.ensure_connectors_index_exists
       config_settings = Core::ConnectorSettings.fetch(connector_id)
-      Core::ElasticConnectorActions.ensure_content_index_exists(
-        config_settings[:index_name],
-        App::Config[:use_analysis_icu],
-        App::Config[:content_language_code]
-      )
+      Core::ElasticConnectorActions.ensure_content_index_exists(config_settings[:index_name])
       Core::SyncJobRunner.new(config_settings, App::Config[:service_type]).execute
     end
 
