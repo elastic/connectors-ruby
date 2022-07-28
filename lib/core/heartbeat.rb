@@ -28,7 +28,7 @@ module Core
 
           # We want to set connector to CONFIGURED status if all configurable fields have default values
           new_connector_status = if configuration.values.all? { |setting| setting[:value] }
-                                   Utility::Logger.debug("All connector configurable fields provided default values.")
+                                   Utility::Logger.debug("All connector configurable fields provided default values for connector #{connector_id}.")
                                    Connectors::ConnectorStatus::CONFIGURED
                                  else
                                    Connectors::ConnectorStatus::NEEDS_CONFIGURATION
