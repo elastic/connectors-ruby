@@ -35,26 +35,13 @@ module Core
     end
 
     def execute
-      unless @connector_settings.configuration_initialized?
-        @connector_settings.initialize_configuration(@connector_class.configurable_fields)
-      end
-
-      validate_configuration!
-
       unless @connector_settings.connector_status_allows_sync?
         Utility::Logger.info("Connector #{@connector_settings.id} is in status \"#{@connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
 
         return
       end
 
-      if @connector_instance.source_status[:status] != 'OK'
-        Utility::Logger.error("Connector #{@connector_settings.id} was unable to reach out to the 3rd-party service. Make sure that it has been configured correctly and 3rd-party system is accessible.")
-        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
-
-        return
-      end
-
-      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::CONNECTED)
+      validate_configuration!
 
       do_sync! if should_sync?
     end
@@ -71,7 +58,7 @@ module Core
       incoming_ids = []
       existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
 
-      Utility::Logger.debug("#{existing_ids} documents are present in index #{@connector_settings.index_name}.")
+      Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
       @connector_instance.yield_documents do |document|
         @sink.ingest(document)
