@@ -88,10 +88,7 @@ module App
     end
 
     def validate_cronline(cronline)
-      Fugit::Cron.do_parse(Utility::Cron.quartz_to_crontab(cronline))
-      true
-    rescue ArgumentError
-      false
+      !!Fugit::Cron.parse(Utility::Cron.quartz_to_crontab(cronline))
     end
 
     def enable_scheduling
