@@ -122,6 +122,7 @@ def run_sync
   body_payload = { settings: settings, mappings: mappings }
   Core::ElasticConnectorActions.ensure_index_exists(config_settings[:index_name], body_payload)
 
+  Core::ElasticConnectorActions.force_sync(config_settings.id)
   Core::SyncJobRunner.new(config_settings, App::Config[:service_type]).execute
 
   puts('Sync done.')
