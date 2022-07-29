@@ -80,7 +80,6 @@ def run_sync
 
   Dir["#{LIB_DIR}/**/*.rb"].sort.each { |f|
     next if f.include?('lib/app')
-    next if f.include?('connectors_async')
 
     absolute_dir = File.dirname(f)
     relative_dir = absolute_dir.sub(/.*lib\//, '')
