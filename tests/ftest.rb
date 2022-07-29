@@ -85,6 +85,7 @@ def run_sync
 
   puts('Create the connector')
   Core::ElasticConnectorActions.ensure_connectors_index_exists
+  Core::ElasticConnectorActions.ensure_job_index_exists
   connector_id = Core::ElasticConnectorActions.create_connector('mongo', 'mongo')
 
   config = {
