@@ -31,9 +31,19 @@ def start_stack
   sleep 60
 end
 
-def prepare_es
+def stop_stack
+  wipe_es
+  Dir.chdir(__dir__) {
+    puts('Stopping the stack')
+    system('make stop-stack')
+  }
+end
+
+def wipe_es
   puts('Wipe existing data')
-  system('curl -X DELETE http://localhost:9200/mongo --user elastic:changeme')
+  ['mongo', '.elastic-connectors', '.elastic-connectors-sync-jobs'].each do |i|
+    es_client.indices.delete(index: i, ignore: [400, 404])
+  end
 end
 
 def set_auth
@@ -127,8 +137,12 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   start_stack
-  prepare_es
-  set_auth
-  run_sync
-  verify
+  begin
+    wipe_es
+    set_auth
+    run_sync
+    verify
+  ensure
+    stop_stack
+  end
 end
