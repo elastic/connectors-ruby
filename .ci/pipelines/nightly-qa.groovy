@@ -7,9 +7,9 @@
 def NODE_LABEL = 'linux && immutable'
 
 def GITHUB_ORG = 'elastic'
-def GIT_REPO = 'ent-search'
+def GIT_REPO = 'connectors-ruby'
 def GIT_CREDENTIALS = '2a9602aa-ab9f-4e52-baf3-b71ca88469c7-UserAndToken'  // elasticmachine
-def GIT_REFERENCE_REPO = '/var/lib/jenkins/.git-references/ent-search.git'
+def GIT_REFERENCE_REPO = '/var/lib/jenkins/.git-references/connectors-ruby.git'
 
 def withRbenv(Closure block) {
     print "Enabling rbenv support at ${env.JENKINS_HOME}/.rbenv"
