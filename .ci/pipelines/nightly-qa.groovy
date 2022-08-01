@@ -70,24 +70,23 @@ pipeline {
         stage('Setup') {
             steps {
                 gitCheckout(
-                repo: "git@github.com:${GITHUB_ORG}/${GIT_REPO}.git",
-                branch: "${params.BRANCH}",
-                credentialsId: "${GIT_CREDENTIALS}",
-                basedir: 'app',
-                reference: "${GIT_REFERENCE_REPO}",
-                shallow: true,
-                depth: 20,
-                noTags: true
-            )
+                    repo: "git@github.com:${GITHUB_ORG}/${GIT_REPO}.git",
+                    branch: "${params.BRANCH}",
+                    credentialsId: "${GIT_CREDENTIALS}",
+                    basedir: 'app',
+                    reference: "${GIT_REFERENCE_REPO}",
+                    shallow: true,
+                    depth: 20,
+                    noTags: true
+                )
+            }
         }
 
-        stage('Run tests') {
-            stage('Run Mongo test') {
-                steps {
-                    dir('app') {
-                        withRbenv {
-                            sh 'make ftest'
-                        }
+        stage('Run Mongo test') {
+            steps {
+                dir('app') {
+                    withRbenv {
+                        sh 'make ftest'
                     }
                 }
             }
