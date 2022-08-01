@@ -86,6 +86,7 @@ pipeline {
             steps {
                 dir('app') {
                     withRbenv {
+                        sh 'make install'
                         sh 'make ftest'
                     }
                 }
