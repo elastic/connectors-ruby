@@ -78,8 +78,6 @@ module Utility
           url_scheme: KEYWORD_FIELD_MAPPING
         }.freeze
 
-
-
         def self.default_text_fields_mappings(connectors_index:, crawler_index: false)
           {
             dynamic: true,
