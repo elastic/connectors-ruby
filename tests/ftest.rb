@@ -82,7 +82,7 @@ def run_sync
     next if f.include?('lib/app')
 
     absolute_dir = File.dirname(f)
-    relative_dir = absolute_dir.sub(/.*lib\//, '')
+    relative_dir = absolute_dir.sub("#{LIB_DIR}/", '')
     name = File.basename(f, '.rb')
     f = File.join(relative_dir, name)
     require(f)

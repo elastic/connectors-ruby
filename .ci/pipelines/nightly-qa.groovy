@@ -7,9 +7,9 @@
 def NODE_LABEL = 'linux && immutable'
 
 def GITHUB_ORG = 'elastic'
-def GIT_REPO = 'ent-search'
+def GIT_REPO = 'connectors-ruby'
 def GIT_CREDENTIALS = '2a9602aa-ab9f-4e52-baf3-b71ca88469c7-UserAndToken'  // elasticmachine
-def GIT_REFERENCE_REPO = '/var/lib/jenkins/.git-references/ent-search.git'
+def GIT_REFERENCE_REPO = '/var/lib/jenkins/.git-references/connectors-ruby.git'
 
 def withRbenv(Closure block) {
     print "Enabling rbenv support at ${env.JENKINS_HOME}/.rbenv"
@@ -70,24 +70,24 @@ pipeline {
         stage('Setup') {
             steps {
                 gitCheckout(
-                repo: "git@github.com:${GITHUB_ORG}/${GIT_REPO}.git",
-                branch: "${params.BRANCH}",
-                credentialsId: "${GIT_CREDENTIALS}",
-                basedir: 'app',
-                reference: "${GIT_REFERENCE_REPO}",
-                shallow: true,
-                depth: 20,
-                noTags: true
-            )
+                    repo: "git@github.com:${GITHUB_ORG}/${GIT_REPO}.git",
+                    branch: "${params.BRANCH}",
+                    credentialsId: "${GIT_CREDENTIALS}",
+                    basedir: 'app',
+                    reference: "${GIT_REFERENCE_REPO}",
+                    shallow: true,
+                    depth: 20,
+                    noTags: true
+                )
+            }
         }
 
-        stage('Run tests') {
-            stage('Run Mongo test') {
-                steps {
-                    dir('app') {
-                        withRbenv {
-                            sh 'make ftest'
-                        }
+        stage('Run Mongo test') {
+            steps {
+                dir('app') {
+                    withRbenv {
+                        sh 'make install'
+                        sh 'make ftest'
                     }
                 }
             }

@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.3'
 
 services:
   elasticsearch:
@@ -42,8 +42,6 @@ services:
       - "host.docker.internal:host-gateway"
     depends_on:
         - "elasticsearch"
-    profiles:
-      - "enterprise-search"
     environment:
       ELASTICSEARCH_URL: http://host.docker.internal:9200
       ELASTICSEARCH_HOSTS: http://host.docker.internal:9200
@@ -55,8 +53,6 @@ services:
 
   enterprise_search:
     image: docker.elastic.co/enterprise-search/enterprise-search:${VERSION}
-    profiles:
-      - "enterprise-search"
     depends_on:
       - "elasticsearch"
     environment:
