@@ -41,13 +41,13 @@ tag:
 
 build_gem:
 	mkdir -p .gems
-	gem build connectors_utility.gemspec
+	bundle _$(shell cat .bundler-version)_ exec gem build connectors_utility.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
 	echo "DO NOT FORGET TO UPDATE ENT-SEARCH"
 
 push_gem:
-	gem push .gems/*
+	bundle _$(shell cat .bundler-version)_ exec gem push .gems/*
 
 install:
 	rbenv install -s
