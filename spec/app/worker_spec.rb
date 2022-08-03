@@ -40,7 +40,7 @@ describe App::Worker do
   shared_examples 'handle_warnings' do |disable_warnings, stderr|
     it "with disable_warnings=#{disable_warnings}" do
       # This call will raise a 401 when the lib checks the server, and that will create a warning
-      allow_any_instance_of(Elasticsearch::Client).to receive(:elasticsearch_validation_request).and_raise(Elastic::Transport::Transport::Errors::Unauthorized)
+      expect_any_instance_of(Utility::EsClient).to receive(:elasticsearch_validation_request).and_raise(Elastic::Transport::Transport::Errors::Unauthorized)
 
       config = if disable_warnings
                  # This is the default behavior, so we don't pass
@@ -72,16 +72,19 @@ describe App::Worker do
       allow(App::Worker).to receive(:start_polling_jobs)
 
       # mocking some of the conversation between the worker and Elasticsearch
-      allow(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
-      allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
       expect(Core::ConnectorSettings).to receive(:fetch).and_return(FakeSettings.new)
 
-      stub_request(:head, 'http://notreallyaserver:9200/.elastic-connectors-sync-jobs-v1')
-        .to_return(status: 404, body: YAML.dump({}), headers: {})
-      stub_request(:put, 'http://notreallyaserver:9200/.elastic-connectors-sync-jobs-v1')
-        .to_return(status: 200, body: YAML.dump({}), headers: {})
+      ['.elastic-connectors-sync-jobs-v1', 'index', '.elastic-connectors-v1'].each do |index|
+        stub_request(:head, "http://notreallyaserver:9200/#{index}")
+          .to_return(status: 404, body: YAML.dump({}), headers: {})
+        stub_request(:put, "http://notreallyaserver:9200/#{index}")
+          .to_return(status: 200, body: YAML.dump({}), headers: {})
+      end
 
       stub_const('App::Config', config)
+
+      # make sure we start with a fresh ESClient for the duration of the test
+      expect(Core::ElasticConnectorActions).to receive(:client).at_least(:once).and_return(Utility::EsClient.new)
 
       # now let's see what is displated in stderr
       expect {
