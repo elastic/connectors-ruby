@@ -19,13 +19,13 @@ module Core
       @connector_id = connector_id
       @poll_interval = poll_interval
     end
-    
+
     def when_triggered
-      loop do 
+      loop do
         connector_settings = Core::ConnectorSettings.fetch(@connector_id)
 
         if sync_triggered?(connector_settings)
-          yield connector_settings 
+          yield connector_settings
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
@@ -53,7 +53,7 @@ module Core
         return true
       end
 
-      # Sync when sync_now flag is true for the connector 
+      # Sync when sync_now flag is true for the connector
       if connector_settings[:sync_now] == true
         Utility::Logger.info("Connector #{connector_settings.id} is manually triggered to sync now.")
         return true
