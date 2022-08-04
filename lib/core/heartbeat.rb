@@ -6,14 +6,32 @@
 
 # frozen_string_literal: true
 
-require 'core/elastic_connector_actions'
+require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
+require 'core/elastic_connector_actions'
 require 'utility/logger'
 
 module Core
   class Heartbeat
     class << self
+      def start_task(connector_id, service_type)
+        interval_seconds = 60 # seconds
+        Utility::Logger.debug("Starting heartbeat timer task with interval #{interval_seconds} seconds.")
+        task = Concurrent::TimerTask.new(execution_interval: interval_seconds, run_now: true) do
+          Utility::Logger.debug("Sending heartbeat for the connector #{connector_id}")
+          send(connector_id, service_type)
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
+        end
+
+        Utility::Logger.info('Successfully started heartbeat task.')
+
+        task.execute
+      end
+
+      private
+
       def send(connector_id, service_type)
         connector_settings = Core::ConnectorSettings.fetch(connector_id)
 
