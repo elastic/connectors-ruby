@@ -59,23 +59,10 @@ module App
 
       def start_polling_jobs
         Utility::Logger.info('Polling Elasticsearch for synchronisation jobs to run.')
-        loop do
-          job_runner = create_sync_job_runner
+        Core::Scheduler.new(App::Config[:connector_id], POLL_IDLING).when_triggered do |connector_settings|
+          job_runner = Core::SyncJobRunner.new(connector_settings, App::Config[:service_type])
           job_runner.execute
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
-        ensure
-          if POLL_IDLING > 0
-            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds.")
-            sleep(POLL_IDLING)
-          end
         end
-      end
-
-      def create_sync_job_runner
-        connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
-
-        Core::SyncJobRunner.new(connector_settings, App::Config[:service_type])
       end
     end
   end
