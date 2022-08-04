@@ -236,7 +236,7 @@ module App
       end
     end
 
-    Utility::with_logging(App::Config) do
+    Utility.with_logging(App::Config) do
       loop do
         command = read_command
         case command
