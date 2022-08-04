@@ -12,6 +12,7 @@ require 'app/config'
 require 'connectors/registry'
 require 'app/menu'
 require 'app/worker'
+require 'utility/environment'
 require 'utility/logger'
 require 'utility/cron'
 require 'core/elastic_connector_actions'
@@ -19,9 +20,6 @@ require 'core/connector_settings'
 require 'fugit'
 
 module App
-  ENV['TZ'] = 'UTC'
-  Utility::Logger.level = App::Config[:log_level]
-
   module ConsoleApp
     extend self
 
@@ -218,37 +216,39 @@ module App
       end
     end
 
-    loop do
-      command = read_command
-      case command
-      when :sync_now
-        start_sync_now
-        wait_for_keypress('Synchronization finished!')
-      when :status
-        show_status
-        wait_for_keypress('Status checked!')
-      when :register
-        if register_connector
-          wait_for_keypress('Please store connector ID in config file and restart the program.')
+    Utility::Environment.set_execution_environment(App::Config) do
+      loop do
+        command = read_command
+        case command
+        when :sync_now
+          start_sync_now
+          wait_for_keypress('Synchronization finished!')
+        when :status
+          show_status
+          wait_for_keypress('Status checked!')
+        when :register
+          if register_connector
+            wait_for_keypress('Please store connector ID in config file and restart the program.')
+          else
+            wait_for_keypress('Registration canceled!')
+          end
+        when :scheduling_on
+          enable_scheduling
+          wait_for_keypress('Scheduling enabled! Start synchronization to see it in action.')
+        when :scheduling_off
+          disable_scheduling
+          wait_for_keypress('Scheduling disabled! Starting synchronization will have no effect now.')
+        when :set_configurable_field
+          set_configurable_field
+          wait_for_keypress('Configurable field is updated!')
+        when :read_configurable_fields
+          read_configurable_fields
+          wait_for_keypress
+        when :exit
+          exit_normally
         else
-          wait_for_keypress('Registration canceled!')
+          exit_normally('Sorry, this command is not yet implemented')
         end
-      when :scheduling_on
-        enable_scheduling
-        wait_for_keypress('Scheduling enabled! Start synchronization to see it in action.')
-      when :scheduling_off
-        disable_scheduling
-        wait_for_keypress('Scheduling disabled! Starting synchronization will have no effect now.')
-      when :set_configurable_field
-        set_configurable_field
-        wait_for_keypress('Configurable field is updated!')
-      when :read_configurable_fields
-        read_configurable_fields
-        wait_for_keypress
-      when :exit
-        exit_normally
-      else
-        exit_normally('Sorry, this command is not yet implemented')
       end
     end
   rescue SystemExit
