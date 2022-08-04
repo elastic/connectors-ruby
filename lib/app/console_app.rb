@@ -19,9 +19,6 @@ require 'core/connector_settings'
 require 'fugit'
 
 module App
-  ENV['TZ'] = 'UTC'
-  Utility::Logger.level = App::Config[:log_level]
-
   module ConsoleApp
     extend self
 
