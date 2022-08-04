@@ -12,6 +12,7 @@ require 'app/config'
 require 'connectors/registry'
 require 'app/menu'
 require 'app/worker'
+require 'utility/environment'
 require 'utility/logger'
 require 'utility/cron'
 require 'core/elastic_connector_actions'
@@ -233,7 +234,7 @@ module App
       end
     end
 
-    Utility.with_logging(App::Config) do
+    Utility::Environment.set_execution_environment(App::Config) do
       loop do
         command = read_command
         case command

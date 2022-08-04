@@ -9,6 +9,7 @@
 require 'yaml'
 require 'app/worker'
 require 'utility/logger'
+require 'utility/environment'
 
 class FakeSettings
   def index_name
@@ -31,7 +32,7 @@ describe App::Worker do
     stub_const('App::Config', config)
 
     expect {
-      Utility.with_logging(config) do
+      Utility::Environment.set_execution_environment(config) do
         described_class.start!
       end
     }.to raise_error('foobar is not a supported connector')
@@ -88,7 +89,7 @@ describe App::Worker do
 
       # now let's see what is displated in stderr
       expect {
-        Utility.with_logging(config) do
+        Utility::Environment.set_execution_environment(config) do
           described_class.start!
         end
       }.to output(stderr).to_stderr

@@ -10,10 +10,10 @@ $LOAD_PATH << '../'
 
 require 'app/worker'
 require 'app/config'
-require 'utility/logger'
+require 'utility/environment'
 
 module App
-  Utility.with_logging(App::Config) do
+  Utility::Environment.set_execution_environment(App::Config) do
     App::Worker.start!
   end
 end
