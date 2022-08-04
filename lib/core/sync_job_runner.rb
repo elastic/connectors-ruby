@@ -11,7 +11,6 @@ require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
-require 'fugit'
 require 'utility'
 
 module Core
@@ -35,15 +34,8 @@ module Core
     end
 
     def execute
-      unless @connector_settings.connector_status_allows_sync?
-        Utility::Logger.info("Connector #{@connector_settings.id} is in status \"#{@connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
-
-        return
-      end
-
       validate_configuration!
-
-      do_sync! if should_sync?
+      do_sync!
     end
 
     private
@@ -102,42 +94,6 @@ module Core
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
       raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
-    end
-
-    def cron_parser(cronline)
-      Fugit::Cron.do_parse(Utility::Cron.quartz_to_crontab(cronline))
-    rescue ArgumentError => e
-      Utility::Logger.error("Fail to parse cronline #{cronline}. Error: #{e.message}")
-      nil
-    end
-
-    def should_sync?
-      # sync_now should have priority over cron
-      if @connector_settings[:sync_now] == true
-        Utility::Logger.info("Connector #{@connector_settings.id} is manually triggered to sync now.")
-        return true
-      end
-      scheduling_settings = @connector_settings.scheduling_settings
-      unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.info("Connector #{@connector_settings.id} scheduling is disabled.")
-        return false
-      end
-
-      last_synced = @connector_settings[:last_synced]
-      return true if last_synced.nil? || last_synced.empty? # first run
-
-      last_synced = Time.parse(last_synced) # TODO: unhandled exception
-      sync_interval = scheduling_settings['interval']
-      if sync_interval.nil? || sync_interval.empty? # no interval configured
-        Utility::Logger.debug("No sync interval configured for connector #{@connector_settings.id}")
-        return false
-      end
-      cron_parser = cron_parser(sync_interval)
-      if cron_parser && cron_parser.next_time(last_synced) < Time.now
-        Utility::Logger.info("Connector #{@connector_settings.id} sync is triggered by cron schedule #{sync_interval}")
-        return true
-      end
-      false
     end
   end
 end
