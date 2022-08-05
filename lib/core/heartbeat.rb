@@ -6,14 +6,33 @@
 
 # frozen_string_literal: true
 
-require 'core/elastic_connector_actions'
+require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
+require 'core/connector_settings'
+require 'core/elastic_connector_actions'
 require 'utility/logger'
 
 module Core
   class Heartbeat
+    INTERVAL_SECONDS = 60
+
     class << self
+      def start_task(connector_id, service_type)
+        Utility::Logger.debug("Starting heartbeat timer task with interval #{INTERVAL_SECONDS} seconds.")
+
+        Concurrent::TimerTask.execute(execution_interval: INTERVAL_SECONDS, run_now: true) do
+          Utility::Logger.debug("Sending heartbeat for the connector #{connector_id}")
+          send(connector_id, service_type)
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
+        end
+
+        Utility::Logger.info('Successfully started heartbeat task.')
+      end
+
+      private
+
       def send(connector_id, service_type)
         connector_settings = Core::ConnectorSettings.fetch(connector_id)
 
@@ -27,7 +46,7 @@ module Core
           doc[:configuration] = configuration
 
           # We want to set connector to CONFIGURED status if all configurable fields have default values
-          new_connector_status = if configuration.values.all? { |setting| setting[:value] }
+          new_connector_status = if configuration.values.all? { |setting| setting[:value].present? }
                                    Utility::Logger.debug("All connector configurable fields provided default values for connector #{connector_id}.")
                                    Connectors::ConnectorStatus::CONFIGURED
                                  else
@@ -43,7 +62,7 @@ module Core
           doc[:status] = connector_instance.source_status[:status] == 'OK' ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
         end
 
-        ElasticConnectorActions.update_connector_fields(connector_id, doc)
+        Core::ElasticConnectorActions.update_connector_fields(connector_id, doc)
       end
     end
   end
