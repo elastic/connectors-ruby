@@ -11,96 +11,128 @@ require 'app/worker'
 require 'utility/logger'
 require 'utility/environment'
 
-class FakeSettings
-  def index_name
-    'index'
-  end
-end
-
 describe App::Worker do
-  it 'should raise error for invalid service type' do
-    config = {
-      :service_type => 'foobar',
-      :connector_id => '1',
+  let(:connector_id) { '1' }
+  let(:service_type) { 'foobar' }
+  let(:content_index_name) { 'recent-data-ingestion-index' }
+  let(:config) do
+    {
+      :service_type => service_type,
+      :connector_id => connector_id,
       :log_level => 'INFO',
       :elasticsearch => {
         :api_key => 'key',
         :hosts => 'http://notreallyaserver'
       }
     }
-    allow(Connectors::REGISTRY).to receive(:connector_class).and_return(nil)
+  end
+
+  let(:connector_settings) do
+    double
+  end
+
+  let(:connector_class) do
+    double
+  end
+
+  let(:scheduler) do
+    double
+  end
+
+  let(:sync_job_runner) do
+    double
+  end
+
+  let(:timer_task) do
+    double
+  end
+
+  before(:each) do
     stub_const('App::Config', config)
 
-    expect {
-      Utility::Environment.set_execution_environment(config) do
+    allow(connector_settings).to receive(:id).and_return(connector_id)
+    allow(connector_settings).to receive(:index_name).and_return(content_index_name)
+
+    allow(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
+    allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
+    allow(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
+
+    allow(Core::ConnectorSettings).to receive(:fetch).and_return(connector_settings)
+
+    allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(connector_class)
+
+    allow(Core::Scheduler).to receive(:new).and_return(scheduler)
+    allow(scheduler).to receive(:when_triggered).and_yield(connector_settings)
+
+    allow(Core::SyncJobRunner).to receive(:new).and_return(sync_job_runner)
+    allow(sync_job_runner).to receive(:execute)
+
+    allow(Core::Heartbeat).to receive(:start_task)
+  end
+
+  describe '#start' do
+    context 'when valid setup is provided' do
+      it 'ensures necessary indices are created' do
+        expect(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
+        expect(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
+        expect(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists).with(content_index_name)
+
         described_class.start!
       end
-    }.to raise_error('foobar is not a supported connector')
-  end
 
-  shared_examples 'handle_warnings' do |disable_warnings, stderr|
-    it "with disable_warnings=#{disable_warnings}" do
-      # This call will raise a 401 when the lib checks the server, and that will create a warning
-      expect_any_instance_of(Utility::EsClient).to receive(:elasticsearch_validation_request).and_raise(Elastic::Transport::Transport::Errors::Unauthorized)
+      it 'starts sync job runner' do
+        expect(sync_job_runner).to receive(:execute)
+        described_class.start!
+      end
+    end
 
-      config = if disable_warnings
-                 # This is the default behavior, so we don't pass
-                 # disable_warnings to make sure it is set to true by default
-                 {
-                   :service_type => 'stub_connector',
-                   :connector_id => '1',
-                   :log_level => 'INFO',
-                   :elasticsearch => {
-                     :api_key => 'key',
-                     :hosts => 'http://notreallyaserver'
-                   }
-                 }
-               else
-                 {
-                   :service_type => 'stub_connector',
-                   :log_level => 'INFO',
-                   :connector_id => '1',
-                   :elasticsearch => {
-                     :api_key => 'key',
-                     :hosts => 'http://notreallyaserver',
-                     :disable_warnings => false
-                   }
-                 }
-               end
+    context 'when connector settings could not be fetched' do
+      let(:error) { 'oh no!' }
 
-      # mocking the worker so start! returns immediatly after the initial checks
-      allow(App::Worker).to receive(:start_heartbeat_task)
-      allow(App::Worker).to receive(:start_polling_jobs)
-
-      # mocking some of the conversation between the worker and Elasticsearch
-      expect(Core::ConnectorSettings).to receive(:fetch).and_return(FakeSettings.new)
-
-      ['.elastic-connectors-sync-jobs-v1', 'index', '.elastic-connectors-v1'].each do |index|
-        stub_request(:head, "http://notreallyaserver:9200/#{index}")
-          .to_return(status: 404, body: YAML.dump({}), headers: {})
-        stub_request(:put, "http://notreallyaserver:9200/#{index}")
-          .to_return(status: 200, body: YAML.dump({}), headers: {})
+      before(:each) do
+        allow(Core::ConnectorSettings).to receive(:fetch).and_raise(error)
       end
 
-      stub_const('App::Config', config)
-
-      # make sure we start with a fresh ESClient for the duration of the test
-      expect(Core::ElasticConnectorActions).to receive(:client).at_least(:once).and_return(Utility::EsClient.new)
-
-      # now let's see what is displated in stderr
-      expect {
-        Utility::Environment.set_execution_environment(config) do
-          described_class.start!
-        end
-      }.to output(stderr).to_stderr
+      it 'crashes with the raised error' do
+        expect { described_class.start! }.to raise_error(error)
+      end
     end
-  end
 
-  context 'should display warnings from the Elasticsearch lib' do
-    include_examples 'handle_warnings', false, /#{Elasticsearch::SECURITY_PRIVILEGES_VALIDATION_WARNING}/
-  end
+    context 'when invalid service type is provided' do
+      before(:each) do
+        allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(nil)
+      end
 
-  context 'should discard warnings from the Elasticsearch lib by default' do
-    include_examples 'handle_warnings', true, ''
+      it 'should raise error for invalid service type' do
+        expect {
+          described_class.start!
+        }.to raise_error("#{service_type} is not a supported connector")
+      end
+    end
+
+    context 'when Core::ElasticConnectorActions raises elastic unauthorized error' do
+      let(:elastic_error_message) { 'Something really bad happened' }
+      before(:each) do
+        allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists).and_raise(Elastic::Transport::Transport::Errors::Unauthorized.new(elastic_error_message))
+      end
+
+      it 'raises a new more user-friendly error' do
+        expect {
+          described_class.start!
+        }.to raise_error(/#{elastic_error_message}/)
+      end
+    end
+
+    context 'when scheduler does not yield' do
+      before(:each) do
+        allow(scheduler).to receive(:when_triggered)
+      end
+
+      it 'does not trigger the connector' do
+        expect(sync_job_runner).to_not receive(:execute)
+
+        described_class.start!
+      end
+    end
   end
 end

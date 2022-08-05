@@ -5,6 +5,7 @@
 #
 
 require 'logger'
+require 'utility/logger'
 require 'active_support/core_ext/module'
 
 module Utility
