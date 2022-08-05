@@ -70,7 +70,7 @@ describe App::Worker do
     allow(Core::Heartbeat).to receive(:start_task)
   end
 
-  describe "#start" do
+  describe '#start' do
     context 'when valid setup is provided' do
       it 'ensures necessary indices are created' do
         expect(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
@@ -111,7 +111,7 @@ describe App::Worker do
     end
 
     context 'when Core::ElasticConnectorActions raises elastic unauthorized error' do
-      let(:elastic_error_message) { "Something really bad happened" }
+      let(:elastic_error_message) { 'Something really bad happened' }
       before(:each) do
         allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists).and_raise(Elastic::Transport::Transport::Errors::Unauthorized.new(elastic_error_message))
       end

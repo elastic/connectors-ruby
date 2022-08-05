@@ -8,11 +8,11 @@ describe Core::Heartbeat do
   let(:connector_stored_configuration) { {} } # returned from Elasticsearch with values already specified by user
   let(:connector_default_configuration) { {} } # returned from Connector class with default values
 
-  let(:connector_settings) { double } 
+  let(:connector_settings) { double }
   let(:connector_class) { double }
   let(:connector_instance) { double }
 
-  let(:source_status) { { :status => 'OK' } } 
+  let(:source_status) { { :status => 'OK' } }
 
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
@@ -115,4 +115,3 @@ describe Core::Heartbeat do
     end
   end
 end
-
