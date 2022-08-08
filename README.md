@@ -1,6 +1,99 @@
-# Elastic Enterprise Search Connectors
+# Elastic Enterprise Search connectors
 
 ![logo](logo-enterprise-search.png)
+
+The home of Elastic Enterprise Connector Clients. This repository contains the framework for customizing Elastic Enterprise Search native connectors, or writing your own connectors for advanced use cases.
+
+[//]: # (The introduction should:)
+[//]: # (- Summarize the tools provided in this repository.)
+[//]: # (- Summarize the procedures and reference information from this readme and any other docs included in this repo.)
+[//]: # (- Introduce any terminology that is our own.)
+[//]: # (- Identify this feature as a technical preview.)
+[//]: # (Then present a TOC to guide the user through the following sections.)
+
+Note #1: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.
+
+## Terminology
+
+* `connector` - generic term used to refer to both native connectors and connector clients.
+* `connector client` - specific light-weight connector implementation, open-code. Not all clients will be supported as native, but we target to have native connectors also offered as clients. Connector clients can be built by Elastic or community built.
+
+## Disambiguation: connectors-ruby and connectors-python
+
+This repository contains connector clients written in Ruby. However, some connectors will also be implemented in Python. The Python connectors are located in a separate repository, [elastic/connectors-python](https://github.com/elastic/connectors-python).
+
+Before getting started, review important information about this feature:
+
+- [Known issues and limitations](#known-issues-and-limitations)
+- [Getting help and providing feedback](#getting-help-and-providing-feedback)
+
+Build, deploy, and operate your connector:
+
+- [Building a connector](#building-a-connector)
+- [Moving to production](#moving-to-production)
+- [Publishing a connector (optional)](#publishing-a-connector-optional)
+
+Reference:
+
+- [Connector protocol reference](#connector-protocol-reference)
+
+## Known issues and limitations
+
+[//]: # (If the only "limitation" is technical preview, we could drop this section.)
+- The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [stub connector](lib/connectors/stub_connector). None of those are production ready clients - rather, they are functional examples, which you can use as a base for your own work.
+- The `stub_connector` is the most basic example that doesn't have any integration with the third-party data source - it just returns some stub data to ingest.
+- The `mongodb` connector is a MongoDB-based connector. It is lacking some features that one would definitely want in production - for example it does not implement any kind of authentication and it only works with a single collection, but it is still a good example of how to use the connector framework for handling the data from this kind of a document storage.
+- The `gitlab` connector is the most involved out of the three but is is also missing a lot of features - for one, it only grabs the projects and leaves aside all the other types of content, like files, folders, issues etc. In the current simplified version, it also doesn't synchronize document permissions. But it implements the authentication via an API token, and it has the most developed class structure, which is easily extendable.
+
+## Getting help and providing feedback
+
+May want to duplicate the content I put in the Elastic doc: https://github.com/elastic/enterprise-search-pubs/pull/2631
+
+## Building a connector
+
+This section has its own structure, so mini TOC to provide an overview:
+
+- [Implementing the connector protocol](#implementing-the-connector-protocol)
+- [Using the connector framework](#using-the-connector-framework)
+- [Operating the connector service](#operating-the-connector-service)
+- [Operating the connector](#operating-the-connector)
+- [Testing the integration](#testing-the-integration)
+
+### Implementing the connector protocol
+
+I see now that the protocol is document-based and building a connector is language- and tool-agnostic. I'm therefore leading with a section that presents a procedure to properly implement the protocol. This is the core task for the developer.
+
+### Using the connector framework
+
+Using the framework is optional and Ruby-specific. This is where the former section "Set up and learn your development environment" is relevant, so that content would now go here.
+
+I don't know how mature the framework is at this point and how much coverage we want to provide for 8.4. I recommend covering this only _after_ you've thoroughly covered the protocol and how to implement it in a tool-agnostic way.
+
+### Operating the connector service
+
+At this point in this feature's lifecycle, I'm assuming the connector developer and service operator are the same person. We may need to change this later.
+
+### Operating the connector
+
+Same here--I'm assuming the developer of the connector is also its operator. I may be wrong to assume this, or we may need to change this assumption in the future.
+
+### Testing the integration
+
+This is where we explain how all the pieces fit together and how to know if you've implemented everything correctly.
+
+## Moving to production
+
+After you've implemented everything correctly, you're ready to go to Production. This is potentially a big topic on its own. I assume for 8.4 we'll cover this only at a high level.
+
+## Publishing a connector (optional)
+
+If they want to share their connector. This was in there from 8.3. Still relevant?
+
+## Connector protocol reference
+
+======================================
+
+# Elastic Enterprise Search Connectors
 
 The home of Elastic Enterprise Connector Clients. Use connector clients to
 customize connectors such as Workplace Search Content Sources for advanced use
