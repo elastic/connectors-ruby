@@ -7,5 +7,7 @@
 # frozen_string_literal: true
 
 require 'core/connector_settings'
-require 'core/sync_job_runner'
 require 'core/elastic_connector_actions'
+require 'core/heartbeat'
+require 'core/scheduler'
+require 'core/sync_job_runner'

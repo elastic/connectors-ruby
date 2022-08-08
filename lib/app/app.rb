@@ -9,10 +9,11 @@
 $LOAD_PATH << '../'
 
 require 'app/worker'
+require 'app/config'
+require 'utility/environment'
 
 module App
-  # Set UTC as the timezone
-  ENV['TZ'] = 'UTC'
-
-  App::Worker.start!
+  Utility::Environment.set_execution_environment(App::Config) do
+    App::Worker.start!
+  end
 end

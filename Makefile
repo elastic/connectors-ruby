@@ -1,5 +1,5 @@
 YQ ?= "yq"
-.phony: test lint autocorrect update_config build autocorrect-unsafe
+.phony: test ftest lint autocorrect update_config build autocorrect-unsafe
 .phony: release_dev release build_gem install build-docker run-docker exec_app tag exec_cli
 
 config/connectors.yml:
@@ -7,6 +7,11 @@ config/connectors.yml:
 
 test: config/connectors.yml
 	bundle _$(shell cat .bundler-version)_ exec rspec spec --order rand
+
+ftest:
+	-cp config/connectors.yml config/connectors.yml.$$(date +%Y%m%d%H%M%S).saved 2>/dev/null
+	cp tests/connectors.yml config/connectors.yml
+	rbenv exec bundle exec ruby tests/ftest.rb
 
 lint: config/connectors.yml
 	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec
@@ -41,13 +46,13 @@ tag:
 
 build_gem:
 	mkdir -p .gems
-	gem build connectors_utility.gemspec
+	bundle _$(shell cat .bundler-version)_ exec gem build connectors_utility.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
 	echo "DO NOT FORGET TO UPDATE ENT-SEARCH"
 
 push_gem:
-	gem push .gems/*
+	bundle _$(shell cat .bundler-version)_ exec gem push .gems/*
 
 install:
 	rbenv install -s

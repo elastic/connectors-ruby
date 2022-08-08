@@ -34,20 +34,22 @@ module Connectors
         }
       end
 
-      def health_check(_params)
-        Connectors::MongoDB::CustomClient.new(hostname, database)
+      def initialize(local_configuration: {}, remote_configuration: {})
+        super
+
+        @host = remote_configuration.dig(:host, :value)
+        @database = remote_configuration.dig(:database, :value)
+        @collection = remote_configuration.dig(:collection, :value)
       end
 
-      def yield_documents(connector)
-        config = connector.configuration
+      def health_check(_params)
+        create_client(@host, @database)
+      end
 
-        host = config[:host][:value]
-        database = config[:database][:value]
-        collection = config[:collection][:value]
+      def yield_documents
+        mongodb_client = create_client(@host, @database)
 
-        mongodb_client = create_client(host, database)
-
-        mongodb_client[collection].find.each do |document|
+        mongodb_client[@collection].find.each do |document|
           doc = document.with_indifferent_access
           transform!(doc)
 

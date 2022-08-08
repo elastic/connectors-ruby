@@ -7,7 +7,6 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/numeric/time'
-require 'concurrent-ruby'
 require 'core/output_sink/base_sink'
 require 'utility/es_client'
 require 'utility/logger'
@@ -16,65 +15,58 @@ module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
     attr_accessor :index_name
 
-    def initialize(index_name, flush_threshold = 50, flush_interval = 10.seconds)
+    def initialize(index_name, flush_threshold = 50)
       super()
       @client = Utility::EsClient.new
       @index_name = index_name
-      @queue = []
+      @operation_queue = []
       @flush_threshold = flush_threshold
-      @last_flush = Time.now
-      @flush_task = Concurrent::TimerTask.new(execution_interval: flush_interval) do
-        flush(:size => @queue.size, :force => true)
-      end
-      @flush_task.execute
     end
 
     def ingest(document)
       return if document.blank?
 
-      @queue << document
-
+      @operation_queue << { :index => { :_index => index_name, :_id => document[:id], :data => document } }
       flush if ready_to_flush?
     end
 
-    def flush(size: nil, force: false)
+    def delete(doc_id)
+      return if doc_id.nil?
+
+      @operation_queue << { :delete => { :_index => index_name, :_id => doc_id } }
+      flush if ready_to_flush?
+    end
+
+    def flush(size: nil)
       flush_size = size || @flush_threshold
-      if force || ready_to_flush?
-        data_to_flush = @queue.pop(flush_size)
+
+      while @operation_queue.any?
+        data_to_flush = @operation_queue.pop(flush_size)
         send_data(data_to_flush)
       end
     end
 
     def ingest_multiple(documents)
-      documents.each { |doc| @queue << doc unless doc.blank? }
-      flush if ready_to_flush?
+      Utility::Logger.debug "Enqueueing #{documents&.size} documents to the index #{index_name}."
+      documents.each { |doc| ingest(doc) }
     end
 
     def delete_multiple(ids)
-      print_header 'Deleting some stuff too'
-      Utility::Logger.info ids
-      print_delim
+      Utility::Logger.debug "Enqueueing #{ids&.size} ids to delete from the index #{index_name}."
+      ids.each { |id| delete(id) }
     end
 
     private
 
-    def send_data(documents)
-      return if documents.empty?
+    def send_data(ops)
+      return if ops.empty?
 
-      bulk_request = documents.map do |document|
-        { :index => { :_index => index_name, :_id => document[:id], :data => document } }
-      end
-      @client.bulk(:body => bulk_request)
-      Utility::Logger.info "SENT #{documents.size} documents to the index #{index_name}"
-    rescue StandardError => e
-      Utility::Logger.error_with_backtrace(
-        message: "Failed to send data to the index #{index_name}: #{e.message}",
-        exception: e
-      )
+      @client.bulk(:body => ops)
+      Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
     end
 
     def ready_to_flush?
-      @queue.size >= @flush_threshold
+      @operation_queue.size >= @flush_threshold
     end
   end
 end

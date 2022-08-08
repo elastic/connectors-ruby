@@ -2,7 +2,7 @@
 
 - job:
     name: connectors/connectors
-    description: "Builds and run tests against the elastic/connectors repo"
+    description: "Builds and run tests against the elastic/connectors-ruby repo"
     project-type: multibranch
     node: master
     concurrent: true

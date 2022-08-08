@@ -1,8 +1,8 @@
-# Elastic Enterprise Search Connectors 
+# Elastic Enterprise Search Connectors
 
 ![logo](logo-enterprise-search.png)
 
-The home of Elastic Enterprise Connector Packages. Use connector packages to
+The home of Elastic Enterprise Connector Clients. Use connector clients to
 customize connectors such as Workplace Search Content Sources for advanced use
 cases.
 
@@ -10,11 +10,8 @@ Note #1: The connector framework is a tech preview feature. Tech preview feature
 are subject to change and are not covered by the support SLA of general release
 (GA) features. Elastic plans to promote this feature to GA in a future release.
 
-Note #2: If you are looking for the version of the connector framework that is described in [Bring Your Own Connector](https://www.elastic.co/blog/bring-your-own-enterprise-search-connector) blog article that was describing the version from the 8.3 release, it would be advisable to check out/fork the [relevant branch](https://github.com/elastic/connectors-ruby/tree/8.3).
-
-## Connector Packages
-
-The connector packages are available in the [lib/connectors](lib/connectors) directory. The list of implemented connectors is subject to change, as we are constantly working to add new connectors. Bring your own connector and add it to our framework!
+Note #2: The `main` branch of this repository is currently being heavily reworked. If you want to use the
+connector clients now, it would be advisable to check out/fork the [latest stable branch](https://github.com/elastic/connectors-ruby/tree/8.3).
 
 ### System Requirements
 
@@ -276,8 +273,13 @@ the metadata they need.
 The build process might change it on-the-fly when the Gem is created but will
 not change the one in the dev tree.
 
-When the connector application is launched, it will pick [config/connectors.yml](config/connectors.yml) by default, 
+When the connector application is launched, it will pick `config/connectors.yml` by default,
 but you can provide your own configuration file by using the **CONNECTORS_CONFIG** env.
+
+
+### Connector protocol
+
+These connectors are built according to our [Connector Protocol](./docs/CONNECTOR_PROTOCOL.md). If you want to build your own connector or update an existing, please make sure to adhere to that protocol.
 
 #### <a name="local-connector-properties></a>Local connector properties
 
@@ -306,3 +308,4 @@ We welcome contributors to the project. Before you begin, please read the [Conne
 - [Developer guide](./docs/DEVELOPING.md)
 - [Security Policy](./docs/SECURITY.md)
 - [Elastic-internal guide](./docs/INTERNAL.md)
+- [Connector Protocol](./docs/CONNECTOR_PROTOCOL.md)

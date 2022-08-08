@@ -27,6 +27,10 @@ module Core::OutputSink
       @sinks.each { |sink| sink.ingest_multiple(documents) }
     end
 
+    def delete(id)
+      @sinks.each { |sink| sink.delete(id) }
+    end
+
     def delete_multiple(ids)
       @sinks.each { |sink| sink.delete_multiple(ids) }
     end

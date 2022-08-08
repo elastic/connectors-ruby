@@ -25,8 +25,13 @@ module Core::OutputSink
       Utility::Logger.info documents
     end
 
+    def delete(id)
+      print_header "Deleting single id: #{id}"
+      Utility::Logger.info id
+    end
+
     def delete_multiple(ids)
-      print_header 'Deleting some stuff too'
+      print_header "Deleting several ids: #{ids}"
       Utility::Logger.info ids
     end
 

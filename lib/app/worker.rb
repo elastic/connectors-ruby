@@ -14,48 +14,44 @@ require 'app/config'
 
 module App
   module Worker
-    POLL_IDLING = (App::Config['idle_timeout'] || 60).to_i
+    POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
 
     class << self
       def start!
+        Utility::Logger.info('Running pre-flight check.')
         pre_flight_check
-
-        Utility::Logger.info('Starting to process jobs...')
+        Utility::Logger.info('Starting connector service workers.')
+        start_heartbeat_task
         start_polling_jobs
       end
 
       private
 
       def pre_flight_check
-        raise "#{App::Config['service_type']} is not a supported connector" unless Connectors::REGISTRY.registered?(App::Config['service_type'])
-        Core::ElasticConnectorActions.ensure_connectors_index_exists
-        Core::ElasticConnectorActions.ensure_job_index_exists
-        connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
-        Core::ElasticConnectorActions.ensure_content_index_exists(
-          connector_settings.index_name,
-          App::Config[:use_analysis_icu],
-          App::Config[:content_language_code]
-        )
-      end
-
-      def start_polling_jobs
-        loop do
-          job_runner = create_sync_job_runner
-          job_runner.execute
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
-        ensure
-          if POLL_IDLING > 0
-            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds")
-            sleep(POLL_IDLING)
-          end
+        raise "#{App::Config[:service_type]} is not a supported connector" unless Connectors::REGISTRY.registered?(App::Config[:service_type])
+        begin
+          Core::ElasticConnectorActions.ensure_connectors_index_exists
+          Core::ElasticConnectorActions.ensure_job_index_exists
+          connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
+          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
+        rescue Elastic::Transport::Transport::Errors::Unauthorized => e
+          raise "Elasticsearch is not authorizing access #{e}"
         end
       end
 
-      def create_sync_job_runner
-        connector_settings = Core::ConnectorSettings.fetch(App::Config['connector_package_id'])
+      def start_heartbeat_task
+        connector_id = App::Config[:connector_id]
+        service_type = App::Config[:service_type]
 
-        Core::SyncJobRunner.new(connector_settings, App::Config['service_type'])
+        Core::Heartbeat.start_task(connector_id, service_type)
+      end
+
+      def start_polling_jobs
+        Utility::Logger.info('Polling Elasticsearch for synchronisation jobs to run.')
+        Core::Scheduler.new(App::Config[:connector_id], POLL_IDLING).when_triggered do |connector_settings|
+          job_runner = Core::SyncJobRunner.new(connector_settings, App::Config[:service_type])
+          job_runner.execute
+        end
       end
     end
   end

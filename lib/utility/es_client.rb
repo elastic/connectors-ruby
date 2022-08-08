@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'logger'
 require 'elasticsearch'
 require 'app/config'
 
@@ -25,15 +26,25 @@ module Utility
     end
 
     def connection_configs
-      es_config = App::Config['elasticsearch']
-      configs = { :api_key => es_config['api_key'] }
-      if es_config['cloud_id']
-        configs[:cloud_id] = es_config['cloud_id']
-      elsif es_config['hosts']
-        configs[:hosts] = es_config['hosts']
+      es_config = App::Config[:elasticsearch]
+      configs = { :api_key => es_config[:api_key] }
+      if es_config[:cloud_id]
+        configs[:cloud_id] = es_config[:cloud_id]
+      elsif es_config[:hosts]
+        configs[:hosts] = es_config[:hosts]
       else
         raise 'Either elasticsearch.cloud_id or elasticsearch.hosts should be configured.'
       end
+      configs[:log] = es_config[:log] || false
+      configs[:trace] = es_config[:trace] || false
+
+      # if log or trace is activated, we use the application logger
+      configs[:logger] = if configs[:log] || configs[:trace]
+                           Utility::Logger.logger
+                         else
+                           # silence!
+                           ::Logger.new(IO::NULL)
+                         end
       configs
     end
 

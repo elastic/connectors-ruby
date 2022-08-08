@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'stubs/app_config' unless defined?(Rails)
+require 'logger'
 require 'active_support/core_ext/module'
 
 module Utility
@@ -15,12 +15,12 @@ module Utility
 
       delegate :formatter, :formatter=, :to => :logger
 
-      def setup!(logger)
-        @logger = logger
+      def level=(log_level)
+        logger.level = log_level
       end
 
       def logger
-        @logger ||= AppConfig.connectors_logger
+        @logger ||= ::Logger.new(STDOUT)
       end
 
       SUPPORTED_LOG_LEVELS.each do |level|

@@ -6,5 +6,5 @@
 require 'app/config'
 
 module App
-  VERSION = App::Config['version']
+  VERSION = App::Config[:version]
 end
