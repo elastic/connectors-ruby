@@ -45,35 +45,40 @@ module Core
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
-      Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
-
-      incoming_ids = []
-      existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
-
-      Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
-
-      @connector_instance.yield_documents do |document|
-        @sink.ingest(document)
-        incoming_ids << document[:id]
-        @status[:indexed_document_count] += 1
+      unless job_id.present?
+        Utility::Logger.error("Failed to claim the job for #{@connector_settings.id}. Please check the logs for the cause of this error.")
+        return
       end
 
-      ids_to_delete = existing_ids - incoming_ids.uniq
+      begin
+        Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
-      Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
+        incoming_ids = []
+        existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
 
-      ids_to_delete.each do |id|
-        @sink.delete(id)
-        @status[:deleted_document_count] += 1
-      end
+        Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
-      @sink.flush
-    rescue StandardError => e
-      @status[:error] = e.message
-      Utility::ExceptionTracking.log_exception(e)
-      ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
-    ensure
-      if job_id.present?
+        @connector_instance.yield_documents do |document|
+          @sink.ingest(document)
+          incoming_ids << document[:id]
+          @status[:indexed_document_count] += 1
+        end
+
+        ids_to_delete = existing_ids - incoming_ids.uniq
+
+        Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
+
+        ids_to_delete.each do |id|
+          @sink.delete(id)
+          @status[:deleted_document_count] += 1
+        end
+
+        @sink.flush
+      rescue StandardError => e
+        @status[:error] = e.message
+        Utility::ExceptionTracking.log_exception(e)
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
+      ensure
         Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
 
@@ -84,8 +89,6 @@ module Core
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
-      else
-        Utility::Logger.info("No scheduled jobs for connector #{@connector_settings.id}. Status: #{@status}.")
       end
     end
 
