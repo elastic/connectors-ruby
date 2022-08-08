@@ -8,20 +8,20 @@ describe Core::SyncJobRunner do
   let(:service_type) { 'foo' }
   let(:connector_status) { Connectors::ConnectorStatus::CONNECTED }
   let(:connector_stored_configuration) do # returned from Elasticsearch with values already specified by user
-        {
-          :lala => {
-            :label => 'Lala',
-            :value => 'hello'
-          }
-        }
+    {
+      :lala => {
+        :label => 'Lala',
+        :value => 'hello'
+      }
+    }
   end
   let(:connector_default_configuration) do # returned from Connector class with default values
-        {
-          :lala => {
-            :label => 'Lala',
-            :value => nil
-          }
-        }
+    {
+      :lala => {
+        :label => 'Lala',
+        :value => nil
+      }
+    }
   end
 
   let(:connector_settings) { double }
@@ -84,7 +84,7 @@ describe Core::SyncJobRunner do
 
     context 'when connector was already configured with different configurable field set' do
       let(:connector_stored_configuration) do
-        { 
+        {
           :foo => {
             :label => 'Foo',
             :value => nil
@@ -137,17 +137,17 @@ describe Core::SyncJobRunner do
         }
       end
 
-      let(:extracted_documents) { [ doc1, doc2 ] } # documents returned from 3rd-party system
+      let(:extracted_documents) { [doc1, doc2] } # documents returned from 3rd-party system
 
       it 'ingests returned documents into the sink' do
         expect(sink).to receive(:ingest).with(doc1)
         expect(sink).to receive(:ingest).with(doc2)
 
         subject.execute
-      end 
+      end
 
       context 'when some documents were present before' do
-        let(:existing_document_ids) { [ 3, 4, 'lala', 'some other id' ] }
+        let(:existing_document_ids) { [3, 4, 'lala', 'some other id'] }
 
         it 'attempts to remove existing documents' do
           existing_document_ids.each do |id|
@@ -158,7 +158,7 @@ describe Core::SyncJobRunner do
         end
 
         it 'marks the job as complete with job stats' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, {:indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => nil})
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, { :indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => nil })
 
           subject.execute
         end
@@ -170,12 +170,12 @@ describe Core::SyncJobRunner do
 
           it 'changes connector status to error' do
             expect(Core::ElasticConnectorActions).to receive(:update_connector_status).with(connector_id, Connectors::ConnectorStatus::ERROR)
-            
+
             subject.execute
           end
 
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, {:indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => anything})
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, { :indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => anything })
 
             subject.execute
           end
