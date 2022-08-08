@@ -6,7 +6,7 @@ RSpec.describe Utility::EsClient do
   let(:host) { 'http://notreallyaserver' }
   let(:config) do
     {
-      :service_type => 'stub_connector',
+      :service_type => 'example',
       :log_level => 'INFO',
       :connector_id => '1',
       :elasticsearch => {
