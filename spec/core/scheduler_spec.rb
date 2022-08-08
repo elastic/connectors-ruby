@@ -12,7 +12,7 @@ describe Core::Scheduler do
   let(:sync_now) { false }
   let(:connector_status) { 'SOME NICE STATUS' }
   let(:scheduling_enabled) { true }
-  let(:scheduling_interval) { '0 * * * * *'}
+  let(:scheduling_interval) { '0 * * * * *' }
   let(:scheduling_settings) { { :enabled => scheduling_enabled, :interval => scheduling_interval } }
 
   before(:each) do
@@ -34,13 +34,13 @@ describe Core::Scheduler do
 
   shared_examples_for 'sync triggers' do
     it '' do
-      expect{ |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings)
+      expect { |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings)
     end
   end
 
   shared_examples_for 'sync does not trigger' do
     it '' do
-      expect{ |b| subject.when_triggered(&b) }.to_not yield_with_args(anything)
+      expect { |b| subject.when_triggered(&b) }.to_not yield_with_args(anything)
     end
   end
 
@@ -55,7 +55,7 @@ describe Core::Scheduler do
       it_behaves_like 'sync does not trigger'
 
       it 'does not raise an error' do
-        expect{ |b| subject.when_triggered(&b) }.to_not raise_error
+        expect { |b| subject.when_triggered(&b) }.to_not raise_error
       end
     end
 
@@ -124,12 +124,12 @@ describe Core::Scheduler do
       end
 
       context 'when cron expression does not trigger sync' do
-        let(:scheduling_interval) { '0 0 * * ? *'} # every day of month at 00:00
+        let(:scheduling_interval) { '0 0 * * ? *' } # every day of month at 00:00
         it_behaves_like 'sync does not trigger'
       end
 
       context 'when cron expression should trigger sync' do
-        let(:scheduling_interval) { '0 * * * ? *'} # every hour
+        let(:scheduling_interval) { '0 * * * ? *' } # every hour
         it_behaves_like 'sync triggers'
       end
     end
