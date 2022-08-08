@@ -11,7 +11,7 @@ require 'elasticsearch'
 require 'app/config'
 
 module Utility
-  class EsClient < Elasticsearch::Client
+  class EsClient < ::Elasticsearch::Client
     class IndexingFailedError < StandardError
       def initialize(message, error = nil)
         super(message)
