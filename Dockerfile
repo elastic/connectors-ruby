@@ -20,6 +20,4 @@ RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh # or /etc/profile
 # run the make file to install the app
 RUN make install
 
-
-EXPOSE 9292
 CMD ["make", "run"]
