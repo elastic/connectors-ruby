@@ -44,6 +44,7 @@ Connectors should update the last_seen field with their current datetime in UTC 
 - Write a UTC date-time to the `last_seen` property as a heartbeat, at least every half hour. Kibana will show an error if the date in `last_seen` is more than half an hour ago.
 
 **Sequence diagram**:
+```
 User->Kibana: Generates new API key & id
 Kibana->Elasticsearch: Saves API key & id
 User->Connector: Deploys with API key, id & Elasticsearch host
@@ -53,7 +54,8 @@ Kibana->User: Returns connector definition
 User->Kibana: Enters necessary configuration
 Kibana->Elasticsearch: Writes configuration
 Connector->Elasticsearch: Picks up configuration and starts syncing
-
+```
+Copy the above code in a sequence diagram viewer like [Sequencediagram.com](https://sequencediagram.org/) to view as a diagram.
 ### .elastic-connectors
 
 This is our main communication index, used to communicate the connector's configuration, status and other related data. All dates in UTC.
