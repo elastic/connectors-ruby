@@ -45,7 +45,6 @@ module Utility
                            # silence!
                            ::Logger.new(IO::NULL)
                          end
-      puts(configs)
       configs
     end
 
