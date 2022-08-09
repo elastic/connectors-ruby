@@ -51,15 +51,6 @@ module Connectors
         response.headers['Link'] || nil
       end
 
-      def fetch_project_repository_files(project_id)
-        response = client.get("projects/#{project_id}/repository/tree")
-        if response.status != 200
-          puts "Received #{response.status} status when fetching repository files for project #{project_id}"
-          return []
-        end
-        JSON.parse(response.body)
-      end
-
       def health_check
         # let's do a simple call to get the current user
         response = client.get('user')
