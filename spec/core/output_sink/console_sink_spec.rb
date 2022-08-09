@@ -7,15 +7,15 @@ describe Core::OutputSink::ConsoleSink do
     let(:doc) { { :id => 1, :something => :else } }
 
     it 'outputs a doc into stdout' do
-      expect { subject.ingest(doc) }.to output(/#{doc.to_s}/).to_stdout
+      expect { subject.ingest(doc) }.to output(/#{doc}/).to_stdout
     end
   end
 
   context '.ingest_multiple' do
-    let(:docs) { [ { :id => 1, :something => :else }, { :id => 2, :another => :one } ] }
+    let(:docs) { [{ :id => 1, :something => :else }, { :id => 2, :another => :one }] }
 
     it 'outputs docs into stdout' do
-      expect { subject.ingest_multiple(docs) }.to output(/#{docs.to_s}/).to_stdout
+      expect { subject.ingest_multiple(docs) }.to output(/#{docs}/).to_stdout
     end
   end
 
@@ -28,10 +28,10 @@ describe Core::OutputSink::ConsoleSink do
   end
 
   context '.delete_multiple' do
-    let(:ids) { [ 1, 2, 3, 15, 11, 17]}
+    let(:ids) { [1, 2, 3, 15, 11, 17] }
 
     it 'outputs deleted ids into stdout' do
-      expect { subject.delete_multiple(ids) }.to output(/#{ids.to_s}/).to_stdout
+      expect { subject.delete_multiple(ids) }.to output(/#{ids}/).to_stdout
     end
   end
 

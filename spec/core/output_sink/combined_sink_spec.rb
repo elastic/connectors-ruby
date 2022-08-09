@@ -3,7 +3,7 @@ require 'core/output_sink/combined_sink'
 describe Core::OutputSink::CombinedSink do
   let(:first_sink) { double }
   let(:second_sink) { double }
-  subject { described_class.new([ first_sink, second_sink ]) }
+  subject { described_class.new([first_sink, second_sink]) }
 
   context '.ingest' do
     let(:doc) { { :id => 1, :something => :else } }
@@ -17,7 +17,7 @@ describe Core::OutputSink::CombinedSink do
   end
 
   context '.ingest_multiple' do
-    let(:docs) { [ { :id => 1, :something => :else }, { :id => 2, :another => :one } ] }
+    let(:docs) { [{ :id => 1, :something => :else }, { :id => 2, :another => :one }] }
 
     it 'calls ingest_multiple for each sink' do
       expect(first_sink).to receive(:ingest_multiple).with(docs)
@@ -39,7 +39,7 @@ describe Core::OutputSink::CombinedSink do
   end
 
   context '.delete_multiple' do
-    let(:ids) { [ 1, 2, 3, 15, 11, 17]}
+    let(:ids) { [1, 2, 3, 15, 11, 17] }
 
     it 'calls delete_multiple for each sink' do
       expect(first_sink).to receive(:delete_multiple).with(ids)
