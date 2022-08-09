@@ -10,14 +10,14 @@ require 'connectors/base/connector'
 require 'utility'
 
 module Connectors
-  module StubConnector
+  module Example
     class Connector < Connectors::Base::Connector
       def self.service_type
-        'stub_connector'
+        'example'
       end
 
       def self.display_name
-        'Stub Connector'
+        'Example Connector'
       end
 
       def self.configurable_fields
@@ -38,7 +38,7 @@ module Connectors
       end
 
       def yield_documents
-        data = { id: '123', name: 'stub connector' }
+        data = { id: '123', name: 'example document' }
         yield data
       end
     end
