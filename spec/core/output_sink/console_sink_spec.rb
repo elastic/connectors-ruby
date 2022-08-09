@@ -1,0 +1,45 @@
+require 'core/output_sink/console_sink'
+
+describe Core::OutputSink::ConsoleSink do
+  subject { described_class.new }
+
+  context '.ingest' do
+    let(:doc) { { :id => 1, :something => :else } }
+
+    it 'outputs a doc into stdout' do
+      expect { subject.ingest(doc) }.to output(/#{doc.to_s}/).to_stdout
+    end
+  end
+
+  context '.ingest_multiple' do
+    let(:docs) { [ { :id => 1, :something => :else }, { :id => 2, :another => :one } ] }
+
+    it 'outputs docs into stdout' do
+      expect { subject.ingest_multiple(docs) }.to output(/#{docs.to_s}/).to_stdout
+    end
+  end
+
+  context '.delete' do
+    let(:id) { 15 }
+
+    it 'outputs deleted id into stdout' do
+      expect { subject.delete(id) }.to output(/#{id}/).to_stdout
+    end
+  end
+
+  context '.delete_multiple' do
+    let(:ids) { [ 1, 2, 3, 15, 11, 17]}
+
+    it 'outputs deleted ids into stdout' do
+      expect { subject.delete_multiple(ids) }.to output(/#{ids.to_s}/).to_stdout
+    end
+  end
+
+  context '.flush' do
+    let(:size) { 99 }
+
+    it 'outputs flush size into stdout' do
+      expect { subject.flush(size: size) }.to output(/#{size}/).to_stdout
+    end
+  end
+end
