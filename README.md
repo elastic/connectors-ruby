@@ -65,31 +65,30 @@ I see now that the protocol is document-based and building a connector is langua
 
 ### Using the connector framework
 
-Using the framework is optional and Ruby-specific. This is where the former section "Set up and learn your development environment" is relevant, so that content would now go here.
+[//]: # (Using the framework is optional and Ruby-specific. This is where the former section "Set up and learn your development environment" is relevant, so that content would now go here.)
 
-I don't know how mature the framework is at this point and how much coverage we want to provide for 8.4. I recommend covering this only _after_ you've thoroughly covered the protocol and how to implement it in a tool-agnostic way.
+[//]: # ()
+[//]: # (I don't know how mature the framework is at this point and how much coverage we want to provide for 8.4. I recommend covering this only _after_ you've thoroughly covered the protocol and how to implement it in a tool-agnostic way.)
 
 ### Operating the connector service
 
-At this point in this feature's lifecycle, I'm assuming the connector developer and service operator are the same person. We may need to change this later.
+[//]: # (At this point in this feature's lifecycle, I'm assuming the connector developer and service operator are the same person. We may need to change this later.)
 
 ### Operating the connector
 
-Same here--I'm assuming the developer of the connector is also its operator. I may be wrong to assume this, or we may need to change this assumption in the future.
+[//]: # (Same here--I'm assuming the developer of the connector is also its operator. I may be wrong to assume this, or we may need to change this assumption in the future.)
 
 ### Testing the integration
 
-This is where we explain how all the pieces fit together and how to know if you've implemented everything correctly.
+[//]: # (This is where we explain how all the pieces fit together and how to know if you've implemented everything correctly.)
 
 ## Moving to production
 
-After you've implemented everything correctly, you're ready to go to Production. This is potentially a big topic on its own. I assume for 8.4 we'll cover this only at a high level.
+[//]: # (After you've implemented everything correctly, you're ready to go to Production. This is potentially a big topic on its own. I assume for 8.4 we'll cover this only at a high level.)
 
 ## Publishing a connector (optional)
 
-If they want to share their connector. This was in there from 8.3. Still relevant?
-
-## Connector protocol reference
+[//]: # (If they want to share their connector. This was in there from 8.3. Still relevant?)
 
 ======================================
 
