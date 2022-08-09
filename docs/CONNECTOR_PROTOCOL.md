@@ -44,18 +44,38 @@ Connectors should update the last_seen field with their current datetime in UTC 
 - Write a UTC date-time to the `last_seen` property as a heartbeat, at least every half hour. Kibana will show an error if the date in `last_seen` is more than half an hour ago.
 
 **Sequence diagram**:
+```mermaid
+sequenceDiagram
+    actor User
+    participant Kibana
+    participant Elasticsearch
+    participant Connector
+    participant Data source
+    User->>Kibana: Generates new API key & id
+    Kibana->>Elasticsearch: Saves API key & id
+    User->>Connector: Deploys with API key, id & Elasticsearch host
+    Connector->>Elasticsearch: Writes its connector definition to .elastic-connectors
+    Elasticsearch->>Kibana: Returns connector definition
+    Kibana->>User: Returns connector definition
+    User->>Kibana: Enters necessary configuration and synchronization schedule
+    Kibana->>Elasticsearch: Writes configuration and synchronization schedule
+    Connector->>Elasticsearch: Reads configuration and synchronization schedule
+    loop Every minute
+        Connector->>Elasticsearch: Reads sync_now flag and sync schedule
+        Connector->>Elasticsearch: Updates last_seen to current datetime
+        opt Sync_now is true or sync_schedule requires synchronization
+            Connector->>Elasticsearch: Sets sync_now to false and last_sync_status to in_progress
+            Connector->>Data source: Reads data
+            Connector->>Elasticsearch: Indexes data
+            alt Sync successfully completed
+                Connector->>Elasticsearch: Sets last_sync_status to success
+            else Sync error
+                Connector->>Elasticsearch: Sets status and last_sync_status to error
+                Connector->>Elasticsearch: Writes error message to error field
+            end
+        end
+    end
 ```
-User->Kibana: Generates new API key & id
-Kibana->Elasticsearch: Saves API key & id
-User->Connector: Deploys with API key, id & Elasticsearch host
-Connector->Elasticsearch: Writes its connector definition to .elastic-connectors
-Elasticsearch->Kibana: Returns connector definition
-Kibana->User: Returns connector definition
-User->Kibana: Enters necessary configuration
-Kibana->Elasticsearch: Writes configuration
-Connector->Elasticsearch: Picks up configuration and starts syncing
-```
-Copy the above code in a sequence diagram viewer like [Sequencediagram.com](https://sequencediagram.org/) to view as a diagram.
 ### .elastic-connectors
 
 This is our main communication index, used to communicate the connector's configuration, status and other related data. All dates in UTC.
