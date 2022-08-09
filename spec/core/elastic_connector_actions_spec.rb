@@ -497,7 +497,7 @@ describe Core::ElasticConnectorActions do
       end
     end
   end
-  
+
   context '#ensure_content_index_exists' do
     let(:index_name) { 'some-cool-index' }
     let(:use_icu_locale) { true }
