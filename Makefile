@@ -63,10 +63,10 @@ build-docker:
 	docker build -t connectors .
 
 run-docker:
-	docker run --env elasticsearch.hosts="http://localhost:9200" --env "elasticsearch.api_key=$(API_KEY)" --rm -it connectors
+	docker run --env "elasticsearch.hosts=http://host.docker.internal:9200" --env "elasticsearch.api_key=$(API_KEY)" --rm -it connectors
 
 exec_app:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby app.rb
+	cd lib/app; source bundle _$(shell cat .bundler-version)_ exec ruby app.rb
 
 exec_cli:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb

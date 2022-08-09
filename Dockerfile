@@ -20,4 +20,4 @@ RUN echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh # or /etc/profile
 # run the make file to install the app
 RUN make install
 
-CMD ["make", "run"]
+CMD ["/bin/bash", "script/run_in_docker.sh"]

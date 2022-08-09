@@ -50,8 +50,8 @@ make run-docker API_KEY=my-key
 
 Where `my-key` is the Elasticsearch API key.
 
-If you need to create an API key for development purposes, you can use the following
-cURL call on Elasticsearch, and use the `encoded` value:
+If you need to create an API key for development purposes, you can use the following cURL call on Elasticsearch:
+
 ```shell
 $ curl --user elastic:changeme -X POST "localhost:9200/_security/api_key?pretty" -H 'Content-Type: application/json' -d'
 {
@@ -75,6 +75,12 @@ $ curl --user elastic:changeme -X POST "localhost:9200/_security/api_key?pretty"
   "api_key" : "zIJThFg9TO6uaYVy57TFSA",
   "encoded" : "NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
 }
+```
+
+And then use the `encoded` value:
+
+```
+make run-docker API_KEY=YmRhYWdZSUJLaFBUeWg3bm16Mmg6ZFh2NXBfVndSc3V3NnpBZHVRdU1xZw==
 ```
 
 ### Updating configuration values
