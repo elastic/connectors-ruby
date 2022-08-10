@@ -21,18 +21,22 @@ Before getting started, review important information about this feature:
 Build, deploy, and operate your connector:
 
 - [Building a connector](#building-a-connector)
+- [Operating the connector](#operating-the-connector)
 - [Moving to production](#moving-to-production)
-- [Publishing a connector (optional)](#publishing-a-connector-optional)
+
+How to publish your connector:
+
+- [Contribute to the repository](#contribute-to-the-repository-)
 
 Reference:
 
-- [Connector protocol reference](#connector-protocol-reference)
+- [Connector protocol reference](docs/CONNECTOR_PROTOCOL.md)
 
 ## Known issues and limitations
 
 [//]: # (If the only "limitation" is technical preview, we could drop this section.)
-- The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [stub connector](lib/connectors/stub_connector). None of those are production ready clients - rather, they are functional examples, which you can use as a base for your own work.
-- The `stub_connector` is the most basic example that doesn't have any integration with the third-party data source - it just returns some stub data to ingest.
+- The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [example connector](lib/connectors/example). None of those are production ready clients - rather, they are functional examples, which you can use as a base for your own work.
+- The `example` connector is the most basic and doesn't have any integration with the third-party data source - it just returns some stub data to ingest.
 - The `mongodb` connector is a MongoDB-based connector. It is lacking some features that one would definitely want in production - for example it does not implement any kind of authentication and it only works with a single collection, but it is still a good example of how to use the connector framework for handling the data from this kind of a document storage.
 - The `gitlab` connector is the most involved out of the three but is is also missing a lot of features - for one, it only grabs the projects and leaves aside all the other types of content, like files, folders, issues etc. In the current simplified version, it also doesn't synchronize document permissions. But it implements the authentication via an API token, and it has the most developed class structure, which is easily extendable.
 
@@ -46,7 +50,6 @@ This section has its own structure, so mini TOC to provide an overview:
 
 - [Implementing the connector protocol](#implementing-the-connector-protocol)
 - [Using the connector framework](#using-the-connector-framework)
-- [Operating the connector service](#operating-the-connector-service)
 - [Operating the connector](#operating-the-connector)
 - [Testing the integration](#testing-the-integration)
 
@@ -85,9 +88,9 @@ We provide an experimental support for Window 10.
 You can run the `win32\install.bat` script to have an unattended installation of Ruby
 and the tools we use. Once installed, you can run the `specs` using `make.bat`
 
-#### Implementing the connector protocol using the connector framework
+#### Implementing the connector protocol with the connector framework
 
-The first three steps for this would be the same [as for skipping the framework and implementing the protocol manually](#implementing-the-connector-protocol): creating a document index, setting up an API key, and updating the document index mappings as needed. The rest of the steps, however, are different.
+The first few steps for this would be the same [as for skipping the framework and implementing the protocol manually](#implementing-the-connector-protocol): creating a document index, setting up an API key, and updating the document index mappings as needed. The rest of the steps, however, are different.
 
 - Copy the [example connector](lib/connectors/example/connector.rb) into a separate folder under the [connectors](lib/connectors). Rename the class as required.
 - Change `self.service_type` and `self.display_name` to match the connector you are implementing. For example, this is how it is done in the provided [mongo connector](lib/connectors/mongodb/connector.rb).
@@ -180,8 +183,6 @@ Or from the [gitlab connector](lib/connectors/gitlab/connector.rb):
     end
 ```
 
-### Operating the connector service
-
 #### Running the connector locally
 
 First, build the code with:
@@ -248,31 +249,6 @@ And then use the `encoded` value:
 make run-docker API_KEY="NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
 ```
 
-### Operating the connector
-
-After the connector is up and running, it will check the status in the [.elastic-connectors](docs/CONNECTOR_PROTOCOL.md#elastic-connectors) index. If the connector specifies any fields in the `configurable_fields` array, it then will change its status to `needs_configuration` and won't try a sync, until these fields are configured in the Kibana UI in `Enterprise Search
-Content - Elasticsearch indices - your-index-name` section, on the `Configuration` tab.
-
-```text
-I, [2022-08-09T13:25:37.961144 #20965]  INFO -- : Changing connector status to needs_configuration.
-I, [2022-08-09T13:25:37.976296 #20965]  INFO -- : Connector ePa7goIBtEloypCyFur8 is in status "created" and won't sync yet. Connector needs to be in one of the following statuses: ["configured", "connected", "error"] to run.
-I, [2022-08-09T13:25:37.976424 #20965]  INFO -- : Sleeping for 60 seconds.
-I, [2022-08-09T13:26:37.988348 #20965]  INFO -- : Connector ePa7goIBtEloypCyFur8 is in status "needs_configuration" and won't sync yet. Connector needs to be in one of the following statuses: ["configured", "connected", "error"] to run.
-
-```
-
-After the values for configurable fields are set, the connector will go into the `configured` status and will try to sync.
-
-```text
-I, [2022-08-09T13:27:38.015952 #20965]  INFO -- : Connector ePa7goIBtEloypCyFur8 has never synced yet, running initial sync.
-I, [2022-08-09T13:27:38.020858 #20965]  INFO -- : Starting sync for connector ePa7goIBtEloypCyFur8.
-I, [2022-08-09T13:27:38.149234 #20965]  INFO -- : Deleting 0 documents from index search-sample-connector.
-I, [2022-08-09T13:27:38.349054 #20965]  INFO -- : Applied 1 upsert/delete operations to the index search-sample-connector.
-I, [2022-08-09T13:27:38.349159 #20965]  INFO -- : Upserted 1 documents into search-sample-connector.
-I, [2022-08-09T13:27:38.349188 #20965]  INFO -- : Deleted 0 documents into search-sample-connector.
-I, [2022-08-09T13:27:38.438638 #20965]  INFO -- : Successfully synced for connector ePa7goIBtEloypCyFur8.
-```
-
 #### Local connector properties
 
 Sensitive data, such as API keys, credentials, etc. could also be stored in the [configuration file](config/connectors.yml), provided that it's NOT under source control. Every connector reads this file on creation and is looking for the section called `<service_type>`, where `service_type` is the name that was provided in the corresponding property of the configuration file. You can look at it as a short identifier allowing you to specify which third-party service is behind the connector, or anything to help identify which connector you're running. Example:
@@ -288,6 +264,22 @@ This way, you're saying that the connector is for GitLab, and there you're provi
 ```ruby
 @local_configuration[:api_token]
 ```
+
+## Operating the connector
+
+After the connector is up and running, it can be connected to Elasticsearch and Kibana.
+
+- In Kibana UI, navigate to `Enterprise Search` -
+  `Content` - `Elasticsearch indices`.
+- Click on the index that you created for the connector while [implementing the connector protocol](#implementing-the-connector-protocol).
+- Go to the tab `Configuration` and make sure the following message is displayed:
+
+```text
+Your connector <your-service-name> has connected to Enterprise Search successfully.
+```
+
+- If needed, set the values of configurable fields in the `Configuration` tab, using the `Edit configuration` button.
+- Use the `Set schedule and sync` on the same tab to set the sync schedule and run the sync for the first time.
 
 ### Testing the integration
 
@@ -307,10 +299,11 @@ After you've implemented everything correctly, you're ready to go to Production.
 - The connector is properly authenticated to the third-party data source.
 - The connector implements the connector protocol correctly and does appropriate error handling.
 
-### Contribute 🚀
-We welcome contributors to the project. Before you begin, please read the [Connectors Contributor's Guide](./docs/CONTRIBUTING.md).
+## Contribute to the repository 🚀
 
-### Other guides
+We welcome contributors to the project. Before you begin, please read the [Connectors Contributor's Guide](docs/CONTRIBUTING.md).
+
+## Other guides
 
 - [Code of Conduct](https://www.elastic.co/community/codeofconduct)
 - [Getting Support](./docs/SUPPORT.md)
