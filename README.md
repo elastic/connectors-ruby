@@ -306,9 +306,9 @@ We welcome contributors to the project. Before you begin, please read the [Conne
 ## Other guides
 
 - [Code of Conduct](https://www.elastic.co/community/codeofconduct)
-- [Getting Support](./docs/SUPPORT.md)
-- [Releasing](./docs/RELEASING.md)
-- [Developer guide](./docs/DEVELOPING.md)
-- [Security Policy](./docs/SECURITY.md)
-- [Elastic-internal guide](./docs/INTERNAL.md)
-- [Connector Protocol](./docs/CONNECTOR_PROTOCOL.md)
+- [Getting Support](docs/SUPPORT.md)
+- [Releasing](docs/RELEASING.md)
+- [Developer guide](docs/DEVELOPING.md)
+- [Security Policy](docs/SECURITY.md)
+- [Elastic-internal guide](docs/INTERNAL.md)
+- [Connector Protocol](docs/CONNECTOR_PROTOCOL.md)

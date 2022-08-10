@@ -8,7 +8,7 @@ If something is not working as expected, please open an [issue](https://github.c
 
 ### Where else can I go to get help?
 The Ingestion team at Elastic maintains this repository and is happy to help. Try posting your question to the
-[Elastic Workplace Search discuss forums](https://discuss.elastic.co/c/workplace-search). Be sure to mention that you're
+[Elastic discuss forums](https://discuss.elastic.co/c/enterprise-search/84). Be sure to mention that you're
 using Connectors and also let us know what service type you're trying to use, and any errors/issues you are
-encountering. You can also find us in the `#enterprise-workplace-search` channel of the
+encountering. You can also find us in the `#enterprise-search` channel of the
 [Elastic Community Slack](http://elasticstack.slack.com).
