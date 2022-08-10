@@ -8,7 +8,7 @@ require 'active_support/core_ext/time/zones'
 require 'simplecov'
 require 'simplecov-material'
 
-Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
+Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 
 # Eneable coverage report
 SimpleCov.add_filter('spec')
