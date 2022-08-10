@@ -80,7 +80,7 @@ $ curl --user elastic:changeme -X POST "localhost:9200/_security/api_key?pretty"
 And then use the `encoded` value:
 
 ```
-make run-docker API_KEY=YmRhYWdZSUJLaFBUeWg3bm16Mmg6ZFh2NXBfVndSc3V3NnpBZHVRdU1xZw==
+make run-docker API_KEY="NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
 ```
 
 ### Updating configuration values
