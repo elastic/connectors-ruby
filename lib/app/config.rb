@@ -15,6 +15,8 @@ puts "Parsing #{CONFIG_FILE} configuration file."
 
 ::Config.setup do |config|
   config.evaluate_erb_in_yaml = false
+  config.use_env = true
+  config.env_prefix = ''
 
   config.schema do
     required(:version).value(:string)

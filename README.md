@@ -35,18 +35,52 @@ TBD
 
 ### Running the connector with Docker
 
-You can run the web server using our Dockerfile.
+You can run the connector service using our Dockerfile.
 
 First, build the Docker image with:
 ```shell
 make build-docker
 ```
 
-The stdout will display the generated API key.
 
 Then, you can run the server within Docker with:
 ```shell
-make run-docker
+make run-docker API_KEY=my-key
+```
+
+Where `my-key` is the Elasticsearch API key.
+
+If you need to create an API key for development purposes, you can use the following cURL call on Elasticsearch:
+
+```shell
+$ curl --user elastic:changeme -X POST "localhost:9200/_security/api_key?pretty" -H 'Content-Type: application/json' -d'
+{
+  "name": "my-connector",
+  "role_descriptors": {
+    "my-connector-role": {
+      "cluster": ["all"],
+      "index": [
+        {
+          "names": ["*"],
+          "privileges": ["all"]
+        }
+      ]
+    }
+  }
+}
+'
+{
+  "id" : "4eOWgYIBAYdMiGHcxmKH",
+  "name" : "my-connector",
+  "api_key" : "zIJThFg9TO6uaYVy57TFSA",
+  "encoded" : "NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
+}
+```
+
+And then use the `encoded` value:
+
+```
+make run-docker API_KEY="NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
 ```
 
 ### Updating configuration values
