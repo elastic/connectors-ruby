@@ -45,7 +45,7 @@ module App
         service_type = App::Config[:service_type]
         interval_seconds = 60 # seconds
         Utility::Logger.debug("Starting heartbeat timer task with interval #{interval_seconds} seconds.")
-        task = Concurrent::TimerTask.new(execution_interval: interval_seconds) do
+        task = Concurrent::TimerTask.new(execution_interval: interval_seconds, run_now: true) do
           Utility::Logger.debug("Sending heartbeat for the connector #{connector_id}")
           Core::Heartbeat.send(connector_id, service_type)
         rescue StandardError => e
