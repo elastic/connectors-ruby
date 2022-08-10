@@ -8,7 +8,7 @@ echo $DIR
 
 for var in `compgen -v`
 do
-	export $var
+    export $var
 done
 
 cd $DIR/../lib/app
