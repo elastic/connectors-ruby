@@ -13,15 +13,6 @@ The home of Elastic Enterprise Connector Clients. This repository contains the f
 
 Note #1: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.
 
-## Terminology
-
-* `connector` - generic term used to refer to both native connectors and connector clients.
-* `connector client` - specific light-weight connector implementation, open-code. Not all clients will be supported as native, but we target to have native connectors also offered as clients. Connector clients can be built by Elastic or community built.
-
-## Disambiguation: connectors-ruby and connectors-python
-
-This repository contains connector clients written in Ruby. However, some connectors will also be implemented in Python. The Python connectors are located in a separate repository, [elastic/connectors-python](https://github.com/elastic/connectors-python).
-
 Before getting started, review important information about this feature:
 
 - [Known issues and limitations](#known-issues-and-limitations)
@@ -61,9 +52,10 @@ This section has its own structure, so mini TOC to provide an overview:
 
 ### Implementing the connector protocol
 
-[//]: # (I see now that the protocol is document-based and building a connector is language- and tool-agnostic. I'm therefore leading with a section that presents a procedure to properly implement the protocol. This is the core task for the developer.)
+The [connector protocol](docs/CONNECTOR_PROTOCOL.md) is document-based and building a connector is language- and tool-agnostic.
+To create an Elastic connector, you need to implement this protocol. At a high level, you need to create an application (the connector service) that can read and write to a specific document in Elasticsearch that represents the connector. This document "registers" the connector with Kibana, keeps the configuration that is made via the Kibana UI, as well as the scheduling configuration and the state information for the service. You need to to update the connector state to keep up with the current status of the connector application and of the third-party data source. You also need to log sync jobs to an additional index, so that the history of synchronization tasks would be available. And of course, you need to write the results of the synchronization to the Elasticsearch document index, created for this connector service.
 
-The [connector protocol](docs/CONNECTOR_PROTOCOL.md) is document-based and building a connector is language- and tool-agnostic. The procedure to properly implement the protocol without using the connector framework is as follows:
+The procedure to properly implement the protocol _without the connector framework_ is as follows:
 
 - Create a new index for the connector via the Kibana UI - Enterprise Search - Create an Elasticsearch index. Use the `Build a connector` option for an ingestion method.
 - Create an API key to work with the connector. It should be done either using the `Generate API key` button, which is available on the next step of the wizard, or by creating a new API key via the Security - API keys - `Create API key`. The second way is more generic and will allow the same API key to be used for multiple connectors.
@@ -75,7 +67,7 @@ The [connector protocol](docs/CONNECTOR_PROTOCOL.md) is document-based and build
 
 ### Using the connector framework
 
-Using this connector framework is optional and Ruby-specific. But the framework already has the code for common tasks like scheduling, so it requires less effort to implement.
+Using this connector framework is optional and Ruby-specific. But the framework already has the code for common tasks like scheduling, so it requires less effort to implement. The framework contains a ruby application (we call it the **connector service** or **connector client**), required ruby libraries, and also some code examples that you can use to implement a connector in Ruby. To use it, you'll need a Ruby development environment.
 
 #### System Requirements
 
@@ -83,7 +75,7 @@ Under Linux or Macos, you can run the application using Docker or directly on yo
 
 For the latter you will need:
 - rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
-- bundler (see [bundler installation](https://bundler.io/); for version, see [.bundler-version](./.bundler-version))
+- bundler (see [bundler installation](https://bundler.io/); for version, see [.bundler-version](.bundler-version))
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
 #### Windows support
@@ -93,15 +85,100 @@ We provide an experimental support for Window 10.
 You can run the `win32\install.bat` script to have an unattended installation of Ruby
 and the tools we use. Once installed, you can run the `specs` using `make.bat`
 
-### Implementing the connector protocol using the connector framework
+#### Implementing the connector protocol using the connector framework
 
 The first three steps for this would be the same [as for skipping the framework and implementing the protocol manually](#implementing-the-connector-protocol): creating a document index, setting up an API key, and updating the document index mappings as needed. The rest of the steps, however, are different.
 
 - Copy the [example connector](lib/connectors/example/connector.rb) into a separate folder under the [connectors](lib/connectors). Rename the class as required.
-- Change `self.service_type` and `self.display_name` to match the connector you are implementing.
+- Change `self.service_type` and `self.display_name` to match the connector you are implementing. For example, this is how it is done in the provided [mongo connector](lib/connectors/mongodb/connector.rb).
+
+```ruby
+      def self.service_type
+        'mongo'
+      end
+
+      def self.display_name
+        'MongoDB'
+      end
+```
+
 - Change `self.configurable_fields` to provide a list of fields you want to configure via the Kibana UI on connecting the connector.
-- Implement the `health_check` method to return a boolean value, corresponding to the health status of the connector. You should return `true` if the third-party data source is working and `false` if it is not.
-- Implement the `yield_documents` method to yield documents to the connector framework. It should call `yield` for every document separately and you should yield the documents in the format, matching the mappings that you have defined for the documents index.
+
+For example, this is how it is done in the provided [mongo connector](lib/connectors/mongodb/connector.rb).
+
+```ruby
+    {
+       :host => {
+         :label => 'MongoDB Server Hostname'
+       },
+       :database => {
+         :label => 'MongoDB Database'
+       },
+       :collection => {
+         :label => 'MongoDB Collection'
+       }
+    }
+```
+
+If you wanted to also have default values for the fields, you could do it as follows:
+
+```ruby
+    {
+       :host => {
+         :label => 'MongoDB Server Hostname',
+         :value => 'localhost:27017'
+       },
+       :database => {
+         :label => 'MongoDB Database',
+         :value => 'test-database'
+       },
+       :collection => {
+         :label => 'MongoDB Collection',
+         :value => 'test'
+       }
+    }
+```
+
+This way, it's not necessary to set the values in the Kibana UI, unless they differ from the defaults.
+
+- Implement the `health_check` method to return a boolean value, corresponding to the health status of the connector. Currently, the `health_check` method is used to evaluate the connector service state to either `OK` or `FAILURE`, depending on whether the method throws an exception or runs normally. So for example, the [mongo connector](lib/connectors/mongodb/connector.rb) just creates the mongo client to make sure the connection to the database is successful.
+
+```ruby
+    def health_check(_params)
+      create_client(@host, @database)
+    end
+```
+
+- Implement the `yield_documents` method to yield documents to the connector framework. It should call `yield` for every document separately and you should yield the documents in the format, matching the mappings that you have defined for the documents index. Example from the [mongo connector](lib/connectors/mongodb/connector.rb):
+
+```ruby
+    def yield_documents
+      mongodb_client = create_client(@host, @database)
+    
+      mongodb_client[@collection].find.each do |document|
+        doc = document.with_indifferent_access
+        transform!(doc)
+    
+        yield doc
+      end
+    end
+```
+
+Or from the [gitlab connector](lib/connectors/gitlab/connector.rb):
+
+```ruby
+    def yield_documents
+      next_page_link = nil
+      loop do
+        next_page_link = @extractor.yield_projects_page(next_page_link) do |projects_chunk|
+          projects_chunk.each do |project|
+            yield Connectors::GitLab::Adapter.to_es_document(:project, project)
+          end
+        end
+        break unless next_page_link.present?
+      end
+    end
+```
 
 ### Operating the connector service
 
