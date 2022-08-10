@@ -109,6 +109,7 @@ The first three steps for this would be the same [as for skipping the framework 
 
 First, build the code with:
 
+You can run the connector service using our Dockerfile.
 ```shell
 make build
 ```
@@ -132,7 +133,42 @@ make build-docker
 Then, you can run the connector service within Docker with:
 
 ```shell
-make run-docker
+make run-docker API_KEY=my-key
+```
+
+Where `my-key` is the Elasticsearch API key.
+
+If you need to create an API key for development purposes, you can use the following cURL call on Elasticsearch:
+
+```shell
+$ curl --user elastic:changeme -X POST "localhost:9200/_security/api_key?pretty" -H 'Content-Type: application/json' -d'
+{
+  "name": "my-connector",
+  "role_descriptors": {
+    "my-connector-role": {
+      "cluster": ["all"],
+      "index": [
+        {
+          "names": ["*"],
+          "privileges": ["all"]
+        }
+      ]
+    }
+  }
+}
+'
+{
+  "id" : "4eOWgYIBAYdMiGHcxmKH",
+  "name" : "my-connector",
+  "api_key" : "zIJThFg9TO6uaYVy57TFSA",
+  "encoded" : "NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
+}
+```
+
+And then use the `encoded` value:
+
+```
+make run-docker API_KEY="NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
 ```
 
 ### Operating the connector

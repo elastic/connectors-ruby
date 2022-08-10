@@ -63,7 +63,7 @@ build-docker:
 	docker build -t connectors .
 
 run-docker:
-	docker run --rm -it -p 127.0.0.1:9292:9292/tcp connectors
+	docker run --env "elasticsearch.hosts=http://host.docker.internal:9200" --env "elasticsearch.api_key=$(API_KEY)" --rm -it connectors
 
 exec_app:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby app.rb
