@@ -1,7 +1,14 @@
 require 'core/output_sink/console_sink'
 
+require 'spec_helper'
+
 describe Core::OutputSink::ConsoleSink do
   subject { described_class.new }
+
+  it_behaves_like 'implements all methods of base class' do
+    let(:concrete_class_instance) { subject }
+    let(:base_class_instance) { Core::OutputSink::BaseSink.new }
+  end
 
   context '.ingest' do
     let(:doc) { { :id => 1, :something => :else } }

@@ -1,9 +1,17 @@
+require 'core/output_sink/base_sink'
 require 'core/output_sink/combined_sink'
+
+require 'spec_helper'
 
 describe Core::OutputSink::CombinedSink do
   let(:first_sink) { double }
   let(:second_sink) { double }
   subject { described_class.new([first_sink, second_sink]) }
+
+  it_behaves_like 'implements all methods of base class' do
+    let(:concrete_class_instance) { subject }
+    let(:base_class_instance) { Core::OutputSink::BaseSink.new }
+  end
 
   context '.ingest' do
     let(:doc) { { :id => 1, :something => :else } }

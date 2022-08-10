@@ -1,6 +1,8 @@
 require 'core/output_sink/es_sink'
 require 'utility/es_client'
 
+require 'spec_helper'
+
 RSpec::Matchers.define :array_of_size do |x|
   match { |actual| actual.size == x }
 end
@@ -14,6 +16,11 @@ describe Core::OutputSink::EsSink do
   before(:each) do
     allow(Utility::EsClient).to receive(:new).and_return(es_client)
     allow(es_client).to receive(:bulk)
+  end
+
+  it_behaves_like 'implements all methods of base class' do
+    let(:concrete_class_instance) { subject }
+    let(:base_class_instance) { Core::OutputSink::BaseSink.new }
   end
 
   context '.ingest' do
