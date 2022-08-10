@@ -13,37 +13,38 @@ module Core::OutputSink
   class ConsoleSink < Core::OutputSink::BaseSink
     def ingest(document)
       print_header 'Got a single document:'
-      Utility::Logger.info document
+      puts document
     end
 
     def flush(size: nil)
       print_header 'Flushing'
+      puts "Flush size: #{size}"
     end
 
     def ingest_multiple(documents)
       print_header 'Got multiple documents:'
-      Utility::Logger.info documents
+      puts documents
     end
 
     def delete(id)
       print_header "Deleting single id: #{id}"
-      Utility::Logger.info id
+      puts id
     end
 
     def delete_multiple(ids)
       print_header "Deleting several ids: #{ids}"
-      Utility::Logger.info ids
+      puts ids
     end
 
     private
 
     def print_delim
-      Utility::Logger.info '----------------------------------------------------'
+      puts '----------------------------------------------------'
     end
 
     def print_header(header)
       print_delim
-      Utility::Logger.info header
+      puts header
       print_delim
     end
   end
