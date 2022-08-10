@@ -9,10 +9,7 @@
 require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
-require 'utility/elasticsearch/index/mappings'
-require 'utility/elasticsearch/index/text_analysis_settings'
-require 'utility/es_client'
-require 'utility/logger'
+require 'utility'
 
 module Core
   class ElasticConnectorActions
