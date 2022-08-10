@@ -7,10 +7,9 @@
 # frozen_string_literal: true
 #
 require 'active_support/core_ext/hash'
-require 'utility/elasticsearch/index/mappings'
-require 'utility/elasticsearch/index/text_analysis_settings'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
+require 'utility'
 
 module Core
   class ElasticConnectorActions
@@ -217,6 +216,8 @@ module Core
         return if doc.empty?
         client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => { :doc => doc })
       end
+
+      private
 
       def client
         @client ||= Utility::EsClient.new
