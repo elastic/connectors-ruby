@@ -6,8 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'mongo'
+require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/base/connector'
+require 'mongo'
 
 module Connectors
   module MongoDB
@@ -42,10 +43,6 @@ module Connectors
         @collection = remote_configuration.dig(:collection, :value)
       end
 
-      def health_check(_params)
-        create_client(@host, @database)
-      end
-
       def yield_documents
         mongodb_client = create_client(@host, @database)
 
@@ -55,6 +52,12 @@ module Connectors
 
           yield doc
         end
+      end
+
+      private
+
+      def health_check(_params)
+        create_client(@host, @database)
       end
 
       def create_client(host, database)

@@ -20,3 +20,44 @@ shared_examples 'does not populate updated_at' do
     expect(document.with_indifferent_access).to_not include(have_key(:updated_at))
   end
 end
+
+shared_examples 'a connector' do
+  it 'implements display_name class method' do
+    expect(described_class.display_name).to_not be_nil
+  end
+
+  it 'implements service_type class method' do
+    expect(described_class.service_type).to_not be_nil
+  end
+
+  it 'implements configurable_fields class method' do
+    expect(described_class.configurable_fields).to_not be_nil
+  end
+
+  it 'configurable_fields class method returns valid configuration' do
+    # expected configurable fields format:
+    # {
+    #   'key' => {
+    #     'label' => '',
+    #     'value' => ''
+    #   }
+    # }
+    configurable_fields = described_class.configurable_fields.with_indifferent_access
+
+    expect(configurable_fields).to respond_to(:keys)
+    expect(configurable_fields).to respond_to(:[])
+
+    configurable_fields.keys.each do |field_name|
+      field_definition = configurable_fields[field_name]
+
+      # is a hash too
+      expect(field_definition).to respond_to(:keys)
+      expect(field_definition).to respond_to(:[])
+
+      expect(field_definition['label']).to_not be_nil
+      if field_definition['value']
+        expect(field_definition['value']).to_not be_nil
+      end
+    end
+  end
+end
