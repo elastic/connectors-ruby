@@ -18,7 +18,7 @@ module Core
       end
 
       def delete(_id)
-        raise 'not_implemented'
+        raise 'not implemented'
       end
 
       def delete_multiple(_ids)
