@@ -4,18 +4,13 @@
 
 The home of Elastic Enterprise Connector Clients. This repository contains the framework for customizing Elastic Enterprise Search native connectors, or writing your own connectors for advanced use cases.
 
-[//]: # (The introduction should:)
-[//]: # (- Summarize the tools provided in this repository.)
-[//]: # (- Summarize the procedures and reference information from this readme and any other docs included in this repo.)
-[//]: # (- Introduce any terminology that is our own.)
-[//]: # (- Identify this feature as a technical preview.)
-[//]: # (Then present a TOC to guide the user through the following sections.)
+**The connector will be operated by an administrative user from within Kibana.**
 
-Note #1: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.
+> Note: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.
 
 Before getting started, review important information about this feature:
 
-- [Known issues and limitations](#known-issues-and-limitations)
+- [Terminology](#terminology)
 - [Getting help and providing feedback](#getting-help-and-providing-feedback)
 
 Build, deploy, and operate your connector:
@@ -32,13 +27,13 @@ Reference:
 
 - [Connector protocol reference](docs/CONNECTOR_PROTOCOL.md)
 
-## Known issues and limitations
+## Terminology
 
-[//]: # (If the only "limitation" is technical preview, we could drop this section.)
-- The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [example connector](lib/connectors/example). None of those are production ready clients - rather, they are functional examples, which you can use as a base for your own work.
-- The `example` connector is the most basic and doesn't have any integration with the third-party data source - it just returns some stub data to ingest.
-- The `mongodb` connector is a MongoDB-based connector. It is lacking some features that one would definitely want in production - for example it does not implement any kind of authentication and it only works with a single collection, but it is still a good example of how to use the connector framework for handling the data from this kind of a document storage.
-- The `gitlab` connector is the most involved out of the three but is is also missing a lot of features - for one, it only grabs the projects and leaves aside all the other types of content, like files, folders, issues etc. In the current simplified version, it also doesn't synchronize document permissions. But it implements the authentication via an API token, and it has the most developed class structure, which is easily extendable.
+- `connector client` - specific light-weight connector implementation, open-code. Connector clients can be built by Elastic or community built.
+- `connector service` - the app that runs the asynchronous loop that calls Elasticsearch on a regular basis to check whether syncs need to happen.
+- `connector framework` - framework and libraries used to customize and build connector clients. Basically, it's what this repository is.
+- `connector packages` - a previous version of the connector clients. Refer to the [8.3 branch](https://github.com/elastic/connectors-ruby/tree/8.3) if you're looking for connector packages. Also, read more about them in the [custom connector packages guide](https://www.elastic.co/guide/en/workplace-search/8.4/custom-connector-package.html).
+- `data source` - file/database/service that provides data to be ingested into Elasticsearch. 
 
 ## Getting help and providing feedback
 
@@ -52,6 +47,7 @@ This section has its own structure, so mini TOC to provide an overview:
 - [Using the connector framework](#using-the-connector-framework)
 - [Operating the connector](#operating-the-connector)
 - [Testing the integration](#testing-the-integration)
+
 
 ### Implementing the connector protocol
 
@@ -71,6 +67,14 @@ The procedure to properly implement the protocol _without the connector framewor
 ### Using the connector framework
 
 Using this connector framework is optional and Ruby-specific. But the framework already has the code for common tasks like scheduling, so it requires less effort to implement. The framework contains a ruby application (we call it the **connector service** or **connector client**), required ruby libraries, and also some code examples that you can use to implement a connector in Ruby. To use it, you'll need a Ruby development environment.
+
+#### Current connector clients
+
+The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [example connector](lib/connectors/example). None of those are production ready clients - rather, they are functional examples, which you can use as a base for your own work.
+
+- The `example` connector is the most basic and doesn't have any integration with the third-party data source - it just returns some stub data to ingest.
+- The `mongodb` connector is a MongoDB-based connector. It is lacking some features that one would definitely want in production - for example it does not implement any kind of authentication and it only works with a single collection, but it is still a good example of how to use the connector framework for handling the data from this kind of a document storage.
+- The `gitlab` connector is the most involved out of the three but is is also missing a lot of features - for one, it only grabs the projects and leaves aside all the other types of content, like files, folders, issues etc. In the current simplified version, it also doesn't synchronize document permissions. But it implements the authentication via an API token, and it has the most developed class structure, which is easily extendable.
 
 #### System Requirements
 
@@ -267,7 +271,12 @@ This way, you're saying that the connector is for GitLab, and there you're provi
 
 ## Operating the connector
 
-After the connector is up and running, it can be connected to Elasticsearch and Kibana.
+As stated above, the connector will be operated by an administrative user from within Kibana.
+
+- The connector operator sets the sync schedule in Kibana, and Kibana writes this to the connector's document in Elasticsearch. So the connector has to read this document to determine when to next sync.
+- The connector operator can see the state of the connector within Kibana. So the connector must regularly write its state back to the document, where Kibana can read it.
+
+### Configuring the connector in Kibana
 
 - In Kibana UI, navigate to `Enterprise Search` -
   `Content` - `Elasticsearch indices`.
