@@ -32,6 +32,7 @@ target
 # temp files/folders for build artifacts
 .gems
 coverage
+tmp
 
 # bundler state
 /.bundle
