@@ -23,6 +23,8 @@ describe Connectors::GitLab::Connector do
     Connectors::GitLab::Connector.new(local_configuration: app_config, remote_configuration: remote_config)
   end
 
+  it_behaves_like 'a connector'
+
   context '#source_status' do
     it 'correctly returns true on 200' do
       stub_request(:get, "#{base_url}/user")
