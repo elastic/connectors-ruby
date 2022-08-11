@@ -13,8 +13,6 @@ require 'utility/logger'
 
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
-    attr_accessor :index_name
-
     def initialize(index_name, flush_threshold = 50)
       super()
       @client = Utility::EsClient.new
@@ -57,6 +55,8 @@ module Core::OutputSink
     end
 
     private
+
+    attr_accessor :index_name
 
     def send_data(ops)
       return if ops.empty?
