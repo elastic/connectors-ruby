@@ -47,7 +47,7 @@ shared_examples 'a connector' do
     expect(configurable_fields).to respond_to(:keys)
     expect(configurable_fields).to respond_to(:[])
 
-    configurable_fields.keys.each do |field_name|
+    configurable_fields.each_key do |field_name|
       field_definition = configurable_fields[field_name]
 
       # is a hash too

@@ -25,7 +25,7 @@ describe Connectors::MongoDB::Connector do
   end
 
   let(:mongodb_host) { '127.0.0.1:27027' }
-  let(:mongodb_database) { 'sample-database' } 
+  let(:mongodb_database) { 'sample-database' }
   let(:mongodb_collection) { 'some-collection' }
 
   let(:mongo_client) { double }
@@ -36,10 +36,10 @@ describe Connectors::MongoDB::Connector do
   before(:each) do
     allow(Mongo::Client).to receive(:new).and_return(mongo_client)
 
-    allow(mongo_client).to receive(:collections).and_return([ Hashie::Mash.new({ :name => mongodb_collection }) ])
-    allow(mongo_client).to receive(:database_names).and_return([ Hashie::Mash.new({ :name => mongodb_database }) ])
+    allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => mongodb_collection })])
+    allow(mongo_client).to receive(:database_names).and_return([Hashie::Mash.new({ :name => mongodb_database })])
     allow(mongo_client).to receive(:[]).with(mongodb_collection).and_return(actual_collection)
-    
+
     allow(actual_collection).to receive(:find).and_return(actual_collection_data)
   end
 
@@ -52,7 +52,7 @@ describe Connectors::MongoDB::Connector do
       subject.source_status({})
     end
   end
-  
+
   context '#yield_documents' do
     context 'when database is not found' do
       xit 'no error is raised' do
@@ -65,7 +65,7 @@ describe Connectors::MongoDB::Connector do
 
     context 'when collection is not found' do
       # mongo client does not raise an error when collection is not found on the server, instead it just returns an empty collection
-      let(:actual_collection_data) { [ ] }
+      let(:actual_collection_data) { [] }
 
       it 'does not raise' do
         expect { |b| subject.yield_documents(&b) }.to_not raise_error(anything)
@@ -87,10 +87,10 @@ describe Connectors::MongoDB::Connector do
       end
 
       it 'yields each document of the collection replacing _id with id' do
-        expected_ids = actual_collection_data.map {|d| d['_id'] }.to_a
+        expected_ids = actual_collection_data.map { |d| d['_id'] }.to_a
 
         yielded_documents = []
-        
+
         subject.yield_documents { |doc| yielded_documents << doc }
 
         expect(yielded_documents.size).to eq(actual_collection_data.size)
