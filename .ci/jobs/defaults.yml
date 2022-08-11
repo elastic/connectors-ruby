@@ -5,7 +5,10 @@
 
 - job:
     node: "linux && immutable"
-
     wrappers:
       - ansicolor
       - timestamps
+    publishers:
+      - junit:
+        results: "tmp/*-junit.xml"
+        allow-empty-results: true
