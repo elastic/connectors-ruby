@@ -35,7 +35,6 @@ group :test do
   gem 'timecop'
   gem 'simplecov', require: false
   gem 'simplecov-material'
-  gem 'rspec_junit_formatter'
 end
 
 # Dependencies for the HTTP service
