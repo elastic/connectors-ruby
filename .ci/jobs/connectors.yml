@@ -8,6 +8,7 @@
     concurrent: true
     script-path: .ci/pipelines/connectors.groovy
     prune-dead-branches: true
+    junit_results: "*-junit.xml"
     scm:
       - github:
           repo: connectors-ruby
