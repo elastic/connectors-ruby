@@ -63,10 +63,6 @@ module Connectors
       def health_check(_params)
         @extractor.health_check
       end
-
-      def custom_client_error
-        Connectors::GitLab::CustomClient::ClientError
-      end
     end
   end
 end
