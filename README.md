@@ -37,7 +37,7 @@ Reference:
 
 ## Getting help and providing feedback
 
-May want to duplicate the content I put in the Elastic doc: https://github.com/elastic/enterprise-search-pubs/pull/2631
+See [Getting Support](docs/SUPPORT.md).
 
 ## Building a connector
 
