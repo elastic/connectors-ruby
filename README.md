@@ -41,7 +41,7 @@ May want to duplicate the content I put in the Elastic doc: https://github.com/e
 
 ## Building a connector
 
-This section has its own structure, so mini TOC to provide an overview:
+In this section:
 
 - [Implementing the connector protocol](#implementing-the-connector-protocol)
 - [Using the connector framework](#using-the-connector-framework)
