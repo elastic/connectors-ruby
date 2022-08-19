@@ -11,8 +11,14 @@ elasticsearch:
   trace: false
   log: false
 
-connector_id: "CHANGEME"
-service_type: "CHANGEME"
+# can be "dispatcher" or "worker"
+mode: worker
+
 log_level: info
 
 idle_timeout: 60
+
+# worker only: these aren't needed for dispatcher mode
+connector_id: "CHANGEME"
+service_type: "CHANGEME"
+

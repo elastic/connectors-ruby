@@ -36,6 +36,22 @@ module Core
         client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
+      def get_native_connectors
+        result = []
+        page_size = 100
+        loop do
+          response = client.search(:index => CONNECTORS_INDEX, :is_native => true, :ignore => 404, :size => page_size)
+          hits = response['hits']['hits']
+          result += hits.map do |hit|
+            mapped = hit['_source'].with_indifferent_access
+            mapped[:id] = hit['_id']
+            mapped
+          end
+          break if hits.size < page_size
+        end
+        result
+      end
+
       def update_connector_configuration(connector_id, configuration)
         update_connector_fields(connector_id, :configuration => configuration)
       end

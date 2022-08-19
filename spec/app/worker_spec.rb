@@ -47,6 +47,10 @@ describe App::Worker do
     double
   end
 
+  subject do
+    App::Worker.new(connector_id: connector_id, service_type: service_type, is_native: false)
+  end
+
   before(:each) do
     stub_const('App::Config', config)
 
@@ -77,12 +81,12 @@ describe App::Worker do
         expect(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
         expect(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists).with(content_index_name)
 
-        described_class.start!
+        subject.start!
       end
 
       it 'starts sync job runner' do
         expect(sync_job_runner).to receive(:execute)
-        described_class.start!
+        subject.start!
       end
     end
 
@@ -94,7 +98,7 @@ describe App::Worker do
       end
 
       it 'crashes with the raised error' do
-        expect { described_class.start! }.to raise_error(error)
+        expect { subject.start! }.to raise_error(error)
       end
     end
 
@@ -105,7 +109,7 @@ describe App::Worker do
 
       it 'should raise error for invalid service type' do
         expect {
-          described_class.start!
+          subject.start!
         }.to raise_error("#{service_type} is not a supported connector")
       end
     end
@@ -118,7 +122,7 @@ describe App::Worker do
 
       it 'raises a new more user-friendly error' do
         expect {
-          described_class.start!
+          subject.start!
         }.to raise_error(/#{elastic_error_message}/)
       end
     end
@@ -131,7 +135,7 @@ describe App::Worker do
       it 'does not trigger the connector' do
         expect(sync_job_runner).to_not receive(:execute)
 
-        described_class.start!
+        subject.start!
       end
     end
   end

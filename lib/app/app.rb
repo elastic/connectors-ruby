@@ -10,10 +10,23 @@ $LOAD_PATH << '../'
 
 require 'app/worker'
 require 'app/config'
+require 'app/dispatcher'
 require 'utility/environment'
+require 'utility/logger'
 
 module App
   Utility::Environment.set_execution_environment(App::Config) do
-    App::Worker.start!
+    mode = App::Config['mode']
+    Utility::Logger.info("Starting as a *** #{mode} ***")
+    if mode == 'worker'
+      worker = App::Worker.new(
+        connector_id: App::Config['connector_id'],
+        service_type: App::Config['service_type'],
+        is_native: false)
+      worker.start!
+    else
+      App::Dispatcher.run!
+      # TODO - use a shutdown method for the dispatcher
+    end
   end
 end

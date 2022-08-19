@@ -70,8 +70,8 @@ describe Core::ElasticConnectorActions do
 
     before(:each) do
       allow(es_client).to receive(:index).with(:index => connectors_index, :body => anything).and_return({
-        '_id' => created_connector_id
-      })
+                                                                                                           '_id' => created_connector_id
+                                                                                                         })
     end
 
     it 'sends a index request with proper index_name and service_type' do
@@ -136,6 +136,20 @@ describe Core::ElasticConnectorActions do
 
       expect(connector).to have_key(:_id)
       expect(connector).to have_key(:something)
+    end
+  end
+
+  context '#get_native_connectors' do
+    let(:connector_1) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } } }
+    let(:connector_2) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } } }
+    before(:each) do
+      allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_1, connector_2] } })
+    end
+    it 'returns all native connectors' do
+      connectors = described_class.get_native_connectors
+      expect(connectors.size).to eq(2)
+      expect(connectors).to include('id' => '123', 'something' => 'something', 'is_native' => true)
+      expect(connectors).to include('id' => '456', 'something' => 'something', 'is_native' => true)
     end
   end
 
@@ -436,7 +450,7 @@ describe Core::ElasticConnectorActions do
 
   context '#ensure_index_exists' do
     let(:data_index_name) { 'was-i-created-or-not' }
-    let(:index_mappings) { {}  }
+    let(:index_mappings) { {} }
     let(:index_exists) { false }
     let(:existing_index_mappings) { {} }
 
