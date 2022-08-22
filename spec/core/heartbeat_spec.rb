@@ -42,9 +42,15 @@ describe Core::Heartbeat do
       context 'when connector has just been created' do
         let(:connector_status) { Connectors::ConnectorStatus::CREATED }
 
+        it 'updates stored connector service_type' do
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:service_type => service_type))
+
+            described_class.start_task(connector_id, service_type)
+        end
+
         context 'when connector has no configurable fields' do
           it 'updates connector status to CONFIGURED' do
-            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, { :last_seen => anything, :configuration => connector_default_configuration, :status => Connectors::ConnectorStatus::CONFIGURED })
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
 
             described_class.start_task(connector_id, service_type)
           end
@@ -64,8 +70,14 @@ describe Core::Heartbeat do
             }
           end
 
+          it 'updates connector configuration' do
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:configuration => connector_default_configuration))
+
+            described_class.start_task(connector_id, service_type)
+          end
+
           it 'updates connector status to NEEDS_CONFIGURATION' do
-            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, { :last_seen => anything, :configuration => connector_default_configuration, :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION })
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
 
             described_class.start_task(connector_id, service_type)
           end
@@ -85,8 +97,14 @@ describe Core::Heartbeat do
             }
           end
 
+          it 'updates connector configuration' do
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:configuration => connector_default_configuration))
+
+            described_class.start_task(connector_id, service_type)
+          end
+
           it 'updates connector status to CONFIGURED' do
-            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, { :last_seen => anything, :configuration => connector_default_configuration, :status => Connectors::ConnectorStatus::CONFIGURED })
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
 
             described_class.start_task(connector_id, service_type)
           end
