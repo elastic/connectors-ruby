@@ -43,9 +43,9 @@ describe Core::Heartbeat do
         let(:connector_status) { Connectors::ConnectorStatus::CREATED }
 
         it 'updates stored connector service_type' do
-            expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:service_type => service_type))
+          expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:service_type => service_type))
 
-            described_class.start_task(connector_id, service_type)
+          described_class.start_task(connector_id, service_type)
         end
 
         context 'when connector has no configurable fields' do
