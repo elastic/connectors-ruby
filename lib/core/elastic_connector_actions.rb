@@ -15,6 +15,7 @@ module Core
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
     JOB_INDEX = '.elastic-connectors-sync-jobs'
+    DEFAULT_PAGE_SIZE = 100
 
     class << self
 
@@ -36,18 +37,31 @@ module Core
         client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
-      def get_native_connectors
+      def native_connectors
         result = []
-        page_size = 100
+        offset = 0
         loop do
-          response = client.search(:index => CONNECTORS_INDEX, :is_native => true, :ignore => 404, :size => page_size)
+          response = client.search(
+            :index => CONNECTORS_INDEX,
+            :ignore => 404,
+            :size => DEFAULT_PAGE_SIZE,
+            :from => offset,
+            :body => {
+              :query => {
+                :term => { :is_native => true }
+              },
+              :sort => ['name:asc']
+            }
+          )
           hits = response['hits']['hits']
+          total = response['hits']['total']
           result += hits.map do |hit|
             mapped = hit['_source'].with_indifferent_access
             mapped[:id] = hit['_id']
             mapped
           end
-          break if hits.size < page_size
+          break if result.size >= total
+          offset += DEFAULT_PAGE_SIZE
         end
         result
       end

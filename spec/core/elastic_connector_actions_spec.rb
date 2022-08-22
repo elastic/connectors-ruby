@@ -140,16 +140,33 @@ describe Core::ElasticConnectorActions do
   end
 
   context '#get_native_connectors' do
-    let(:connector_1) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } } }
-    let(:connector_2) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } } }
+    let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } } }
+    let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } } }
     before(:each) do
-      allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_1, connector_2] } })
+      allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => 2 } })
     end
     it 'returns all native connectors' do
-      connectors = described_class.get_native_connectors
+      connectors = described_class.native_connectors
       expect(connectors.size).to eq(2)
       expect(connectors).to include('id' => '123', 'something' => 'something', 'is_native' => true)
       expect(connectors).to include('id' => '456', 'something' => 'something', 'is_native' => true)
+    end
+
+    context 'when pagination is needed' do
+      before(:each) do
+        described_class::DEFAULT_PAGE_SIZE = 1
+        allow(es_client).to receive(:search).with(hash_including(:from => 0), any_args)
+          .and_return({ 'hits' => { 'hits' => [connector_one], 'total' => 2 } })
+        allow(es_client).to receive(:search).with(hash_including(:from => 1), any_args)
+          .and_return({ 'hits' => { 'hits' => [connector_two], 'total' => 2 } })
+      end
+
+      it 'returns all native connectors with pagination' do
+        connectors = described_class.native_connectors
+        expect(connectors.size).to eq(2)
+        expect(connectors).to include('id' => '123', 'something' => 'something', 'is_native' => true)
+        expect(connectors).to include('id' => '456', 'something' => 'something', 'is_native' => true)
+      end
     end
   end
 

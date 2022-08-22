@@ -22,11 +22,11 @@ module App
       worker = App::Worker.new(
         connector_id: App::Config['connector_id'],
         service_type: App::Config['service_type'],
-        is_native: false)
+        is_native: false
+      )
       worker.start!
     else
-      App::Dispatcher.run!
-      # TODO - use a shutdown method for the dispatcher
+      App::Dispatcher.new.start!
     end
   end
 end
