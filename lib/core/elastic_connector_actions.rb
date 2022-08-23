@@ -44,17 +44,17 @@ module Core
           response = client.search(
             :index => CONNECTORS_INDEX,
             :ignore => 404,
-            :size => DEFAULT_PAGE_SIZE,
-            :from => offset,
             :body => {
+              :size => DEFAULT_PAGE_SIZE,
+              :from => offset,
               :query => {
                 :term => { :is_native => true }
               },
-              :sort => ['name:asc']
+              :sort => ['name']
             }
           )
           hits = response['hits']['hits']
-          total = response['hits']['total']
+          total = response['hits']['total']['value']
           result += hits.map do |hit|
             mapped = hit['_source'].with_indifferent_access
             mapped[:id] = hit['_id']
@@ -64,6 +64,8 @@ module Core
           offset += DEFAULT_PAGE_SIZE
         end
         result
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, 'Error while getting native connectors')
       end
 
       def update_connector_configuration(connector_id, configuration)

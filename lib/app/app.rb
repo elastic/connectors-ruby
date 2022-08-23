@@ -17,7 +17,7 @@ require 'utility/logger'
 module App
   Utility::Environment.set_execution_environment(App::Config) do
     mode = App::Config['mode']
-    Utility::Logger.info("Starting as a *** #{mode} ***")
+    Utility::Logger.info("Starting as a [#{mode}]")
     if mode == 'worker'
       worker = App::Worker.new(
         connector_id: App::Config['connector_id'],
