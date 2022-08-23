@@ -143,7 +143,7 @@ describe Core::ElasticConnectorActions do
     let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } } }
     let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } } }
     before(:each) do
-      allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => 2 } })
+      allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => { 'value' => 2 } } })
     end
     it 'returns all native connectors' do
       connectors = described_class.native_connectors
@@ -155,9 +155,13 @@ describe Core::ElasticConnectorActions do
     context 'when pagination is needed' do
       before(:each) do
         described_class::DEFAULT_PAGE_SIZE = 1
-        allow(es_client).to receive(:search).with(hash_including(:from => 0), any_args)
+        allow(es_client)
+          .to receive(:search)
+          .with(hash_including(:from => 0), any_args)
           .and_return({ 'hits' => { 'hits' => [connector_one], 'total' => 2 } })
-        allow(es_client).to receive(:search).with(hash_including(:from => 1), any_args)
+        allow(es_client)
+          .to receive(:search)
+          .with(hash_including(:from => 1), any_args)
           .and_return({ 'hits' => { 'hits' => [connector_two], 'total' => 2 } })
       end
 

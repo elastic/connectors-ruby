@@ -16,7 +16,6 @@ require 'connectors/registry'
 require 'utility'
 require 'core'
 
-
 module App
   module ConsoleApp
     extend self
