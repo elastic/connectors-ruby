@@ -43,6 +43,7 @@ module Core
         if connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
           connector_class = Connectors::REGISTRY.connector_class(service_type)
           configuration = connector_class.configurable_fields
+          doc[:service_type] = service_type
           doc[:configuration] = configuration
 
           # We want to set connector to CONFIGURED status if all configurable fields have default values
