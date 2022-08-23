@@ -117,6 +117,15 @@ describe App::Dispatcher do
           expect(mock_worker).to have_received(:start!).exactly(2).times
         end
       end
+
+      context 'when native connectors search throws an error' do
+        it 'starts no workers' do
+          allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_raise(StandardError)
+          subject.start!
+
+          expect(subject.workers.length).to eq(0)
+        end
+      end
     end
   end
 

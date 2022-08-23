@@ -66,6 +66,7 @@ module Core
         result
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'Error while getting native connectors')
+        raise Utility::ClientError.new(e)
       end
 
       def update_connector_configuration(connector_id, configuration)
