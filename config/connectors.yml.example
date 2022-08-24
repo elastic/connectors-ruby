@@ -11,9 +11,6 @@ elasticsearch:
   trace: false
   log: false
 
-# can be "dispatcher" or "worker"
-mode: worker
-
 log_level: info
 
 idle_timeout: 60

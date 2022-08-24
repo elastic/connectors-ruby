@@ -32,43 +32,37 @@ module App
     end
 
     def start!
-      if App::Config['mode'] == 'dispatcher'
-        loop do
-          connectors = Core::ElasticConnectorActions.native_connectors
-          if connectors.empty?
-            Utility::Logger.info('No native connectors found.')
-            return
-          end
-          Utility::Logger.info("Total workers: #{workers.size}. Checking if all native connectors are running...")
-          connectors.each do |connector|
-            if !workers[connector[:id]].nil?
-              Utility::Logger.info("Connector #{connector[:id]} for service type #{connector[:service_type]} is running.")
-            else
-              worker = App::Worker.new(
-                connector_id: connector[:id],
-                service_type: connector[:service_type],
-                is_native: true
-              )
-              @workers[connector[:id]] = worker
-              @pool.post do
-                Utility::Logger.info("Starting #{connector[:id]} for service type #{connector[:service_type]}... Total workers: #{@workers.count}")
-                worker.start!
-              end
+      loop do
+        connectors = Core::ElasticConnectorActions.native_connectors
+        if connectors.empty?
+          Utility::Logger.info('No native connectors found.')
+          return
+        end
+        Utility::Logger.info("Total workers: #{workers.size}. Checking if all native connectors are running...")
+        connectors.each do |connector|
+          if !workers[connector[:id]].nil?
+            Utility::Logger.info("Connector #{connector[:id]} for service type #{connector[:service_type]} is running.")
+          else
+            worker = App::Worker.new(
+              connector_id: connector[:id],
+              service_type: connector[:service_type],
+              is_native: true
+            )
+            @workers[connector[:id]] = worker
+            @pool.post do
+              Utility::Logger.info("Starting #{connector[:id]} for service type #{connector[:service_type]}... Total workers: #{@workers.count}")
+              worker.start!
             end
           end
-          if @is_shutting_down
-            break
-          end
-        ensure
-          if POLL_IDLING > 0
-            Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds.")
-            sleep(POLL_IDLING)
-          end
         end
-      else
-        message = 'Worker mode set for the application. Please check your configuration.'
-        Utility::Logger.error(message)
-        exit
+        if @is_shutting_down
+          break
+        end
+      ensure
+        if POLL_IDLING > 0 && !@is_shutting_down
+          Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds.")
+          sleep(POLL_IDLING)
+        end
       end
     rescue SystemExit
       puts 'Exiting.'
@@ -83,6 +77,14 @@ module App
       @is_shutting_down = true
       @pool.shutdown
       @pool.wait_for_termination(TERMINATION_TIMEOUT)
+    end
+  end
+
+  def run_dispatcher!
+    # Dispatcher is responsible for dispatching connectors to workers.
+    Utility::Environment.set_execution_environment(App::Config) do
+      dispatcher = App::Dispatcher.new
+      dispatcher.start!
     end
   end
 end

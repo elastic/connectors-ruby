@@ -42,18 +42,6 @@ describe App::Dispatcher do
     Concurrent::ImmediateExecutor.new
   end
 
-  let(:dispatcher_config) do
-    {
-      :mode => 'dispatcher'
-    }.with_indifferent_access
-  end
-
-  let(:worker_config) do
-    {
-      :mode => 'worker'
-    }.with_indifferent_access
-  end
-
   before do
     subject.instance_variable_set(:@pool, mock_scheduler)
     stub_const('App::Dispatcher::POLL_IDLING', 1)
@@ -64,67 +52,47 @@ describe App::Dispatcher do
     subject.instance_variable_set(:@is_shutting_down, true) # prevent infinite loop - run just one cycle
     allow(App::Worker).to receive(:new).and_return(mock_worker)
     allow(mock_worker).to receive(:start!)
-    stub_const('App::Config', dispatcher_config)
   end
 
   describe '#start!' do
-    context 'when app mode is worker' do
-      before(:each) do
-        subject.instance_variable_set(:@is_shutting_down, false)
-        stub_const('App::Config', worker_config)
-      end
-      let(:mock_config) do
-      end
-
-      it 'should not start anything' do
+    context 'when no native connectors are returned' do
+      it 'starts no workers' do
+        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([])
         subject.start!
-        expect(mock_worker).to_not have_received(:start!)
+
+        expect(subject.workers.length).to eq(0)
       end
     end
 
-    context 'when app mode is dispatcher' do
-      before(:each) do
-        stub_const('App::Config', dispatcher_config)
+    context 'when there is one native connector' do
+      it 'starts one worker' do
+        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([native_connector])
+        subject.start!
+
+        expect(subject.workers.length).to eq(1)
+        expect(mock_worker).to have_received(:start!).exactly(1).times
       end
-      context 'when no native connectors are returned' do
-        it 'starts no workers' do
-          allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([])
-          subject.start!
+    end
 
-          expect(subject.workers.length).to eq(0)
-        end
+    context 'when there are several native connectors' do
+      let(:native_connector_one) do
+        native_connector.dup.merge :id => '0987654321'
       end
+      it 'starts several workers' do
+        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([native_connector, native_connector_one])
+        subject.start!
 
-      context 'when there is one native connector' do
-        it 'starts one worker' do
-          allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([native_connector])
-          subject.start!
-
-          expect(subject.workers.length).to eq(1)
-          expect(mock_worker).to have_received(:start!).exactly(1).times
-        end
+        expect(subject.workers.length).to eq(2)
+        expect(mock_worker).to have_received(:start!).exactly(2).times
       end
+    end
 
-      context 'when there are several native connectors' do
-        let(:native_connector_one) do
-          native_connector.dup.merge :id => '0987654321'
-        end
-        it 'starts several workers' do
-          allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([native_connector, native_connector_one])
-          subject.start!
+    context 'when native connectors search throws an error' do
+      it 'starts no workers' do
+        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_raise(StandardError)
+        subject.start!
 
-          expect(subject.workers.length).to eq(2)
-          expect(mock_worker).to have_received(:start!).exactly(2).times
-        end
-      end
-
-      context 'when native connectors search throws an error' do
-        it 'starts no workers' do
-          allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_raise(StandardError)
-          subject.start!
-
-          expect(subject.workers.length).to eq(0)
-        end
+        expect(subject.workers.length).to eq(0)
       end
     end
   end
