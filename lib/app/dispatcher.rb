@@ -18,7 +18,7 @@ module App
     POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
     TERMINATION_TIMEOUT = (App::Config[:termination_timeout] || 60).to_i
 
-    attr_reader :is_shutting_down
+    attr_reader :scheduler
 
     def initialize
       @pool = Concurrent::ThreadPoolExecutor.new(
@@ -31,23 +31,20 @@ module App
     end
 
     def start!
-      # TODO need to do pre-flight and start a single heartbeat task for dispatcher
-      @scheduler = Core::NativeScheduler.new(POLL_IDLING).when_triggered do |connector_settings|
+      # TODO: need to do pre-flight and start a single heartbeat task for dispatcher
+      @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
+      @scheduler.when_triggered do |connector_settings|
         @pool.post do
           job_runner = Core::SyncJobRunner.new(connector_settings, connector_settings[:service_type])
           job_runner.execute
         end
       end
-    rescue SystemExit
-      puts 'Exiting.'
-    rescue Interrupt
-      shutdown
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, 'Dispatcher failed due to unexpected error.')
     end
 
     def shutdown
-      Utility::Logger.info("Shutting down #{@pool.scheduled_task_count} scheduled tasks...")
+      Utility::Logger.info("Shutting down dispatcher with pool [#{@pool&.class}] and scheduler [#{@scheduler&.class}]...")
       @is_shutting_down = true
       @scheduler&.shutdown
       @pool.shutdown

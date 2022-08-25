@@ -11,102 +11,85 @@ require 'app/worker'
 require 'app/dispatcher'
 
 describe App::Dispatcher do
-  let(:native_connector) do
-    {
-      "id": '1234567890',
-      "api_key_id": nil,
-      "configuration": {},
-      "index_name": 'search-test',
-      "language": nil,
-      "last_seen": nil,
-      "last_sync_error": nil,
-      "last_sync_status": nil,
-      "last_synced": nil,
-      "name": 'test',
-      "scheduling": {
-        "enabled": false,
-        "interval": '0 0 0 * * ?'
-      },
-      "service_type": 'example',
-      "status": 'created',
-      "sync_now": false,
-      "is_native": true
-    }.with_indifferent_access
-  end
-
-  let(:mock_worker) do
+  let(:mock_scheduler) do
     double
   end
 
-  let(:mock_scheduler) do
+  let(:mock_pool) do
     Concurrent::ImmediateExecutor.new
   end
 
+  let(:connector_id1) { '123' }
+  let(:connector_id2) { '456' }
+
+  let(:connector_settings1) { double }
+  let(:connector_settings2) { double }
+
   before do
-    subject.instance_variable_set(:@pool, mock_scheduler)
+    subject.instance_variable_set(:@pool, mock_pool)
     stub_const('App::Dispatcher::POLL_IDLING', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
   end
 
   before(:each) do
     subject.instance_variable_set(:@is_shutting_down, true) # prevent infinite loop - run just one cycle
-    allow(App::Worker).to receive(:new).and_return(mock_worker)
-    allow(mock_worker).to receive(:start!)
+    allow(Core::NativeScheduler).to receive(:new).and_return(mock_scheduler)
+    allow(mock_scheduler).to receive(:when_triggered)
+    allow(mock_pool).to receive(:post)
+    allow(Object).to receive(:sleep) # don't really want to sleep
+
+    allow(connector_settings1).to receive(:[]).with(:id).and_return(connector_id1)
+    allow(connector_settings2).to receive(:[]).with(:id).and_return(connector_id2)
+    [connector_settings1, connector_settings2].each { |cs| allow(cs).to receive(:service_type).and_return('example') }
   end
 
   describe '#start!' do
-    context 'when no native connectors are returned' do
-      it 'starts no workers' do
-        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([])
+    context 'when no native connectors' do
+      it 'starts no sync jobs' do
         subject.start!
 
-        expect(subject.workers.length).to eq(0)
+        expect(subject.scheduler).to_not be_nil
+        expect(mock_pool).to_not have_received(:post)
       end
     end
 
-    context 'when there is one native connector' do
-      it 'starts one worker' do
-        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([native_connector])
+    context 'when one native connector' do
+      before(:each) do
+        allow(mock_scheduler).to receive(:when_triggered).and_yield(connector_settings1)
+      end
+
+      it 'starts one sync job' do
         subject.start!
 
-        expect(subject.workers.length).to eq(1)
-        expect(mock_worker).to have_received(:start!).exactly(1).times
+        expect(subject.scheduler).to_not be_nil
+        expect(mock_pool).to have_received(:post)
       end
     end
 
-    context 'when there are several native connectors' do
-      let(:native_connector_one) do
-        native_connector.dup.merge :id => '0987654321'
+    context 'when two native connectors' do
+      before(:each) do
+        allow(mock_scheduler).to receive(:when_triggered).and_yield(connector_settings1).and_yield(connector_settings2)
       end
-      it 'starts several workers' do
-        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return([native_connector, native_connector_one])
+
+      it 'starts one sync job' do
         subject.start!
 
-        expect(subject.workers.length).to eq(2)
-        expect(mock_worker).to have_received(:start!).exactly(2).times
-      end
-    end
-
-    context 'when native connectors search throws an error' do
-      it 'starts no workers' do
-        allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_raise(StandardError)
-        subject.start!
-
-        expect(subject.workers.length).to eq(0)
+        expect(subject.scheduler).to_not be_nil
+        expect(mock_pool).to have_received(:post).twice
       end
     end
   end
 
   describe '#shutdown' do
     before(:each) do
-      allow(mock_scheduler).to receive(:shutdown)
+      allow(mock_pool).to receive(:shutdown)
       subject.instance_variable_set(:@is_shutting_down, false)
     end
 
     it 'shutdowns correctly' do
       subject.shutdown
 
-      expect(mock_scheduler).to have_received(:shutdown)
+      expect(mock_pool).to have_received(:shutdown)
       expect(subject.instance_variable_get(:@is_shutting_down)).to eq(true)
     end
   end
