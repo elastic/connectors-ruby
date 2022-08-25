@@ -1,8 +1,8 @@
-require 'core/scheduler'
+require 'core/single_scheduler'
 require 'active_support/core_ext/numeric/time'
 require 'timecop'
 
-describe Core::Scheduler do
+describe Core::SingleScheduler do
   subject { described_class.new(connector_id, poll_interval) }
 
   let(:connector_id) { '123' }

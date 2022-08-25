@@ -18,10 +18,9 @@ module App
     POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
     TERMINATION_TIMEOUT = (App::Config[:termination_timeout] || 60).to_i
 
-    attr_reader :workers
+    attr_reader :is_shutting_down
 
     def initialize
-      @workers = {}.with_indifferent_access
       @pool = Concurrent::ThreadPoolExecutor.new(
         min_threads: 5,
         max_threads: 10,
@@ -32,36 +31,11 @@ module App
     end
 
     def start!
-      loop do
-        connectors = Core::ElasticConnectorActions.native_connectors
-        if connectors.empty?
-          Utility::Logger.info('No native connectors found.')
-          next
-        end
-        Utility::Logger.info("Total workers: #{workers.size}. Checking if all native connectors are running...")
-        connectors.each do |connector|
-          if !workers[connector[:id]].nil?
-            Utility::Logger.info("Connector #{connector[:id]} for service type #{connector[:service_type]} is running.")
-          else
-            worker = App::Worker.new(
-              connector_id: connector[:id],
-              service_type: connector[:service_type]
-            )
-            @workers[connector[:id]] = worker
-            @pool.post do
-              Utility::Logger.info("Starting #{connector[:id]} for service type #{connector[:service_type]}... Total workers: #{@workers.count}")
-              worker.start!
-            end
-          end
-        end
-        # TODO: check for orphaned workers - those that don't have matching connectors anymore (example: connector deleted)
-        if @is_shutting_down
-          break
-        end
-      ensure
-        if POLL_IDLING > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{POLL_IDLING} seconds.")
-          sleep(POLL_IDLING)
+      # TODO need to do pre-flight and start a single heartbeat task for dispatcher
+      @scheduler = Core::NativeScheduler.new(POLL_IDLING).when_triggered do |connector_settings|
+        @pool.post do
+          job_runner = Core::SyncJobRunner.new(connector_settings, connector_settings[:service_type])
+          job_runner.execute
         end
       end
     rescue SystemExit
@@ -73,8 +47,9 @@ module App
     end
 
     def shutdown
-      Utility::Logger.info("Shutting down #{workers.size} workers...")
+      Utility::Logger.info("Shutting down #{@pool.scheduled_task_count} scheduled tasks...")
       @is_shutting_down = true
+      @scheduler&.shutdown
       @pool.shutdown
       @pool.wait_for_termination(TERMINATION_TIMEOUT)
     end

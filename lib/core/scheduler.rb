@@ -15,26 +15,41 @@ require 'utility/exception_tracking'
 
 module Core
   class Scheduler
-    def initialize(connector_id, poll_interval)
-      @connector_id = connector_id
+    attr_reader :is_shutting_down
+
+    def initialize(poll_interval)
       @poll_interval = poll_interval
+      @is_shutting_down = is_shutting_down
+    end
+
+    def connector_ids
+      raise 'Not implemented'
     end
 
     def when_triggered
       loop do
-        connector_settings = Core::ConnectorSettings.fetch(@connector_id)
-
-        if sync_triggered?(connector_settings)
-          yield connector_settings
+        connector_ids.each do |connector_id|
+          connector_settings = Core::ConnectorSettings.fetch(connector_id)
+          if sync_triggered?(connector_settings)
+            yield connector_settings
+          end
         end
-      rescue StandardError => e
-        Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
-      ensure
-        if @poll_interval > 0
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds.")
-          sleep(@poll_interval)
+        if @is_shutting_down
+          break
         end
       end
+    rescue StandardError => e
+      Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
+    ensure
+      if @poll_interval > 0 && !@is_shutting_down
+        Utility::Logger.info("Sleeping for #{@poll_interval} seconds.")
+        sleep(@poll_interval)
+      end
+    end
+
+    def shutdown
+      Utility::Logger.info("Shutting down scheduler #{self.class.name}.")
+      @is_shutting_down = true
     end
 
     private
