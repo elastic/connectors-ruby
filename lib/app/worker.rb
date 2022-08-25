@@ -49,7 +49,7 @@ module App
     end
 
     def start_polling_jobs
-      Utility::Logger.info('Polling Elasticsearch for synchronisation jobs to run.')
+      Utility::Logger.info("Polling Elasticsearch for synchronisation jobs to run on #{@connector_id} - #{@service_type}...")
       Core::Scheduler.new(@connector_id, POLL_IDLING).when_triggered do |connector_settings|
         job_runner = Core::SyncJobRunner.new(connector_settings, @service_type)
         job_runner.execute

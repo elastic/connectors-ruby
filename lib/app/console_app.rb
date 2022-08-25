@@ -8,7 +8,6 @@
 
 $LOAD_PATH << '../'
 
-require 'fugit'
 require 'app/config'
 require 'app/menu'
 require 'app/worker'
