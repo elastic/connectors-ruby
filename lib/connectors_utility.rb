@@ -6,7 +6,6 @@
 
 # frozen_string_literal: true
 
-
 require_relative 'utility/es_client'
 require_relative 'utility/logger'
 require_relative 'utility/elasticsearch/index/text_analysis_settings'
