@@ -36,7 +36,7 @@ module App
         connectors = Core::ElasticConnectorActions.native_connectors
         if connectors.empty?
           Utility::Logger.info('No native connectors found.')
-          return
+          next
         end
         Utility::Logger.info("Total workers: #{workers.size}. Checking if all native connectors are running...")
         connectors.each do |connector|
