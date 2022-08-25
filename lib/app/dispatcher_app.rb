@@ -8,18 +8,13 @@
 
 $LOAD_PATH << '../'
 
-require 'app/worker'
+require 'app/dispatcher'
 require 'app/config'
 require 'utility/environment'
 require 'utility/logger'
 
 module App
   Utility::Environment.set_execution_environment(App::Config) do
-    worker = App::Worker.new(
-      connector_id: App::Config['connector_id'],
-      service_type: App::Config['service_type'],
-      is_native: false
-    )
-    worker.start!
+    App::Dispatcher.run_dispatcher!
   end
 end

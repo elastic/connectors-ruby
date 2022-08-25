@@ -26,7 +26,7 @@ module App
         min_threads: 5,
         max_threads: 10,
         max_queue: 100,
-        fallback_policy: :caller_runs
+        fallback_policy: :abort
       )
       @is_shutting_down = false
     end
@@ -55,6 +55,7 @@ module App
             end
           end
         end
+        # TODO: check for orphaned workers - those that don't have matching connectors anymore (example: connector deleted)
         if @is_shutting_down
           break
         end
@@ -82,6 +83,7 @@ module App
 
   def run_dispatcher!
     # Dispatcher is responsible for dispatching connectors to workers.
+    Utility::Logger.info('Starting dispatcher...')
     Utility::Environment.set_execution_environment(App::Config) do
       dispatcher = App::Dispatcher.new
       dispatcher.start!
