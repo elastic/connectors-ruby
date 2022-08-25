@@ -45,8 +45,7 @@ module App
           else
             worker = App::Worker.new(
               connector_id: connector[:id],
-              service_type: connector[:service_type],
-              is_native: true
+              service_type: connector[:service_type]
             )
             @workers[connector[:id]] = worker
             @pool.post do

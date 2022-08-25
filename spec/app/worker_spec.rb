@@ -48,7 +48,7 @@ describe App::Worker do
   end
 
   subject do
-    App::Worker.new(connector_id: connector_id, service_type: service_type, is_native: false)
+    App::Worker.new(connector_id: connector_id, service_type: service_type)
   end
 
   before(:each) do

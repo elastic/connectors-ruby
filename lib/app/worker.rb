@@ -16,11 +16,10 @@ module App
   class Worker
     POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
 
-    def initialize(connector_id:, service_type:, is_native:)
+    def initialize(connector_id:, service_type:)
       super()
       @connector_id = connector_id
       @service_type = service_type
-      @is_native = is_native
     end
 
     def start!

@@ -17,8 +17,7 @@ module App
   Utility::Environment.set_execution_environment(App::Config) do
     worker = App::Worker.new(
       connector_id: App::Config['connector_id'],
-      service_type: App::Config['service_type'],
-      is_native: false
+      service_type: App::Config['service_type']
     )
     worker.start!
   end
