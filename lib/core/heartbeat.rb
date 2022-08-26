@@ -12,6 +12,7 @@ require 'connectors/registry'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'utility/logger'
+require 'utility/encryption_helper'
 
 module Core
   class Heartbeat
@@ -44,7 +45,11 @@ module Core
           connector_class = Connectors::REGISTRY.connector_class(service_type)
           configuration = connector_class.configurable_fields
           doc[:service_type] = service_type
-          doc[:configuration] = configuration
+          Utility::EncryptionHelper.generate_local_pk unless Utility::EncryptionHelper.local_pk_set?
+          doc[:encryption] = {}
+          doc[:encryption][:connector_public_key] = Utility::EncryptionHelper.read_local_pk.public_key.to_bn(:uncompressed).to_s # TODO: check serialization with Kibana
+
+          doc[:encrypted_configuration] = Utility::EncryptionHelper.encrypt(connector_settings[:encryption], configuration)
 
           # We want to set connector to CONFIGURED status if all configurable fields have default values
           new_connector_status = if configuration.values.all? { |setting| setting[:value].present? }

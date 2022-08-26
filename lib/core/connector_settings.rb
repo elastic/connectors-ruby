@@ -11,6 +11,7 @@ require 'active_support/core_ext/object/blank'
 require 'connectors/connector_status'
 require 'time'
 require 'utility/logger'
+require 'utility/encryption_helper'
 
 module Core
   class ConnectorSettings
@@ -51,7 +52,7 @@ module Core
     end
 
     def configuration
-      self[:configuration]
+      Utility::EncryptionHelper.decrypt(self[:encryption], self[:encrypted_configuration])
     end
 
     def scheduling_settings
