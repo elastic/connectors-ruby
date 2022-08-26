@@ -26,16 +26,20 @@ describe App::Dispatcher do
   let(:connector_settings2) { double }
 
   let(:elastic_connector_actions) { class_double(Core::ElasticConnectorActions) }
+  let(:heartbeat_class) { class_double(Core::Heartbeat) }
 
   before do
     allow(elastic_connector_actions).to receive(:ensure_connectors_index_exists)
     allow(elastic_connector_actions).to receive(:ensure_job_index_exists)
     allow(elastic_connector_actions).to receive(:ensure_content_index_exists)
 
+    allow(heartbeat_class).to receive(:start_task)
+
     subject.instance_variable_set(:@pool, mock_pool)
     stub_const('App::Dispatcher::POLL_IDLING', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
     stub_const('Core::ElasticConnectorActions', elastic_connector_actions)
+    stub_const('Core::Heartbeat', heartbeat_class)
   end
 
   before(:each) do
@@ -45,9 +49,9 @@ describe App::Dispatcher do
     allow(mock_pool).to receive(:post)
     allow(Object).to receive(:sleep) # don't really want to sleep
 
-    allow(connector_settings1).to receive(:[]).with(:id).and_return(connector_id1)
+    allow(connector_settings1).to receive(:id).and_return(connector_id1)
     allow(connector_settings1).to receive(:index_name).and_return('connector1')
-    allow(connector_settings2).to receive(:[]).with(:id).and_return(connector_id2)
+    allow(connector_settings2).to receive(:id).and_return(connector_id2)
     allow(connector_settings2).to receive(:index_name).and_return('connector2')
 
     [connector_settings1, connector_settings2].each { |cs| allow(cs).to receive(:service_type).and_return('example') }
@@ -60,6 +64,7 @@ describe App::Dispatcher do
 
         expect(subject.scheduler).to_not be_nil
         expect(mock_pool).to_not have_received(:post)
+        expect(heartbeat_class).to_not have_received(:start_task)
       end
     end
 
@@ -77,6 +82,8 @@ describe App::Dispatcher do
         expect(elastic_connector_actions).to have_received(:ensure_job_index_exists).once
         expect(elastic_connector_actions).to have_received(:ensure_connectors_index_exists).once
         expect(elastic_connector_actions).to have_received(:ensure_content_index_exists).once
+
+        expect(heartbeat_class).to have_received(:start_task).with(connector_id1, 'example').once
       end
     end
 
@@ -94,6 +101,9 @@ describe App::Dispatcher do
         expect(elastic_connector_actions).to have_received(:ensure_job_index_exists).once
         expect(elastic_connector_actions).to have_received(:ensure_connectors_index_exists).once
         expect(elastic_connector_actions).to have_received(:ensure_content_index_exists).twice
+
+        expect(heartbeat_class).to have_received(:start_task).with(connector_id1, 'example').once
+        expect(heartbeat_class).to have_received(:start_task).with(connector_id2, 'example').once
       end
     end
   end

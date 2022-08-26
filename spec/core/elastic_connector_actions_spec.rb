@@ -1,4 +1,4 @@
-require 'core/elastic_connector_actions'
+require 'core'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility/es_client'
@@ -69,9 +69,14 @@ describe Core::ElasticConnectorActions do
     let(:created_connector_id) { 'just-created-this-connector-id-1' }
 
     before(:each) do
-      allow(es_client).to receive(:index).with(:index => connectors_index, :body => anything).and_return({
-                                                                                                           '_id' => created_connector_id
-                                                                                                         })
+      allow(es_client)
+        .to receive(:index)
+        .with(:index => connectors_index, :body => anything)
+        .and_return(
+          {
+            '_id' => created_connector_id
+          }
+        )
     end
 
     it 'sends a index request with proper index_name and service_type' do
@@ -140,16 +145,16 @@ describe Core::ElasticConnectorActions do
   end
 
   context '#get_native_connectors' do
-    let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } } }
-    let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } } }
+    let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
+    let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
     before(:each) do
       allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => { 'value' => 2 } } })
     end
     it 'returns all native connectors' do
       connectors = described_class.native_connectors
       expect(connectors.size).to eq(2)
-      expect(connectors).to include('id' => '123', 'something' => 'something', 'is_native' => true)
-      expect(connectors).to include('id' => '456', 'something' => 'something', 'is_native' => true)
+      expect(connectors[0].id).to eq(connector_one['_id'])
+      expect(connectors[1].id).to eq(connector_two['_id'])
     end
 
     context 'when pagination is needed' do
@@ -168,8 +173,8 @@ describe Core::ElasticConnectorActions do
       it 'returns all native connectors with pagination' do
         connectors = described_class.native_connectors
         expect(connectors.size).to eq(2)
-        expect(connectors).to include('id' => '123', 'something' => 'something', 'is_native' => true)
-        expect(connectors).to include('id' => '456', 'something' => 'something', 'is_native' => true)
+        expect(connectors[0].id).to eq(connector_one['_id'])
+        expect(connectors[1].id).to eq(connector_two['_id'])
       end
     end
   end

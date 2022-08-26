@@ -10,6 +10,7 @@ require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
+require 'core/connector_settings'
 
 module Core
   class ElasticConnectorActions
@@ -56,9 +57,7 @@ module Core
           hits = response['hits']['hits']
           total = response['hits']['total']['value']
           result += hits.map do |hit|
-            mapped = hit['_source'].with_indifferent_access
-            mapped[:id] = hit['_id']
-            mapped
+            Core::ConnectorSettings.new(hit)
           end
           break if result.size >= total
           offset += DEFAULT_PAGE_SIZE
