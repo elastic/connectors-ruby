@@ -25,10 +25,17 @@ describe App::Dispatcher do
   let(:connector_settings1) { double }
   let(:connector_settings2) { double }
 
+  let(:elastic_connector_actions) { class_double(Core::ElasticConnectorActions) }
+
   before do
+    allow(elastic_connector_actions).to receive(:ensure_connectors_index_exists)
+    allow(elastic_connector_actions).to receive(:ensure_job_index_exists)
+    allow(elastic_connector_actions).to receive(:ensure_content_index_exists)
+
     subject.instance_variable_set(:@pool, mock_pool)
     stub_const('App::Dispatcher::POLL_IDLING', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
+    stub_const('Core::ElasticConnectorActions', elastic_connector_actions)
   end
 
   before(:each) do
@@ -39,7 +46,10 @@ describe App::Dispatcher do
     allow(Object).to receive(:sleep) # don't really want to sleep
 
     allow(connector_settings1).to receive(:[]).with(:id).and_return(connector_id1)
+    allow(connector_settings1).to receive(:index_name).and_return('connector1')
     allow(connector_settings2).to receive(:[]).with(:id).and_return(connector_id2)
+    allow(connector_settings2).to receive(:index_name).and_return('connector2')
+
     [connector_settings1, connector_settings2].each { |cs| allow(cs).to receive(:service_type).and_return('example') }
   end
 
@@ -63,6 +73,10 @@ describe App::Dispatcher do
 
         expect(subject.scheduler).to_not be_nil
         expect(mock_pool).to have_received(:post)
+
+        expect(elastic_connector_actions).to have_received(:ensure_job_index_exists).once
+        expect(elastic_connector_actions).to have_received(:ensure_connectors_index_exists).once
+        expect(elastic_connector_actions).to have_received(:ensure_content_index_exists).once
       end
     end
 
@@ -71,11 +85,15 @@ describe App::Dispatcher do
         allow(mock_scheduler).to receive(:when_triggered).and_yield(connector_settings1).and_yield(connector_settings2)
       end
 
-      it 'starts one sync job' do
+      it 'starts two sync jobs' do
         subject.start!
 
         expect(subject.scheduler).to_not be_nil
         expect(mock_pool).to have_received(:post).twice
+
+        expect(elastic_connector_actions).to have_received(:ensure_job_index_exists).once
+        expect(elastic_connector_actions).to have_received(:ensure_connectors_index_exists).once
+        expect(elastic_connector_actions).to have_received(:ensure_content_index_exists).twice
       end
     end
   end

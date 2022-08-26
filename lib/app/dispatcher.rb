@@ -32,10 +32,16 @@ module App
 
     def start!
       # TODO: need to do pre-flight and start a single heartbeat task for dispatcher
+      Core::ElasticConnectorActions.ensure_connectors_index_exists
+      Core::ElasticConnectorActions.ensure_job_index_exists
+
       @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
       @scheduler.when_triggered do |connector_settings|
+        service_type = connector_settings.service_type
+        Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
+        raise "#{service_type} is not a supported connector" unless Connectors::REGISTRY.registered?(service_type)
         @pool.post do
-          job_runner = Core::SyncJobRunner.new(connector_settings, connector_settings[:service_type])
+          job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
           job_runner.execute
         end
       end
