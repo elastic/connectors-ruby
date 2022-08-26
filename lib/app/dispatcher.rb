@@ -47,8 +47,11 @@ module App
         start_heartbeat_task(connector_settings.id, service_type)
 
         @pool.post do
+          Utility::Logger.info("Starting a job for #{service_type} - #{connector_settings.id}...")
           job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
           job_runner.execute
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, "Job for #{service_type} - #{connector_settings.id} failed due to unexpected error.")
         end
       end
     rescue StandardError => e
