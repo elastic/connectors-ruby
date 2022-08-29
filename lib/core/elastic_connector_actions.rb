@@ -252,7 +252,7 @@ module Core
       private
 
       def client
-        @client ||= Utility::EsClient.new
+        @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
       end
     end
   end

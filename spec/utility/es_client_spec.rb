@@ -17,11 +17,9 @@ RSpec.describe Utility::EsClient do
     }
   end
 
-  let(:subject) { described_class.new }
+  let(:subject) { described_class.new(config[:elasticsearch]) }
 
   before(:each) do
-    stub_const('App::Config', config)
-
     stub_request(:get, "#{host}:9200/")
       .to_return(status: 403, body: '', headers: {})
     stub_request(:get, "#{host}:9200/_cluster/health")
