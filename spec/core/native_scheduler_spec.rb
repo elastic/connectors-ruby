@@ -1,3 +1,4 @@
+require 'core/connector_settings'
 require 'core/native_scheduler'
 require 'core/elastic_connector_actions'
 require 'active_support/core_ext/numeric/time'
@@ -10,8 +11,11 @@ describe Core::NativeScheduler do
   let(:connector_id2) { '456' }
   let(:poll_interval) { 999 }
 
-  let(:connector_settings1) { double(:id => connector_id1) }
-  let(:connector_settings2) { double(:id => connector_id2) }
+  let(:native_connector1) { { :_id => connector_id1 } }
+  let(:native_connector2) { { :_id => connector_id2 } }
+
+  let(:connector_settings1) { Core::ConnectorSettings.new(native_connector1) }
+  let(:connector_settings2) { Core::ConnectorSettings.new(native_connector2) }
 
   let(:last_synced) { Time.now - 1.day }
   let(:sync_now) { false }
@@ -19,12 +23,6 @@ describe Core::NativeScheduler do
   let(:scheduling_enabled) { true }
   let(:scheduling_interval) { '0 * * * * *' }
   let(:scheduling_settings) { { :enabled => scheduling_enabled, :interval => scheduling_interval } }
-  let(:native_connectors) do
-    [
-      { :id => connector_id1, :service_type => 'example' },
-      { :id => connector_id2, :service_type => 'example' }
-    ]
-  end
   let(:native_connectors_settings) do
     [connector_settings1, connector_settings2]
   end
@@ -38,10 +36,11 @@ describe Core::NativeScheduler do
       allow(settings).to receive(:connector_status_allows_sync?).and_return(true)
       allow(settings).to receive(:[]).with(:last_synced).and_return(last_synced.to_s)
       allow(settings).to receive(:[]).with(:sync_now).and_return(sync_now)
+      allow(settings).to receive(:[]).with(:status).and_return(connector_status)
       allow(settings).to receive(:scheduling_settings).and_return(scheduling_settings)
     }
 
-    allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return(native_connectors)
+    allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return(native_connectors_settings)
 
     # Also we don't really wanna sleep
     allow_any_instance_of(Object).to receive(:sleep)

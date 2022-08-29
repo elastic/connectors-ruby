@@ -22,16 +22,15 @@ module Core
       @is_shutting_down = is_shutting_down
     end
 
-    def connector_ids
+    def connector_settings
       raise 'Not implemented'
     end
 
     def when_triggered
       loop do
-        connector_ids.each do |connector_id|
-          connector_settings = Core::ConnectorSettings.fetch(connector_id)
-          if sync_triggered?(connector_settings)
-            yield connector_settings
+        connector_settings.each do |cs|
+          if sync_triggered?(cs)
+            yield cs
           end
         end
         if @is_shutting_down

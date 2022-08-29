@@ -6,11 +6,8 @@
 
 # frozen_string_literal: true
 
-require 'time'
-require 'fugit'
-require 'core/connector_settings'
 require 'core/scheduler'
-require 'utility/cron'
+require 'core/connector_settings'
 require 'utility/logger'
 require 'utility/exception_tracking'
 
@@ -21,8 +18,9 @@ module Core
       @connector_id = connector_id
     end
 
-    def connector_ids
-      [@connector_id]
+    def connector_settings
+      connector_settings = Core::ConnectorSettings.fetch(@connector_id)
+      [connector_settings]
     end
   end
 end

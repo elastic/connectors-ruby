@@ -7,14 +7,15 @@
 # frozen_string_literal: true
 
 require 'core/scheduler'
+require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'utility/logger'
 require 'utility/exception_tracking'
 
 module Core
   class NativeScheduler < Core::Scheduler
-    def connector_ids
-      (Core::ElasticConnectorActions.native_connectors || []).map { |c| c[:id] }
+    def connector_settings
+      Core::ElasticConnectorActions.native_connectors || []
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, 'Could not retrieve native connectors due to unexpected error.')
     end
