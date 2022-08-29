@@ -40,7 +40,7 @@ module Core
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure
         if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds.")
+          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{self.class}.")
           sleep(@poll_interval)
         end
       end
