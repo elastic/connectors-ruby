@@ -72,14 +72,15 @@ module App
       Utility::Logger.info("Starting heartbeats on #{connector_id} - #{service_type}...")
       Core::Heartbeat.start_task(connector_id, service_type)
     end
-  end
 
-  def run_dispatcher!
-    # Dispatcher is responsible for dispatching connectors to workers.
-    Utility::Logger.info('Starting dispatcher...')
-    Utility::Environment.set_execution_environment(App::Config) do
-      dispatcher = App::Dispatcher.new
-      dispatcher.start!
+    def self.run_dispatcher!
+      # Dispatcher is responsible for dispatching connectors to workers.
+      Utility::Logger.info('Starting dispatcher...')
+      Utility::Environment.set_execution_environment(App::Config) do
+        dispatcher = App::Dispatcher.new
+        dispatcher.start!
+      end
     end
   end
+
 end

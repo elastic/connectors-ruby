@@ -36,13 +36,13 @@ module Core
         if @is_shutting_down
           break
         end
-      end
-    rescue StandardError => e
-      Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
-    ensure
-      if @poll_interval > 0 && !@is_shutting_down
-        Utility::Logger.info("Sleeping for #{@poll_interval} seconds.")
-        sleep(@poll_interval)
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
+      ensure
+        if @poll_interval > 0 && !@is_shutting_down
+          Utility::Logger.info("Sleeping for #{@poll_interval} seconds.")
+          sleep(@poll_interval)
+        end
       end
     end
 
