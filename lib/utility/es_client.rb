@@ -8,7 +8,6 @@
 
 require 'logger'
 require 'elasticsearch'
-require 'app/config'
 
 module Utility
   class EsClient < ::Elasticsearch::Client
@@ -21,12 +20,11 @@ module Utility
       attr_reader :cause
     end
 
-    def initialize
-      super(connection_configs)
+    def initialize(es_config)
+      super(connection_configs(es_config))
     end
 
-    def connection_configs
-      es_config = App::Config[:elasticsearch]
+    def connection_configs(es_config)
       configs = { :api_key => es_config[:api_key] }
       if es_config[:cloud_id]
         configs[:cloud_id] = es_config[:cloud_id]

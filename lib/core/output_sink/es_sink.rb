@@ -15,7 +15,7 @@ module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
     def initialize(index_name, flush_threshold = 50)
       super()
-      @client = Utility::EsClient.new
+      @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name
       @operation_queue = []
       @flush_threshold = flush_threshold

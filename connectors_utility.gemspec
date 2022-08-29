@@ -16,6 +16,8 @@ Gem::Specification.new do |s|
                     LICENSE
                     NOTICE.txt
                     lib/connectors_utility.rb
+                    lib/utility/es_client.rb
+                    lib/utility/logger.rb
                     lib/utility/elasticsearch/index/text_analysis_settings.rb
                     lib/utility/elasticsearch/index/mappings.rb
                     lib/utility/elasticsearch/index/language_data.yml
