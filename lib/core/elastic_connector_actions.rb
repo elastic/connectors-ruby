@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 #
 require 'active_support/core_ext/hash'
+require 'app/config'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
@@ -37,6 +38,12 @@ module Core
 
       def get_connector(connector_id)
         client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
+      end
+
+      def get_connectors_meta
+        alias_mappings = client.indices.get_mapping(:index => CONNECTORS_INDEX).with_indifferent_access
+        index = get_latest_index_in_alias(CONNECTORS_INDEX, alias_mappings.keys)
+        alias_mappings.dig(index, 'mappings', '_meta')
       end
 
       def native_connectors
@@ -264,6 +271,12 @@ module Core
 
       def client
         @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
+      end
+
+      def get_latest_index_in_alias(alias_name, indicies)
+        index_versions = indicies.map{ |index| (index.gsub("#{alias_name}-v", '')).to_i }
+        index_version = index_versions.sort[-1] # gets the largest suffix number
+        "#{alias_name}-v#{index_version}"
       end
     end
   end

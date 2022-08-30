@@ -65,25 +65,26 @@ module Core
     end
 
     def request_pipeline
-      self[:request_pipeline] || DEFAULT_REQUEST_PIPELINE
+      self[:request_pipeline] || @globals[:default_request_pipeline] || DEFAULT_REQUEST_PIPELINE
     end
 
     def extract_binary_content?
-      self[:extract_binary_content] || DEFAULT_EXTRACT_BINARY_CONTENT
+      self[:extract_binary_content] || @globals[:default_extract_binary_content] || DEFAULT_EXTRACT_BINARY_CONTENT
     end
 
     def reduce_whitespace?
-      self[:reduce_whitespace] || DEFAULT_REDUCE_WHITESPACE
+      self[:reduce_whitespace] || @globals[:default_reduce_whitespace] || DEFAULT_REDUCE_WHITESPACE
     end
 
     def run_ml_inference?
-      self[:run_ml_inference] || DEFAULT_RUN_ML_INFERENCE
+      self[:run_ml_inference] || @globals[:default_run_ml_inference] || DEFAULT_RUN_ML_INFERENCE
     end
 
     private
 
     def initialize(es_response)
       @elasticsearch_response = es_response.with_indifferent_access
+      @globals = ElasticConnectorActions.get_connectors_meta
     end
   end
 end

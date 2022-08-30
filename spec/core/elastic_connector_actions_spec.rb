@@ -144,6 +144,16 @@ describe Core::ElasticConnectorActions do
     end
   end
 
+  context '#get_connectors_meta' do
+    before(:each) do
+      allow(es_client_indices_api).to receive(:get_mapping).and_return({ '.elastic-connectors-v1'=>{ 'mappings'=>{ '_meta'=>{ 'version'=>'1'}, 'properties'=>{ 'api_key_id'=>{ 'type'=>'keyword'}, 'configuration'=>{ 'type'=>'object'}, 'error'=>{ 'type'=>'keyword'}, 'index_name'=>{ 'type'=>'keyword'}, 'language'=>{ 'type'=>'keyword'}, 'last_seen'=>{ 'type'=>'date'}, 'last_sync_error'=>{ 'type'=>'keyword'}, 'last_sync_status'=>{ 'type'=>'keyword'}, 'last_synced'=>{ 'type'=>'date'}, 'name'=>{ 'type'=>'keyword'}, 'scheduling'=>{ 'properties'=>{ 'enabled'=>{ 'type'=>'boolean'}, 'interval'=>{ 'type'=>'text'}}}, 'service_type'=>{ 'type'=>'keyword'}, 'status'=>{ 'type'=>'keyword'}, 'sync_now'=>{ 'type'=>'boolean'}}}}})
+    end
+
+    it 'gets the meta' do
+      expect(described_class.get_connectors_meta).to eq({ 'version' => '1' })
+    end
+  end
+
   context '#get_native_connectors' do
     let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
     let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
@@ -623,6 +633,15 @@ describe Core::ElasticConnectorActions do
 
         described_class.update_connector_fields(connector_id, doc)
       end
+    end
+  end
+
+  context 'get latest index in alias' do
+    let(:alias_name) { '.ent-search-connectors' }
+    let(:indices) { 11.times.collect { |i| ".ent-search-connectors-v#{i}" }.to_a }
+
+    it 'finds the latest numeric version' do
+      expect(described_class.send(:get_latest_index_in_alias, alias_name, indices)).to eq('.ent-search-connectors-v10')
     end
   end
 end
