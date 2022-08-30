@@ -10,6 +10,7 @@ require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
+require 'app/config'
 
 module Core
   class ElasticConnectorActions
@@ -82,11 +83,16 @@ module Core
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
                                 :last_sync_error => status[:error],
-                                :last_synced => Time.now)
+                                :last_synced => Time.now,
+                                :last_indexed_count => status[:indexed_document_count],
+                                :last_deleted_count => status[:deleted_document_count]
+        )
 
         body = {
           :doc => {
             :status => sync_status,
+            :indexed_count => status[:indexed_document_count],
+            :deleted_count => status[:deleted_document_count],
             :completed_at => Time.now
           }.merge(status)
         }
