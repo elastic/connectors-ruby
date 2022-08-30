@@ -76,10 +76,8 @@ module App
     def self.run_dispatcher!
       # Dispatcher is responsible for dispatching connectors to workers.
       Utility::Logger.info('Starting dispatcher...')
-      Utility::Environment.set_execution_environment(App::Config) do
-        dispatcher = App::Dispatcher.new
-        dispatcher.start!
-      end
+      dispatcher = App::Dispatcher.new
+      dispatcher.start!
     end
   end
 end
