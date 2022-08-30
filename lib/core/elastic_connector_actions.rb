@@ -40,7 +40,7 @@ module Core
         client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
-      def get_connectors_meta
+      def connectors_meta
         alias_mappings = client.indices.get_mapping(:index => CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta')
@@ -274,8 +274,8 @@ module Core
       end
 
       def get_latest_index_in_alias(alias_name, indicies)
-        index_versions = indicies.map{ |index| (index.gsub("#{alias_name}-v", '')).to_i }
-        index_version = index_versions.sort[-1] # gets the largest suffix number
+        index_versions = indicies.map { |index| index.gsub("#{alias_name}-v", '').to_i }
+        index_version = index_versions.max # gets the largest suffix number
         "#{alias_name}-v#{index_version}"
       end
     end

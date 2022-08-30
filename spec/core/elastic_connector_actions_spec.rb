@@ -144,13 +144,13 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#get_connectors_meta' do
+  context '#connectors_meta' do
     before(:each) do
-      allow(es_client_indices_api).to receive(:get_mapping).and_return({ '.elastic-connectors-v1'=>{ 'mappings'=>{ '_meta'=>{ 'version'=>'1'}, 'properties'=>{ 'api_key_id'=>{ 'type'=>'keyword'}, 'configuration'=>{ 'type'=>'object'}, 'error'=>{ 'type'=>'keyword'}, 'index_name'=>{ 'type'=>'keyword'}, 'language'=>{ 'type'=>'keyword'}, 'last_seen'=>{ 'type'=>'date'}, 'last_sync_error'=>{ 'type'=>'keyword'}, 'last_sync_status'=>{ 'type'=>'keyword'}, 'last_synced'=>{ 'type'=>'date'}, 'name'=>{ 'type'=>'keyword'}, 'scheduling'=>{ 'properties'=>{ 'enabled'=>{ 'type'=>'boolean'}, 'interval'=>{ 'type'=>'text'}}}, 'service_type'=>{ 'type'=>'keyword'}, 'status'=>{ 'type'=>'keyword'}, 'sync_now'=>{ 'type'=>'boolean'}}}}})
+      allow(es_client_indices_api).to receive(:get_mapping).and_return({ '.elastic-connectors-v1' => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
     end
 
     it 'gets the meta' do
-      expect(described_class.get_connectors_meta).to eq({ 'version' => '1' })
+      expect(described_class.connectors_meta).to eq({ 'version' => '1' })
     end
   end
 

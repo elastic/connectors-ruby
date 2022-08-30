@@ -84,7 +84,7 @@ module Core
 
     def initialize(es_response)
       @elasticsearch_response = es_response.with_indifferent_access
-      @globals = ElasticConnectorActions.get_connectors_meta
+      @globals = ElasticConnectorActions.connectors_meta
     end
   end
 end
