@@ -191,7 +191,9 @@ describe Core::ElasticConnectorActions do
       expect(es_client).to receive(:update).with(
         :index => connectors_index,
         :id => connector_id,
-        :body => { :doc => { :configuration => doc } }
+        :body => { :doc => { :configuration => doc } },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.update_connector_configuration(connector_id, doc)
@@ -212,7 +214,9 @@ describe Core::ElasticConnectorActions do
               :enabled => true
             )
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.enable_connector_scheduling(connector_id, cron_expression)
@@ -229,7 +233,9 @@ describe Core::ElasticConnectorActions do
               :interval => cron_expression
             )
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.enable_connector_scheduling(connector_id, cron_expression)
@@ -248,7 +254,9 @@ describe Core::ElasticConnectorActions do
               :enabled => false
             )
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.disable_connector_scheduling(connector_id)
@@ -273,7 +281,9 @@ describe Core::ElasticConnectorActions do
               }
             }
           }
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.set_configurable_field(connector_id, field_name, field_label, field_value)
@@ -295,7 +305,9 @@ describe Core::ElasticConnectorActions do
             :sync_now => false,
             :last_sync_status => Connectors::SyncStatus::IN_PROGRESS
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.claim_job(connector_id)
@@ -325,7 +337,9 @@ describe Core::ElasticConnectorActions do
         :id => connector_id,
         :body => {
           :doc => { :status => status }
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.update_connector_status(connector_id, status)
@@ -345,7 +359,9 @@ describe Core::ElasticConnectorActions do
             :last_synced,
             :last_sync_status => Connectors::SyncStatus::COMPLETED
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.complete_sync(connector_id, job_id, status)
@@ -380,7 +396,9 @@ describe Core::ElasticConnectorActions do
               :last_sync_status => Connectors::SyncStatus::FAILED,
               :last_sync_error => status[:error]
             )
-          }
+          },
+          :refresh => true,
+          :retry_on_conflict => 3
         )
 
         described_class.complete_sync(connector_id, job_id, status)
@@ -589,7 +607,13 @@ describe Core::ElasticConnectorActions do
       let(:doc) { { :something => :something } }
 
       it 'does expected elastic index request' do
-        expect(es_client).to receive(:update).with(:index => connectors_index, :id => connector_id, :body => { :doc => doc })
+        expect(es_client).to receive(:update).with(
+          :index => connectors_index,
+          :id => connector_id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        )
 
         described_class.update_connector_fields(connector_id, doc)
       end

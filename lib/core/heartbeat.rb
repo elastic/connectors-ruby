@@ -19,19 +19,17 @@ module Core
 
     class << self
       def start_task(connector_id, service_type)
-        Utility::Logger.debug("Starting heartbeat timer task for #{connector_id} - #{service_type} with interval #{INTERVAL_SECONDS} seconds.")
+        Utility::Logger.debug("Starting heartbeat timer task for [#{connector_id} - #{service_type}] with interval #{INTERVAL_SECONDS} seconds.")
 
         Concurrent::TimerTask.execute(execution_interval: INTERVAL_SECONDS, run_now: true) do
-          Utility::Logger.debug("Sending heartbeat for the connector #{connector_id} - #{service_type}.")
+          Utility::Logger.debug("Sending heartbeat for the connector [#{connector_id} - #{service_type}].")
           send(connector_id, service_type)
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
         end
 
-        Utility::Logger.info("Successfully started heartbeat task for the connector #{connector_id} - #{service_type}.")
+        Utility::Logger.info("Successfully started heartbeat task for the connector [#{connector_id} - #{service_type}].")
       end
-
-      private
 
       def send(connector_id, service_type)
         connector_settings = Core::ConnectorSettings.fetch(connector_id)

@@ -32,7 +32,7 @@ describe App::Dispatcher do
     allow(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
     allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
 
-    allow(Core::Heartbeat).to receive(:start_task)
+    allow(Core::Heartbeat).to receive(:send)
 
     allow(Core::SyncJobRunner).to receive(:new).and_return(mock_job_runner)
     allow(mock_job_runner).to receive(:execute)
@@ -67,7 +67,7 @@ describe App::Dispatcher do
 
         expect(subject.scheduler).to_not be_nil
         expect(simple_pool).to_not have_received(:post)
-        expect(Core::Heartbeat).to_not have_received(:start_task)
+        expect(Core::Heartbeat).to_not have_received(:send)
       end
     end
 
@@ -86,7 +86,7 @@ describe App::Dispatcher do
         expect(Core::ElasticConnectorActions).to have_received(:ensure_connectors_index_exists).once
         expect(Core::ElasticConnectorActions).to have_received(:ensure_content_index_exists).once
 
-        expect(Core::Heartbeat).to have_received(:start_task).with(connector_id1, 'example').once
+        expect(Core::Heartbeat).to have_received(:send).with(connector_id1, 'example').once
       end
 
       context 'when sync throws an error' do
@@ -117,8 +117,8 @@ describe App::Dispatcher do
       expect(Core::ElasticConnectorActions).to have_received(:ensure_connectors_index_exists).once
       expect(Core::ElasticConnectorActions).to have_received(:ensure_content_index_exists).twice
 
-      expect(Core::Heartbeat).to have_received(:start_task).with(connector_id1, 'example').once
-      expect(Core::Heartbeat).to have_received(:start_task).with(connector_id2, 'example').once
+      expect(Core::Heartbeat).to have_received(:send).with(connector_id1, 'example').once
+      expect(Core::Heartbeat).to have_received(:send).with(connector_id2, 'example').once
     end
   end
 

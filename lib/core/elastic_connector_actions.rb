@@ -246,7 +246,13 @@ module Core
 
       def update_connector_fields(connector_id, doc = {})
         return if doc.empty?
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => { :doc => doc })
+        client.update(
+          :index => CONNECTORS_INDEX,
+          :id => connector_id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        )
       end
 
       private

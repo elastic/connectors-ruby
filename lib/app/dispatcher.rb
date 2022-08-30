@@ -28,6 +28,7 @@ module App
         fallback_policy: :abort
       )
       @is_shutting_down = false
+      @heartbeats = {}
     end
 
     def start!
@@ -38,20 +39,19 @@ module App
       @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
       @scheduler.when_triggered do |connector_settings|
         service_type = connector_settings.service_type
+        connector_id = connector_settings.id
 
         # connector-level checks
         Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-        raise "#{service_type} is not a supported connector" unless Connectors::REGISTRY.registered?(service_type)
-
-        # heartbeat per connector
-        start_heartbeat_task(connector_settings.id, service_type)
+        raise "[#{service_type}] is not a supported connector" unless Connectors::REGISTRY.registered?(service_type)
 
         @pool.post do
-          Utility::Logger.info("Starting a job for #{service_type} - #{connector_settings.id}...")
+          send_heartbeat(connector_id, service_type)
+          Utility::Logger.info("Starting a job for [#{service_type} - #{connector_id}]...")
           job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
           job_runner.execute
         rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, "Job for #{service_type} - #{connector_settings.id} failed due to unexpected error.")
+          Utility::ExceptionTracking.log_exception(e, "Job for [#{service_type} - #{connector_id}] failed due to unexpected error.")
         end
       end
     rescue StandardError => e
@@ -68,9 +68,9 @@ module App
 
     private
 
-    def start_heartbeat_task(connector_id, service_type)
-      Utility::Logger.info("Starting heartbeats on #{connector_id} - #{service_type}...")
-      Core::Heartbeat.start_task(connector_id, service_type)
+    def send_heartbeat(connector_id, service_type)
+      Utility::Logger.info("Sending a heartbeat on [#{connector_id} - #{service_type}]...")
+      Core::Heartbeat.send(connector_id, service_type)
     end
 
     def self.run_dispatcher!
