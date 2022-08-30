@@ -14,6 +14,12 @@ require 'utility/logger'
 
 module Core
   class ConnectorSettings
+
+    DEFAULT_REQUEST_PIPELINE = 'ent-search-generic-ingestion'
+    DEFAULT_EXTRACT_BINARY_CONTENT = true
+    DEFAULT_REDUCE_WHITESPACE = true
+    DEFAULT_RUN_ML_INFERENCE = false
+
     # Error Classes
     class ConnectorNotFoundError < StandardError; end
 
@@ -56,6 +62,22 @@ module Core
 
     def scheduling_settings
       self[:scheduling]
+    end
+
+    def request_pipeline
+      self[:request_pipeline] || DEFAULT_REQUEST_PIPELINE
+    end
+
+    def extract_binary_content?
+      self[:extract_binary_content] || DEFAULT_EXTRACT_BINARY_CONTENT
+    end
+
+    def reduce_whitespace?
+      self[:reduce_whitespace] || DEFAULT_REDUCE_WHITESPACE
+    end
+
+    def run_ml_inference?
+      self[:run_ml_inference] || DEFAULT_RUN_ML_INFERENCE
     end
 
     private

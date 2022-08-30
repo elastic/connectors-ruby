@@ -1,4 +1,5 @@
 require 'core/output_sink/es_sink'
+require 'core/connector_settings'
 require 'utility/es_client'
 
 require 'spec_helper'
@@ -8,8 +9,9 @@ RSpec::Matchers.define :array_of_size do |x|
 end
 
 describe Core::OutputSink::EsSink do
-  subject { described_class.new(index_name, flush_threshold) }
+  subject { described_class.new(index_name, request_pipeline, flush_threshold) }
   let(:index_name) { 'some-index-name' }
+  let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }
   let(:es_client) { double }
   let(:flush_threshold) { 1000 }
 
@@ -39,7 +41,7 @@ describe Core::OutputSink::EsSink do
       let(:doc_count) { 55 }
 
       it 'sends out one batch of documents' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold) })
+        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
 
         (1..doc_count).each do |id|
           doc = { :id => id, :data => 'same data' }
@@ -54,7 +56,7 @@ describe Core::OutputSink::EsSink do
             subject.ingest(doc)
           end
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold) })
+          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
 
           subject.flush
         end
@@ -78,7 +80,7 @@ describe Core::OutputSink::EsSink do
       let(:doc_count) { 55 }
 
       it 'sends out one batch of documents' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold) })
+        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
 
         documents = (1..doc_count).map do |id|
           { :id => id, :data => 'same data' }
@@ -95,7 +97,7 @@ describe Core::OutputSink::EsSink do
 
           subject.ingest_multiple(documents)
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold) })
+          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
 
           subject.flush
         end
@@ -119,7 +121,7 @@ describe Core::OutputSink::EsSink do
       let(:doc_count) { 55 }
 
       it 'sends out one batch of changes' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold) })
+        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
 
         (1..doc_count).each do |id|
           subject.delete(id)
@@ -132,7 +134,7 @@ describe Core::OutputSink::EsSink do
             subject.delete(id)
           end
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold) })
+          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
 
           subject.flush
         end
@@ -156,7 +158,7 @@ describe Core::OutputSink::EsSink do
       let(:doc_count) { 55 }
 
       it 'sends out one batch of documents' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold) })
+        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
 
         subject.delete_multiple((1..doc_count).to_a)
       end
@@ -165,7 +167,7 @@ describe Core::OutputSink::EsSink do
         it 'second flush sends out the rest of the documents' do
           subject.delete_multiple((1..doc_count).to_a)
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold) })
+          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
 
           subject.flush
         end
@@ -178,7 +180,7 @@ describe Core::OutputSink::EsSink do
     let(:doc_count) { 5 }
 
     it 'sends the documents once flush is triggered' do
-      expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count) })
+      expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count), :pipeline => request_pipeline })
 
       (1..doc_count).each do |id|
         doc = { :id => id, :data => 'same data' }
