@@ -85,14 +85,13 @@ module Core
                                 :last_sync_error => status[:error],
                                 :last_synced => Time.now,
                                 :last_indexed_count => status[:indexed_document_count],
-                                :last_deleted_count => status[:deleted_document_count]
-        )
+                                :last_deleted_count => status[:deleted_document_count])
 
         body = {
           :doc => {
             :status => sync_status,
-            :indexed_count => status[:indexed_document_count],
-            :deleted_count => status[:deleted_document_count],
+            :indexed_document_count => status[:indexed_document_count],
+            :deleted_document_count => status[:deleted_document_count],
             :completed_at => Time.now
           }.merge(status)
         }

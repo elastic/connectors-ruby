@@ -320,8 +320,8 @@ describe Core::ElasticConnectorActions do
         :body => {
           :doc => hash_including(
             :completed_at,
-            :indexed_count,
-            :deleted_count,
+            :indexed_document_count,
+            :deleted_document_count,
             :status => Connectors::SyncStatus::COMPLETED
           )
         }
