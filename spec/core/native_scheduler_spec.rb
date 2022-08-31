@@ -28,6 +28,7 @@ describe Core::NativeScheduler do
   end
 
   before(:each) do
+    allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return({})
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id1).and_return(connector_settings1)
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id2).and_return(connector_settings2)
 
