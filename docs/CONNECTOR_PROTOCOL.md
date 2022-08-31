@@ -90,7 +90,6 @@ This is our main communication index, used to communicate the connector's config
   };                    -> Definition and values of configurable
                            fields
   error: string;        -> Optional error message
-  extract_binary_content: boolean; -> Whether or not the `request_pipeline` should handle binary data
   index_name: string;   -> The index data will be written to
   language: string;     -> the language used for the analyzer
   last_seen: date;      -> Connector writes check-in date-time
@@ -100,9 +99,13 @@ This is our main communication index, used to communicate the connector's config
   last_indexed_count: number;    -> How many documents were inserted into the index
   last_deleted_count: number;    -> How many documents were deleted from the index
   last_sync_status: string;  -> last sync Enum, see below
-  request_pipeline: string; -> Ingest pipeline to utilize on indexing data to Elasticsearch
-  reduce_whitespace: boolean; -> Whether or not the `request_pipeline` should squish redundant whitespace
-  run_ml_inference: boolean; -> Whether or not the `request_pipeline` should run the ML Inference pipeline
+  name: string; -> the name to use for the connector
+  pipeline: {
+    extract_binary_content: boolean; -> Whether or not the `request_pipeline` should handle binary data
+    name: string; ->  Ingest pipeline to utilize on indexing data to Elasticsearch
+    reduce_whitespace: boolean; -> Whether or not the `request_pipeline` should squish redundant whitespace
+    run_ml_inference: boolean; -> Whether or not the `request_pipeline` should run the ML Inference pipeline
+  }
   scheduling: {
     enabled: boolean; -> Is sync schedule enabled?
     interval: string; -> Quartz Cron syntax
@@ -132,16 +135,21 @@ This is our main communication index, used to communicate the connector's config
     "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
     "error" : { "type" : "text" },
-    "extract_binary_content": { "type" : "boolean" },
     "index_name" : { "type" : "keyword" },
     "language" : { "type" : "keyword" },
     "last_seen" : { "type" : "date" },
     "last_sync_error" : { "type" : "text" },
     "last_sync_status" : { "type" : "keyword" },
     "last_synced" : { "type" : "date" },
-    "request_pipeline" : { "type" : "keyword" },
-    "reduce_whitespace" : { "type" : "boolean" },
-    "run_ml_inference" : { "type" : "boolean" },
+    "name" : { "type" : "keyword" },
+    "pipeline" : {
+      "properties" : {
+        "extract_binary_content": { "type" : "boolean" },
+        "name" : { "type" : "keyword" },
+        "reduce_whitespace" : { "type" : "boolean" },
+        "run_ml_inference" : { "type" : "boolean" },
+      }
+    }
     "scheduling" : {
       "properties" : {
         "enabled" : { "type" : "boolean" },
