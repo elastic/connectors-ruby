@@ -1,4 +1,4 @@
-require 'core/elastic_connector_actions'
+require 'core'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility/es_client'
@@ -69,9 +69,14 @@ describe Core::ElasticConnectorActions do
     let(:created_connector_id) { 'just-created-this-connector-id-1' }
 
     before(:each) do
-      allow(es_client).to receive(:index).with(:index => connectors_index, :body => anything).and_return({
-        '_id' => created_connector_id
-      })
+      allow(es_client)
+        .to receive(:index)
+        .with(:index => connectors_index, :body => anything)
+        .and_return(
+          {
+            '_id' => created_connector_id
+          }
+        )
     end
 
     it 'sends a index request with proper index_name and service_type' do
@@ -139,6 +144,41 @@ describe Core::ElasticConnectorActions do
     end
   end
 
+  context '#get_native_connectors' do
+    let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
+    let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
+    before(:each) do
+      allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => { 'value' => 2 } } })
+    end
+    it 'returns all native connectors' do
+      connectors = described_class.native_connectors
+      expect(connectors.size).to eq(2)
+      expect(connectors[0].id).to eq(connector_one['_id'])
+      expect(connectors[1].id).to eq(connector_two['_id'])
+    end
+
+    context 'when pagination is needed' do
+      before(:each) do
+        described_class::DEFAULT_PAGE_SIZE = 1
+        allow(es_client)
+          .to receive(:search)
+          .with(hash_including(:from => 0), any_args)
+          .and_return({ 'hits' => { 'hits' => [connector_one], 'total' => 2 } })
+        allow(es_client)
+          .to receive(:search)
+          .with(hash_including(:from => 1), any_args)
+          .and_return({ 'hits' => { 'hits' => [connector_two], 'total' => 2 } })
+      end
+
+      it 'returns all native connectors with pagination' do
+        connectors = described_class.native_connectors
+        expect(connectors.size).to eq(2)
+        expect(connectors[0].id).to eq(connector_one['_id'])
+        expect(connectors[1].id).to eq(connector_two['_id'])
+      end
+    end
+  end
+
   context '#update_connector_configuration' do
     let(:doc) do
       {
@@ -151,7 +191,9 @@ describe Core::ElasticConnectorActions do
       expect(es_client).to receive(:update).with(
         :index => connectors_index,
         :id => connector_id,
-        :body => { :doc => { :configuration => doc } }
+        :body => { :doc => { :configuration => doc } },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.update_connector_configuration(connector_id, doc)
@@ -172,7 +214,9 @@ describe Core::ElasticConnectorActions do
               :enabled => true
             )
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.enable_connector_scheduling(connector_id, cron_expression)
@@ -189,7 +233,9 @@ describe Core::ElasticConnectorActions do
               :interval => cron_expression
             )
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.enable_connector_scheduling(connector_id, cron_expression)
@@ -208,7 +254,9 @@ describe Core::ElasticConnectorActions do
               :enabled => false
             )
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.disable_connector_scheduling(connector_id)
@@ -233,7 +281,9 @@ describe Core::ElasticConnectorActions do
               }
             }
           }
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.set_configurable_field(connector_id, field_name, field_label, field_value)
@@ -255,7 +305,9 @@ describe Core::ElasticConnectorActions do
             :sync_now => false,
             :last_sync_status => Connectors::SyncStatus::IN_PROGRESS
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.claim_job(connector_id)
@@ -285,7 +337,9 @@ describe Core::ElasticConnectorActions do
         :id => connector_id,
         :body => {
           :doc => { :status => status }
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.update_connector_status(connector_id, status)
@@ -307,7 +361,9 @@ describe Core::ElasticConnectorActions do
             :last_deleted_count,
             :last_sync_status => Connectors::SyncStatus::COMPLETED
           )
-        }
+        },
+        :refresh => true,
+        :retry_on_conflict => 3
       )
 
       described_class.complete_sync(connector_id, job_id, status)
@@ -346,7 +402,9 @@ describe Core::ElasticConnectorActions do
               :last_sync_status => Connectors::SyncStatus::FAILED,
               :last_sync_error => status[:error]
             )
-          }
+          },
+          :refresh => true,
+          :retry_on_conflict => 3
         )
 
         described_class.complete_sync(connector_id, job_id, status)
@@ -442,7 +500,7 @@ describe Core::ElasticConnectorActions do
 
   context '#ensure_index_exists' do
     let(:data_index_name) { 'was-i-created-or-not' }
-    let(:index_mappings) { {}  }
+    let(:index_mappings) { {} }
     let(:index_exists) { false }
     let(:existing_index_mappings) { {} }
 
@@ -555,7 +613,13 @@ describe Core::ElasticConnectorActions do
       let(:doc) { { :something => :something } }
 
       it 'does expected elastic index request' do
-        expect(es_client).to receive(:update).with(:index => connectors_index, :id => connector_id, :body => { :doc => doc })
+        expect(es_client).to receive(:update).with(
+          :index => connectors_index,
+          :id => connector_id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        )
 
         described_class.update_connector_fields(connector_id, doc)
       end

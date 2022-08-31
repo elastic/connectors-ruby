@@ -61,7 +61,7 @@ module Core
     private
 
     def initialize(es_response)
-      @elasticsearch_response = es_response
+      @elasticsearch_response = es_response.with_indifferent_access
     end
   end
 end

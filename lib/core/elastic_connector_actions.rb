@@ -10,12 +10,14 @@ require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
+require 'core/connector_settings'
 require 'app/config'
 
 module Core
   class ElasticConnectorActions
     CONNECTORS_INDEX = '.elastic-connectors'
     JOB_INDEX = '.elastic-connectors-sync-jobs'
+    DEFAULT_PAGE_SIZE = 100
 
     class << self
 
@@ -35,6 +37,36 @@ module Core
 
       def get_connector(connector_id)
         client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
+      end
+
+      def native_connectors
+        result = []
+        offset = 0
+        loop do
+          response = client.search(
+            :index => CONNECTORS_INDEX,
+            :ignore => 404,
+            :body => {
+              :size => DEFAULT_PAGE_SIZE,
+              :from => offset,
+              :query => {
+                :term => { :is_native => true }
+              },
+              :sort => ['name']
+            }
+          )
+          hits = response['hits']['hits']
+          total = response['hits']['total']['value']
+          result += hits.map do |hit|
+            Core::ConnectorSettings.new(hit)
+          end
+          break if result.size >= total
+          offset += DEFAULT_PAGE_SIZE
+        end
+        result
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, 'Error while getting native connectors')
+        raise Utility::ClientError.new(e)
       end
 
       def update_connector_configuration(connector_id, configuration)
@@ -219,7 +251,13 @@ module Core
 
       def update_connector_fields(connector_id, doc = {})
         return if doc.empty?
-        client.update(:index => CONNECTORS_INDEX, :id => connector_id, :body => { :doc => doc })
+        client.update(
+          :index => CONNECTORS_INDEX,
+          :id => connector_id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        )
       end
 
       private

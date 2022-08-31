@@ -9,15 +9,11 @@
 $LOAD_PATH << '../'
 
 require 'app/config'
-require 'connectors/registry'
 require 'app/menu'
 require 'app/worker'
-require 'utility/environment'
-require 'utility/logger'
-require 'utility/cron'
-require 'core/elastic_connector_actions'
-require 'core/connector_settings'
-require 'fugit'
+require 'connectors/registry'
+require 'utility'
+require 'core'
 
 module App
   module ConsoleApp
@@ -274,7 +270,7 @@ module App
   rescue Interrupt
     exit_normally
   rescue StandardError => e
-    Utility::Logger.error_with_backtrace(exception: e)
+    Utility::ExceptionTracking.log_exception(e)
     exit(false)
   end
 end

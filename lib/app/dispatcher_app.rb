@@ -6,10 +6,15 @@
 
 # frozen_string_literal: true
 
-require 'core/connector_settings'
-require 'core/elastic_connector_actions'
-require 'core/heartbeat'
-require 'core/scheduler'
-require 'core/single_scheduler'
-require 'core/native_scheduler'
-require 'core/sync_job_runner'
+$LOAD_PATH << '../'
+
+require 'app/dispatcher'
+require 'app/config'
+require 'utility/environment'
+require 'utility/logger'
+
+module App
+  Utility::Environment.set_execution_environment(App::Config) do
+    App::Dispatcher.run_dispatcher!
+  end
+end
