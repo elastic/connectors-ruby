@@ -12,7 +12,6 @@ require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
 require 'core/connector_settings'
-require 'app/config'
 
 module Core
   class ElasticConnectorActions
