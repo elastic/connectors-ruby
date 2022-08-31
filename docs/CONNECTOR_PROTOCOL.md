@@ -96,6 +96,8 @@ This is our main communication index, used to communicate the connector's config
                            regularly (UTC)
   last_sync_error: string;   -> Optional last sync error message
   last_synced: date;    -> Date/time of last completed sync (UTC)
+  last_indexed_count: number;    -> How many documents were inserted into the index
+  last_deleted_count: number;    -> How many documents were deleted from the index
   last_sync_status: string;  -> last sync Enum, see below
   scheduling: {
     enabled: boolean; -> Is sync schedule enabled?
