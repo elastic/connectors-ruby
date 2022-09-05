@@ -9,6 +9,7 @@ require 'active_support/core_ext/hash'
 require 'core'
 require 'app/worker'
 require 'app/dispatcher'
+require 'app/preflight_check'
 
 describe App::Dispatcher do
   let(:mock_scheduler) do
@@ -28,8 +29,7 @@ describe App::Dispatcher do
   let(:mock_job_runner) { double }
 
   before do
-    allow(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
-    allow(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
+    allow(App::PreflightCheck).to receive(:run!)
     allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
 
     allow(Core::Heartbeat).to receive(:send)
@@ -82,8 +82,6 @@ describe App::Dispatcher do
         expect(subject.scheduler).to_not be_nil
         expect(simple_pool).to have_received(:post)
 
-        expect(Core::ElasticConnectorActions).to have_received(:ensure_job_index_exists).once
-        expect(Core::ElasticConnectorActions).to have_received(:ensure_connectors_index_exists).once
         expect(Core::ElasticConnectorActions).to have_received(:ensure_content_index_exists).once
 
         expect(Core::Heartbeat).to have_received(:send).with(connector_id1, 'example').once
@@ -113,8 +111,6 @@ describe App::Dispatcher do
       expect(subject.scheduler).to_not be_nil
       expect(simple_pool).to have_received(:post).twice
 
-      expect(Core::ElasticConnectorActions).to have_received(:ensure_job_index_exists).once
-      expect(Core::ElasticConnectorActions).to have_received(:ensure_connectors_index_exists).once
       expect(Core::ElasticConnectorActions).to have_received(:ensure_content_index_exists).twice
 
       expect(Core::Heartbeat).to have_received(:send).with(connector_id1, 'example').once

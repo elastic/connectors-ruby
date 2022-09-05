@@ -32,10 +32,6 @@ module App
     end
 
     def start!
-      # dispatcher-level checks
-      Core::ElasticConnectorActions.ensure_connectors_index_exists
-      Core::ElasticConnectorActions.ensure_job_index_exists
-
       @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
       @scheduler.when_triggered do |connector_settings|
         service_type = connector_settings.service_type

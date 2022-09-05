@@ -592,22 +592,6 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#ensure_connectors_index_exists' do
-    it 'creates connectors index with expected alias' do
-      expect(described_class).to receive(:ensure_index_exists).with("#{connectors_index}-v1", hash_including(:aliases => hash_including(connectors_index), :mappings => anything))
-
-      described_class.ensure_connectors_index_exists
-    end
-  end
-
-  context '#ensure_job_index_exists' do
-    it 'creates connector jobs index with expected alias' do
-      expect(described_class).to receive(:ensure_index_exists).with("#{jobs_index}-v1", hash_including(:aliases => hash_including(jobs_index), :mappings => anything))
-
-      described_class.ensure_job_index_exists
-    end
-  end
-
   context '#update_connector_fields' do
     let(:doc) { {} }
 

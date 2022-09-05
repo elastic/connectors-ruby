@@ -57,9 +57,7 @@ describe App::Worker do
     allow(connector_settings).to receive(:id).and_return(connector_id)
     allow(connector_settings).to receive(:index_name).and_return(content_index_name)
 
-    allow(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
     allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
-    allow(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
 
     allow(Core::ConnectorSettings).to receive(:fetch).and_return(connector_settings)
 
@@ -77,8 +75,6 @@ describe App::Worker do
   describe '#start' do
     context 'when valid setup is provided' do
       it 'ensures necessary indices are created' do
-        expect(Core::ElasticConnectorActions).to receive(:ensure_connectors_index_exists)
-        expect(Core::ElasticConnectorActions).to receive(:ensure_job_index_exists)
         expect(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists).with(content_index_name)
 
         subject.start!

@@ -10,6 +10,7 @@ $LOAD_PATH << '../'
 
 require 'app/config'
 require 'app/menu'
+require 'app/preflight_check'
 require 'app/worker'
 require 'connectors/registry'
 require 'utility'
@@ -46,7 +47,6 @@ module App
       Core::ElasticConnectorActions.force_sync(connector_id)
       puts "Successfully synced for connector #{connector_id}"
 
-      Core::ElasticConnectorActions.ensure_connectors_index_exists
       config_settings = Core::ConnectorSettings.fetch(connector_id)
       Core::ElasticConnectorActions.ensure_content_index_exists(config_settings[:index_name])
       Core::SyncJobRunner.new(config_settings, App::Config[:service_type]).execute
@@ -76,8 +76,6 @@ module App
       puts 'Do you want to use ICU Analysis Plugin? (y/N)'
       use_analysis_icu = gets.chomp.strip.casecmp('y').zero?
       language_code = select_analyzer
-      # these might not have been created without kibana
-      Core::ElasticConnectorActions.ensure_connectors_index_exists
       # create the connector
       created_id = create_connector(index_name, use_analysis_icu, language_code)
       update_connector_id(created_id)
@@ -231,6 +229,7 @@ module App
     end
 
     Utility::Environment.set_execution_environment(App::Config) do
+      App::PreflightCheck.run!
       loop do
         command = read_command
         case command
@@ -265,6 +264,8 @@ module App
         end
       end
     end
+  rescue App::PreflightCheck::CheckFailure => e
+    Utility::Logger.error("Preflight check failed: #{e.message}")
   rescue SystemExit
     puts 'Exiting.'
   rescue Interrupt
