@@ -69,26 +69,25 @@ module Utility
       @day_of_week = '*'
       @year = '*'
 
-      # ? is not supported
-      converted_expression = expression.tr('?', '*')
+      converted_expression = expression.dup
 
       matched = false
       converted_expression.match(CRON_REGEXP) { |m|
         @seconds = m[2]
         @minutes = m[3]
         @hours = m[4]
-        @day_of_month = check(m[5])
-        @month = check(m[6])
-        @day_of_week = check(m[7])
+        @day_of_month = m[5]
+        @month = m[6]
+        @day_of_week = m[7]
         @year = m[9]
         matched = true
       }
 
       raise StandardError.new('Unknown format {expression}') unless matched
 
-      # Unix cron has five: minute, hour, day, month, and dayofweek
+      # Unix cron has five: minute, hour, day, month, and day of week
       # Quartz adds seconds and year
-      converted_expression = "#{@minutes} #{@hours} #{@day_of_month} #{@month} #{@day_of_week}"
+      converted_expression = build_expression(converted_expression)
 
       Utility::Logger.debug("Converted Quartz Cron expression \"#{expression}\" to Standard Cron Expression \"#{converted_expression}\"")
 
@@ -96,7 +95,6 @@ module Utility
     end
 
     def self.build_expression(expression)
-      expression_parsed = true
       begin
         @seconds ||= []
         @minutes ||= []
@@ -115,32 +113,362 @@ module Utility
           # throw an exception if L is used with other days of the month
           if expr_on == DAY_OF_MONTH && expr.include?('L') && expr.length > 1 && expr.include?(',')
             raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the month is not implemented')
-            expr_on += 1
-            next
           end
           # throw an exception if L is used with other days of the week
           if expr_on == DAY_OF_WEEK && expr.include?('L') && expr.length > 1 && expr.include?(',')
             raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the week is not implemented')
-            expr_on += 1
-            next
           end
           if expr_on == DAY_OF_WEEK && expr.scan(/#/).length > 1 && expr.include?(',')
             raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the week is not implemented')
-            expr_on += 1
-            next
           end
           expression_vals = expr.split(',')
           expression_vals.each do |expression_val|
-            #
+            store_expression_vals(0, expression_val, expr_on)
+          end
+          expr_on += 1
+        end
+        if expr_on <= DAY_OF_WEEK
+          raise StandardError.new('Unexpected end of expression.')
+        end
+        if expr_on <= YEAR
+          store_expression_vals(0, '*', YEAR) # default the year to '*'
+        end
+        dow = get_set(DAY_OF_WEEK)
+        dom = get_set(DAY_OF_MONTH)
+
+        # Copying the logic from the UnsupportedOperationException below
+        # to determine which exception to throw based on the presence
+        # of both a day-of-week and a day-of-month value
+
+        day_of_m_spec = !dom.include?(NO_SPEC)
+        day_of_w_spec = !dow.include?(NO_SPEC)
+        if !day_of_m_spec || day_of_w_spec
+          if !day_of_w_spec || day_of_m_spec
+            raise StandardError.new('Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.')
           end
         end
-
       end
     end
 
-    def self.store_expression_vals(expr_on, expression_val)
+    def self.store_expression_vals(pos, s, type)
       incr = 0
-      # TODO: implement
+      i = skip_white_space(pos, s)
+      if i >= s.length
+        return i
+      end
+      c = s[i]
+      if (c >= 'A' && c <= 'Z') && (s != 'L' && s != 'LW' && !/^L-\d*W?/.match?(s))
+        sub = s[i..i + 3]
+        s_val = -1
+        e_val = -1
+        if type == MONTH
+          s_val = get_month_number(sub) + 1
+          if s_val <= 0
+            raise StandardError.new("Invalid Month value: #{sub}")
+          end
+          if s.length > i + 3
+            c = s[i + 3]
+            if c == '-'
+              i += 4
+              sub = s[i..i + 3]
+              e_val = get_month_number(sub) + 1
+              if e_val <= 0
+                raise StandardError.new("Invalid Month value: #{sub}")
+              end
+            end
+          end
+        elsif type == DAY_OF_WEEK
+          s_val = get_day_number(sub)
+          if s_val < 0
+            raise StandardError.new("Invalid Day-of-Week value: #{sub}")
+          end
+          if s.length > i + 3
+            c = s[i + 3]
+            if c == '-'
+              i += 4
+              sub = s[i..i + 3]
+              e_val = get_day_number(sub)
+              if e_val < 0
+                raise StandardError.new("Invalid Day-of-Week value: #{sub}")
+              end
+            elsif c == '#'
+              i += 4
+              @nth_day_of_week = s[i..-1].to_i
+              if num < 1 || num > 5
+                raise StandardError.new("A numeric value between 1 and 5 must follow the '#' option")
+              end
+            elsif c == 'L'
+              @last_day_of_week = true
+              i += 1
+            end
+          end
+        else
+          raise StandardError.new("Illegal characters for this position: #{sub}")
+        end
+        if e_val != -1
+          incr = 1
+        end
+        add_to_set(s_val, e_val, incr, type)
+        return i + 3
+      end
+      if c == '?'
+        i += 1
+        if i + 1 < s.length && s[i] != ' ' && s[i + 1] != "\t"
+          raise StandardError.new("Illegal character after '?': #{s[i]}")
+        end
+        if type != DAY_OF_MONTH && type != DAY_OF_WEEK
+          raise StandardError.new("'?' can only be specified for Day-of-Month or Day-of-Week.")
+        end
+        if type == DAY_OF_WEEK && !@last_day_of_month
+          val = @days_of_month.last
+          if val == nil || val == NO_SPEC_INT
+            raise StandardError.new("'?' can only be specified for Day-of-Month -OR- Day-of-Week.")
+          end
+        end
+        add_to_set(NO_SPEC_INT, -1, 0, type)
+        return i
+      end
+
+      if c == '*' || c == '/'
+        if c == '*' && i + 1 >= s.length
+          add_to_set(ALL_SPEC_INT, -1, incr, type)
+          return i + 1
+        elsif c == '/' && (i + 1 >= s.length || s[i + 1] == ' ' || s[i + 1] == "\t")
+          raise StandardError.new("'/' must be followed by an integer.")
+        elsif c == '*'
+          i += 1
+        end
+        c = s[i]
+        if c == '/' # is an increment specified?
+          i += 1
+          if i >= s.length
+            raise StandardError.new("Unexpected end of string.")
+          end
+          incr = get_numeric_value(s, i)
+          i += 1
+          if incr > 10
+            i += 1
+          end
+          check_increment_range(incr, type, i)
+        else
+          incr = 1
+        end
+        add_to_set(ALL_SPEC_INT, -1, incr, type)
+        return i
+      else
+        if c == 'L'
+          i += 1
+          if type == DAY_OF_MONTH
+            @last_day_of_month = true
+          end
+          if type == DAY_OF_WEEK
+            add_to_set(7, 7, 0, type)
+          end
+          if type == DAY_OF_MONTH && s.length > i
+            c = s[i]
+            if c == '-'
+              vs = get_value(0, s, i + 1)
+              @last_day_offset = vs.value
+              if @last_day_offset > 30
+                raise StandardError.new("Offset from last day must be <= 30")
+              end
+              i = vs.pos
+            end
+            if s.length > i
+              c = s[i]
+              if c == 'W'
+                @nearest_weekday = true
+                i += 1
+              end
+            end
+          end
+          return i
+        else
+          if c >= '0' && c <= '9'
+            val = c.to_i
+            i += 1
+            if i >= s.length
+              add_to_set(val, -1, -1, type)
+            else
+              c = s[i]
+              if c >= '0' && c <= '9'
+                vs = get_value(val, s, i)
+                val = vs.value
+                i = vs.pos
+              end
+              i = check_next(i, s, val, type)
+              return i
+            end
+          else
+            throw StandardError.new("Unexpected character: #{c}")
+          end
+        end
+      end
+      return i
+    end
+
+    def self.check_increment_range(incr, type, idx_pos)
+      if incr > 59 && (type == MINUTE || type == SECOND)
+        raise StandardError.new("Increment > 60 : #{incr} #{type} #{idx_pos}")
+      else
+        if incr > 23 && type == HOUR
+          raise StandardError.new("Increment > 24 : #{incr} #{type} #{idx_pos}")
+        else
+          if incr > 31 && type == DAY_OF_MONTH
+            raise StandardError.new("Increment > 31 : #{incr} #{type} #{idx_pos}")
+          else
+            if incr > 7 && type == DAY_OF_WEEK
+              raise StandardError.new("Increment > 7 : #{incr} #{type} #{idx_pos}")
+            else
+              if incr > 12 && type == MONTH
+                raise StandardError.new("Increment > 12 : #{incr} #{type} #{idx_pos}")
+              else
+                if incr > MAX_YEAR && type == YEAR
+                  raise StandardError.new("Increment > #{MAX_YEAR} : #{incr} #{type} #{idx_pos}")
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    def self.check_next(pos, s, val, type)
+      end_index = -1
+      i = pos
+      if i >= s.length
+        add_to_set(val, end_index, -1, type)
+        return i
+      end
+      c = s[pos]
+      if c == 'L'
+        if type == DAY_OF_WEEK
+          if val < 1 || val > 7
+            raise StandardError.new('Day-of-Week values must be between 1 and 7')
+          end
+          @last_day_of_week = true
+        else
+          raise StandardError.new("'L' option is not valid here. (pos=#{pos})")
+        end
+        set = get_set(type)
+        set << val
+        i += 1
+        return i
+      end
+      if c == 'W'
+        if type == DAY_OF_MONTH
+          @nearest_weekday = true
+        else
+          raise StandardError.new("'W' option is not valid here. (pos=#{pos})")
+        end
+        if val > 31
+          raise StandardError.new("The 'W' option does not make sense with values larger than 31 (max number of days in a month)")
+        end
+        set = get_set(type)
+        set << val
+        i += 1
+        return i
+      end
+
+      if c == '#'
+        if type != DAY_OF_WEEK
+          raise StandardError.new("'#' option is not valid here. (pos=#{pos})")
+        end
+        i += 1
+        @nth_day_of_week = s[i..-1].to_i
+        if @nth_day_of_week < 1 || @nth_day_of_week > 5
+          raise StandardError.new('A numeric value between 1 and 5 must follow the # option')
+        end
+        set = get_set(type)
+        set << val
+        i += 1
+        return i
+      end
+
+      if c == '-'
+        i += 1
+        c = s[i]
+        v = c.to_i
+        end_index = v
+        i += 1
+        if i < s.length
+          add_to_set(val, end_index, 1, type)
+          return i
+        end
+        c = s[i]
+        if c >= '0' && c <= '9'
+          vs = get_value(v, s, i)
+          end_index = vs.value
+          i = vs.pos
+        end
+        if i < s.length && s[i] == '/'
+          i += 1
+          c = s[i]
+          v2 = c.to_i
+          i += 1
+          if i >= s.length
+            add_to_set(val, end_index, v2, type)
+            return i
+          end
+          c = s[i]
+          if c >= '0' && c <= '9'
+            vs = get_value(v2, s, i)
+            i = vs.pos
+            return i
+          else
+            add_to_set(val, end_index, v2, type)
+            return i
+          end
+        else
+          add_to_set(val, end_index, 1, type)
+          return i
+        end
+      end
+
+      if c == '/'
+        if i + 1 >= s.length || s[i + 1] == ' ' || s[i + 1] == "\t"
+          raise StandardError.new("'/' must be followed by an integer.")
+        end
+        i += 1
+        c = s[i]
+        v2 = c.to_i
+        i += 1
+        if i >= s.length
+          check_increment_range(v2, type, i)
+          add_to_set(val, end_index, v2, type)
+          return i
+        end
+        c = s[i]
+        if c >= '0' && c <= '9'
+          vs = get_value(v2, s, i)
+          v3 = vs.value
+          check_increment_range(v3, type, i)
+          add_to_set(val, end_index, v3, type)
+          i = vs.pos
+          return i
+        else
+          raise StandardError.new("'/' must be followed by an integer.")
+        end
+      end
+      add_to_set(val, end_index, 0, type)
+      i += 1
+      return i
+    end
+
+    def self.get_expression_summary
+      pairs = []
+      pairs << ['seconds: ', @seconds]
+      pairs << ['minutes: ', @minutes]
+      pairs << ['hours: ', @hours]
+      pairs << ['day_of_month: ', @day_of_month]
+      pairs << ['month: ', @month]
+      pairs << ['day_of_week: ', @day_of_week]
+      pairs << ['last_day_of_week: ', @last_day_of_week]
+      pairs << ['nearest_weekday: ', @nearest_weekday]
+      pairs << ['nth_day_of_week: ', @nth_day_of_week]
+      pairs << ['last_day_of_month: ', @last_day_of_month]
+      pairs << ['year', @year]
+      pairs.map { |el| "#{el[0]}#{el[1]}" }.join("\n").to_s
     end
 
     def self.get_expression_set_summary(list)
@@ -150,6 +478,7 @@ module Utility
       if list.include?(ALL_SPEC)
         return '*'
       end
+      list.sort.join(',')
     end
 
     def self.add_to_set(val, end_index, incr, type)
