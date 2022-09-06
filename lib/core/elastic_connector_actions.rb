@@ -44,6 +44,14 @@ module Core
       end
 
       def native_connectors
+        connectors({ term: { is_native: true } })
+      end
+
+      def crawler_connectors
+        connectors({ term: { service_type: CRAWLER_SERVICE_TYPE } })
+      end
+
+      def connectors(query)
         globals = connectors_meta
         result = []
         offset = 0
@@ -54,9 +62,7 @@ module Core
             :body => {
               :size => DEFAULT_PAGE_SIZE,
               :from => offset,
-              :query => {
-                :term => { :is_native => true }
-              },
+              :query => query,
               :sort => ['name']
             }
           )
@@ -123,7 +129,13 @@ module Core
 
         body = {
           :doc => {
+<<<<<<< HEAD
             :status => sync_status,
+=======
+            status => sync_status,
+            :indexed_document_count => status[:indexed_document_count],
+            :deleted_document_count => status[:deleted_document_count],
+>>>>>>> 554709c (Add some abstractions)
             :completed_at => Time.now
           }.merge(status)
         }
