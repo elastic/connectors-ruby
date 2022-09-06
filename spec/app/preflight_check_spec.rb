@@ -5,10 +5,12 @@
 #
 # frozen_string_literal: true
 
+require 'app/preflight_check'
+
 describe App::PreflightCheck do
   describe '#run!' do
     let(:client) { double }
-    let(:cluster) { double }
+    let(:cluster) { Elasticsearch::API::Cluster::ClusterClient.new }
 
     before(:each) do
       allow(subject).to receive(:client).and_return(client)
@@ -16,17 +18,18 @@ describe App::PreflightCheck do
     end
 
     context 'when Elasticsearch is not running' do
-      before(:each) do
-        allow(cluster).to receive(:health).and_raise(Faraday::ConnectionFailed)
-      end
-
-      it 'should fail the check' do
-        expect { subject.run! }.to raise_error(described_class::CheckFailure)
+      it 'should retry multiple times and fail the check' do
+        stub_const('App::PreflightCheck::STARTUP_RETRY_INTERVAL', 1)
+        stub_const('App::PreflightCheck::STARTUP_RETRY_TIMEOUT', 3)
+        expect(cluster).to receive(:health).at_least(2).times.and_raise(Faraday::ConnectionFailed)
+        subject.run!
       end
     end
 
     context 'when Elasticsearch is running' do
       before(:each) do
+        stub_const('App::PreflightCheck::STARTUP_RETRY_INTERVAL', 0)
+        stub_const('App::PreflightCheck::STARTUP_RETRY_TIMEOUT', 0)
         allow(cluster).to receive(:health).and_return({ 'status' => status })
       end
 

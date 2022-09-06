@@ -8,11 +8,15 @@
 
 require 'app/version'
 require 'utility/logger'
+require 'faraday'
 
 module App
   class PreflightCheck
     class CheckFailure < StandardError; end
+    class UnhealthyCluster < StandardError; end
 
+    STARTUP_RETRY_INTERVAL = 5
+    STARTUP_RETRY_TIMEOUT = 600
     CONNECTORS_INDEX = '.elastic-connectors'
     JOB_INDEX = '.elastic-connectors-sync-jobs'
 
@@ -31,19 +35,10 @@ module App
     #-------------------------------------------------------------------------------------------------
     # Checks to make sure we can connect to Elasticsearch and make API requests to it
     def check_es_connection!
-      response = client.cluster.health
-      case response['status']
-      when 'green'
-        Utility::Logger.info('Elasticsearch backend is running and healthy.')
-      when 'yellow'
-        Utility::Logger.warn('Elasticsearch backend is running but the status is yellow.')
-      when 'red'
-        fail_check!('Elasticsearch backend is running but is unhealthy.')
-      else
-        fail_check!("Unexpected cluster status: #{response['status']}")
-      end
-    rescue StandardError
-      fail_check!('Could not connect to Elasticsearch backend. Make sure it is running and healthy.')
+      check_es_connection_with_retries!(
+        :retry_interval => STARTUP_RETRY_INTERVAL,
+        :retry_timeout => STARTUP_RETRY_TIMEOUT
+      )
     end
 
     #-------------------------------------------------------------------------------------------------
@@ -68,6 +63,35 @@ module App
       end
     end
 
+    def check_es_connection_with_retries!(retry_interval:, retry_timeout:)
+      started_at = Time.now
+
+      begin
+        response = client.cluster.health
+        Utility::Logger.info('Successfully connected to Elasticsearch')
+        case response['status']
+        when 'green'
+          Utility::Logger.info('Elasticsearch is running and healthy.')
+        when 'yellow'
+          Utility::Logger.warn('Elasticsearch is running but the status is yellow.')
+        when 'red'
+          raise UnhealthyCluster, 'Elasticsearch is running but unhealthy.'
+        else
+          raise UnhealthyCluster, "Unexpected cluster status: #{response['status']}"
+        end
+      rescue *App::RETRYABLE_CONNECTION_ERRORS => e
+        Utility::Logger.warn('Could not connect to Elasticsearch. Make sure it is running and healthy.')
+        Utility::Logger.debug("Error: #{e.full_message}")
+
+        sleep(retry_interval)
+        time_elapsed = Time.now - started_at
+        retry if time_elapsed < retry_timeout
+
+        # If we ran out of time, there is not much we can do but shut down
+        fail_check!("Could not connect to Elasticsearch after #{time_elapsed.to_i} seconds. Terminating...")
+      end
+    end
+
     def match_es_version?(es_version)
       parse_minor_version(App::VERSION) == parse_minor_version(es_version)
     end
@@ -84,4 +108,14 @@ module App
       raise CheckFailure, message
     end
   end
+
+  RETRYABLE_CONNECTION_ERRORS = [
+    ::Faraday::ConnectionFailed,
+    ::Faraday::ClientError,
+    ::Errno::ECONNREFUSED,
+    ::SocketError,
+    ::Errno::ECONNRESET,
+    App::PreflightCheck::UnhealthyCluster,
+    ::HTTPClient::KeepAliveDisconnected
+  ]
 end
