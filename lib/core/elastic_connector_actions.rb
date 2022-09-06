@@ -129,13 +129,7 @@ module Core
 
         body = {
           :doc => {
-<<<<<<< HEAD
             :status => sync_status,
-=======
-            status => sync_status,
-            :indexed_document_count => status[:indexed_document_count],
-            :deleted_document_count => status[:deleted_document_count],
->>>>>>> 554709c (Add some abstractions)
             :completed_at => Time.now
           }.merge(status)
         }
