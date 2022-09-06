@@ -23,7 +23,7 @@ module Core
   class SyncJobRunner
     def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
-      @sink = Core::OutputSink::EsSink.new(connector_settings.index_name)
+      @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(service_type)
       @connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
       @status = {
@@ -59,6 +59,7 @@ module Core
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
         @connector_instance.yield_documents do |document|
+          document = add_ingest_metadata(document)
           @sink.ingest(document)
           incoming_ids << document[:id]
           @status[:indexed_document_count] += 1
@@ -89,6 +90,14 @@ module Core
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
+      end
+    end
+
+    def add_ingest_metadata(document)
+      document.tap do |it|
+        it['_extract_binary_content'] = @connector_settings.extract_binary_content? if @connector_settings.extract_binary_content?
+        it['_reduce_whitespace'] = @connector_settings.reduce_whitespace? if @connector_settings.reduce_whitespace?
+        it['_run_ml_inference'] = @connector_settings.run_ml_inference? if @connector_settings.run_ml_inference?
       end
     end
 

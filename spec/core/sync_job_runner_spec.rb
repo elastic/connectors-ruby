@@ -6,6 +6,7 @@ require 'core/sync_job_runner'
 describe Core::SyncJobRunner do
   let(:connector_id) { '123' }
   let(:service_type) { 'foo' }
+  let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }
   let(:connector_status) { Connectors::ConnectorStatus::CONNECTED }
   let(:connector_stored_configuration) do # returned from Elasticsearch with values already specified by user
     {
@@ -36,6 +37,10 @@ describe Core::SyncJobRunner do
 
   let(:job_id) { 'job-123' }
 
+  let(:extract_binary_content) { true }
+  let(:reduce_whitespace) { true }
+  let(:run_ml_inference) { true }
+
   subject { described_class.new(connector_settings, service_type) }
 
   before(:each) do
@@ -47,7 +52,7 @@ describe Core::SyncJobRunner do
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
-    allow(Core::OutputSink::EsSink).to receive(:new).with(output_index_name).and_return(sink)
+    allow(Core::OutputSink::EsSink).to receive(:new).with(output_index_name, request_pipeline).and_return(sink)
     allow(sink).to receive(:ingest)
     allow(sink).to receive(:delete)
     allow(sink).to receive(:flush)
@@ -55,6 +60,10 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:id).and_return(connector_id)
     allow(connector_settings).to receive(:index_name).and_return(output_index_name)
     allow(connector_settings).to receive(:configuration).and_return(connector_stored_configuration)
+    allow(connector_settings).to receive(:request_pipeline).and_return(request_pipeline)
+    allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
+    allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
+    allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
@@ -180,6 +189,30 @@ describe Core::SyncJobRunner do
             subject.execute
           end
         end
+      end
+    end
+  end
+
+  context 'ingest metadata' do
+    let(:document) { { 'body' => 'hello, world' } }
+
+    it 'augments document data' do
+      subject.send(:add_ingest_metadata, document)
+      expect(document['_extract_binary_content']).to be
+      expect(document['_reduce_whitespace']).to be
+      expect(document['_run_ml_inference']).to be
+    end
+
+    context 'when the settings are false' do
+      let(:extract_binary_content) { false }
+      let(:reduce_whitespace) { false }
+      let(:run_ml_inference) { false }
+
+      it 'does not augment data' do
+        subject.send(:add_ingest_metadata, document)
+        expect(document['_extract_binary_content']).to_not be
+        expect(document['_reduce_whitespace']).to_not be
+        expect(document['_run_ml_inference']).to_not be
       end
     end
   end

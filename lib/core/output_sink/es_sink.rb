@@ -7,16 +7,18 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/numeric/time'
+require 'app/config'
 require 'core/output_sink/base_sink'
 require 'utility/es_client'
 require 'utility/logger'
 
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
-    def initialize(index_name, flush_threshold = 50)
+    def initialize(index_name, request_pipeline, flush_threshold = 50)
       super()
       @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name
+      @request_pipeline = request_pipeline
       @operation_queue = []
       @flush_threshold = flush_threshold
     end
@@ -61,7 +63,7 @@ module Core::OutputSink
     def send_data(ops)
       return if ops.empty?
 
-      @client.bulk(:body => ops)
+      @client.bulk(:body => ops, :pipeline => @request_pipeline)
       Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
     end
 
