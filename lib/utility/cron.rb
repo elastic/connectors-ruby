@@ -69,17 +69,17 @@ module Utility
       @day_of_week = '*'
       @year = '*'
 
-      converted_expression = expression.dup
+      converted_expression = expression.dup.gsub('?', '*')
 
       matched = false
       converted_expression.match(CRON_REGEXP) { |m|
-        @seconds = m[2]
-        @minutes = m[3]
-        @hours = m[4]
-        @day_of_month = m[5]
-        @month = m[6]
-        @day_of_week = m[7]
-        @year = m[9]
+        @seconds = [m[2]]
+        @minutes = [m[3]]
+        @hours = [m[4]]
+        @day_of_month = [m[5]]
+        @month = [m[6]]
+        @day_of_week = [m[7]]
+        @year = [m[9]]
         matched = true
       }
 
@@ -95,59 +95,58 @@ module Utility
     end
 
     def self.build_expression(expression)
-      begin
-        @seconds ||= []
-        @minutes ||= []
-        @hours ||= []
-        @day_of_month ||= []
-        @month ||= []
-        @day_of_week ||= []
-        @year ||= []
+      @seconds ||= []
+      @minutes ||= []
+      @hours ||= []
+      @day_of_month ||= []
+      @month ||= []
+      @day_of_week ||= []
+      @year ||= []
 
-        expr_on = SECOND
-        expressions = expression.strip.upcase.split(/\t/)
-        expressions.each do |expr|
-          if expr_on > YEAR
-            break # we've processed the year field
-          end
-          # throw an exception if L is used with other days of the month
-          if expr_on == DAY_OF_MONTH && expr.include?('L') && expr.length > 1 && expr.include?(',')
-            raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the month is not implemented')
-          end
-          # throw an exception if L is used with other days of the week
-          if expr_on == DAY_OF_WEEK && expr.include?('L') && expr.length > 1 && expr.include?(',')
-            raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the week is not implemented')
-          end
-          if expr_on == DAY_OF_WEEK && expr.scan(/#/).length > 1 && expr.include?(',')
-            raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the week is not implemented')
-          end
-          expression_vals = expr.split(',')
-          expression_vals.each do |expression_val|
-            store_expression_vals(0, expression_val, expr_on)
-          end
+      expr_on = SECOND
+      expressions = expression.strip.upcase.split(/\t|\s+/)
+      expressions.each do |expr|
+        if expr_on > YEAR
+          break # we've processed the year field
+        end
+        # throw an exception if L is used with other days of the month
+        if expr_on == DAY_OF_MONTH && expr.include?('L') && expr.length > 1 && expr.include?(',')
+          raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the month is not implemented')
+        end
+        # throw an exception if L is used with other days of the week
+        if expr_on == DAY_OF_WEEK && expr.include?('L') && expr.length > 1 && expr.include?(',')
+          raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the week is not implemented')
+        end
+        if expr_on == DAY_OF_WEEK && expr.scan(/#/).length > 1 && expr.include?(',')
+          raise StandardError.new('Support for specifying \'L\' and \'LW\' with other days of the week is not implemented')
+        end
+        expression_vals = expr.split(',')
+        expression_vals.each do |expression_val|
+          store_expression_vals(0, expression_val, expr_on)
           expr_on += 1
         end
-        if expr_on <= DAY_OF_WEEK
-          raise StandardError.new('Unexpected end of expression.')
-        end
-        if expr_on <= YEAR
-          store_expression_vals(0, '*', YEAR) # default the year to '*'
-        end
-        dow = get_set(DAY_OF_WEEK)
-        dom = get_set(DAY_OF_MONTH)
+      end
+      if expr_on <= DAY_OF_WEEK
+        raise StandardError.new("Unexpected end of expression #{expression}: #{expr_on}")
+      end
+      if expr_on <= YEAR
+        store_expression_vals(0, '*', YEAR) # default the year to '*'
+      end
+      dow = get_set(DAY_OF_WEEK) || []
+      dom = get_set(DAY_OF_MONTH) || []
 
-        # Copying the logic from the UnsupportedOperationException below
-        # to determine which exception to throw based on the presence
-        # of both a day-of-week and a day-of-month value
+      # Copying the logic from the UnsupportedOperationException below
+      # to determine which exception to throw based on the presence
+      # of both a day-of-week and a day-of-month value
 
-        day_of_m_spec = !dom.include?(NO_SPEC)
-        day_of_w_spec = !dow.include?(NO_SPEC)
-        if !day_of_m_spec || day_of_w_spec
-          if !day_of_w_spec || day_of_m_spec
-            raise StandardError.new('Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.')
-          end
+      day_of_m_spec = !dom.include?(NO_SPEC)
+      day_of_w_spec = !dow.include?(NO_SPEC)
+      if !day_of_m_spec || day_of_w_spec
+        if !day_of_w_spec || day_of_m_spec
+          raise StandardError.new('Support for specifying both a day-of-week AND a day-of-month parameter is not implemented.')
         end
       end
+      "#{@minutes.first} #{@hours.first} #{@day_of_month.first} #{@month.first} #{@day_of_week.first} #{@year.first}"
     end
 
     def self.store_expression_vals(pos, s, type)
@@ -220,7 +219,7 @@ module Utility
           raise StandardError.new("'?' can only be specified for Day-of-Month or Day-of-Week.")
         end
         if type == DAY_OF_WEEK && !@last_day_of_month
-          val = @days_of_month.last
+          val = @day_of_month.last
           if val == nil || val == NO_SPEC_INT
             raise StandardError.new("'?' can only be specified for Day-of-Month -OR- Day-of-Week.")
           end
@@ -484,32 +483,32 @@ module Utility
     def self.add_to_set(val, end_index, incr, type)
       set = get_set(type)
       if type == SECOND || type == MINUTE
-        if val < 0 || val > 59
+        if (val < 0 || val > 59) && val != ALL_SPEC_INT
           raise StandardError.new('Minute and Second values must be between 0 and 59')
         end
       else
         if type == HOUR
-          if val < 0 || val > 23
+          if (val < 0 || val > 23) && val != ALL_SPEC_INT
             raise StandardError.new('Hour values must be between 0 and 23')
           end
         else
           if type == DAY_OF_MONTH
-            if val < 1 || val > 31
+            if (val < 1 || val > 31) && val != ALL_SPEC_INT && val != NO_SPEC_INT
               raise StandardError.new('Day of month values must be between 1 and 31')
             end
           else
             if type == MONTH
-              if val < 1 || val > 12
+              if (val < 1 || val > 12) && val != ALL_SPEC_INT
                 raise StandardError.new('Month values must be between 1 and 12')
               end
             else
               if type == DAY_OF_WEEK
-                if val < 1 || val > 7
+                if (val < 1 || val > 7) && val != ALL_SPEC_INT && val != NO_SPEC_INT
                   raise StandardError.new('Day-of-Week values must be between 1 and 7')
                 end
               else
                 if type == YEAR
-                  if val < 1970 || val > MAX_YEAR
+                  if (val < 1970 || val > MAX_YEAR) && val != ALL_SPEC_INT
                     raise StandardError.new("Year values must be between 1970 and #{MAX_YEAR}")
                   end
                 end
@@ -520,9 +519,9 @@ module Utility
       end
       if (incr == 0 || incr == -1) && val != ALL_SPEC_INT
         if val != -1
-          set += [val]
+          set << val
         else
-          set += [NO_SPEC]
+          set << NO_SPEC
         end
         return
       end
@@ -530,13 +529,13 @@ module Utility
       stop_at = end_index
       if val == ALL_SPEC_INT && incr <= 0
         incr = 1
-        set += [ALL_SPEC]
+        set << ALL_SPEC
       end
       if type == SECOND || type == MINUTE
-        if stop_at == 60 && incr == 1
-          stop_at = 0
-          set += [ALL_SPEC]
-        end
+        # if stop_at == 60 && incr == 1
+        #   stop_at = 0
+        #   set << ALL_SPEC
+        # end
         if stop_at == -1
           stop_at = 59
         end
@@ -545,10 +544,10 @@ module Utility
         end
       else
         if type == HOUR
-          if stop_at == 24 && incr == 1
-            stop_at = 0
-            set += [ALL_SPEC]
-          end
+          # if stop_at == 24 && incr == 1
+          #   stop_at = 0
+          #   set << ALL_SPEC
+          # end
           if stop_at == -1
             stop_at = 23
           end
@@ -563,10 +562,10 @@ module Utility
             if start_at == -1 || start_at == ALL_SPEC_INT
               start_at = 1
             end
-            if stop_at == 32 && incr == 1
-              stop_at = 1
-              set += [ALL_SPEC]
-            end
+            # if stop_at == 32 && incr == 1
+            #   stop_at = 1
+            #   set << ALL_SPEC
+            # end
           else
             if type == MONTH
               if stop_at == -1
@@ -575,10 +574,10 @@ module Utility
               if start_at == -1 || start_at == ALL_SPEC_INT
                 start_at = 1
               end
-              if stop_at == 13 && incr == 1
-                stop_at = 1
-                set += [ALL_SPEC]
-              end
+              # if stop_at == 13 && incr == 1
+              #   stop_at = 1
+              #   set << ALL_SPEC
+              # end
             else
               if type == DAY_OF_WEEK
                 if stop_at == -1
@@ -589,7 +588,7 @@ module Utility
                 end
                 if stop_at == 8 && incr == 1
                   stop_at = 1
-                  set += [ALL_SPEC]
+                  set << ALL_SPEC
                 end
               else
                 if type == YEAR
@@ -601,7 +600,7 @@ module Utility
                   end
                   if stop_at == MAX_YEAR + 1 && incr == 1
                     stop_at = 1970
-                    set += [ALL_SPEC]
+                    set << ALL_SPEC
                   end
                 end
               end
@@ -609,7 +608,7 @@ module Utility
           end
         end
       end
-      int max = -1
+      max = -1
       if stop_at < start_at
         case type
         when SECOND, MINUTE
@@ -632,13 +631,13 @@ module Utility
       i = start_at
       while i < stop_at
         if max == -1
-          set += [i]
+          set << i
         else
           i2 = i % max
           if i2 == 0 && (type == DAY_OF_WEEK || type == MONTH || type == DAY_OF_MONTH)
             i2 = max
           end
-          set += [i2]
+          set << i2
         end
         i += incr
       end
@@ -659,7 +658,7 @@ module Utility
 
     def self.get_value(v, s, i)
       c = s[i]
-      s1 = ''
+      s1 = v.dup.to_s
       while c >= '0' && c <= '9'
         s1 += c
         i += 1
