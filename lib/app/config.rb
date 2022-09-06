@@ -49,6 +49,7 @@ module App
   # If it's on cloud (i.e. EnvVar ENT_SEARCH_CONFIG_PATH is set), elasticsearch config in ent-search will be used.
   Config = ::Settings.tap do |config|
     if ENV['ENT_SEARCH_CONFIG_PATH']
+      Utility::Logger.info("Found ENT_SEARCH_CONFIG_PATH, loading ent-search config from #{ENV['ENT_SEARCH_CONFIG_PATH']}")
       ent_search_config = YAML.safe_load(File.read(ENV['ENT_SEARCH_CONFIG_PATH']))
       if ent_search_config && ent_search_config['elasticsearch.host'] && ent_search_config['elasticsearch.username'] && ent_search_config['elasticsearch.password']
         url = URI(ent_search_config['elasticsearch.host'])
