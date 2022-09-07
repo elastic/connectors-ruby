@@ -10,5 +10,7 @@ module Utility
     SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version].freeze
     ALLOW_FIELD = '_allow_permissions'.freeze
     DENY_FIELD = '_deny_permissions'.freeze
+    CONNECTORS_INDEX = '.elastic-connectors'.freeze
+    JOB_INDEX = '.elastic-connectors-sync-jobs'.freeze
   end
 end

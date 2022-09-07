@@ -72,8 +72,8 @@ describe App::PreflightCheck do
           before(:each) do
             stub_const('App::VERSION', '8.4.0.0-foobar')
             allow(client).to receive(:indices).and_return(indices)
-            allow(indices).to receive(:exists?).with(:index => described_class::CONNECTORS_INDEX).and_return(connector_index_exist)
-            allow(indices).to receive(:exists?).with(:index => described_class::JOB_INDEX).and_return(job_index_exist)
+            allow(indices).to receive(:exists?).with(:index => Utility::Constants::CONNECTORS_INDEX).and_return(connector_index_exist)
+            allow(indices).to receive(:exists?).with(:index => Utility::Constants::JOB_INDEX).and_return(job_index_exist)
           end
 
           context 'when both indices exist' do

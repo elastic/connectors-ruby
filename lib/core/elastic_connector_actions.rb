@@ -15,8 +15,6 @@ require 'core/connector_settings'
 
 module Core
   class ElasticConnectorActions
-    CONNECTORS_INDEX = '.elastic-connectors'
-    JOB_INDEX = '.elastic-connectors-sync-jobs'
     DEFAULT_PAGE_SIZE = 100
 
     class << self
@@ -31,17 +29,17 @@ module Core
           :index_name => index_name,
           :service_type => service_type
         }
-        response = client.index(:index => CONNECTORS_INDEX, :body => body)
+        response = client.index(:index => Utility::Constants::CONNECTORS_INDEX, :body => body)
         response['_id']
       end
 
       def get_connector(connector_id)
-        client.get(:index => CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
+        client.get(:index => Utility::Constants::CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
       def connectors_meta
-        alias_mappings = client.indices.get_mapping(:index => CONNECTORS_INDEX).with_indifferent_access
-        index = get_latest_index_in_alias(CONNECTORS_INDEX, alias_mappings.keys)
+        alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
+        index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta')
       end
 
@@ -51,7 +49,7 @@ module Core
         offset = 0
         loop do
           response = client.search(
-            :index => CONNECTORS_INDEX,
+            :index => Utility::Constants::CONNECTORS_INDEX,
             :ignore => 404,
             :body => {
               :size => DEFAULT_PAGE_SIZE,
@@ -104,7 +102,7 @@ module Core
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now
         }
-        job = client.index(:index => JOB_INDEX, :body => body)
+        job = client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
 
         job['_id']
       end
@@ -129,7 +127,7 @@ module Core
             :completed_at => Time.now
           }.merge(status)
         }
-        client.update(:index => JOB_INDEX, :id => job_id, :body => body)
+        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
 
       def fetch_document_ids(index_name)
@@ -234,7 +232,7 @@ module Core
             :sync_status => { :type => :keyword }
           }
         }
-        ensure_index_exists("#{CONNECTORS_INDEX}-v1", system_index_body(:alias_name => CONNECTORS_INDEX, :mappings => mappings))
+        ensure_index_exists("#{Utility::Constants::CONNECTORS_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::CONNECTORS_INDEX, :mappings => mappings))
       end
 
       def ensure_job_index_exists
@@ -250,13 +248,13 @@ module Core
             :completed_at => { :type => :date }
           }
         }
-        ensure_index_exists("#{JOB_INDEX}-v1", system_index_body(:alias_name => JOB_INDEX, :mappings => mappings))
+        ensure_index_exists("#{Utility::Constants::JOB_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::JOB_INDEX, :mappings => mappings))
       end
 
       def update_connector_fields(connector_id, doc = {})
         return if doc.empty?
         client.update(
-          :index => CONNECTORS_INDEX,
+          :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :body => { :doc => doc },
           :refresh => true,

@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require 'app/version'
-require 'utility/logger'
+require 'utility'
 require 'faraday'
 
 module App
@@ -17,8 +17,6 @@ module App
 
     STARTUP_RETRY_INTERVAL = 5
     STARTUP_RETRY_TIMEOUT = 600
-    CONNECTORS_INDEX = '.elastic-connectors'
-    JOB_INDEX = '.elastic-connectors-sync-jobs'
 
     def self.run!
       App::PreflightCheck.new.run!
@@ -58,7 +56,7 @@ module App
     #-------------------------------------------------------------------------------------------------
     # Ensures that the required system indices of connector service exist
     def check_system_indices!
-      unless client.indices.exists?(:index => CONNECTORS_INDEX) && client.indices.exists?(:index => JOB_INDEX)
+      unless client.indices.exists?(:index => Utility::Constants::CONNECTORS_INDEX) && client.indices.exists?(:index => Utility::Constants::JOB_INDEX)
         fail_check!('Required system indices for connector service don\'t exist. Make sure to run Kibana first to create system indices.')
       end
     end
