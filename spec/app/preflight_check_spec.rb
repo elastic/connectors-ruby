@@ -54,6 +54,14 @@ describe App::PreflightCheck do
         end
       end
 
+      context 'when Elasticsearch status is invalid status' do
+        let(:status) { 'garbage' }
+
+        it 'should fail the check' do
+          expect { described_class.run! }.to raise_error(described_class::CheckFailure)
+        end
+      end
+
       context 'when Elasticsearch status is green' do
         let(:status) { 'green' }
         let(:es_version) { '8.4.0-SNAPSHOT' }
