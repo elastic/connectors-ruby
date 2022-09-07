@@ -95,10 +95,10 @@ This is our main communication index, used to communicate the connector's config
   last_seen: date;      -> Connector writes check-in date-time
                            regularly (UTC)
   last_sync_error: string;   -> Optional last sync error message
-  last_synced: date;    -> Date/time of last completed sync (UTC)
-  last_indexed_count: number;    -> How many documents were inserted into the index
-  last_deleted_count: number;    -> How many documents were deleted from the index
   last_sync_status: string;  -> last sync Enum, see below
+  last_synced: date;    -> Date/time of last completed sync (UTC)
+  last_indexed_document_count: number;    -> How many documents were inserted into the index
+  last_deleted_document_count: number;    -> How many documents were deleted from the index
   name: string; -> the name to use for the connector
   pipeline: {
     extract_binary_content: boolean; -> Whether or not the `request_pipeline` should handle binary data
@@ -141,6 +141,8 @@ This is our main communication index, used to communicate the connector's config
     "last_sync_error" : { "type" : "text" },
     "last_sync_status" : { "type" : "keyword" },
     "last_synced" : { "type" : "date" },
+    "last_indexed_document_count" : { "type" : "integer" },
+    "last_deleted_document_count" : { "type" : "integer" },
     "name" : { "type" : "keyword" },
     "pipeline" : {
       "properties" : {

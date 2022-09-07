@@ -358,7 +358,7 @@ describe Core::ElasticConnectorActions do
 
   context '#complete_sync' do
     let(:job_id) { 'completed-job-1' }
-    let(:status) { {} }
+    let(:status) { { :indexed_document_count => 1, :deleted_document_count => 0 } }
 
     it 'updates last connector sync status, sync time and counts' do
       expect(es_client).to receive(:update).with(
@@ -367,8 +367,8 @@ describe Core::ElasticConnectorActions do
         :body => {
           :doc => hash_including(
             :last_synced,
-            :last_indexed_count,
-            :last_deleted_count,
+            :last_indexed_document_count,
+            :last_deleted_document_count,
             :last_sync_status => Connectors::SyncStatus::COMPLETED
           )
         },
@@ -398,7 +398,7 @@ describe Core::ElasticConnectorActions do
 
     context 'when status contains an error' do
       let(:error_message) { 'something really went wrong' }
-      let(:status) { { :error => error_message } }
+      let(:status) { super().merge(:error => error_message) }
 
       it 'updates last connector sync status to error' do
         expect(es_client).to receive(:update).with(
@@ -407,8 +407,8 @@ describe Core::ElasticConnectorActions do
           :body => {
             :doc => hash_including(
               :last_synced,
-              :last_indexed_count,
-              :last_deleted_count,
+              :last_indexed_document_count,
+              :last_deleted_document_count,
               :last_sync_status => Connectors::SyncStatus::FAILED,
               :last_sync_error => status[:error]
             )
