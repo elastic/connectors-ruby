@@ -122,8 +122,8 @@ module Core
                                 :last_sync_status => sync_status,
                                 :last_sync_error => status[:error],
                                 :last_synced => Time.now,
-                                :last_indexed_count => status[:indexed_document_count],
-                                :last_deleted_count => status[:deleted_document_count])
+                                :last_indexed_document_count => status[:indexed_document_count],
+                                :last_deleted_document_count => status[:deleted_document_count])
 
         body = {
           :doc => {
@@ -223,6 +223,8 @@ module Core
             :index_name => { :type => :keyword },
             :last_seen => { :type => :date },
             :last_synced => { :type => :date },
+            :last_indexed_document_count => { :type => :integer },
+            :last_deleted_document_count => { :type => :integer },
             :scheduling => {
               :properties => {
                 :enabled => { :type => :boolean },
