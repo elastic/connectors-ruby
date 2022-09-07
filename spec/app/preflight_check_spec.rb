@@ -8,21 +8,22 @@
 require 'app/preflight_check'
 
 describe App::PreflightCheck do
-  describe '#run!' do
+  describe '.run!' do
     let(:client) { double }
-    let(:cluster) { Elasticsearch::API::Cluster::ClusterClient.new }
 
     before(:each) do
-      allow(subject).to receive(:client).and_return(client)
-      allow(client).to receive(:cluster).and_return(cluster)
+      allow(described_class).to receive(:client).and_return(client)
     end
 
     context 'when Elasticsearch is not running' do
+      let(:cluster) { double }
+
       it 'should retry multiple times and fail the check' do
         stub_const('App::PreflightCheck::STARTUP_RETRY_INTERVAL', 1)
         stub_const('App::PreflightCheck::STARTUP_RETRY_TIMEOUT', 3)
+        allow(client).to receive(:cluster).and_return(cluster)
         expect(cluster).to receive(:health).at_least(2).times.and_raise(Faraday::ConnectionFailed)
-        subject.run!
+        described_class.run!
       end
     end
 
@@ -30,26 +31,26 @@ describe App::PreflightCheck do
       before(:each) do
         stub_const('App::PreflightCheck::STARTUP_RETRY_INTERVAL', 0)
         stub_const('App::PreflightCheck::STARTUP_RETRY_TIMEOUT', 0)
-        allow(cluster).to receive(:health).and_return({ 'status' => status })
+        allow(client).to receive_message_chain(:cluster, :health).and_return({ 'status' => status })
       end
 
       context 'when Elasticsearch status is red' do
         let(:status) { 'red' }
         it 'should fail the check' do
-          expect { subject.run! }.to raise_error(described_class::CheckFailure)
+          expect { described_class.run! }.to raise_error(described_class::CheckFailure)
         end
       end
 
       context 'when Elasticsearch status is yellow' do
         let(:status) { 'yellow' }
         before(:each) do
-          allow(subject).to receive(:check_es_version!)
-          allow(subject).to receive(:check_system_indices!)
+          allow(described_class).to receive(:check_es_version!)
+          allow(described_class).to receive(:check_system_indices!)
         end
 
         it 'should log warn message' do
           expect(Utility::Logger).to receive(:warn)
-          subject.run!
+          described_class.run!
         end
       end
 
@@ -63,17 +64,15 @@ describe App::PreflightCheck do
         context 'when Elasticsearch version doesn\'t match connector service version' do
           it 'should fail the check' do
             stub_const('App::VERSION', '8.5.0.0-foobar')
-            expect { subject.run! }.to raise_error(described_class::CheckFailure)
+            expect { described_class.run! }.to raise_error(described_class::CheckFailure)
           end
         end
 
         context 'when Elasticsearch version matches connector service version' do
-          let(:indices) { double }
           before(:each) do
             stub_const('App::VERSION', '8.4.0.0-foobar')
-            allow(client).to receive(:indices).and_return(indices)
-            allow(indices).to receive(:exists?).with(:index => Utility::Constants::CONNECTORS_INDEX).and_return(connector_index_exist)
-            allow(indices).to receive(:exists?).with(:index => Utility::Constants::JOB_INDEX).and_return(job_index_exist)
+            allow(client).to receive_message_chain(:indices, :exists?).with(:index => Utility::Constants::CONNECTORS_INDEX).and_return(connector_index_exist)
+            allow(client).to receive_message_chain(:indices, :exists?).with(:index => Utility::Constants::JOB_INDEX).and_return(job_index_exist)
           end
 
           context 'when both indices exist' do
@@ -81,7 +80,7 @@ describe App::PreflightCheck do
             let(:job_index_exist) { true }
 
             it 'should pass the check' do
-              expect { subject.run! }.to_not raise_error(described_class::CheckFailure)
+              expect { described_class.run! }.to_not raise_error(described_class::CheckFailure)
             end
           end
 
@@ -90,7 +89,7 @@ describe App::PreflightCheck do
             let(:job_index_exist) { true }
 
             it 'should fail the check' do
-              expect { subject.run! }.to raise_error(described_class::CheckFailure)
+              expect { described_class.run! }.to raise_error(described_class::CheckFailure)
             end
           end
 
@@ -99,7 +98,7 @@ describe App::PreflightCheck do
             let(:job_index_exist) { false }
 
             it 'should fail the check' do
-              expect { subject.run! }.to raise_error(described_class::CheckFailure)
+              expect { described_class.run! }.to raise_error(described_class::CheckFailure)
             end
           end
 
@@ -108,7 +107,7 @@ describe App::PreflightCheck do
             let(:job_index_exist) { false }
 
             it 'should fail the check' do
-              expect { subject.run! }.to raise_error(described_class::CheckFailure)
+              expect { described_class.run! }.to raise_error(described_class::CheckFailure)
             end
           end
         end
