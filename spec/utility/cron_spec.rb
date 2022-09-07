@@ -29,6 +29,8 @@ RSpec.describe Utility::Cron do
       ['0 15 10 15 * ?', '15 10 15 * *'],
       ['0 0 12 1/5 * ?', '0 12 1/5 * *'],
       ['0 11 11 11 11 ?', '11 11 11 11 *'],
+      ['0 20 6 ? * 5', '20 6 * * 5'], # every thursday at 6:20am
+      ['0 0 0 ? * SUN,MON,TUE *', '0 0 * * SUN,MON,TUE'] # every sunday, monday, tuesday at midnight
     ]
 
     conversions.each do |quartz, crontab|

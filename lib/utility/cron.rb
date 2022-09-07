@@ -26,32 +26,6 @@ module Utility
 
   # see https:#github.com/quartz-scheduler/quartz/blob/master/quartz-core/src/main/java/org/quartz/CronExpression.java
   module Cron
-    @month_map = {
-      'JAN' => 0,
-      'FEB' => 1,
-      'MAR' => 2,
-      'APR' => 3,
-      'MAY' => 4,
-      'JUN' => 5,
-      'JUL' => 6,
-      'AUG' => 7,
-      'SEP' => 8,
-      'OCT' => 9,
-      'NOV' => 10,
-      'DEC' => 11
-    }
-    @day_map = {
-      'SUN' => 1,
-      'MON' => 2,
-      'TUE' => 3,
-      'WED' => 4,
-      'THU' => 5,
-      'FRI' => 6,
-      'SAT' => 7
-    }
-
-    MAX_YEAR = DateTime.now.year + 100
-
     def self.check(expr)
       raise StandardError.new("Unsupported expression #{expr} with #") if expr.include?('#')
       raise StandardError.new("Unsupported expression #{expr} with L") if expr.include?('L')
