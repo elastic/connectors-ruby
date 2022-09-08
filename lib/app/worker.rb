@@ -35,8 +35,6 @@ module App
     def pre_flight_check
       raise "#{@service_type} is not a supported connector" unless Connectors::REGISTRY.registered?(@service_type)
       begin
-        Core::ElasticConnectorActions.ensure_connectors_index_exists
-        Core::ElasticConnectorActions.ensure_job_index_exists
         connector_settings = Core::ConnectorSettings.fetch(@connector_id)
         Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
       rescue Elastic::Transport::Transport::Errors::Unauthorized => e

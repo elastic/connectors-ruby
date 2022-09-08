@@ -1,14 +1,14 @@
 require 'core'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
-require 'utility/es_client'
+require 'utility'
 
 describe Core::ElasticConnectorActions do
   let(:connector_id) { 'one-two-three' }
   let(:es_client) { double }
   let(:es_client_indices_api) { double }
-  let(:connectors_index) { Core::ElasticConnectorActions::CONNECTORS_INDEX }
-  let(:jobs_index) { Core::ElasticConnectorActions::JOB_INDEX }
+  let(:connectors_index) { Utility::Constants::CONNECTORS_INDEX }
+  let(:jobs_index) { Utility::Constants::JOB_INDEX }
 
   before(:each) do
     allow(Utility::EsClient).to receive(:new).and_return(es_client)
@@ -146,7 +146,7 @@ describe Core::ElasticConnectorActions do
 
   context '#connectors_meta' do
     before(:each) do
-      allow(es_client_indices_api).to receive(:get_mapping).and_return({ '.elastic-connectors-v1' => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
+      allow(es_client_indices_api).to receive(:get_mapping).and_return({ "#{Utility::Constants::CONNECTORS_INDEX}-v1" => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
     end
 
     it 'gets the meta' do
@@ -589,22 +589,6 @@ describe Core::ElasticConnectorActions do
       expect(described_class).to receive(:ensure_index_exists).with(index_name, { :settings => settings, :mappings => mappings })
 
       described_class.ensure_content_index_exists(index_name, use_icu_locale, language_code)
-    end
-  end
-
-  context '#ensure_connectors_index_exists' do
-    it 'creates connectors index with expected alias' do
-      expect(described_class).to receive(:ensure_index_exists).with("#{connectors_index}-v1", hash_including(:aliases => hash_including(connectors_index), :mappings => anything))
-
-      described_class.ensure_connectors_index_exists
-    end
-  end
-
-  context '#ensure_job_index_exists' do
-    it 'creates connector jobs index with expected alias' do
-      expect(described_class).to receive(:ensure_index_exists).with("#{jobs_index}-v1", hash_including(:aliases => hash_including(jobs_index), :mappings => anything))
-
-      described_class.ensure_job_index_exists
     end
   end
 
