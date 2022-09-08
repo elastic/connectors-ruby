@@ -22,7 +22,7 @@ module Utility
       expr
     end
 
-    def self.scheduler_to_crontab(expression)
+    def self.quartz_to_crontab(expression)
       @seconds = '*'
       @minutes = '*'
       @hours = '*'

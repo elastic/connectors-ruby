@@ -36,7 +36,7 @@ RSpec.describe Utility::Cron do
     ]
 
     conversions.each do |quartz, crontab|
-      expect(subject.scheduler_to_crontab(quartz)).to eq(crontab)
+      expect(subject.quartz_to_crontab(quartz)).to eq(crontab)
       next_time = Fugit::Cron.do_parse(crontab).next_time
       print "### next_time for scheduler [#{quartz}], cron [#{crontab}]: [#{next_time}]\n"
       expect(next_time).to be > Time.now
@@ -49,7 +49,7 @@ RSpec.describe Utility::Cron do
                    '0 15 10 ? * 6#3']
 
     unsupported.each do |quartz|
-      expect { subject.scheduler_to_crontab(quartz) }.to raise_error(Exception)
+      expect { subject.quartz_to_crontab(quartz) }.to raise_error(Exception)
     end
   end
 end
