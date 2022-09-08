@@ -4,8 +4,10 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+# frozen_string_literal: true
+
 require 'config'
-require 'utility'
+require_relative '../utility/logger'
 
 # We look for places in this order:
 # - CONNECTORS_CONFIG environment variable
