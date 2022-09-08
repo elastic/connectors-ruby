@@ -40,7 +40,7 @@ module Core
       def connectors_meta
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
-        alias_mappings.dig(index, 'mappings', '_meta')
+        alias_mappings.dig(index, 'mappings', '_meta') || {}
       end
 
       def native_connectors
@@ -208,6 +208,8 @@ module Core
         body
       end
 
+      # DO NOT USE this method
+      # Creation of connector index should be handled by Kibana, this method is only used by ftest.rb
       def ensure_connectors_index_exists
         mappings = {
           :properties => {
@@ -235,6 +237,8 @@ module Core
         ensure_index_exists("#{Utility::Constants::CONNECTORS_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::CONNECTORS_INDEX, :mappings => mappings))
       end
 
+      # DO NOT USE this method
+      # Creation of job index should be handled by Kibana, this method is only used by ftest.rb
       def ensure_job_index_exists
         mappings = {
           :properties => {

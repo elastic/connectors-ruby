@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 require 'yaml'
 require 'elasticsearch'
+require_relative '../lib/utility/constants'
 
 LIB_DIR = File.expand_path("#{File.dirname(__FILE__)}/../lib")
 
@@ -41,7 +42,7 @@ end
 
 def wipe_es
   puts('Wipe existing data')
-  ['mongo', '.elastic-connectors', '.elastic-connectors-sync-jobs'].each do |i|
+  ['mongo', Utility::Constants::CONNECTORS_INDEX, Utility::Constants::JOB_INDEX].each do |i|
     es_client.indices.delete(index: i, ignore: [400, 404])
   end
 end
