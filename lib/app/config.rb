@@ -5,6 +5,7 @@
 #
 
 require 'config'
+require 'utility'
 
 # We look for places in this order:
 # - CONNECTORS_CONFIG environment variable
@@ -62,7 +63,7 @@ module App
       return nil
     end
 
-    unless ent_search_config&.is_a?(Hash)
+    unless ent_search_config.is_a?(Hash)
       Utility::Logger.error("Invalid ent-search config: #{ent_search_config.inspect}")
       return nil
     end
@@ -88,7 +89,7 @@ module App
     end
 
     unless uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-      Utility::Logger.error("Invalid elasticsearch host #{host}, it must be an http or https.")
+      Utility::Logger.error("Invalid elasticsearch host #{host}, it must be a http or https URI.")
       return nil
     end
 
