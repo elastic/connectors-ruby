@@ -25,7 +25,8 @@ module Utility
     end
 
     def connection_configs(es_config)
-      configs = { :api_key => es_config[:api_key] }
+      configs = {}
+      configs[:api_key] = es_config[:api_key] if es_config[:api_key]
       if es_config[:cloud_id]
         configs[:cloud_id] = es_config[:cloud_id]
       elsif es_config[:hosts]
