@@ -9,6 +9,7 @@
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/object/blank'
 require 'connectors/connector_status'
+require 'core/elastic_connector_actions'
 require 'time'
 require 'utility/logger'
 
@@ -40,6 +41,10 @@ module Core
       @elasticsearch_response[:_source][property_name]
     end
 
+    def dig(*args)
+      @elasticsearch_response.dig(*args)
+    end
+
     def index_name
       self[:index_name]
     end
@@ -65,19 +70,19 @@ module Core
     end
 
     def request_pipeline
-      self[:pipeline][:name] || @globals[:pipeline][:default_name] || DEFAULT_REQUEST_PIPELINE
+      return_if_present(dig(:pipeline, :name), @globals.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
     end
 
     def extract_binary_content?
-      self[:pipeline][:extract_binary_content] || @globals[:pipeline][:default_extract_binary_content] || DEFAULT_EXTRACT_BINARY_CONTENT
+      return_if_present(dig(:pipeline, :extract_binary_content), @globals.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
     end
 
     def reduce_whitespace?
-      self[:pipeline][:reduce_whitespace] || @globals[:pipeline][:default_reduce_whitespace] || DEFAULT_REDUCE_WHITESPACE
+      return_if_present(dig(:pipeline, :reduce_whitespace), @globals.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
     end
 
     def run_ml_inference?
-      self[:pipeline][:run_ml_inference] || @globals[:pipeline][:default_run_ml_inference] || DEFAULT_RUN_ML_INFERENCE
+      return_if_present(dig(:pipeline, :run_ml_inference), @globals.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
     end
 
     private
@@ -85,6 +90,13 @@ module Core
     def initialize(es_response)
       @elasticsearch_response = es_response.with_indifferent_access
       @globals = ElasticConnectorActions.connectors_meta
+    end
+
+    def return_if_present(*args)
+      args.each do |arg|
+        return arg unless arg.nil?
+      end
+      nil
     end
   end
 end
