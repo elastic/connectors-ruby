@@ -108,7 +108,7 @@ module App
 
   Config = ::Settings.tap do |config|
     if ent_search_config = ent_search_es_config
-      Utility::Logger.error('Overriding elasticsearch config with ent_search config')
+      Utility::Logger.error('Overriding elasticsearch config with ent-search config')
       config[:elasticsearch] = ent_search_config
     end
   end
