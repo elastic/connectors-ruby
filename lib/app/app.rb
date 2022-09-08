@@ -15,12 +15,10 @@ require 'utility/logger'
 
 module App
   Utility::Environment.set_execution_environment(App::Config) do
-    Utility::Logger.info("App::Config['elasticsearch'] = #{App::Config['elasticsearch']}")
-
-    # worker = App::Worker.new(
-    #   connector_id: App::Config['connector_id'],
-    #   service_type: App::Config['service_type']
-    # )
-    # worker.start!
+    worker = App::Worker.new(
+      connector_id: App::Config['connector_id'],
+      service_type: App::Config['service_type']
+    )
+    worker.start!
   end
 end
