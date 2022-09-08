@@ -22,7 +22,7 @@ module Utility
       expr
     end
 
-    def self.quartz_to_crontab(expression)
+    def self.scheduler_to_crontab(expression)
       @seconds = '*'
       @minutes = '*'
       @hours = '*'
@@ -41,7 +41,7 @@ module Utility
         @hours = m[4]
         @day_of_month = check(m[5])
         @month = check(m[6])
-        @day_of_week = check(m[7])
+        @day_of_week = scheduler_dow_to_crontab(check(m[7])).to_s
         @year = m[9]
         matched = true
       }
@@ -55,6 +55,16 @@ module Utility
       Utility::Logger.debug("Converted Quartz Cron expression '#{expression}' to Standard Cron Expression '#{converted_expression}'")
 
       converted_expression
+    end
+
+    def self.scheduler_dow_to_crontab(day)
+      unless /\d/.match?(day)
+        return day
+      end
+      if day.to_i <= 0
+        return day
+      end
+      day.to_i - 1
     end
   end
 end

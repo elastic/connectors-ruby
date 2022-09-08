@@ -83,7 +83,7 @@ module App
     end
 
     def validate_cronline(cronline)
-      !!Fugit::Cron.parse(Utility::Cron.quartz_to_crontab(cronline))
+      !!Fugit::Cron.parse(Utility::Cron.scheduler_to_crontab(cronline))
     end
 
     def enable_scheduling

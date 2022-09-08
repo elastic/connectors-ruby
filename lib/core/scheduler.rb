@@ -88,7 +88,7 @@ module Core
         return false
       end
 
-      current_schedule = Utility::Cron.quartz_to_crontab(current_schedule)
+      current_schedule = Utility::Cron.scheduler_to_crontab(current_schedule)
       cron_parser = Fugit::Cron.parse(current_schedule)
 
       # Don't sync if the scheduling interval is non-parsable
