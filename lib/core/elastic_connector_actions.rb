@@ -65,7 +65,7 @@ module Core
           hits = response['hits']['hits']
           total = response['hits']['total']['value']
           result += hits.map do |hit|
-            Core::ConnectorSettings.new(hit, connectors_meta)
+            Core::ConnectorSettings.new(hit, globals)
           end
           break if result.size >= total
           offset += DEFAULT_PAGE_SIZE
