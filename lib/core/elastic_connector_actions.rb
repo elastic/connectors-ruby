@@ -46,6 +46,7 @@ module Core
       end
 
       def native_connectors
+        globals = connectors_meta
         result = []
         offset = 0
         loop do
@@ -64,7 +65,7 @@ module Core
           hits = response['hits']['hits']
           total = response['hits']['total']['value']
           result += hits.map do |hit|
-            Core::ConnectorSettings.new(hit)
+            Core::ConnectorSettings.new(hit, globals)
           end
           break if result.size >= total
           offset += DEFAULT_PAGE_SIZE

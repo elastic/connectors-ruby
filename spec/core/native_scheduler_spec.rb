@@ -11,11 +11,12 @@ describe Core::NativeScheduler do
   let(:connector_id2) { '456' }
   let(:poll_interval) { 999 }
 
+  let(:globals) { {} }
   let(:native_connector1) { { :_id => connector_id1 } }
   let(:native_connector2) { { :_id => connector_id2 } }
 
-  let(:connector_settings1) { Core::ConnectorSettings.new(native_connector1) }
-  let(:connector_settings2) { Core::ConnectorSettings.new(native_connector2) }
+  let(:connector_settings1) { Core::ConnectorSettings.new(native_connector1, globals) }
+  let(:connector_settings2) { Core::ConnectorSettings.new(native_connector2, globals) }
 
   let(:last_synced) { Time.now - 1.day }
   let(:sync_now) { false }

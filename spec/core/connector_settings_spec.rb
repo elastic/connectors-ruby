@@ -11,11 +11,7 @@ require 'core'
 describe Core::ConnectorSettings do
   let(:elasticsearch_response) { {} }
   let(:connectors_meta) { {} }
-  subject { described_class.send(:new, elasticsearch_response) }
-
-  before(:each) do
-    allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return(connectors_meta)
-  end
+  subject { described_class.send(:new, elasticsearch_response, connectors_meta) }
 
   context 'pipeline settings' do
     it 'has defaults' do
