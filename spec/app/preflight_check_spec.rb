@@ -18,12 +18,16 @@ describe App::PreflightCheck do
     context 'when Elasticsearch is not running' do
       let(:cluster) { double }
 
-      it 'should retry multiple times and fail the check' do
+      before(:each) do
         stub_const('App::PreflightCheck::STARTUP_RETRY_INTERVAL', 1)
         stub_const('App::PreflightCheck::STARTUP_RETRY_TIMEOUT', 3)
         allow(client).to receive(:cluster).and_return(cluster)
-        expect(cluster).to receive(:health).at_least(2).times.and_raise(Faraday::ConnectionFailed)
-        described_class.run!
+        allow(cluster).to receive(:health).and_raise(Faraday::ConnectionFailed, 'nope')
+      end
+
+      it 'should retry multiple times and fail the check' do
+        expect(cluster).to receive(:health).at_least(2).times
+        expect { described_class.run! }.to raise_error(described_class::CheckFailure)
       end
     end
 
