@@ -7,6 +7,8 @@ elasticsearch:
 #  cloud_id: CHANGEME
   hosts: http://localhost:9200
   api_key: "CHANGEME"
+  retry_on_failure: 3
+  request_timeout: 120
   disable_warnings: true
   trace: false
   log: false
