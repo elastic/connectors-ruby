@@ -34,6 +34,8 @@ module Utility
       else
         raise 'Either elasticsearch.cloud_id or elasticsearch.hosts should be configured.'
       end
+      configs[:retry_on_failure] = es_config[:retry_on_failure] || false
+      configs[:request_timeout] = es_config[:request_timeout] || nil
       configs[:log] = es_config[:log] || false
       configs[:trace] = es_config[:trace] || false
 

@@ -30,6 +30,11 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       optional(:cloud_id).value(:string)
       optional(:hosts).value(:string)
       required(:api_key).value(:string)
+      optional(:retry_on_failure).value(:integer)
+      optional(:request_timeout).value(:integer)
+      optional(:disable_warnings).value(:bool?)
+      optional(:trace).value(:bool?)
+      optional(:log).value(:bool?)
     end
 
     required(:connector_id).value(:string)
@@ -111,7 +116,11 @@ module App
   Config = ::Settings.tap do |config|
     if ent_search_config = ent_search_es_config
       Utility::Logger.error('Overriding elasticsearch config with ent-search config')
-      config[:elasticsearch] = ent_search_config
+      original_es_config = config[:elasticsearch].to_h
+      original_es_config.delete(:cloud_id)
+      original_es_config.delete(:hosts)
+      original_es_config.delete(:api_key)
+      config[:elasticsearch] = original_es_config.merge(ent_search_config)
     end
   end
 end
