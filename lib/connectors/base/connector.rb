@@ -34,7 +34,7 @@ module Connectors
 
       def yield_documents; end
 
-      def do_health_check(params)
+      def do_health_check(_params)
         raise 'Not implemented for this connector'
       end
 
