@@ -33,6 +33,10 @@ module Connectors
 
       def yield_documents; end
 
+      def do_health_check(params)
+        raise 'Not implemented for this connector'
+      end
+
       def is_healthy?(params = {})
         do_health_check(params)
 
