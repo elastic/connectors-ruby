@@ -50,6 +50,9 @@ module Connectors
         @collection = remote_configuration.dig(:collection, :value)
         @user = remote_configuration.dig(:user, :value)
         @password = remote_configuration.dig(:password, :value)
+
+        # XXX when yield_documents is called, we lost the values
+        # hardcoding them for now
       end
 
       def yield_documents
