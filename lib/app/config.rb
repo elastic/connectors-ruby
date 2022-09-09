@@ -30,6 +30,11 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       optional(:cloud_id).value(:string)
       optional(:hosts).value(:string)
       required(:api_key).value(:string)
+      optional(:retry_on_failure).value(:integer)
+      optional(:request_timeout).value(:integer)
+      optional(:disable_warnings).value(:bool?)
+      optional(:trace).value(:bool?)
+      optional(:log).value(:bool?)
     end
 
     required(:connector_id).value(:string)
