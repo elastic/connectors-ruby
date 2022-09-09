@@ -46,6 +46,7 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:connector_id).value(:string)
     optional(:service_type).value(:string)
     required(:log_level).value(:string)
+    required(:ecs_logging).value(:bool?)
 
     optional(:idle_timeout).value(:integer)
 

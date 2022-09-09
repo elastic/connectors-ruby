@@ -19,6 +19,7 @@ thread_pool:
   max_queue: 100
 
 log_level: info
+ecs_logging: false
 
 idle_timeout: 60
 

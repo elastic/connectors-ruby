@@ -6,6 +6,7 @@
 
 require 'logger'
 require 'active_support/core_ext/module'
+require 'ecs_logging/logger'
 
 module Utility
   class Logger
@@ -20,7 +21,7 @@ module Utility
       end
 
       def logger
-        @logger ||= ::Logger.new(STDOUT)
+        @logger ||= Settings[:ecs_logging] ? EcsLogging::Logger.new(STDOUT) : ::Logger.new(STDOUT)
       end
 
       SUPPORTED_LOG_LEVELS.each do |level|
