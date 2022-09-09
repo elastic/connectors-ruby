@@ -29,11 +29,17 @@ RSpec.describe Utility::Cron do
       ['0 15 10 15 * ?', '15 10 15 * *'],
       ['0 0 12 1/5 * ?', '0 12 1/5 * *'],
       ['0 11 11 11 11 ?', '11 11 11 11 *'],
+      ['0 20 6 ? * 5', '20 6 * * 4'], # every Thursday at 6:20 AM
+      ['0 0 12 ? * 2', '0 12 * * 1'], # every Monday at 12:00 PM
+      ['0 0 0 ? * 7', '0 0 * * 6'], # every Saturday at 12:00 AM
+      ['0 0 0 ? * 0', '0 0 * * 0'], # every Sunday at 12:00 AM
     ]
 
     conversions.each do |quartz, crontab|
       expect(subject.quartz_to_crontab(quartz)).to eq(crontab)
-      expect(Fugit::Cron.do_parse(crontab).next_time).to be > Time.now
+      next_time = Fugit::Cron.do_parse(crontab).next_time
+      print "### next_time for scheduler [#{quartz}], cron [#{crontab}]: [#{next_time}]\n"
+      expect(next_time).to be > Time.now
     end
 
     unsupported = ['0 15 10 ? * 6#3', '0 15 10 L * ?',
