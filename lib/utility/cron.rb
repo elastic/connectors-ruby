@@ -67,6 +67,7 @@ module Utility
     # (see https://en.wikipedia.org/wiki/Cron for more details)
     # This means that we need to shift the Quartz day of week that are between 1 and 7 by minus one, but we also allow 0
     # in case it's not a quartz expression but already the cron standard.
+    # See also the code in connectors-python that does the same thing: https://github.com/elastic/connectors-python/blob/main/connectors/quartz.py
     def self.scheduler_dow_to_crontab(day)
       unless /\d/.match?(day)
         return day
