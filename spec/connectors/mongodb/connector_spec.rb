@@ -45,11 +45,11 @@ describe Connectors::MongoDB::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#source_status' do
+  context '#is_healthy?' do
     it 'instantiates a mongodb client' do
       expect(Mongo::Client).to receive(:new).with([mongodb_host], hash_including(:database => mongodb_database))
 
-      subject.source_status({})
+      subject.is_healthy?({})
     end
   end
 

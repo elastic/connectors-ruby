@@ -30,7 +30,6 @@ describe Core::SyncJobRunner do
   let(:connector_instance) { double }
   let(:sink) { double }
 
-  let(:source_status) { { :status => 'OK' } }
   let(:output_index_name) { 'test-ingest-index' }
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
@@ -69,6 +68,7 @@ describe Core::SyncJobRunner do
     allow(connector_class).to receive(:service_type).and_return(service_type)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
+    allow(connector_instance).to receive(:do_health_check!)
     allow_statement = allow(connector_instance).to receive(:yield_documents)
     extracted_documents.each { |document| allow_statement.and_yield(document) }
   end

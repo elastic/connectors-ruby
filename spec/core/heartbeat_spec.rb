@@ -12,7 +12,7 @@ describe Core::Heartbeat do
   let(:connector_class) { double }
   let(:connector_instance) { double }
 
-  let(:source_status) { { :status => 'OK' } }
+  let(:is_healthy) { true }
 
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
@@ -28,7 +28,7 @@ describe Core::Heartbeat do
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
-    allow(connector_instance).to receive(:source_status).and_return(source_status)
+    allow(connector_instance).to receive(:is_healthy?).and_return(is_healthy)
   end
 
   describe '.start_task' do
