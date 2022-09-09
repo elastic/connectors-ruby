@@ -63,7 +63,8 @@ module Core::OutputSink
     def send_data(ops)
       return if ops.empty?
 
-      @client.bulk(:body => ops, :pipeline => @request_pipeline)
+      # need the pipeline! XXX deactivating for now
+      @client.bulk(:body => ops) #, :pipeline => @request_pipeline)
       Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
     end
 
