@@ -12,9 +12,9 @@ module Utility
     SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version].freeze
     ALLOW_FIELD = '_allow_permissions'
     DENY_FIELD = '_deny_permissions'
-    CONNECTORS_INDEX = '.elastic-connectors'
-    JOB_INDEX = '.elastic-connectors-sync-jobs'
-    CONTENT_INDEX_PREFIX = 'search-'
     CRAWLER_SERVICE_TYPE = 'elastic-crawler'
+    CONNECTORS_INDEX = '.elastic-connectors'.freeze
+    JOB_INDEX = '.elastic-connectors-sync-jobs'.freeze
+    CONTENT_INDEX_PREFIX = 'search-'.freeze
   end
 end
