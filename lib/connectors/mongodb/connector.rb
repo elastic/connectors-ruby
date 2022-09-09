@@ -26,6 +26,12 @@ module Connectors
            :host => {
              :label => 'MongoDB Server Hostname'
            },
+           :user => {
+             :label => 'MongoDB User'
+           },
+           :password => {
+             :label => 'MongoDB Passwd'
+           },
            :database => {
              :label => 'MongoDB Database'
            },
@@ -37,10 +43,13 @@ module Connectors
 
       def initialize(local_configuration: {}, remote_configuration: {})
         super
+        remote_configuration = remote_configuration.transform_keys(&:to_sym)
 
         @host = remote_configuration.dig(:host, :value)
         @database = remote_configuration.dig(:database, :value)
         @collection = remote_configuration.dig(:collection, :value)
+        @user = remote_configuration.dig(:user, :value)
+        @password = remote_configuration.dig(:password, :value)
       end
 
       def yield_documents
@@ -48,7 +57,6 @@ module Connectors
           client[@collection].find.each do |document|
             doc = document.with_indifferent_access
             transform!(doc)
-
             yield doc
           end
         end
@@ -71,7 +79,6 @@ module Connectors
           Utility::Logger.debug('Existing Collections:')
 
           client.collections.each { |coll| Utility::Logger.debug(coll.name) }
-
           yield client
         ensure
           client.close

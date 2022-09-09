@@ -120,6 +120,12 @@ module Core
       results
     end
 
+    def initialize(es_response, globals)
+      @elasticsearch_response = es_response.transform_keys(&:to_sym)
+      @elasticsearch_response[:_source] = @elasticsearch_response[:_source].transform_keys(&:to_sym)
+      @globals = globals
+    end
+
     def return_if_present(*args)
       args.each do |arg|
         return arg unless arg.nil?

@@ -50,6 +50,35 @@ module Core
             :sort => ['name']
           }
         )
+
+      def native_connectors
+        globals = connectors_meta
+        result = []
+        offset = 0
+        loop do
+          response = client.search(
+            :index => Utility::Constants::CONNECTORS_INDEX,
+            :ignore => 404,
+            :body => {
+              :size => DEFAULT_PAGE_SIZE,
+              :from => offset,
+              :query => {
+                :term => { :is_native => true }
+              },
+              :sort => ['name']
+            }
+          )
+          hits = response['hits']['hits']
+          puts(hits)
+
+          total = response['hits']['total']['value']
+          result += hits.map do |hit|
+            Core::ConnectorSettings.new(hit, globals)
+          end
+          break if result.size >= total
+          offset += DEFAULT_PAGE_SIZE
+        end
+        result
       end
 
       def update_connector_configuration(connector_id, configuration)

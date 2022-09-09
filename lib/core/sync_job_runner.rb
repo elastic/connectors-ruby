@@ -107,7 +107,7 @@ module Core
       expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
-      raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
+      #raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
     end
   end
 end
