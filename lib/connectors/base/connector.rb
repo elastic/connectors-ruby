@@ -9,6 +9,7 @@
 require 'bson'
 require 'core/output_sink'
 require 'utility/exception_tracking'
+require 'utility/errors'
 require 'app/config'
 
 module Connectors
@@ -35,6 +36,13 @@ module Connectors
 
       def do_health_check(params)
         raise 'Not implemented for this connector'
+      end
+
+      def do_health_check!(params)
+        do_health_check(params)
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
+        raise Utility::Errors::HealthCheckFailedError.new
       end
 
       def is_healthy?(params = {})
