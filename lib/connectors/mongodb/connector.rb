@@ -56,7 +56,7 @@ module Connectors
 
       private
 
-      def health_check(_params)
+      def do_health_check(_params)
         create_client(@host, @database)
       end
 

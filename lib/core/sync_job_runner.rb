@@ -20,6 +20,12 @@ module Core
     end
   end
 
+  class HealthCheckFailedError < StandardError
+    def initialize
+      super('Health check failed for 3rd-party service.')
+    end
+  end
+
   class SyncJobRunner
     def initialize(connector_settings, service_type)
       @connector_settings = connector_settings
@@ -52,6 +58,8 @@ module Core
 
       begin
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
+
+        raise HealthCheckFailedError unless @connector_instance.is_healthy?
 
         incoming_ids = []
         existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)

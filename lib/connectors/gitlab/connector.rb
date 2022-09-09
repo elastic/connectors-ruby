@@ -60,7 +60,7 @@ module Connectors
 
       private
 
-      def health_check(_params)
+      def do_health_check(_params)
         @extractor.health_check
       end
     end
