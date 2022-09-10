@@ -66,7 +66,6 @@ module Core::OutputSink
       # need the pipeline! XXX deactivating for now
       resp = @client.bulk(:body => ops) #, :pipeline => @request_pipeline)
       # XXX we should display errors here
-      puts(resp)
       Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
     end
 
