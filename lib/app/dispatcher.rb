@@ -86,7 +86,6 @@ module App
             job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
             job_runner.execute
             GC.start
-
           rescue StandardError => e
             Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
           end
