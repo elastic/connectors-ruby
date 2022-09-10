@@ -80,7 +80,6 @@ module Connectors
         begin
           Utility::Logger.debug("Existing Databases #{client.database_names}")
           Utility::Logger.debug('Existing Collections:')
-
           client.collections.each { |coll| Utility::Logger.debug(coll.name) }
           yield client
         ensure
