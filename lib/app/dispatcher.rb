@@ -28,8 +28,8 @@ module App
         running!
         Utility::Logger.info('Starting connector service...')
         @pool = Concurrent::ThreadPoolExecutor.new(
-          min_threads: 5,
-          max_threads: 10,
+          min_threads: 0,
+          max_threads: 5,
           max_queue: 100,
           idletime: 10,
           fallback_policy: :abort

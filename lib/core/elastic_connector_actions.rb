@@ -69,8 +69,6 @@ module Core
             }
           )
           hits = response['hits']['hits']
-          puts(hits)
-
           total = response['hits']['total']['value']
           result += hits.map do |hit|
             Core::ConnectorSettings.new(hit, globals)
