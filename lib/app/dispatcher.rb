@@ -20,6 +20,7 @@ module App
     MIN_THREADS = (App::Config.thread_pool&.min_threads || 0).to_i
     MAX_THREADS = (App::Config.thread_pool&.max_threads || 5).to_i
     MAX_QUEUE = (App::Config.thread_pool&.max_queue || 100).to_i
+    FLUSH_THRESHOLD = (App::Config[:flush_threshold] || 100).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
 
@@ -92,7 +93,7 @@ module App
           @pool.post do
             send_heartbeat(connector_id, service_type)
             Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
-            job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
+            job_runner = Core::SyncJobRunner.new(connector_settings, service_type, FLUSH_THRESHOLD)
             job_runner.execute
           rescue StandardError => e
             Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")

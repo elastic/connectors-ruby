@@ -14,7 +14,7 @@ require 'utility/logger'
 
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
-    def initialize(index_name, request_pipeline, flush_threshold = 50)
+    def initialize(index_name, request_pipeline, flush_threshold = 100)
       super()
       @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name

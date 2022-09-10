@@ -21,9 +21,10 @@ module Core
   end
 
   class SyncJobRunner
-    def initialize(connector_settings, service_type)
+    def initialize(connector_settings, service_type, flush_threshold = 100)
       @connector_settings = connector_settings
-      @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
+      @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline,
+                                           flush_threshold)
       @connector_class = Connectors::REGISTRY.connector_class(service_type)
       @connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
       @status = {
