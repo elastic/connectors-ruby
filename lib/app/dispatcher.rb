@@ -90,7 +90,8 @@ module App
           end
           Core::ElasticConnectorActions.ensure_content_index_exists(index_name)
 
-          @pool.post do
+          #@pool.post do
+          begin
             send_heartbeat(connector_id, service_type)
             Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
             job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
