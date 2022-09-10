@@ -67,6 +67,7 @@ module Core::OutputSink
       resp = @client.bulk(:body => ops) #, :pipeline => @request_pipeline)
       # XXX we should display errors here
       Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
+      puts GC.stat
       GC.start
     end
 
