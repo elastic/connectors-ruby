@@ -27,15 +27,25 @@ module App
       def start!
         running!
         Utility::Logger.info('Starting connector service...')
+        @pool = Concurrent::ThreadPoolExecutor.new(
+          min_threads: 1,
+          max_threads: 4,
+          max_queue: 100,
+          idletime: 10,
+          auto_terminate: true,
+          fallback_policy: :abort
+        )
+        @scheduler = Core::NativeScheduler.new(POLL_IDLING)
+
         start_polling_jobs!
       end
 
       def shutdown!
-        Utility::Logger.info("Shutting down connector service with pool [#{pool.class}] and scheduler [#{scheduler.class}]...")
+        Utility::Logger.info("Shutting down connector service with pool [#{@pool.class}] and scheduler [#{@scheduler.class}]...")
         running.make_false
-        scheduler.shutdown
-        pool.shutdown
-        pool.wait_for_termination(TERMINATION_TIMEOUT)
+        @scheduler.shutdown
+        @pool.shutdown
+        @pool.wait_for_termination(TERMINATION_TIMEOUT)
       end
 
       private
@@ -60,7 +70,7 @@ module App
       end
 
       def start_polling_jobs!
-        scheduler.when_triggered do |connector_settings|
+        @scheduler.when_triggered do |connector_settings|
           service_type = connector_settings.service_type
           connector_id = connector_settings.id
           index_name = connector_settings.index_name
@@ -80,7 +90,7 @@ module App
           end
           Core::ElasticConnectorActions.ensure_content_index_exists(index_name)
 
-          pool.post do
+          @pool.post do
             send_heartbeat(connector_id, service_type)
             Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
             job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
@@ -89,6 +99,7 @@ module App
           rescue StandardError => e
             Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
           end
+          Utility::Logger.info("End of sync after thread")
 
           puts GC.stat
         end
