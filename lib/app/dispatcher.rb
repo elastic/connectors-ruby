@@ -89,6 +89,8 @@ module App
           rescue StandardError => e
             Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
           end
+
+          puts GC.stat
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'connector service failed due to unexpected error.')
