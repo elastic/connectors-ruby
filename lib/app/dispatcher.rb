@@ -71,6 +71,7 @@ module App
 
       def start_polling_jobs!
         @scheduler.when_triggered do |connector_settings|
+          puts("Triggered")
           service_type = connector_settings.service_type
           connector_id = connector_settings.id
           index_name = connector_settings.index_name
