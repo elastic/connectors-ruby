@@ -70,7 +70,6 @@ module App
 
       def start_polling_jobs!
         @scheduler.when_triggered do |connector_settings|
-          puts("Triggered")
           service_type = connector_settings.service_type
           connector_id = connector_settings.id
           index_name = connector_settings.index_name
@@ -95,13 +94,9 @@ module App
             Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
             job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
             job_runner.execute
-            GC.start
           rescue StandardError => e
             Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
           end
-          Utility::Logger.info("End of sync after thread")
-
-          puts GC.stat
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'connector service failed due to unexpected error.')
