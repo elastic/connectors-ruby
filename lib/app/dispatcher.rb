@@ -27,14 +27,14 @@ module App
       def start!
         running!
         Utility::Logger.info('Starting connector service...')
-        @pool = Concurrent::ThreadPoolExecutor.new(
-          min_threads: 1,
-          max_threads: 4,
-          max_queue: 100,
-          idletime: 10,
-          auto_terminate: true,
-          fallback_policy: :abort
-        )
+        #@pool = Concurrent::ThreadPoolExecutor.new(
+        #  min_threads: 0,
+        #  max_threads: 4,
+        #  max_queue: 100,
+        #  idletime: 10,
+        #  auto_terminate: true,
+        #  fallback_policy: :abort
+        #)
         @scheduler = Core::NativeScheduler.new(POLL_IDLING)
 
         start_polling_jobs!
@@ -44,8 +44,8 @@ module App
         Utility::Logger.info("Shutting down connector service with pool [#{@pool.class}] and scheduler [#{@scheduler.class}]...")
         running.make_false
         @scheduler.shutdown
-        @pool.shutdown
-        @pool.wait_for_termination(TERMINATION_TIMEOUT)
+        #@pool.shutdown
+        #@pool.wait_for_termination(TERMINATION_TIMEOUT)
       end
 
       private
