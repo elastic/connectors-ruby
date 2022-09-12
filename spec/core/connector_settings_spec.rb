@@ -61,4 +61,81 @@ describe Core::ConnectorSettings do
       end
     end
   end
+
+  context '.fetch_native' do
+    let(:connectors_meta) {
+      {
+        :pipeline => {
+          :default_name => 'foo',
+          :default_extract_binary_content => false,
+          :default_reduce_whitespace => false,
+          :default_run_ml_inference => true
+        }
+      }
+    }
+
+    let(:connectors) do
+      [
+         { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access,
+         { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access,
+         { '_id' => '789', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access
+      ]
+    end
+
+    before(:each) do
+      allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return(connectors_meta)
+    end
+
+    context 'when no paging is needed' do
+      before(:each) do
+        allow(Core::ElasticConnectorActions).to receive(:get_native_connectors).and_return({
+          'hits' => {
+            'hits' => connectors,
+            'total' => {
+              'value' => connectors.size
+            }
+          }
+        })
+      end
+
+      it 'returns three connector settings instances' do
+        results = described_class.fetch_native(page_size = connectors.size)
+
+        expected_connector_ids = results.map { |c| c.id }
+        actual_connector_ids = connectors.map { |c| c['_id'] }
+
+        expect(expected_connector_ids).to eq(actual_connector_ids)
+      end
+    end
+
+    context 'when paging is needed' do
+      before(:each) do
+        (0..2).each do |i|
+          allow(Core::ElasticConnectorActions).to receive(:get_native_connectors).with(anything, i).and_return({
+            'hits' => {
+              'hits' => [ connectors[i] ],
+              'total' => {
+                'value' => connectors.size
+              }
+            }
+          })
+        end
+      end
+
+      it 'returns three connector settings instances' do
+        results = described_class.fetch_native(page_size = 1)
+
+        expected_connector_ids = results.map { |c| c.id }
+        actual_connector_ids = connectors.map { |c| c['_id'] }
+
+        expect(expected_connector_ids).to eq(actual_connector_ids)
+      end
+
+      it 'fetches connectors meta only once' do
+        expect(Core::ElasticConnectorActions).to receive(:connectors_meta).exactly(1).time
+
+        described_class.fetch_native(page_size = 1)
+      end
+    end
+  end
 end

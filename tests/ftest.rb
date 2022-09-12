@@ -115,7 +115,7 @@ def run_sync
   puts("Connector id #{connector_id}")
   puts('Syncing')
 
-  config_settings = Core::ConnectorSettings.fetch(connector_id)
+  config_settings = Core::ConnectorSettings.fetch_by_id(connector_id)
 
   # Creating the mapping for the index
   settings = Utility::Elasticsearch::Index::TextAnalysisSettings.new(:language_code => 'en', :analysis_icu => false).to_h

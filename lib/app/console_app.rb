@@ -47,7 +47,7 @@ module App
       Core::ElasticConnectorActions.force_sync(connector_id)
       puts "Successfully synced for connector #{connector_id}"
 
-      config_settings = Core::ConnectorSettings.fetch(connector_id)
+      config_settings = Core::ConnectorSettings.fetch_by_id(connector_id)
       Core::ElasticConnectorActions.ensure_content_index_exists(config_settings[:index_name])
       Core::SyncJobRunner.new(config_settings, App::Config[:service_type]).execute
     end
@@ -89,7 +89,7 @@ module App
     def enable_scheduling
       return unless connector_registered?
 
-      previous_schedule = Core::ConnectorSettings.fetch(connector_id)&.scheduling_settings&.fetch(:interval, nil)
+      previous_schedule = Core::ConnectorSettings.fetch_by_id(connector_id)&.scheduling_settings&.fetch(:interval, nil)
       if previous_schedule.present?
         puts "Please enter a valid crontab expression for scheduling. Previous schedule was: #{previous_schedule}."
       else
@@ -125,7 +125,7 @@ module App
       Core::ElasticConnectorActions.ensure_content_index_exists(index_name, use_analysis_icu, language_code)
       puts "Successfully registered connector #{index_name} with ID #{id}"
 
-      connector_settings = Core::ConnectorSettings.fetch(id)
+      connector_settings = Core::ConnectorSettings.fetch_by_id(id)
 
       connector_settings.id
     end
@@ -164,7 +164,7 @@ module App
     end
 
     def current_connector
-      connector_settings = Core::ConnectorSettings.fetch(App::Config[:connector_id])
+      connector_settings = Core::ConnectorSettings.fetch_by_id(App::Config[:connector_id])
       service_type = App::Config[:service_type]
       if service_type.present?
         return registry.connector(service_type, connector_settings.configuration)
@@ -190,7 +190,7 @@ module App
 
       connector = current_connector
       connector_class = connector.class
-      current_values = Core::ConnectorSettings.fetch(connector_id)&.configuration
+      current_values = Core::ConnectorSettings.fetch_by_id(connector_id)&.configuration
       return unless connector.present?
 
       puts 'Provided configurable fields:'
@@ -217,7 +217,7 @@ module App
       connector = current_connector
       connector_class = connector.class
 
-      current_values = Core::ConnectorSettings.fetch(connector_id)&.configuration
+      current_values = Core::ConnectorSettings.fetch_by_id(connector_id)&.configuration
       return unless connector.present?
 
       puts 'Persisted values of configurable fields:'

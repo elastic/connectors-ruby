@@ -21,10 +21,12 @@ module Core
     DEFAULT_REDUCE_WHITESPACE = true
     DEFAULT_RUN_ML_INFERENCE = false
 
+    DEFAULT_PAGE_SIZE = 100
+
     # Error Classes
     class ConnectorNotFoundError < StandardError; end
 
-    def self.fetch(connector_id)
+    def self.fetch_by_id(connector_id)
       es_response = ElasticConnectorActions.get_connector(connector_id)
       globals = ElasticConnectorActions.connectors_meta
 
@@ -35,6 +37,14 @@ module Core
     def initialize(es_response, globals)
       @elasticsearch_response = es_response.with_indifferent_access
       @globals = globals.with_indifferent_access
+    end
+
+    def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
+      fetch_connectors_by_query({ term: { is_native: true } })
+    end
+
+    def self.fetch_crawler_connectors
+      fetch_connectors_by_query({ term: { service_type: Utility::Constants::CRAWLER_SERVICE_TYPE } })
     end
 
     def id
@@ -87,6 +97,27 @@ module Core
     end
 
     private
+
+    def self.fetch_connectors_by_query(query, page_size)
+      connectors_meta = ElasticConnectorActions.connectors_meta
+
+      results = []
+      offset = 0
+      loop do
+        puts "#{page_size}, #{offset}"
+        response = ElasticConnectorActions.search_connectors(query, page_size, offset)
+
+        hits = response['hits']['hits']
+        total = response['hits']['total']['value']
+        results += hits.map do |hit|
+          Core::ConnectorSettings.new(hit, connectors_meta)
+        end
+        break if results.size >= total
+        offset += hits.size
+      end
+
+      results
+    end
 
     def return_if_present(*args)
       args.each do |arg|

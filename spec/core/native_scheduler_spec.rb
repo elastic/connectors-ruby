@@ -29,9 +29,8 @@ describe Core::NativeScheduler do
   end
 
   before(:each) do
-    allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return({})
-    allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id1).and_return(connector_settings1)
-    allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id2).and_return(connector_settings2)
+    allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id1).and_return(connector_settings1)
+    allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id2).and_return(connector_settings2)
 
     [connector_settings1, connector_settings2].each { |settings|
       allow(settings).to receive(:connector_status).and_return(connector_status)
@@ -42,7 +41,7 @@ describe Core::NativeScheduler do
       allow(settings).to receive(:scheduling_settings).and_return(scheduling_settings)
     }
 
-    allow(Core::ElasticConnectorActions).to receive(:native_connectors).and_return(native_connectors_settings)
+    allow(Core::ConnectorSettings).to receive(:fetch_native).and_return(native_connectors_settings)
 
     # Also we don't really wanna sleep
     allow_any_instance_of(Object).to receive(:sleep)

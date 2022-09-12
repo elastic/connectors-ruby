@@ -35,7 +35,7 @@ module App
     def pre_flight_check
       raise "#{@service_type} is not a supported connector" unless Connectors::REGISTRY.registered?(@service_type)
       begin
-        connector_settings = Core::ConnectorSettings.fetch(@connector_id)
+        connector_settings = Core::ConnectorSettings.fetch_by_id(@connector_id)
         Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
       rescue Elastic::Transport::Transport::Errors::Unauthorized => e
         raise "Elasticsearch is not authorizing access #{e}"

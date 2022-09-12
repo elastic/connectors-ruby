@@ -15,7 +15,7 @@ describe Core::Heartbeat do
   let(:is_healthy) { true }
 
   before(:each) do
-    allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
+    allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id).and_return(connector_settings)
 
     allow(Core::ElasticConnectorActions).to receive(:update_connector_fields)
 
@@ -123,7 +123,7 @@ describe Core::Heartbeat do
         let(:error) { 'something really bad happened' }
 
         before(:each) do
-          allow(Core::ConnectorSettings).to receive(:fetch).and_raise(error)
+          allow(Core::ConnectorSettings).to receive(:fetch_by_id).and_raise(error)
         end
 
         it 'does not raise an error' do
