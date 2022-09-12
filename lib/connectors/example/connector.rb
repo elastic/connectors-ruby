@@ -33,7 +33,7 @@ module Connectors
         super
       end
 
-      def do_health_check(_params)
+      def do_health_check
         # Do the health check by trying to access 3rd-party system just to verify that everything is set up properly.
         #
         # To emulate unhealthy 3rd-party system situation, uncomment the following line:

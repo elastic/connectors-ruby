@@ -19,7 +19,7 @@ describe Connectors::Example::Connector do
 
   context '#is_healthy?' do
     it 'returns ok' do
-      expect(subject.is_healthy?({})).to eq(true)
+      expect(subject.is_healthy?).to eq(true)
     end
   end
 
