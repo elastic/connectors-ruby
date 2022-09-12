@@ -53,6 +53,8 @@ module Core
       begin
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
+        @connector_instance.do_health_check!
+
         incoming_ids = []
         existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
 

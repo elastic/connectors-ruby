@@ -25,32 +25,29 @@ describe Connectors::GitLab::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#source_status' do
+  context '#is_healthy?' do
     it 'correctly returns true on 200' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 200, :body => user_json)
-      result = subject.source_status
+      result = subject.is_healthy?
 
-      expect(result).to_not be_nil
-      expect(result[:status]).to eq('OK')
+      expect(result).to eq(true)
     end
 
     it 'correctly returns false on 401' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 401, :body => '{ "error": "wrong token" }')
-      result = subject.source_status
+      result = subject.is_healthy?
 
-      expect(result).to_not be_nil
-      expect(result[:status]).to eq('FAILURE')
+      expect(result).to eq(false)
     end
 
     it 'correctly returns false on 400' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 401, :body => '{ "error": "wrong token" }')
-      result = subject.source_status
+      result = subject.is_healthy?
 
-      expect(result).to_not be_nil
-      expect(result[:status]).to eq('FAILURE')
+      expect(result).to eq(false)
     end
   end
 

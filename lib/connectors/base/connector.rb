@@ -8,7 +8,8 @@
 
 require 'bson'
 require 'core/output_sink'
-require 'utility/logger'
+require 'utility/exception_tracking'
+require 'utility/errors'
 require 'app/config'
 
 module Connectors
@@ -33,11 +34,24 @@ module Connectors
 
       def yield_documents; end
 
-      def source_status(params = {})
-        health_check(params)
-        { :status => 'OK', :statusCode => 200, :message => "Connected to #{self.class.display_name}" }
+      def do_health_check(_params)
+        raise 'Not implemented for this connector'
+      end
+
+      def do_health_check!(params)
+        do_health_check(params)
       rescue StandardError => e
-        { :status => 'FAILURE', :statusCode => 500, :message => e.message }
+        Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
+        raise Utility::Errors::HealthCheckFailedError.new
+      end
+
+      def is_healthy?(params = {})
+        do_health_check(params)
+
+        true
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
+        false
       end
     end
   end

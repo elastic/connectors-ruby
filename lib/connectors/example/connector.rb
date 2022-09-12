@@ -33,8 +33,11 @@ module Connectors
         super
       end
 
-      def health_check(_params)
-        true
+      def do_health_check(_params)
+        # Do the health check by trying to access 3rd-party system just to verify that everything is set up properly.
+        #
+        # To emulate unhealthy 3rd-party system situation, uncomment the following line:
+        # raise 'something went wrong'
       end
 
       def yield_documents

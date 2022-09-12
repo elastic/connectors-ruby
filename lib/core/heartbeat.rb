@@ -58,7 +58,7 @@ module Core
           Utility::Logger.info("Changing connector status to #{new_connector_status}.")
         elsif connector_settings.connector_status_allows_sync?
           connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
-          doc[:status] = connector_instance.source_status[:status] == 'OK' ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
+          doc[:status] = connector_instance.is_healthy? ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
         end
 
         Core::ElasticConnectorActions.update_connector_fields(connector_id, doc)

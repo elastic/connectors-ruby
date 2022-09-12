@@ -17,9 +17,9 @@ describe Connectors::Example::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#source_status' do
+  context '#is_healthy?' do
     it 'returns ok' do
-      expect(subject.source_status({})).to include(:status => 'OK')
+      expect(subject.is_healthy?({})).to eq(true)
     end
   end
 
