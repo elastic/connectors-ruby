@@ -47,7 +47,7 @@ module Core
       end
 
       def crawler_connectors
-        connectors({ term: { service_type: CRAWLER_SERVICE_TYPE } })
+        connectors({ term: { service_type: Utility::Constants::CRAWLER_SERVICE_TYPE } })
       end
 
       def connectors(query)
