@@ -57,7 +57,7 @@ module Connectors
       private
 
       def do_health_check
-        with_client(@host, @database) do |client|
+        with_client(@host, @database) do |_client|
           Utility::Logger.debug("Mongo at #{@host}/#{@database} looks healthy.")
         end
       end
@@ -76,9 +76,6 @@ module Connectors
         ensure
           client.close
         end
-      end
-
-      def create_client(host, database)
       end
 
       def transform!(mongodb_document)
