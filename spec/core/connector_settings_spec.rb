@@ -99,9 +99,9 @@ describe Core::ConnectorSettings do
       end
 
       it 'returns three connector settings instances' do
-        results = described_class.fetch_native(page_size = connectors.size)
+        results = described_class.fetch_native(connectors.size)
 
-        expected_connector_ids = results.map { |c| c.id }
+        expected_connector_ids = results.map(&:id)
         actual_connector_ids = connectors.map { |c| c['_id'] }
 
         expect(expected_connector_ids).to eq(actual_connector_ids)
@@ -113,7 +113,7 @@ describe Core::ConnectorSettings do
         (0..2).each do |i|
           allow(Core::ElasticConnectorActions).to receive(:get_native_connectors).with(anything, i).and_return({
             'hits' => {
-              'hits' => [ connectors[i] ],
+              'hits' => [connectors[i]],
               'total' => {
                 'value' => connectors.size
               }
@@ -123,9 +123,9 @@ describe Core::ConnectorSettings do
       end
 
       it 'returns three connector settings instances' do
-        results = described_class.fetch_native(page_size = 1)
+        results = described_class.fetch_native(1)
 
-        expected_connector_ids = results.map { |c| c.id }
+        expected_connector_ids = results.map(&:id)
         actual_connector_ids = connectors.map { |c| c['_id'] }
 
         expect(expected_connector_ids).to eq(actual_connector_ids)
@@ -134,7 +134,7 @@ describe Core::ConnectorSettings do
       it 'fetches connectors meta only once' do
         expect(Core::ElasticConnectorActions).to receive(:connectors_meta).exactly(1).time
 
-        described_class.fetch_native(page_size = 1)
+        described_class.fetch_native(1)
       end
     end
   end
