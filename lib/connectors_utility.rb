@@ -6,7 +6,11 @@
 
 # frozen_string_literal: true
 
-require_relative 'utility/es_client'
-require_relative 'utility/logger'
-require_relative 'utility/elasticsearch/index/text_analysis_settings'
-require_relative 'utility/elasticsearch/index/mappings'
+require_relative 'utility'
+
+require_relative 'connectors/connector_status'
+require_relative 'connectors/sync_status'
+require_relative 'core/scheduler'
+require_relative 'core/elastic_connector_actions'
+
+require_relative 'connectors/crawler/scheduler'
