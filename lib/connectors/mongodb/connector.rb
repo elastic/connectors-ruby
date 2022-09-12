@@ -44,33 +44,41 @@ module Connectors
       end
 
       def yield_documents
-        mongodb_client = create_client(@host, @database)
+        with_client(@host, @database) do |client|
+          client[@collection].find.each do |document|
+            doc = document.with_indifferent_access
+            transform!(doc)
 
-        mongodb_client[@collection].find.each do |document|
-          doc = document.with_indifferent_access
-          transform!(doc)
-
-          yield doc
+            yield doc
+          end
         end
       end
 
       private
 
       def do_health_check
-        create_client(@host, @database)
+        with_client(@host, @database) do |client|
+          Utility::Logger.debug("Mongo at #{@host}/#{@database} looks healthy.")
+        end
       end
 
-      def create_client(host, database)
+      def with_client(host, database)
         client = Mongo::Client.new([host],
                                    :connect => :direct,
                                    :database => database)
+        begin
+          Utility::Logger.debug("Existing Databases #{client.database_names}")
+          Utility::Logger.debug('Existing Collections:')
 
-        Utility::Logger.debug("Existing Databases #{client.database_names}")
-        Utility::Logger.debug('Existing Collections:')
+          client.collections.each { |coll| Utility::Logger.debug(coll.name) }
 
-        client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+          yield client
+        ensure
+          client.close
+        end
+      end
 
-        client
+      def create_client(host, database)
       end
 
       def transform!(mongodb_document)
