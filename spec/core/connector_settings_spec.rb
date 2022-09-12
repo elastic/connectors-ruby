@@ -62,7 +62,7 @@ describe Core::ConnectorSettings do
     end
   end
 
-  context '.fetch_native' do
+  context '.fetch_native_connectors' do
     let(:connectors_meta) {
       {
         :pipeline => {
@@ -88,7 +88,7 @@ describe Core::ConnectorSettings do
 
     context 'when no paging is needed' do
       before(:each) do
-        allow(Core::ElasticConnectorActions).to receive(:get_native_connectors).and_return({
+        allow(Core::ElasticConnectorActions).to receive(:search_connectors).and_return({
           'hits' => {
             'hits' => connectors,
             'total' => {
@@ -99,7 +99,7 @@ describe Core::ConnectorSettings do
       end
 
       it 'returns three connector settings instances' do
-        results = described_class.fetch_native(connectors.size)
+        results = described_class.fetch_native_connectors(connectors.size)
 
         expected_connector_ids = results.map(&:id)
         actual_connector_ids = connectors.map { |c| c['_id'] }
@@ -111,7 +111,7 @@ describe Core::ConnectorSettings do
     context 'when paging is needed' do
       before(:each) do
         (0..2).each do |i|
-          allow(Core::ElasticConnectorActions).to receive(:get_native_connectors).with(anything, i).and_return({
+          allow(Core::ElasticConnectorActions).to receive(:search_connectors).with(anything, anything, i).and_return({
             'hits' => {
               'hits' => [connectors[i]],
               'total' => {
@@ -123,7 +123,7 @@ describe Core::ConnectorSettings do
       end
 
       it 'returns three connector settings instances' do
-        results = described_class.fetch_native(1)
+        results = described_class.fetch_native_connectors(1)
 
         expected_connector_ids = results.map(&:id)
         actual_connector_ids = connectors.map { |c| c['_id'] }
@@ -134,7 +134,7 @@ describe Core::ConnectorSettings do
       it 'fetches connectors meta only once' do
         expect(Core::ElasticConnectorActions).to receive(:connectors_meta).exactly(1).time
 
-        described_class.fetch_native(1)
+        described_class.fetch_native_connectors(1)
       end
     end
   end

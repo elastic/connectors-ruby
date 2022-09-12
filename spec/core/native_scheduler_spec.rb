@@ -41,7 +41,7 @@ describe Core::NativeScheduler do
       allow(settings).to receive(:scheduling_settings).and_return(scheduling_settings)
     }
 
-    allow(Core::ConnectorSettings).to receive(:fetch_native).and_return(native_connectors_settings)
+    allow(Core::ConnectorSettings).to receive(:fetch_native_connectors).and_return(native_connectors_settings)
 
     # Also we don't really wanna sleep
     allow_any_instance_of(Object).to receive(:sleep)

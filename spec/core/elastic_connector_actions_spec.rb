@@ -154,16 +154,17 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#get_native_connectors' do
+  context '#search_connectors' do
     let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
     let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
+    let(:query) { { :term => { :is_native => true } } }
     let(:offset) { 0 }
     let(:page_size) { 10 }
     before(:each) do
       allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => { 'value' => 2 } } })
     end
     it 'returns all native connectors' do
-      connectors = described_class.get_native_connectors(page_size, offset)
+      connectors = described_class.search_connectors(query, page_size, offset)
       expect(connectors['hits']['hits'].size).to eq(2)
       expect(connectors['hits']['hits'][0]['_id']).to eq(connector_one['_id'])
       expect(connectors['hits']['hits'][1]['_id']).to eq(connector_two['_id'])
