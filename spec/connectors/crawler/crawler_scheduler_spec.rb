@@ -1,10 +1,10 @@
 require 'core/connector_settings'
-require 'core/crawler_scheduler'
+require 'connectors/crawler/scheduler'
 require 'core/elastic_connector_actions'
 require 'active_support/core_ext/numeric/time'
 require 'timecop'
 
-describe Core::CrawlerScheduler do
+describe Connectors::Crawler::Scheduler do
   subject { described_class.new(poll_interval) }
 
   let(:connector_id1) { '123' }

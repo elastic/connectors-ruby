@@ -32,8 +32,8 @@ Gem::Specification.new do |s|
                     lib/utility/elasticsearch/index/language_data.yml
                     lib/connectors/sync_status.rb
                     lib/core/scheduler.rb
-                    lib/core/crawler_scheduler.rb
                     lib/connectors/connector_status.rb
+                    lib/connectors/crawler/scheduler.rb
                     lib/core/elastic_connector_actions.rb
                     lib/core/connector_settings.rb
                   ]
