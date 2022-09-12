@@ -266,6 +266,7 @@ module App
     end
   rescue App::PreflightCheck::CheckFailure => e
     Utility::Logger.error("Preflight check failed: #{e.message}")
+    exit(-1)
   rescue SystemExit
     puts 'Exiting.'
   rescue Interrupt

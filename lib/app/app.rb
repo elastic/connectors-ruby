@@ -24,5 +24,6 @@ module App
     worker.start!
   rescue App::PreflightCheck::CheckFailure => e
     Utility::Logger.error("Preflight check failed: #{e.message}")
+    exit(-1)
   end
 end
