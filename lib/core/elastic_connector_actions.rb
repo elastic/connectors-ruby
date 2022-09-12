@@ -7,7 +7,6 @@
 # frozen_string_literal: true
 #
 require 'active_support/core_ext/hash'
-require 'app/config'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
@@ -44,6 +43,14 @@ module Core
       end
 
       def native_connectors
+        connectors({ term: { is_native: true } })
+      end
+
+      def crawler_connectors
+        connectors({ term: { service_type: Utility::Constants::CRAWLER_SERVICE_TYPE } })
+      end
+
+      def connectors(query)
         globals = connectors_meta
         result = []
         offset = 0
@@ -54,9 +61,7 @@ module Core
             :body => {
               :size => DEFAULT_PAGE_SIZE,
               :from => offset,
-              :query => {
-                :term => { :is_native => true }
-              },
+              :query => query,
               :sort => ['name']
             }
           )

@@ -4,13 +4,16 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+# frozen_string_literal: true
+
 module Utility
   class Constants
     THUMBNAIL_FIELDS = %w[_thumbnail_80x100 _thumbnail_310x430].freeze
     SUBEXTRACTOR_RESERVED_FIELDS = %w[_subextracted_as_of _subextracted_version].freeze
-    ALLOW_FIELD = '_allow_permissions'.freeze
-    DENY_FIELD = '_deny_permissions'.freeze
-    CONNECTORS_INDEX = '.elastic-connectors'.freeze
-    JOB_INDEX = '.elastic-connectors-sync-jobs'.freeze
+    ALLOW_FIELD = '_allow_permissions'
+    DENY_FIELD = '_deny_permissions'
+    CONNECTORS_INDEX = '.elastic-connectors'
+    JOB_INDEX = '.elastic-connectors-sync-jobs'
+    CRAWLER_SERVICE_TYPE = 'elastic-crawler'
   end
 end
