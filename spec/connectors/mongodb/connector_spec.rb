@@ -49,7 +49,7 @@ describe Connectors::MongoDB::Connector do
     it 'instantiates a mongodb client' do
       expect(Mongo::Client).to receive(:new).with([mongodb_host], hash_including(:database => mongodb_database))
 
-      subject.is_healthy?({})
+      subject.is_healthy?
     end
   end
 
