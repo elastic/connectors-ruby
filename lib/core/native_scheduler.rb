@@ -18,6 +18,7 @@ module Core
       Core::ElasticConnectorActions.native_connectors || []
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, 'Could not retrieve native connectors due to unexpected error.')
+      []
     end
   end
 end
