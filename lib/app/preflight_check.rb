@@ -53,9 +53,10 @@ module App
       #-------------------------------------------------------------------------------------------------
       # Ensures that the required system indices of connector service exist
       def check_system_indices!
-        unless client.indices.exists?(:index => Utility::Constants::CONNECTORS_INDEX) && client.indices.exists?(:index => Utility::Constants::JOB_INDEX)
-          fail_check!('Required system indices for connector service don\'t exist. Make sure to run Kibana first to create system indices.')
-        end
+        check_system_indices_with_retries!(
+          :retry_interval => STARTUP_RETRY_INTERVAL,
+          :retry_timeout => STARTUP_RETRY_TIMEOUT
+        )
       end
 
       def check_es_connection_with_retries!(retry_interval:, retry_timeout:)
@@ -93,6 +94,22 @@ module App
 
       def parse_minor_version(version)
         version.split('.').slice(0, 2).join('.')
+      end
+
+      def check_system_indices_with_retries!(retry_interval:, retry_timeout:)
+        started_at = Time.now
+        loop do
+          if client.indices.exists?(:index => Utility::Constants::CONNECTORS_INDEX) && client.indices.exists?(:index => Utility::Constants::JOB_INDEX)
+            Utility::Logger.info("Found system indices #{Utility::Constants::CONNECTORS_INDEX} and #{Utility::Constants::JOB_INDEX}.")
+            return
+          end
+          Utility::Logger.warn('Required system indices for connector service don\'t exist. Make sure to run Kibana first to create system indices.')
+          sleep(retry_interval)
+          time_elapsed = Time.now - started_at
+          if time_elapsed > retry_timeout
+            fail_check!("Could not find required system indices after #{time_elapsed.to_i} seconds. Terminating...")
+          end
+        end
       end
 
       def client

@@ -81,10 +81,29 @@ describe App::PreflightCheck do
         end
 
         context 'when Elasticsearch version matches connector service version' do
+          let(:indices) { double }
+
           before(:each) do
             stub_const('App::VERSION', '8.4.0.0-foobar')
-            allow(client).to receive_message_chain(:indices, :exists?).with(:index => Utility::Constants::CONNECTORS_INDEX).and_return(connector_index_exist)
-            allow(client).to receive_message_chain(:indices, :exists?).with(:index => Utility::Constants::JOB_INDEX).and_return(job_index_exist)
+            allow(client).to receive(:indices).and_return(indices)
+            allow(indices).to receive(:exists?).with(:index => Utility::Constants::CONNECTORS_INDEX).and_return(connector_index_exist)
+            allow(indices).to receive(:exists?).with(:index => Utility::Constants::JOB_INDEX).and_return(job_index_exist)
+          end
+
+          context 'with retries' do
+            let(:connector_index_exist) { true }
+            let(:job_index_exist) { false }
+
+            before(:each) do
+              stub_const('App::PreflightCheck::STARTUP_RETRY_INTERVAL', 1)
+              stub_const('App::PreflightCheck::STARTUP_RETRY_TIMEOUT', 3)
+            end
+
+            it 'should retry multiple times and fail the check' do
+              expect(indices).to receive(:exists?).with(:index => Utility::Constants::CONNECTORS_INDEX).at_least(2).times
+              expect(indices).to receive(:exists?).with(:index => Utility::Constants::JOB_INDEX).at_least(2).times
+              expect { described_class.run! }.to raise_error(described_class::CheckFailure)
+            end
           end
 
           context 'when both indices exist' do
