@@ -21,6 +21,9 @@ module Core
     def connector_settings
       connector_settings = Core::ConnectorSettings.fetch(@connector_id)
       [connector_settings]
+    rescue StandardError => e
+      Utility::ExceptionTracking.log_exception(e, "Could not retrieve the connector by id #{@connector_id} due to unexpected error.")
+      []
     end
   end
 end

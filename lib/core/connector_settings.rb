@@ -32,6 +32,11 @@ module Core
       new(es_response, globals)
     end
 
+    def initialize(es_response, globals)
+      @elasticsearch_response = es_response.with_indifferent_access
+      @globals = globals.with_indifferent_access
+    end
+
     def id
       @elasticsearch_response[:_id]
     end
@@ -82,11 +87,6 @@ module Core
     end
 
     private
-
-    def initialize(es_response, globals)
-      @elasticsearch_response = es_response
-      @globals = globals
-    end
 
     def return_if_present(*args)
       args.each do |arg|
