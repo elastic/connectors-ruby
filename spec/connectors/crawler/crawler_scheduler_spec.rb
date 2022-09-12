@@ -14,8 +14,10 @@ describe Connectors::Crawler::Scheduler do
   let(:crawler1) { { :_id => connector_id1 } }
   let(:crawler2) { { :_id => connector_id2 } }
 
-  let(:connector_settings1) { Core::ConnectorSettings.new(crawler1) }
-  let(:connector_settings2) { Core::ConnectorSettings.new(crawler2) }
+  let(:globals) { {} }
+
+  let(:connector_settings1) { Core::ConnectorSettings.new(crawler1, globals) }
+  let(:connector_settings2) { Core::ConnectorSettings.new(crawler2, globals) }
 
   let(:last_synced) { Time.now - 1.day }
   let(:sync_now) { false }
@@ -28,6 +30,7 @@ describe Connectors::Crawler::Scheduler do
   end
 
   before(:each) do
+    allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return({})
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id1).and_return(connector_settings1)
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id2).and_return(connector_settings2)
 
