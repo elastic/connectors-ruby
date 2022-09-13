@@ -39,6 +39,7 @@ describe Connectors::MongoDB::Connector do
     allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => mongodb_collection })])
     allow(mongo_client).to receive(:database_names).and_return([Hashie::Mash.new({ :name => mongodb_database })])
     allow(mongo_client).to receive(:[]).with(mongodb_collection).and_return(actual_collection)
+    allow(mongo_client).to receive(:close)
 
     allow(actual_collection).to receive(:find).and_return(actual_collection_data)
   end
@@ -51,9 +52,21 @@ describe Connectors::MongoDB::Connector do
 
       subject.is_healthy?
     end
+
+    it 'closes a client in the end' do
+      expect(mongo_client).to receive(:close)
+
+      subject.is_healthy?
+    end
   end
 
   context '#yield_documents' do
+    it 'closes a client in the end' do
+      expect(mongo_client).to receive(:close)
+
+      subject.yield_documents { |doc| }
+    end
+
     context 'when database is not found' do
       xit 'no error is raised' do
         # Leaving this here to describe the work of MongoDB client:
