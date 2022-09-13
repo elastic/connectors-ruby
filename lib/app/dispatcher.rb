@@ -17,63 +17,86 @@ module App
   class Dispatcher
     POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
     TERMINATION_TIMEOUT = (App::Config[:termination_timeout] || 60).to_i
+    MIN_THREADS = (App::Config.thread_pool&.min_threads || 0).to_i
+    MAX_THREADS = (App::Config.thread_pool&.max_threads || 5).to_i
+    MAX_QUEUE = (App::Config.thread_pool&.max_queue || 100).to_i
 
-    attr_reader :scheduler
+    @running = Concurrent::AtomicBoolean.new(false)
 
-    def initialize
-      @pool = Concurrent::ThreadPoolExecutor.new(
-        min_threads: 5,
-        max_threads: 10,
-        max_queue: 100,
-        fallback_policy: :abort
-      )
-      @is_shutting_down = false
-      @heartbeats = {}
-    end
-
-    def start!
-      @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
-      @scheduler.when_triggered do |connector_settings|
-        service_type = connector_settings.service_type
-        connector_id = connector_settings.id
-
-        # connector-level checks
-        Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-        raise "[#{service_type}] is not a supported connector" unless Connectors::REGISTRY.registered?(service_type)
-
-        @pool.post do
-          send_heartbeat(connector_id, service_type)
-          Utility::Logger.info("Starting a job for [#{service_type} - #{connector_id}]...")
-          job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
-          job_runner.execute
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, "Job for [#{service_type} - #{connector_id}] failed due to unexpected error.")
-        end
+    class << self
+      def start!
+        running!
+        Utility::Logger.info('Starting connector service...')
+        start_polling_jobs!
       end
-    rescue StandardError => e
-      Utility::ExceptionTracking.log_exception(e, 'Dispatcher failed due to unexpected error.')
-    end
 
-    def shutdown
-      Utility::Logger.info("Shutting down dispatcher with pool [#{@pool&.class}] and scheduler [#{@scheduler&.class}]...")
-      @is_shutting_down = true
-      @scheduler&.shutdown
-      @pool.shutdown
-      @pool.wait_for_termination(TERMINATION_TIMEOUT)
-    end
+      def shutdown!
+        Utility::Logger.info("Shutting down connector service with pool [#{pool.class}] and scheduler [#{scheduler.class}]...")
+        running.make_false
+        scheduler.shutdown
+        pool.shutdown
+        pool.wait_for_termination(TERMINATION_TIMEOUT)
+      end
 
-    private
+      private
 
-    def send_heartbeat(connector_id, service_type)
-      Utility::Logger.info("Sending a heartbeat on [#{connector_id} - #{service_type}]...")
-      Core::Heartbeat.send(connector_id, service_type)
-    end
+      attr_reader :running
 
-    def self.run_dispatcher!
-      # Dispatcher is responsible for dispatching connectors to workers.
-      Utility::Logger.info('Starting dispatcher...')
-      dispatcher = App::Dispatcher.new
-      dispatcher.start!
+      def running!
+        raise 'connector service is already running!' unless running.make_true
+      end
+
+      def pool
+        @pool ||= Concurrent::ThreadPoolExecutor.new(
+          min_threads: MIN_THREADS,
+          max_threads: MAX_THREADS,
+          max_queue: MAX_QUEUE,
+          fallback_policy: :abort
+        )
+      end
+
+      def scheduler
+        @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
+      end
+
+      def start_polling_jobs!
+        scheduler.when_triggered do |connector_settings|
+          service_type = connector_settings.service_type
+          connector_id = connector_settings.id
+          index_name = connector_settings.index_name
+
+          # connector-level checks
+          unless Connectors::REGISTRY.registered?(service_type)
+            Utility::Logger.info("The service type (#{service_type}) of connector (ID: #{connector_id}) is not supported. Skipping...")
+            next
+          end
+          if index_name.nil? || index_name.empty?
+            Utility::Logger.info("The index name of connector (ID: #{connector_id}, service type: #{service_type}) is empty. Skipping...")
+            next
+          end
+          unless index_name.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
+            Utility::Logger.info("The index name of connector (ID: #{connector_id}, service type: #{service_type}) is invalid, it must start with '#{Utility::Constants::CONTENT_INDEX_PREFIX}'. Skipping...")
+            next
+          end
+          Core::ElasticConnectorActions.ensure_content_index_exists(index_name)
+
+          pool.post do
+            send_heartbeat(connector_id, service_type)
+            Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
+            job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
+            job_runner.execute
+          rescue StandardError => e
+            Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
+          end
+        end
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, 'connector service failed due to unexpected error.')
+      end
+
+      def send_heartbeat(connector_id, service_type)
+        Utility::Logger.info("Sending a heartbeat on [#{connector_id} - #{service_type}]...")
+        Core::Heartbeat.send(connector_id, service_type)
+      end
     end
   end
 end

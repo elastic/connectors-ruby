@@ -5,130 +5,133 @@
 #
 # frozen_string_literal: true
 
-require 'active_support/core_ext/hash'
 require 'core'
-require 'app/worker'
 require 'app/dispatcher'
-require 'app/preflight_check'
 
 describe App::Dispatcher do
-  let(:mock_scheduler) do
-    double
-  end
-
-  let(:simple_pool) do
-    Concurrent::ImmediateExecutor.new
-  end
-
-  let(:connector_id1) { '123' }
-  let(:connector_id2) { '456' }
-
-  let(:connector_settings1) { double }
-  let(:connector_settings2) { double }
-
-  let(:mock_job_runner) { double }
-
-  before do
-    allow(App::PreflightCheck).to receive(:run!)
-    allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
-
-    allow(Core::Heartbeat).to receive(:send)
-
-    allow(Core::SyncJobRunner).to receive(:new).and_return(mock_job_runner)
-    allow(mock_job_runner).to receive(:execute)
-
-    subject.instance_variable_set(:@pool, simple_pool)
-    stub_const('App::Dispatcher::POLL_IDLING', 1)
-    stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
-    stub_const('Core::SyncJobRunner', Core::SyncJobRunner)
-  end
+  let(:scheduler) { double }
+  let(:pool) { double }
+  let(:job_runner) { double }
 
   before(:each) do
-    subject.instance_variable_set(:@is_shutting_down, true) # prevent infinite loop - run just one cycle
-    allow(Core::NativeScheduler).to receive(:new).and_return(mock_scheduler)
-    allow(mock_scheduler).to receive(:when_triggered)
-    allow(simple_pool).to receive(:post).and_call_original
-    allow(Object).to receive(:sleep) # don't really want to sleep
+    allow(described_class).to receive(:scheduler).and_return(scheduler)
+    allow(described_class).to receive(:pool).and_return(pool)
 
-    allow(Utility::ExceptionTracking).to receive(:log_exception).and_call_original
+    allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
+    allow(pool).to receive(:post).and_yield
+    allow(Core::SyncJobRunner).to receive(:new).and_return(job_runner)
+    allow(Core::Heartbeat).to receive(:send)
+    allow(job_runner).to receive(:execute)
+    allow(Utility::ExceptionTracking).to receive(:log_exception)
 
-    allow(connector_settings1).to receive(:id).and_return(connector_id1)
-    allow(connector_settings1).to receive(:index_name).and_return('connector1')
-    allow(connector_settings2).to receive(:id).and_return(connector_id2)
-    allow(connector_settings2).to receive(:index_name).and_return('connector2')
-
-    [connector_settings1, connector_settings2].each { |cs| allow(cs).to receive(:service_type).and_return('example') }
+    stub_const('App::Dispatcher::POLL_IDLING', 1)
+    stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
   end
 
-  describe '#start!' do
-    context 'when no native connectors' do
-      it 'starts no sync jobs' do
-        subject.start!
+  after(:each) do
+    described_class.instance_variable_set(:@running, Concurrent::AtomicBoolean.new(false))
+  end
 
-        expect(subject.scheduler).to_not be_nil
-        expect(simple_pool).to_not have_received(:post)
-        expect(Core::Heartbeat).to_not have_received(:send)
+  describe '.start!' do
+    context 'when it\'s called twice' do
+      before(:each) do
+        allow(described_class).to receive(:start_polling_jobs!)
+        described_class.start!
+      end
+
+      it 'raises error' do
+        expect { described_class.start! }.to raise_error
       end
     end
 
-    context 'when one native connector' do
+    context 'without native connectors' do
       before(:each) do
-        allow(mock_scheduler).to receive(:when_triggered).and_yield(connector_settings1)
+        allow(scheduler).to receive(:when_triggered)
+      end
+      it 'starts no sync jobs' do
+        expect(Core::Heartbeat).to_not receive(:send)
+        expect(job_runner).to_not receive(:execute)
+        described_class.start!
+      end
+    end
+
+    context 'with native connectors' do
+      let(:connector_settings) { double }
+      let(:id) { '123' }
+      let(:service_type) { 'example' }
+      let(:index_name) { 'search-foobar' }
+
+      before(:each) do
+        allow(connector_settings).to receive(:id).and_return(id)
+        allow(connector_settings).to receive(:service_type).and_return(service_type)
+        allow(connector_settings).to receive(:index_name).and_return(index_name)
+
+        allow(scheduler).to receive(:when_triggered).and_yield(connector_settings)
+        allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(true)
       end
 
-      it 'starts one sync job' do
-        subject.start!
+      it 'starts sync job' do
+        expect(Core::Heartbeat).to receive(:send)
+        expect(job_runner).to receive(:execute)
+        expect { described_class.start! }.to_not raise_error
+      end
 
-        expect(subject.scheduler).to_not be_nil
-        expect(simple_pool).to have_received(:post)
+      context 'when service type is not supported' do
+        before(:each) do
+          allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(false)
+        end
 
-        expect(Core::ElasticConnectorActions).to have_received(:ensure_content_index_exists).once
+        it 'should not sync' do
+          expect(Core::Heartbeat).to_not receive(:send)
+          expect(job_runner).to_not receive(:execute)
+          expect { described_class.start! }.to_not raise_error
+        end
+      end
 
-        expect(Core::Heartbeat).to have_received(:send).with(connector_id1, 'example').once
+      context 'when index name is empty' do
+        let(:index_name) { '' }
+
+        it 'should not sync' do
+          expect(Core::Heartbeat).to_not receive(:send)
+          expect(job_runner).to_not receive(:execute)
+          expect { described_class.start! }.to_not raise_error
+        end
+      end
+
+      context 'when index name is invalid' do
+        let(:index_name) { 'foobar' }
+
+        it 'should not sync' do
+          expect(Core::Heartbeat).to_not receive(:send)
+          expect(job_runner).to_not receive(:execute)
+          expect { described_class.start! }.to_not raise_error
+        end
       end
 
       context 'when sync throws an error' do
         before(:each) do
-          allow(mock_job_runner).to receive(:execute).and_raise('Oh no!')
+          allow(job_runner).to receive(:execute).and_raise('Oh no!')
         end
-        it 'logs an error when execute fails' do
-          subject.start!
 
-          expect(Utility::ExceptionTracking).to have_received(:log_exception).with(anything, match(/123/))
+        it 'logs an error when execute fails' do
+          expect(Utility::ExceptionTracking).to receive(:log_exception).with(anything, match(/123/))
+          expect { described_class.start! }.to_not raise_error
         end
       end
     end
   end
 
-  context 'when two native connectors' do
+  describe '.shutdown!' do
     before(:each) do
-      allow(mock_scheduler).to receive(:when_triggered).and_yield(connector_settings1).and_yield(connector_settings2)
+      allow(described_class).to receive(:start_polling_jobs!)
+      described_class.start!
     end
 
-    it 'starts two sync jobs' do
-      subject.start!
-
-      expect(subject.scheduler).to_not be_nil
-      expect(simple_pool).to have_received(:post).twice
-
-      expect(Core::ElasticConnectorActions).to have_received(:ensure_content_index_exists).twice
-
-      expect(Core::Heartbeat).to have_received(:send).with(connector_id1, 'example').once
-      expect(Core::Heartbeat).to have_received(:send).with(connector_id2, 'example').once
-    end
-  end
-
-  describe '#shutdown' do
-    before(:each) do
-      allow(simple_pool).to receive(:shutdown)
-      subject.instance_variable_set(:@is_shutting_down, false)
-    end
-
-    it 'shutdowns correctly' do
-      subject.shutdown
-
-      expect(simple_pool).to have_received(:shutdown)
-      expect(subject.instance_variable_get(:@is_shutting_down)).to eq(true)
+    it 'shuts down correctly' do
+      expect(scheduler).to receive(:shutdown)
+      expect(pool).to receive(:shutdown)
+      expect(pool).to receive(:wait_for_termination)
+      described_class.shutdown!
     end
   end
 end

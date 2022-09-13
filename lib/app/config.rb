@@ -37,8 +37,14 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       optional(:log).value(:bool?)
     end
 
-    required(:connector_id).value(:string)
-    required(:service_type).value(:string)
+    optional(:thread_pool).hash do
+      optional(:min_threads).value(:integer, gteq?: 0)
+      optional(:max_threads).value(:integer, gteq?: 0)
+      optional(:max_queue).value(:integer, gteq?: 0)
+    end
+
+    optional(:connector_id).value(:string)
+    optional(:service_type).value(:string)
     required(:log_level).value(:string)
 
     optional(:idle_timeout).value(:integer)

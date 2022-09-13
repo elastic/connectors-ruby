@@ -14,6 +14,7 @@ module Utility
     DENY_FIELD = '_deny_permissions'
     CONNECTORS_INDEX = '.elastic-connectors'
     JOB_INDEX = '.elastic-connectors-sync-jobs'
+    CONTENT_INDEX_PREFIX = 'search-'
     CRAWLER_SERVICE_TYPE = 'elastic-crawler'
   end
 end

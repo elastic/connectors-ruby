@@ -15,11 +15,9 @@ require 'utility/exception_tracking'
 
 module Core
   class Scheduler
-    attr_reader :is_shutting_down
-
     def initialize(poll_interval)
       @poll_interval = poll_interval
-      @is_shutting_down = is_shutting_down
+      @is_shutting_down = false
     end
 
     def connector_settings
@@ -88,7 +86,11 @@ module Core
         return false
       end
 
-      current_schedule = Utility::Cron.quartz_to_crontab(current_schedule)
+      current_schedule = begin
+        Utility::Cron.quartz_to_crontab(current_schedule)
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, "Unable to convert quartz (#{current_schedule}) to crontab.")
+      end
       cron_parser = Fugit::Cron.parse(current_schedule)
 
       # Don't sync if the scheduling interval is non-parsable
