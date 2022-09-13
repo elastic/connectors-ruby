@@ -17,6 +17,9 @@ module App
   class Dispatcher
     POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
     TERMINATION_TIMEOUT = (App::Config[:termination_timeout] || 60).to_i
+    MIN_THREADS = (App::Config.thread_pool&.min_threads || 0).to_i
+    MAX_THREADS = (App::Config.thread_pool&.max_threads || 5).to_i
+    MAX_QUEUE = (App::Config.thread_pool&.max_queue || 100).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
 
@@ -45,9 +48,9 @@ module App
 
       def pool
         @pool ||= Concurrent::ThreadPoolExecutor.new(
-          min_threads: 5,
-          max_threads: 10,
-          max_queue: 100,
+          min_threads: MIN_THREADS,
+          max_threads: MAX_THREADS,
+          max_queue: MAX_QUEUE,
           fallback_policy: :abort
         )
       end

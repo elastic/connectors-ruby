@@ -13,6 +13,11 @@ elasticsearch:
   trace: false
   log: false
 
+thread_pool:
+  min_threads: 0
+  max_threads: 5
+  max_queue: 100
+
 log_level: info
 
 idle_timeout: 60
