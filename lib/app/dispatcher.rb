@@ -27,13 +27,17 @@ module App
       def start!
         running!
         Utility::Logger.info('Starting connector service...')
+        start_heartbeat_task!
+        start_configuration_task!
         start_polling_jobs!
       end
 
       def shutdown!
-        Utility::Logger.info("Shutting down connector service with pool [#{pool.class}] and scheduler [#{scheduler.class}]...")
+        Utility::Logger.info("Shutting down connector service with pool [#{pool.class}]...")
         running.make_false
-        scheduler.shutdown
+        sync_scheduler.shutdown
+        heartbeat_scheduler.shutdown
+        configuration_scheduler.shutdown
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
       end
@@ -55,12 +59,21 @@ module App
         )
       end
 
-      def scheduler
-        @scheduler ||= Core::NativeScheduler.new(POLL_IDLING)
+      def sync_scheduler
+        @sync_scheduler ||= Core::NativeScheduler.new(:sync, POLL_IDLING)
+      end
+
+      def heartbeat_scheduler
+        @heartbeat_scheduler ||= Core::NativeScheduler.new(:heartbeat, POLL_IDLING)
+      end
+
+      def configuration_scheduler
+        @configuration_scheduler ||= Core::NativeScheduler.new(:configuration, 5)
       end
 
       def start_polling_jobs!
-        scheduler.when_triggered do |connector_settings|
+        Utility::Logger.info('Start polling jobs...')
+        sync_scheduler.when_triggered do |connector_settings|
           service_type = connector_settings.service_type
           connector_id = connector_settings.id
           index_name = connector_settings.index_name
@@ -81,7 +94,6 @@ module App
           Core::ElasticConnectorActions.ensure_content_index_exists(index_name)
 
           pool.post do
-            send_heartbeat(connector_id, service_type)
             Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
             job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
             job_runner.execute
@@ -93,9 +105,36 @@ module App
         Utility::ExceptionTracking.log_exception(e, 'connector service failed due to unexpected error.')
       end
 
-      def send_heartbeat(connector_id, service_type)
-        Utility::Logger.info("Sending a heartbeat on [#{connector_id} - #{service_type}]...")
-        Core::Heartbeat.send(connector_id, service_type)
+      def start_heartbeat_task!
+        Thread.new do
+          Utility::Logger.info('Start heartbeat task...')
+          heartbeat_scheduler.when_triggered do |connector_settings|
+            pool.post do
+              service_type = connector_settings.service_type
+              connector_id = connector_settings.id
+              Utility::Logger.info("Sending a heartbeat for connector (ID: #{connector_id}, service type: #{service_type})...")
+              Core::Heartbeat.send(connector_id, service_type)
+            rescue StandardError => e
+              Utility::ExceptionTracking.log_exception(e, "Heartbeat task for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
+            end
+          rescue StandardError => e
+            Utility::ExceptionTracking.log_exception(e, 'connector service failed due to unexpected error.')
+          end
+        end
+      end
+
+      def start_configuration_task!
+        Thread.new do
+          Utility::Logger.info('Start configuration task...')
+          configuration_scheduler.when_triggered do |connector_settings|
+            pool.post do
+              Utility::Logger.info("Updating configuration for connector (ID: #{connector_settings.id}, service type: #{connector_settings.service_type})...")
+              Core::Configuration.update(connector_settings)
+            rescue StandardError => e
+              Utility::ExceptionTracking.log_exception(e, "Configuration task for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
+            end
+          end
+        end
       end
     end
   end

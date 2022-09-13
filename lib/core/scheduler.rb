@@ -15,7 +15,9 @@ require 'utility/exception_tracking'
 
 module Core
   class Scheduler
-    def initialize(poll_interval)
+    def initialize(type, poll_interval)
+      @type = type&.to_sym
+      raise "Unsupported scheduler type: #{@type}" unless [:sync, :heartbeat, :configuration].include?(type)
       @poll_interval = poll_interval
       @is_shutting_down = false
     end
@@ -27,7 +29,7 @@ module Core
     def when_triggered
       loop do
         connector_settings.each do |cs|
-          if sync_triggered?(cs)
+          if send("#{@type}_triggered?", cs)
             yield cs
           end
         end
@@ -38,14 +40,14 @@ module Core
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure
         if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{self.class}.")
+          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{@type} scheduler.")
           sleep(@poll_interval)
         end
       end
     end
 
     def shutdown
-      Utility::Logger.info("Shutting down scheduler #{self.class.name}.")
+      Utility::Logger.info("Shutting down the #{@type} scheduler.")
       @is_shutting_down = true
     end
 
@@ -108,6 +110,23 @@ module Core
       end
 
       false
+    end
+
+    def heartbeat_triggered?(connector_settings)
+      last_seen = connector_settings[:last_seen]
+      return true if last_seen.nil? || last_seen.empty?
+      last_seen = begin
+        Time.parse(last_seen)
+      rescue StandardError
+        Utility::Logger.warn("Unable to parse last_seen #{last_seen}")
+        nil
+      end
+      return true unless last_seen
+      last_seen + 60 * 30 < Time.now
+    end
+
+    def configuration_triggered?(connector_settings)
+      connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
     end
   end
 end

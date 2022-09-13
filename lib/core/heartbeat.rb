@@ -38,25 +38,7 @@ module Core
           :last_seen => Time.now
         }
 
-        if connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
-          connector_class = Connectors::REGISTRY.connector_class(service_type)
-          configuration = connector_class.configurable_fields
-          doc[:service_type] = service_type
-          doc[:configuration] = configuration
-
-          # We want to set connector to CONFIGURED status if all configurable fields have default values
-          new_connector_status = if configuration.values.all? { |setting| setting[:value].present? }
-                                   Utility::Logger.debug("All connector configurable fields provided default values for connector #{connector_id}.")
-                                   Connectors::ConnectorStatus::CONFIGURED
-                                 else
-                                   Connectors::ConnectorStatus::NEEDS_CONFIGURATION
-                                 end
-
-          doc[:status] = new_connector_status
-
-          Utility::Logger.info("Heartbeat updated configuration for connector #{connector_id}.")
-          Utility::Logger.info("Changing connector status to #{new_connector_status}.")
-        elsif connector_settings.connector_status_allows_sync?
+        if connector_settings.connector_status_allows_sync?
           connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
           doc[:status] = connector_instance.is_healthy? ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
         end
