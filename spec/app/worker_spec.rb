@@ -59,7 +59,7 @@ describe App::Worker do
 
     allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
 
-    allow(Core::ConnectorSettings).to receive(:fetch).and_return(connector_settings)
+    allow(Core::ConnectorSettings).to receive(:fetch_by_id).and_return(connector_settings)
 
     allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(connector_class)
 
@@ -90,7 +90,7 @@ describe App::Worker do
       let(:error) { 'oh no!' }
 
       before(:each) do
-        allow(Core::ConnectorSettings).to receive(:fetch).and_raise(error)
+        allow(Core::ConnectorSettings).to receive(:fetch_by_id).and_raise(error)
       end
 
       it 'crashes with the raised error' do

@@ -16,7 +16,7 @@ describe Core::SingleScheduler do
   let(:scheduling_settings) { { :enabled => scheduling_enabled, :interval => scheduling_interval } }
 
   before(:each) do
-    allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
+    allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id).and_return(connector_settings)
 
     allow(connector_settings).to receive(:id).and_return(connector_id)
     allow(connector_settings).to receive(:connector_status).and_return(connector_status)

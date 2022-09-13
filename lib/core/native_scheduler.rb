@@ -15,7 +15,7 @@ require 'utility/exception_tracking'
 module Core
   class NativeScheduler < Core::Scheduler
     def connector_settings
-      Core::ElasticConnectorActions.native_connectors || []
+      Core::ConnectorSettings.fetch_native_connectors || []
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, 'Could not retrieve native connectors due to unexpected error.')
       []

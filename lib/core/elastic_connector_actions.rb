@@ -10,12 +10,9 @@ require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
-require 'core/connector_settings'
 
 module Core
   class ElasticConnectorActions
-    DEFAULT_PAGE_SIZE = 100
-
     class << self
 
       def force_sync(connector_id)
@@ -42,38 +39,17 @@ module Core
         alias_mappings.dig(index, 'mappings', '_meta') || {}
       end
 
-      def native_connectors
-        connectors({ term: { is_native: true } })
-      end
-
-      def crawler_connectors
-        connectors({ term: { service_type: Utility::Constants::CRAWLER_SERVICE_TYPE } })
-      end
-
-      def connectors(query)
-        globals = connectors_meta
-        result = []
-        offset = 0
-        loop do
-          response = client.search(
-            :index => Utility::Constants::CONNECTORS_INDEX,
-            :ignore => 404,
-            :body => {
-              :size => DEFAULT_PAGE_SIZE,
-              :from => offset,
-              :query => query,
-              :sort => ['name']
-            }
-          )
-          hits = response['hits']['hits']
-          total = response['hits']['total']['value']
-          result += hits.map do |hit|
-            Core::ConnectorSettings.new(hit, globals)
-          end
-          break if result.size >= total
-          offset += DEFAULT_PAGE_SIZE
-        end
-        result
+      def search_connectors(query, page_size, offset)
+        client.search(
+          :index => Utility::Constants::CONNECTORS_INDEX,
+          :ignore => 404,
+          :body => {
+            :size => page_size,
+            :from => offset,
+            :query => query,
+            :sort => ['name']
+          }
+        )
       end
 
       def update_connector_configuration(connector_id, configuration)

@@ -154,38 +154,20 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#get_native_connectors' do
+  context '#search_connectors' do
     let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
     let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
+    let(:query) { { :term => { :is_native => true } } }
+    let(:offset) { 0 }
+    let(:page_size) { 10 }
     before(:each) do
       allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [connector_one, connector_two], 'total' => { 'value' => 2 } } })
     end
     it 'returns all native connectors' do
-      connectors = described_class.native_connectors
-      expect(connectors.size).to eq(2)
-      expect(connectors[0].id).to eq(connector_one['_id'])
-      expect(connectors[1].id).to eq(connector_two['_id'])
-    end
-
-    context 'when pagination is needed' do
-      before(:each) do
-        described_class::DEFAULT_PAGE_SIZE = 1
-        allow(es_client)
-          .to receive(:search)
-          .with(hash_including(:from => 0), any_args)
-          .and_return({ 'hits' => { 'hits' => [connector_one], 'total' => 2 } })
-        allow(es_client)
-          .to receive(:search)
-          .with(hash_including(:from => 1), any_args)
-          .and_return({ 'hits' => { 'hits' => [connector_two], 'total' => 2 } })
-      end
-
-      it 'returns all native connectors with pagination' do
-        connectors = described_class.native_connectors
-        expect(connectors.size).to eq(2)
-        expect(connectors[0].id).to eq(connector_one['_id'])
-        expect(connectors[1].id).to eq(connector_two['_id'])
-      end
+      connectors = described_class.search_connectors(query, page_size, offset)
+      expect(connectors['hits']['hits'].size).to eq(2)
+      expect(connectors['hits']['hits'][0]['_id']).to eq(connector_one['_id'])
+      expect(connectors['hits']['hits'][1]['_id']).to eq(connector_two['_id'])
     end
   end
 

@@ -21,20 +21,32 @@ module Core
     DEFAULT_REDUCE_WHITESPACE = true
     DEFAULT_RUN_ML_INFERENCE = false
 
+    DEFAULT_PAGE_SIZE = 100
+
     # Error Classes
     class ConnectorNotFoundError < StandardError; end
 
-    def self.fetch(connector_id)
+    def self.fetch_by_id(connector_id)
       es_response = ElasticConnectorActions.get_connector(connector_id)
-      globals = ElasticConnectorActions.connectors_meta
+      connectors_meta = ElasticConnectorActions.connectors_meta
 
       raise ConnectorNotFoundError.new("Connector with id=#{connector_id} was not found.") unless es_response[:found]
-      new(es_response, globals)
+      new(es_response, connectors_meta)
     end
 
-    def initialize(es_response, globals)
+    def initialize(es_response, connectors_meta)
       @elasticsearch_response = es_response.with_indifferent_access
-      @globals = globals.with_indifferent_access
+      @connectors_meta = connectors_meta.with_indifferent_access
+    end
+
+    def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
+      query = { term: { is_native: true } }
+      fetch_connectors_by_query(query, page_size)
+    end
+
+    def self.fetch_crawler_connectors
+      query = { term: { service_type: Utility::Constants::CRAWLER_SERVICE_TYPE } }
+      fetch_connectors_by_query(query, page_size)
     end
 
     def id
@@ -71,22 +83,42 @@ module Core
     end
 
     def request_pipeline
-      return_if_present(@elasticsearch_response.dig(:pipeline, :name), @globals.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
+      return_if_present(@elasticsearch_response.dig(:pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
     end
 
     def extract_binary_content?
-      return_if_present(@elasticsearch_response.dig(:pipeline, :extract_binary_content), @globals.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
+      return_if_present(@elasticsearch_response.dig(:pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
     end
 
     def reduce_whitespace?
-      return_if_present(@elasticsearch_response.dig(:pipeline, :reduce_whitespace), @globals.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
+      return_if_present(@elasticsearch_response.dig(:pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
     end
 
     def run_ml_inference?
-      return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @globals.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
+      return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
     end
 
     private
+
+    def self.fetch_connectors_by_query(query, page_size)
+      connectors_meta = ElasticConnectorActions.connectors_meta
+
+      results = []
+      offset = 0
+      loop do
+        response = ElasticConnectorActions.search_connectors(query, page_size, offset)
+
+        hits = response['hits']['hits']
+        total = response['hits']['total']['value']
+        results += hits.map do |hit|
+          Core::ConnectorSettings.new(hit, connectors_meta)
+        end
+        break if results.size >= total
+        offset += hits.size
+      end
+
+      results
+    end
 
     def return_if_present(*args)
       args.each do |arg|

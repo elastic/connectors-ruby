@@ -32,7 +32,7 @@ module Core
       end
 
       def send(connector_id, service_type)
-        connector_settings = Core::ConnectorSettings.fetch(connector_id)
+        connector_settings = Core::ConnectorSettings.fetch_by_id(connector_id)
 
         doc = {
           :last_seen => Time.now
