@@ -51,14 +51,14 @@ describe Core::NativeScheduler do
   end
 
   shared_examples_for 'sync triggers' do
-    it '' do
-      expect { |b| subject.when_triggered(&b) }.to yield_successive_args(*native_connectors_settings)
+    it 'works as expected' do
+      expect { |b| subject.when_polling_jobs(&b) }.to yield_successive_args(*native_connectors_settings.map { |cs| [cs, true] })
     end
   end
 
   shared_examples_for 'sync does not trigger' do
-    it '' do
-      expect { |b| subject.when_triggered(&b) }.to_not yield_successive_args(anything)
+    it 'works as expected' do
+      expect { |b| subject.when_polling_jobs(&b) }.to_not yield_successive_args(anything)
     end
   end
 

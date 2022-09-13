@@ -46,7 +46,7 @@ describe App::Dispatcher do
 
     context 'without native connectors' do
       before(:each) do
-        allow(scheduler).to receive(:when_triggered)
+        allow(scheduler).to receive(:when_polling_jobs)
       end
       it 'starts no sync jobs' do
         expect(Core::Heartbeat).to_not receive(:send)
@@ -66,7 +66,7 @@ describe App::Dispatcher do
         allow(connector_settings).to receive(:service_type).and_return(service_type)
         allow(connector_settings).to receive(:index_name).and_return(index_name)
 
-        allow(scheduler).to receive(:when_triggered).and_yield(connector_settings)
+        allow(scheduler).to receive(:when_polling_jobs).and_yield(connector_settings, true)
         allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(true)
       end
 

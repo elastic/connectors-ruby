@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 
-require 'concurrent'
+require 'concurrent-ruby'
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/connector_settings'

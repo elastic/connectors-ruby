@@ -34,17 +34,17 @@ describe Core::SingleScheduler do
 
   shared_examples_for 'sync triggers' do
     it '' do
-      expect { |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings)
+      expect { |b| subject.when_polling_jobs(&b) }.to yield_with_args(connector_settings, true)
     end
   end
 
   shared_examples_for 'sync does not trigger' do
     it '' do
-      expect { |b| subject.when_triggered(&b) }.to_not yield_with_args(anything)
+      expect { |b| subject.when_polling_jobs(&b) }.to_not yield_with_args(anything)
     end
   end
 
-  describe '.when_triggered' do
+  describe '.when_polling_jobs' do
     context 'when error is raised' do
       let(:error) { 'some error happened' }
 
@@ -55,7 +55,7 @@ describe Core::SingleScheduler do
       it_behaves_like 'sync does not trigger'
 
       it 'does not raise an error' do
-        expect { |b| subject.when_triggered(&b) }.to_not raise_error
+        expect { |b| subject.when_polling_jobs(&b) }.to_not raise_error
       end
     end
 

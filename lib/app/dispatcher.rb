@@ -60,7 +60,7 @@ module App
       end
 
       def start_polling_jobs!
-        scheduler.when_triggered do |connector_settings|
+        scheduler.when_polling_jobs do |connector_settings, do_sync|
           service_type = connector_settings.service_type
           connector_id = connector_settings.id
           index_name = connector_settings.index_name
@@ -82,9 +82,11 @@ module App
 
           pool.post do
             send_heartbeat(connector_id, service_type)
-            Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
-            job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
-            job_runner.execute
+            if do_sync
+              Utility::Logger.info("Starting a job for connector (ID: #{connector_id}, service type: #{service_type})...")
+              job_runner = Core::SyncJobRunner.new(connector_settings, service_type)
+              job_runner.execute
+            end
           rescue StandardError => e
             Utility::ExceptionTracking.log_exception(e, "Job for connector (ID: #{connector_id}, service type: #{service_type}) failed due to unexpected error.")
           end

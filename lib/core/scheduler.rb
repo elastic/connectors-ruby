@@ -24,12 +24,10 @@ module Core
       raise 'Not implemented'
     end
 
-    def when_triggered
+    def when_polling_jobs
       loop do
         connector_settings.each do |cs|
-          if sync_triggered?(cs)
-            yield cs
-          end
+          yield cs, sync_triggered?(cs)
         end
         if @is_shutting_down
           break

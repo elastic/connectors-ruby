@@ -64,7 +64,7 @@ describe App::Worker do
     allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(connector_class)
 
     allow(Core::Scheduler).to receive(:new).and_return(scheduler)
-    allow(scheduler).to receive(:when_triggered).and_yield(connector_settings)
+    allow(scheduler).to receive(:when_polling_jobs).and_yield(connector_settings, true)
 
     allow(Core::SyncJobRunner).to receive(:new).and_return(sync_job_runner)
     allow(sync_job_runner).to receive(:execute)
@@ -125,7 +125,7 @@ describe App::Worker do
 
     context 'when scheduler does not yield' do
       before(:each) do
-        allow(scheduler).to receive(:when_triggered)
+        allow(scheduler).to receive(:when_polling_jobs)
       end
 
       it 'does not trigger the connector' do

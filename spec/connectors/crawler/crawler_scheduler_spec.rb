@@ -54,13 +54,13 @@ describe Connectors::Crawler::Scheduler do
 
   shared_examples_for 'sync triggers' do
     it '' do
-      expect { |b| subject.when_triggered(&b) }.to yield_successive_args(*crawlers_settings)
+      expect { |b| subject.when_polling_jobs(&b) }.to yield_successive_args(*crawlers_settings.map { |cs| [cs, true] })
     end
   end
 
   shared_examples_for 'sync does not trigger' do
     it '' do
-      expect { |b| subject.when_triggered(&b) }.to_not yield_successive_args(anything)
+      expect { |b| subject.when_polling_jobs(&b) }.to_not yield_successive_args(anything)
     end
   end
 
