@@ -16,7 +16,7 @@ module Connectors
   module Crawler
     class Scheduler < Core::Scheduler
       def connector_settings
-        Core::ElasticConnectorActions.crawler_connectors || []
+        Core::ConnectorSettings.fetch_crawler_connectors || []
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'Could not retrieve Crawler connectors due to unexpected error.')
       end

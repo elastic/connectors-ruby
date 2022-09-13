@@ -44,7 +44,7 @@ module Core
       fetch_connectors_by_query(query, page_size)
     end
 
-    def self.fetch_crawler_connectors
+    def self.fetch_crawler_connectors(page_size = DEFAULT_PAGE_SIZE)
       query = { term: { service_type: Utility::Constants::CRAWLER_SERVICE_TYPE } }
       fetch_connectors_by_query(query, page_size)
     end
