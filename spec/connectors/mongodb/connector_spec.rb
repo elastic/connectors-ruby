@@ -56,7 +56,7 @@ describe Connectors::MongoDB::Connector do
     it 'closes a client in the end' do
       expect(mongo_client).to receive(:close)
 
-      subject.is_healthy?({})
+      subject.is_healthy?
     end
   end
 
