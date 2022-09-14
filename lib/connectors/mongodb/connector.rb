@@ -14,7 +14,7 @@ module Connectors
   module MongoDB
     class Connector < Connectors::Base::Connector
       def self.service_type
-        'mongo'
+        'mongodb'
       end
 
       def self.display_name
