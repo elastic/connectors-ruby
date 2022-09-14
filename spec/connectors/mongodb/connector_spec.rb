@@ -20,6 +20,14 @@ describe Connectors::MongoDB::Connector do
        :collection => {
          :label => 'MongoDB Collection',
          :value => mongodb_collection
+       },
+       :user => {
+         :label => 'Username',
+         :value => mongodb_username
+       },
+       :password => {
+         :label => 'Password',
+         :value => mongodb_password
        }
     }
   end
@@ -27,6 +35,8 @@ describe Connectors::MongoDB::Connector do
   let(:mongodb_host) { '127.0.0.1:27027' }
   let(:mongodb_database) { 'sample-database' }
   let(:mongodb_collection) { 'some-collection' }
+  let(:mongodb_username) { 'admin' }
+  let(:mongodb_password) { 'password' }
 
   let(:mongo_client) { double }
 

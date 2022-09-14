@@ -49,6 +49,8 @@ module Connectors
         @collection = remote_configuration.dig(:collection, :value)
         @user = remote_configuration.dig(:user, :value)
         @password = remote_configuration.dig(:password, :value)
+
+        @direct_connection = local_configuration.present? && !!local_configuration.dig(:direct_connection)
       end
 
       def yield_documents
@@ -71,20 +73,25 @@ module Connectors
       end
 
       def with_client
-        uri = if @user.present? || @password.present?
-                "mongodb+srv://#{@user}:#{@password}@#{@host}/#{@database}"
-              else
-                "mongodb+srv://#{@host}/#{@database}"
-              end
-
         client = Mongo::Client.new(
-          uri,
+          @host,
+          database: @database,
           app_name: 'Elastic Enterprise Search',
           max_pool_size: 8,
           socket_timeout: 60,
           heartbeat_frequency: 120,
           connect_timeout: 30,
+          direct_connection: @direct_connection
         )
+
+        if @user.present? && @password.present?
+          client = client.with(
+            user: @user,
+            password: @password
+          )
+        elsif @user.present? || @password.present?
+          raise 'Wrong configuration: both user and password should be present or missing at the same time'
+        end
 
         begin
           Utility::Logger.debug("Existing Databases #{client.database_names}")
