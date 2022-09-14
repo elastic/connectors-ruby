@@ -14,7 +14,8 @@ require 'app/config'
 
 module App
   class Worker
-    POLL_IDLING = (App::Config[:idle_timeout] || 60).to_i
+    POLL_INTERVAL = (App::Config[:poll_interval] || 3).to_i
+    HEARTBEAT_INTERVAL = (App::Config[:heartbeat_interval] || 60 * 30).to_i
 
     def initialize(connector_id:, service_type:)
       super()
@@ -26,7 +27,6 @@ module App
       Utility::Logger.info('Running pre-flight check.')
       pre_flight_check
       Utility::Logger.info('Starting connector service workers.')
-      start_heartbeat_task
       start_polling_jobs
     end
 
@@ -48,9 +48,18 @@ module App
 
     def start_polling_jobs
       Utility::Logger.info("Polling Elasticsearch for synchronisation jobs to run on #{@connector_id} - #{@service_type}...")
-      Core::SingleScheduler.new(@connector_id, POLL_IDLING).when_triggered do |connector_settings|
-        job_runner = Core::SyncJobRunner.new(connector_settings, @service_type)
-        job_runner.execute
+      Core::SingleScheduler.new(@connector_id, POLL_INTERVAL, HEARTBEAT_INTERVAL).when_triggered do |connector_settings, task|
+        case task
+        when :sync
+          job_runner = Core::SyncJobRunner.new(connector_settings, @service_type)
+          job_runner.execute
+        when :heartbeat
+          Core::Heartbeat.send(@connector_id, @service_type)
+        when :configuration
+          Core::Configuration.update(connector_settings)
+        else
+          Utility::Logger.error("Invalid task type: #{task}")
+        end
       end
     end
   end

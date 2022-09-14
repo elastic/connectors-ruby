@@ -47,7 +47,9 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:service_type).value(:string)
     required(:log_level).value(:string)
 
-    optional(:idle_timeout).value(:integer)
+    optional(:poll_interval).value(:integer)
+    optional(:termination_timeout).value(:integer)
+    optional(:heartbeat_interval).value(:integer)
 
     optional(:gitlab).hash do
       required(:api_token).value(:string)

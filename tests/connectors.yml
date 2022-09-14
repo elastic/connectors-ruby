@@ -11,4 +11,4 @@ connector_id: "mongo"
 service_type: "mongo"
 log_level: info
 
-idle_timeout: 60
+poll_interval: 60

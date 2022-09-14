@@ -24,7 +24,7 @@ describe App::Dispatcher do
     allow(job_runner).to receive(:execute)
     allow(Utility::ExceptionTracking).to receive(:log_exception)
 
-    stub_const('App::Dispatcher::POLL_IDLING', 1)
+    stub_const('App::Dispatcher::POLL_INTERVAL', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
   end
 

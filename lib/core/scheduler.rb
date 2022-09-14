@@ -15,10 +15,9 @@ require 'utility/exception_tracking'
 
 module Core
   class Scheduler
-    def initialize(type, poll_interval)
-      @type = type&.to_sym
-      raise "Unsupported scheduler type: #{@type}" unless [:sync, :heartbeat, :configuration].include?(type)
+    def initialize(poll_interval, heartbeat_interval)
       @poll_interval = poll_interval
+      @heartbeat_interval = heartbeat_interval
       @is_shutting_down = false
     end
 
@@ -29,8 +28,14 @@ module Core
     def when_triggered
       loop do
         connector_settings.each do |cs|
-          if send("#{@type}_triggered?", cs)
-            yield cs
+          if sync_triggered?(cs)
+            yield cs, :sync
+          end
+          if heartbeat_triggered?(cs)
+            yield cs, :heartbeat
+          end
+          if configuration_triggered?(cs)
+            yield cs, :configuration
           end
         end
         if @is_shutting_down
@@ -40,14 +45,14 @@ module Core
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure
         if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{@type} scheduler.")
+          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{self.class}.")
           sleep(@poll_interval)
         end
       end
     end
 
     def shutdown
-      Utility::Logger.info("Shutting down the #{@type} scheduler.")
+      Utility::Logger.info("Shutting down scheduler #{self.class.name}.")
       @is_shutting_down = true
     end
 
@@ -122,7 +127,7 @@ module Core
         nil
       end
       return true unless last_seen
-      last_seen + 60 * 30 < Time.now
+      last_seen + @heartbeat_interval < Time.now
     end
 
     def configuration_triggered?(connector_settings)
