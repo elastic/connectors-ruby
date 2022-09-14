@@ -72,10 +72,10 @@ module Connectors
 
       def with_client
         uri = if @user.present? || @password.present?
-          "mongodb+srv://#{@user}:#{@password}@#{@host}/#{@database}"
-        else
-          "mongodb+srv://#{@host}/#{@database}"
-        end
+                "mongodb+srv://#{@user}:#{@password}@#{@host}/#{@database}"
+              else
+                "mongodb+srv://#{@host}/#{@database}"
+              end
 
         client = Mongo::Client.new(
           uri,
