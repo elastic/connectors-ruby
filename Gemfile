@@ -10,7 +10,6 @@ gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
 gem 'activesupport', '5.2.6'
-gem 'bson', '~> 4.2.2'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data', '= 1.2022.1'
 gem 'tzinfo', '1.2.10'
@@ -52,4 +51,4 @@ gem 'elasticsearch'
 gem 'signet', '~> 0.16.0'
 
 # Dependency for mongo connector
-gem 'mongo', '~> 2.4.3'
+gem 'mongo', '~> 2.18'
