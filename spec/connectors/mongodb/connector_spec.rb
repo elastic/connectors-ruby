@@ -35,8 +35,8 @@ describe Connectors::MongoDB::Connector do
   let(:mongodb_host) { '127.0.0.1:27027' }
   let(:mongodb_database) { 'sample-database' }
   let(:mongodb_collection) { 'some-collection' }
-  let(:mongodb_username) { 'admin' }
-  let(:mongodb_password) { 'password' }
+  let(:mongodb_username) { nil }
+  let(:mongodb_password) { nil }
 
   let(:mongo_client) { double }
 
@@ -58,7 +58,7 @@ describe Connectors::MongoDB::Connector do
 
   context '#is_healthy?' do
     it 'instantiates a mongodb client' do
-      expect(Mongo::Client).to receive(:new).with([mongodb_host], hash_including(:database => mongodb_database))
+      expect(Mongo::Client).to receive(:new).with(mongodb_host, hash_including(:database => mongodb_database))
 
       subject.is_healthy?
     end
