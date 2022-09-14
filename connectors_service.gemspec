@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Elastic']
   s.email       = 'ent-search-dev@elastic.co'
   s.executables << 'connectors_service'
+  s.executables << 'native_connectors'
   s.files       = Dir['lib/**/*'] + %w[config/connectors.yml LICENSE NOTICE.txt]
   s.license     = 'Elastic-2.0'
 end

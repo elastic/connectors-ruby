@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require 'native_connectors'
+NativeConnectors.run!
