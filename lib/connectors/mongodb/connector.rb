@@ -50,7 +50,7 @@ module Connectors
         @user = remote_configuration.dig(:user, :value)
         @password = remote_configuration.dig(:password, :value)
 
-        @direct_connection = local_configuration.present? && !!local_configuration.dig(:direct_connection)
+        @direct_connection = local_configuration.present? && !!local_configuration[:direct_connection]
       end
 
       def yield_documents
@@ -89,8 +89,6 @@ module Connectors
             user: @user,
             password: @password
           )
-        elsif @user.present? || @password.present?
-          raise 'Wrong configuration: both user and password should be present or missing at the same time'
         end
 
         begin
