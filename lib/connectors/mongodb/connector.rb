@@ -26,6 +26,12 @@ module Connectors
            :host => {
              :label => 'MongoDB Server Hostname'
            },
+           :user => {
+             :label => 'MongoDB User'
+           },
+           :password => {
+             :label => 'MongoDB Passwd'
+           },
            :database => {
              :label => 'MongoDB Database'
            },
@@ -41,10 +47,14 @@ module Connectors
         @host = remote_configuration.dig(:host, :value)
         @database = remote_configuration.dig(:database, :value)
         @collection = remote_configuration.dig(:collection, :value)
+        @user = remote_configuration.dig(:user, :value)
+        @password = remote_configuration.dig(:password, :value)
+
+        @direct_connection = local_configuration.present? && !!local_configuration[:direct_connection]
       end
 
       def yield_documents
-        with_client(@host, @database) do |client|
+        with_client do |client|
           client[@collection].find.each do |document|
             doc = document.with_indifferent_access
             transform!(doc)
@@ -57,15 +67,30 @@ module Connectors
       private
 
       def do_health_check
-        with_client(@host, @database) do |_client|
+        with_client do |_client|
           Utility::Logger.debug("Mongo at #{@host}/#{@database} looks healthy.")
         end
       end
 
-      def with_client(host, database)
-        client = Mongo::Client.new([host],
-                                   :connect => :direct,
-                                   :database => database)
+      def with_client
+        client = Mongo::Client.new(
+          @host,
+          database: @database,
+          app_name: 'Elastic Enterprise Search',
+          max_pool_size: 8,
+          socket_timeout: 60,
+          heartbeat_frequency: 120,
+          connect_timeout: 30,
+          direct_connection: @direct_connection
+        )
+
+        if @user.present? && @password.present?
+          client = client.with(
+            user: @user,
+            password: @password
+          )
+        end
+
         begin
           Utility::Logger.debug("Existing Databases #{client.database_names}")
           Utility::Logger.debug('Existing Collections:')
