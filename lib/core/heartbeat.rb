@@ -38,7 +38,9 @@ module Core
           :last_seen => Time.now
         }
 
-        if connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+        if connector_settings.connector_status == Connectors::ConnectorStatus::CREATED && connector_settings.configuration.present?
+          doc[:status] = Connectors::ConnectorStatus::CONFIGURED
+        elsif connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
           connector_class = Connectors::REGISTRY.connector_class(service_type)
           configuration = connector_class.configurable_fields
           doc[:service_type] = service_type

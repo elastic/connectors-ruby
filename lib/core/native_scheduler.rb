@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'core/scheduler'
+require 'core/heartbeat'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'utility/logger'
@@ -15,7 +16,14 @@ require 'utility/exception_tracking'
 module Core
   class NativeScheduler < Core::Scheduler
     def connector_settings
-      Core::ConnectorSettings.fetch_native_connectors || []
+      connectors = Core::ConnectorSettings.fetch_native_connectors || []
+      connectors.each do |connector|
+        connector_id = connector.id
+        service_type = connector.service_type
+        Core::Heartbeat.send(connector_id, service_type)
+      end
+
+      Core::ConnectorSettings.fetch_native_connectors
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, 'Could not retrieve native connectors due to unexpected error.')
       []
