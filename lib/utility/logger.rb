@@ -26,7 +26,11 @@ module Utility
 
       SUPPORTED_LOG_LEVELS.each do |level|
         define_method(level) do |message|
-          logger.public_send(level, message)
+          if logger.is_a?(EcsLogging::Logger)
+            logger.public_send(level, message, service: { name: 'connectors-ruby' })
+          else
+            logger.public_send(level, message)
+          end
         end
       end
 
