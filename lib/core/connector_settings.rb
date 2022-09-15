@@ -7,11 +7,9 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/hash/indifferent_access'
-require 'active_support/core_ext/object/blank'
 require 'connectors/connector_status'
 require 'core/elastic_connector_actions'
-require 'time'
-require 'utility/logger'
+require 'utility'
 
 module Core
   class ConnectorSettings
@@ -96,6 +94,20 @@ module Core
 
     def run_ml_inference?
       return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
+    end
+
+    def formatted
+      properties = ["ID: #{id}"]
+      properties << "Service type: #{service_type}" if service_type
+      "connector (#{properties.join(', ')})"
+    end
+
+    def needs_service_type?
+      service_type.to_s.strip.empty?
+    end
+
+    def valid_index_name?
+      index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
     end
 
     private

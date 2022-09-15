@@ -6,44 +6,24 @@
 
 # frozen_string_literal: true
 
-require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
-require 'utility/logger'
 
 module Core
   class Heartbeat
-    INTERVAL_SECONDS = 60
-
     class << self
-      def start_task(connector_id, service_type)
-        Utility::Logger.debug("Starting heartbeat timer task for [#{connector_id} - #{service_type}] with interval #{INTERVAL_SECONDS} seconds.")
-
-        Concurrent::TimerTask.execute(execution_interval: INTERVAL_SECONDS, run_now: true) do
-          Utility::Logger.debug("Sending heartbeat for the connector [#{connector_id} - #{service_type}].")
-          send(connector_id, service_type)
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, 'Heartbeat timer encountered unexpected error.')
-        end
-
-        Utility::Logger.info("Successfully started heartbeat task for the connector [#{connector_id} - #{service_type}].")
-      end
-
-      def send(connector_id, service_type)
-        connector_settings = Core::ConnectorSettings.fetch_by_id(connector_id)
-
+      def send(connector_settings)
         doc = {
-          :last_seen => Time.now
+            :last_seen => Time.now
         }
-
         if connector_settings.connector_status_allows_sync?
-          connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
+          connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
           doc[:status] = connector_instance.is_healthy? ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
         end
 
-        Core::ElasticConnectorActions.update_connector_fields(connector_id, doc)
+        Core::ElasticConnectorActions.update_connector_fields(connector_settings.id, doc)
       end
     end
   end
