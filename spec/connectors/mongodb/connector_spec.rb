@@ -70,7 +70,7 @@ describe Connectors::MongoDB::Connector do
       let(:mongodb_username) { 'admin' }
       let(:mongodb_password) { 'some-password' }
       it 'sets client to use basic auth' do
-        expect(mongo_client).to receive(:with).with(:user => mongodb_username, :password => mongodb_password)
+        expect(Mongo::Client).to receive(:new).with(anything, hash_including(:user => mongodb_username, :password => mongodb_password))
 
         do_test
       end
@@ -78,7 +78,7 @@ describe Connectors::MongoDB::Connector do
 
     context 'when no username and password are provided' do
       it 'does not set client to use basic auth' do
-        expect(mongo_client).to_not receive(:with).with(:user => mongodb_username, :password => mongodb_password)
+        expect(Mongo::Client).to_not receive(:new).with(anything, hash_including(:user => mongodb_username, :password => mongodb_password))
 
         do_test
       end

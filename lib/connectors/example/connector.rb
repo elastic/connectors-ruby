@@ -41,8 +41,16 @@ module Connectors
       end
 
       def yield_documents
-        data = { id: '123', name: 'example document' }
-        yield data
+        attachments = [
+          File.open('./lib/connectors/example/example_attachments/first_attachment.txt'),
+          File.open('./lib/connectors/example/example_attachments/second_attachment.txt'),
+          File.open('./lib/connectors/example/example_attachments/third_attachment.txt')
+        ]
+
+        attachments.each_with_index do |att, index|
+          data = { id: (index + 1).to_s, name: "example document #{index + 1}", _attachment: File.read(att) }
+          yield data
+        end
       end
     end
   end

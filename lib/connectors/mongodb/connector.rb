@@ -73,23 +73,21 @@ module Connectors
       end
 
       def with_client
-        client = Mongo::Client.new(
-          @host,
-          database: @database,
-          app_name: 'Elastic Enterprise Search',
-          max_pool_size: 8,
-          socket_timeout: 60,
-          heartbeat_frequency: 120,
-          connect_timeout: 30,
-          direct_connection: @direct_connection
-        )
-
-        if @user.present? && @password.present?
-          client = client.with(
-            user: @user,
-            password: @password
-          )
-        end
+        client = if @user.present? || @password.present?
+                   Mongo::Client.new(
+                     @host,
+                     database: @database,
+                     direct_connection: @direct_connection,
+                     user: @user,
+                     password: @password
+                   )
+                 else
+                   Mongo::Client.new(
+                     @host,
+                     database: @database,
+                     direct_connection: @direct_connection
+                   )
+                 end
 
         begin
           Utility::Logger.debug("Existing Databases #{client.database_names}")
