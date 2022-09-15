@@ -10,6 +10,7 @@ require 'active_support/core_ext/module'
 module Utility
   class Logger
     SUPPORTED_LOG_LEVELS = %i[fatal error warn info debug].freeze
+    MAX_SHORT_MESSAGE_LENGTH = 1000.freeze
 
     class << self
 
@@ -37,6 +38,14 @@ module Utility
 
       def new_line
         logger.info("\n")
+      end
+
+      def generate_trace_id
+        SecureRandom.uuid
+      end
+
+      def abbreviated_message(message)
+        message.gsub(/[\n\t]/, ' ').gsub(/\s+/, ' ')[0, MAX_SHORT_MESSAGE_LENGTH].strip
       end
     end
   end

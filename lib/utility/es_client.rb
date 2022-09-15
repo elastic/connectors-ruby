@@ -58,7 +58,10 @@ module Utility
     def raise_if_necessary(response)
       if response['errors']
         first_error = response['items'][0]
-        raise IndexingFailedError.new("Failed to index documents into Elasticsearch.\nFirst error in response is: #{first_error.to_json}")
+        trace_id = Utility::Logger.generate_trace_id
+        Utility::Logger.error("Failed to index documents into Elasticsearch. First error in response is: #{first_error.to_json}")
+        short_message = Utility::Logger.abbreviated_message(first_error.to_json)
+        raise IndexingFailedError.new("Failed to index documents into Elasticsearch with an error '#{short_message}'. Look up the error ID [#{trace_id}] in the application logs to see the full error message.")
       end
       response
     end
