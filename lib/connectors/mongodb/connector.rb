@@ -105,7 +105,7 @@ module Connectors
         # Problem: MongoDB has its own format of things - e.g. ids are Bson::ObjectId, which when serialized to JSON
         # will produce something like: 'id': { '$oid': '536268a06d2d7019ba000000' }, which is not good for us
 
-        object = mongodb_document.map do |key,value|
+        mongodb_document.map do |key, value|
           remapped_key = key == '_id' ? 'id' : key
 
           remapped_value = case value
@@ -131,8 +131,6 @@ module Connectors
 
           [remapped_key, remapped_value]
         end.to_h
-
-        object
       end
     end
   end
