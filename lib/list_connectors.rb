@@ -9,10 +9,10 @@
 require 'connectors/registry'
 require 'utility'
 
-class NativeConnectors
+class ListConnectors
   def self.run!
     Utility::Environment.set_execution_environment(App::Config) do
-      Utility::Logger.info('Registered native connectors:')
+      Utility::Logger.info('Registered connectors:')
       Connectors::REGISTRY.registered_connectors.each do |connector|
         Utility::Logger.info("- #{Connectors::REGISTRY.connector_class(connector).display_name}")
       end
