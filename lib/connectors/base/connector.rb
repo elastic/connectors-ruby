@@ -42,7 +42,7 @@ module Connectors
         do_health_check
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
-        raise Utility::Errors::HealthCheckFailedError.new
+        raise Utility::HealthCheckFailedError.new
       end
 
       def is_healthy?
