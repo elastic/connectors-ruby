@@ -146,7 +146,9 @@ describe Core::ElasticConnectorActions do
 
   context '#connectors_meta' do
     before(:each) do
-      allow(es_client_indices_api).to receive(:get_mapping).and_return({ "#{Utility::Constants::CONNECTORS_INDEX}-v1" => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
+      allow(es_client_indices_api)
+        .to receive(:get_mapping)
+        .and_return({ "#{Utility::Constants::CONNECTORS_INDEX}-v1" => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
     end
 
     it 'gets the meta' do
@@ -321,10 +323,8 @@ describe Core::ElasticConnectorActions do
   end
 
   context '#update_connector_status' do
-    let(:status) { Connectors::ConnectorStatus::CONFIGURED }
-
-    it 'sends update request with expected body' do
-      expect(es_client).to receive(:update).with(
+    let(:expected_payload) do
+      {
         :index => connectors_index,
         :id => connector_id,
         :body => {
@@ -332,9 +332,36 @@ describe Core::ElasticConnectorActions do
         },
         :refresh => true,
         :retry_on_conflict => 3
-      )
+      }
+    end
+    context 'with no errors' do
+      let(:status) { Connectors::ConnectorStatus::CONFIGURED }
 
-      described_class.update_connector_status(connector_id, status)
+      it 'sends update request with expected body' do
+        expect(es_client).to receive(:update).with(expected_payload.deep_merge(:body => { :doc => { :error => nil } }))
+
+        described_class.update_connector_status(connector_id, status)
+      end
+    end
+
+    context 'with an error status but no message' do
+      let(:status) { Connectors::ConnectorStatus::ERROR }
+
+      it 'raises an argument error' do
+        expect { described_class.update_connector_status(connector_id, status) }
+          .to raise_error(ArgumentError, /error_message is required/)
+      end
+    end
+
+    context 'with an error status and message' do
+      let(:status) { Connectors::ConnectorStatus::ERROR }
+      let(:message) { 'whoops' }
+
+      it 'sends update request with expected body' do
+        expect(es_client).to receive(:update).with(expected_payload.deep_merge(:body => { :doc => { :error => message } }))
+
+        described_class.update_connector_status(connector_id, status, message)
+      end
     end
   end
 
@@ -392,7 +419,8 @@ describe Core::ElasticConnectorActions do
               :last_indexed_document_count,
               :last_deleted_document_count,
               :last_sync_status => Connectors::SyncStatus::FAILED,
-              :last_sync_error => status[:error]
+              :last_sync_error => status[:error],
+              :error => status[:error]
             )
           },
           :refresh => true,

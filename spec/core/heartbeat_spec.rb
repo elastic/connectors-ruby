@@ -18,6 +18,7 @@ describe Core::Heartbeat do
     allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id).and_return(connector_settings)
 
     allow(Core::ElasticConnectorActions).to receive(:update_connector_fields)
+    allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
 
@@ -112,22 +113,29 @@ describe Core::Heartbeat do
       end
 
       context 'when connector is already connected' do
-        it 'updates connector last_seen and status only' do
-          expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, { :last_seen => anything, :status => Connectors::ConnectorStatus::CONNECTED })
+        it 'updates connector last_seen and status and error' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id, { :last_seen => anything, :status => Connectors::ConnectorStatus::CONNECTED, :error => nil })
 
           described_class.start_task(connector_id, service_type)
         end
       end
 
       context 'when connector settings were not found' do
-        let(:error) { 'something really bad happened' }
+        let(:error) { Core::ConnectorSettings::ConnectorNotFoundError.new('something really bad happened') }
 
         before(:each) do
           allow(Core::ConnectorSettings).to receive(:fetch_by_id).and_raise(error)
         end
 
-        it 'does not raise an error' do
+        it 'does not raise an error but writes it into status' do
           expect { described_class.start_task(connector_id, service_type) }.to_not raise_error
+          expect(Core::ElasticConnectorActions)
+            .to_not have_received(:update_connector_fields)
+          expect(Core::ElasticConnectorActions)
+            .to have_received(:update_connector_status)
+            .with(connector_id, Connectors::ConnectorStatus::ERROR, /Failed to send heartbeat for connector/)
         end
       end
     end

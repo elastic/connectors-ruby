@@ -88,8 +88,15 @@ module Core
         job['_id']
       end
 
-      def update_connector_status(connector_id, status)
-        update_connector_fields(connector_id, :status => status)
+      def update_connector_status(connector_id, status, error_message = nil)
+        if status == Connectors::ConnectorStatus::ERROR && error_message.nil?
+          raise ArgumentError, 'error_message is required when status is error'
+        end
+        body = {
+          :status => status,
+          :error => status == Connectors::ConnectorStatus::ERROR ? error_message : nil
+        }
+        update_connector_fields(connector_id, body)
       end
 
       def complete_sync(connector_id, job_id, status)
@@ -98,6 +105,7 @@ module Core
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
                                 :last_sync_error => status[:error],
+                                :error => status[:error],
                                 :last_synced => Time.now,
                                 :last_indexed_document_count => status[:indexed_document_count],
                                 :last_deleted_document_count => status[:deleted_document_count])

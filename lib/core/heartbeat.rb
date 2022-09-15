@@ -59,9 +59,18 @@ module Core
         elsif connector_settings.connector_status_allows_sync?
           connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
           doc[:status] = connector_instance.is_healthy? ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
+          doc[:error] = if doc[:status] == Connectors::ConnectorStatus::ERROR
+                          "Health check for 3d party service failed for connector [#{connector_id}], service type [#{service_type}]. Check the application logs for more information."
+                        else
+                          nil
+                        end
         end
 
         Core::ElasticConnectorActions.update_connector_fields(connector_id, doc)
+      rescue Core::ConnectorSettings::ConnectorNotFoundError => e
+        error_message = "Failed to send heartbeat for connector [#{connector_id}], service type [#{service_type}] because connector settings were not found."
+        Utility::ExceptionTracking.log_exception(e, error_message)
+        Core::ElasticConnectorActions.update_connector_status(connector_id, Connectors::ConnectorStatus::ERROR, error_message)
       end
     end
   end
