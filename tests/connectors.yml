@@ -11,4 +11,4 @@ connector_id: "mongo"
 service_type: "mongo"
 log_level: info
 
-poll_interval: 60
+poll_interval: 3
