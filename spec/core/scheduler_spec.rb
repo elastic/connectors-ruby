@@ -79,7 +79,6 @@ describe Core::Scheduler do
         let(:sync_enabled) { false }
 
         it_behaves_like 'does not trigger', :sync
-
       end
 
       context 'when connector is never synced' do
