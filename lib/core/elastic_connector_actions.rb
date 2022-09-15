@@ -68,7 +68,7 @@ module Core
 
       def set_configurable_field(connector_id, field_name, label, value)
         payload = { field_name => { :value => value, :label => label } }
-        update_connector_fields(connector_id, :configuration => payload)
+        update_connector_configuration(connector_id, payload)
       end
 
       def claim_job(connector_id)
