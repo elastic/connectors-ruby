@@ -24,8 +24,12 @@ describe App::Dispatcher do
     allow(job_runner).to receive(:execute)
     allow(Utility::ExceptionTracking).to receive(:log_exception)
 
-    stub_const('App::Dispatcher::POLL_IDLING', 1)
+    stub_const('App::Dispatcher::POLL_INTERVAL', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
+    stub_const('App::Dispatcher::HEARTBEAT_INTERVAL', 60 * 30)
+    stub_const('App::Dispatcher::MIN_THREADS', 0)
+    stub_const('App::Dispatcher::MAX_THREADS', 5)
+    stub_const('App::Dispatcher::MAX_QUEUE', 100)
   end
 
   after(:each) do
@@ -49,73 +53,139 @@ describe App::Dispatcher do
         allow(scheduler).to receive(:when_triggered)
       end
       it 'starts no sync jobs' do
-        expect(Core::Heartbeat).to_not receive(:send)
-        expect(job_runner).to_not receive(:execute)
+        expect(described_class).to_not receive(:start_sync_task)
+        expect(described_class).to_not receive(:start_heartbeat_task)
+        expect(described_class).to_not receive(:start_configuration_task)
         described_class.start!
       end
     end
 
     context 'with native connectors' do
       let(:connector_settings) { double }
-      let(:id) { '123' }
-      let(:service_type) { 'example' }
-      let(:index_name) { 'search-foobar' }
 
       before(:each) do
-        allow(connector_settings).to receive(:id).and_return(id)
-        allow(connector_settings).to receive(:service_type).and_return(service_type)
-        allow(connector_settings).to receive(:index_name).and_return(index_name)
-
-        allow(scheduler).to receive(:when_triggered).and_yield(connector_settings)
-        allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(true)
+        allow(scheduler).to receive(:when_triggered).and_yield(connector_settings, task)
+        allow(connector_settings).to receive(:formatted).and_return('')
       end
 
-      it 'starts sync job' do
-        expect(Core::Heartbeat).to receive(:send)
-        expect(job_runner).to receive(:execute)
-        expect { described_class.start! }.to_not raise_error
+      shared_examples_for 'logs exception' do
+        it 'logs exception' do
+          expect(Utility::ExceptionTracking).to receive(:log_exception)
+          expect { described_class.start! }.to_not raise_error
+        end
       end
 
-      context 'when service type is not supported' do
+      context 'with invalid task' do
+        let(:task) { :invalid }
+
+        it 'logs error' do
+          expect(Utility::Logger).to receive(:error)
+          expect { described_class.start! }.to_not raise_error
+        end
+      end
+
+      context 'with sync task' do
+        let(:task) { :sync }
+        let(:valid_index_name) { true }
+
         before(:each) do
-          allow(Connectors::REGISTRY).to receive(:registered?).with(service_type).and_return(false)
+          allow(connector_settings).to receive(:service_type).and_return('')
+          allow(connector_settings).to receive(:index_name).and_return('')
+          allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
+          allow(Connectors::REGISTRY).to receive(:registered?).and_return(true)
         end
 
-        it 'should not sync' do
-          expect(Core::Heartbeat).to_not receive(:send)
-          expect(job_runner).to_not receive(:execute)
-          expect { described_class.start! }.to_not raise_error
+        shared_examples_for 'sync' do
+          it 'starts sync job' do
+            expect(described_class).to receive(:start_heartbeat_task)
+            expect(job_runner).to receive(:execute)
+            expect { described_class.start! }.to_not raise_error
+          end
+        end
+
+        shared_examples_for 'no sync' do
+          it 'does not start sync job' do
+            expect(described_class).to_not receive(:start_heartbeat_task)
+            expect(job_runner).to_not receive(:execute)
+            expect { described_class.start! }.to_not raise_error
+          end
+        end
+
+        it_behaves_like 'sync'
+
+        context 'when service type is not supported' do
+          before(:each) do
+            allow(Connectors::REGISTRY).to receive(:registered?).and_return(false)
+          end
+
+          it_behaves_like 'no sync'
+        end
+
+        context 'when index name is invalid' do
+          let(:valid_index_name) { false }
+
+          it_behaves_like 'no sync'
+        end
+
+        context 'when sync throws an error' do
+          before(:each) do
+            allow(job_runner).to receive(:execute).and_raise('Oh no!')
+          end
+
+          it_behaves_like 'logs exception'
         end
       end
 
-      context 'when index name is empty' do
-        let(:index_name) { '' }
+      context 'with heartbeat task' do
+        let(:task) { :heartbeat }
 
-        it 'should not sync' do
-          expect(Core::Heartbeat).to_not receive(:send)
-          expect(job_runner).to_not receive(:execute)
+        it 'should send heartbeat' do
+          expect(Core::Heartbeat).to receive(:send)
           expect { described_class.start! }.to_not raise_error
+        end
+
+        context 'when heartbeat throws an error' do
+          before(:each) do
+            allow(Core::Heartbeat).to receive(:send).and_raise('Oh no!')
+          end
+
+          it_behaves_like 'logs exception'
         end
       end
 
-      context 'when index name is invalid' do
-        let(:index_name) { 'foobar' }
+      context 'with configuration task' do
+        let(:task) { :configuration }
+        let(:native_mode) { true }
+        let(:needs_service_type) { false }
+        let(:service_type) { 'custom' }
 
-        it 'should not sync' do
-          expect(Core::Heartbeat).to_not receive(:send)
-          expect(job_runner).to_not receive(:execute)
-          expect { described_class.start! }.to_not raise_error
-        end
-      end
-
-      context 'when sync throws an error' do
         before(:each) do
-          allow(job_runner).to receive(:execute).and_raise('Oh no!')
+          allow(connector_settings).to receive(:needs_service_type?).and_return(needs_service_type)
+          allow(App::Config).to receive(:native_mode).and_return(native_mode)
+          allow(App::Config).to receive(:service_type).and_return(service_type)
         end
 
-        it 'logs an error when execute fails' do
-          expect(Utility::ExceptionTracking).to receive(:log_exception).with(anything, match(/123/))
+        it 'should update configuration without service type' do
+          expect(Core::Configuration).to receive(:update).with(connector_settings, nil)
           expect { described_class.start! }.to_not raise_error
+        end
+
+        context 'in non-native mode' do
+          let(:native_mode) { false }
+          let(:needs_service_type) { true }
+
+          it 'should update configuration with service type' do
+            expect(Core::Configuration).to receive(:update).with(connector_settings, service_type)
+            expect { described_class.start! }.to_not raise_error
+          end
+        end
+
+        context 'when configuration throws an error' do
+          before(:each) do
+            allow(Core::Configuration).to receive(:update).and_raise('Oh no!')
+          end
+
+          it_behaves_like 'logs exception'
         end
       end
     end

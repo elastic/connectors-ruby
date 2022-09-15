@@ -21,8 +21,11 @@ thread_pool:
 log_level: info
 ecs_logging: true
 
-idle_timeout: 60
+poll_interval: 3
+termination_timeout: 60
+heartbeat_interval: 1800
 
+native_mode: true
 connector_id: CHANGEME
 service_type: CHANGEME
 
