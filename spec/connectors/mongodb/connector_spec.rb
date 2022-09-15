@@ -136,7 +136,7 @@ describe Connectors::MongoDB::Connector do
         ]
       end
 
-      it 'yields each document of the collection replacing _id with id' do
+      it 'yields each document of the collection remapping ids correctly' do
         expected_ids = actual_collection_data.map { |d| d['_id'] }.to_a
 
         yielded_documents = []
@@ -146,6 +146,88 @@ describe Connectors::MongoDB::Connector do
         expect(yielded_documents.size).to eq(actual_collection_data.size)
         expected_ids.each do |id|
           expect(yielded_documents).to include(a_hash_including('id' => id))
+        end
+      end
+
+      context 'when field of type BSON::ObjectId is met' do
+        let(:id) { '63238d68dc461bfe327e9634' }
+
+        let(:actual_collection_data) do
+          [
+            { '_id' => BSON::ObjectId.from_string(id) }
+          ]
+        end
+
+        it 'serializes the field correctly' do
+          # only 1 record is there, so meh no need to do it outside of yield_documents
+          subject.yield_documents do |doc|
+            expect(doc['id']).to eq(id)
+          end
+        end
+      end
+
+      context 'when field of type BSON::Decimal128 is met' do
+        let(:price) { '12.00' }
+
+        let(:actual_collection_data) do
+          [
+            { '_id' => 1, 'price' => BSON::Decimal128.from_string(price) }
+          ]
+        end
+
+        it 'serializes the field correctly' do
+          # only 1 record is there, so meh no need to do it outside of yield_documents
+          subject.yield_documents do |doc|
+            expect(doc['price']).to eq(BigDecimal(price))
+          end
+        end
+      end
+
+      context 'when array of strings is met' do
+        let(:array_of_strings) { ['1', '1b', '17', '222'] }
+        let(:actual_collection_data) do
+          [
+            { '_id' => 1, 'rooms' => array_of_strings }
+          ]
+        end
+
+        it 'serializes the field correctly' do
+          # only 1 record is there, so meh no need to do it outside of yield_documents
+          subject.yield_documents do |doc|
+            expect(doc['rooms']).to eq(array_of_strings)
+          end
+        end
+      end
+
+      context 'when field that needs special serialization is nested in hash' do
+        let(:price) { '12.00' }
+        let(:actual_collection_data) do
+          [
+            { '_id' => 1, 'room' => { 'price' => BSON::Decimal128.from_string(price) } }
+          ]
+        end
+
+        it 'serializes the field correctly' do
+          # only 1 record is there, so meh no need to do it outside of yield_documents
+          subject.yield_documents do |doc|
+            expect(doc['room']['price']).to eq(BigDecimal(price))
+          end
+        end
+      end
+
+      context 'when field that needs special serialization is nested in array' do
+        let(:price) { '12.00' }
+        let(:actual_collection_data) do
+          [
+            { '_id' => 1, 'rooms' => [{ 'price' => BSON::Decimal128.from_string(price) }] }
+          ]
+        end
+
+        it 'serializes the field correctly' do
+          # only 1 record is there, so meh no need to do it outside of yield_documents
+          subject.yield_documents do |doc|
+            expect(doc['rooms'][0]['price']).to eq(BigDecimal(price))
+          end
         end
       end
     end
