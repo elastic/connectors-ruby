@@ -57,8 +57,23 @@ module Utility
 
     def raise_if_necessary(response)
       if response['errors']
-        first_error = response['items'][0]
-        raise IndexingFailedError.new("Failed to index documents into Elasticsearch.\nFirst error in response is: #{first_error.to_json}")
+        first_error = nil
+
+        response['items'].each do |item|
+          [ 'index', 'delete' ].each do |op|
+            if item.has_key?(op) && item[op].has_key?('error')
+              first_error = item
+
+              break
+            end
+          end
+        end
+
+        if first_error
+          raise IndexingFailedError.new("Failed to index documents into Elasticsearch.\nFirst error in response is: #{first_error.to_json}")
+        else
+          raise IndexingFailedError.new('Failed to index documents into Elasticsearch due to unknown error. Try enabling tracing for Elasticsearch and checking the logs.')
+        end
       end
       response
     end
