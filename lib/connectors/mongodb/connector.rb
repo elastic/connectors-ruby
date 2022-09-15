@@ -57,9 +57,8 @@ module Connectors
         with_client do |client|
           client[@collection].find.each do |document|
             doc = document.with_indifferent_access
-            transform!(doc)
 
-            yield doc
+            yield serialize(doc)
           end
         end
       end
@@ -101,8 +100,17 @@ module Connectors
         end
       end
 
-      def transform!(mongodb_document)
-        mongodb_document[:id] = mongodb_document.delete(:_id)
+      def serialize(mongodb_document)
+        # This is some lazy serialization here.
+        # Problem: MongoDB has its own format of things - e.g. ids are Bson::ObjectId, which when serialized to JSON
+        # will produce something like: 'id': { '$oid': '536268a06d2d7019ba000000' }, which is not good for us
+
+        object = mongodb_document.map do |key,value|
+          remapped_key = key == '_id' ? 'id' : key
+          [remapped_key, value.is_a?(BSON::ObjectId) ? value.to_s : value]
+        end.to_h
+
+        object
       end
     end
   end
