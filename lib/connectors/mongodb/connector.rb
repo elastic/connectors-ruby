@@ -107,7 +107,29 @@ module Connectors
 
         object = mongodb_document.map do |key,value|
           remapped_key = key == '_id' ? 'id' : key
-          [remapped_key, value.is_a?(BSON::ObjectId) ? value.to_s : value]
+
+          remapped_value = case value
+                           when BSON::ObjectId
+                             value.to_s
+                             break
+                           when BSON::Decimal128
+                             value.to_big_decimal # potential problems with NaNs but also will get treated as a string by Elasticsearch anyway
+                             break
+                           when String
+                             # it's here cause Strings are Arrays too :/
+                             value.to_s
+                             break
+                           when Array
+                             value.map { |v| serialize(v) }
+                             break
+                           when Hash
+                             serialize(value)
+                             break
+                           else
+                             value
+                           end
+
+          [remapped_key, remapped_value]
         end.to_h
 
         object
