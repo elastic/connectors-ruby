@@ -72,22 +72,22 @@ module Connectors
         end
       end
 
-      def with_client(&block)
+      def with_client
         client = if @user.present? || @password.present?
-          Mongo::Client.new(
-            @host,
-            database: @database,
-            direct_connection: @direct_connection,
-            user: @user,
-            password: @password
-          )
-        else
-          Mongo::Client.new(
-            @host,
-            database: @database,
-            direct_connection: @direct_connection
-          )
-        end
+                   Mongo::Client.new(
+                     @host,
+                     database: @database,
+                     direct_connection: @direct_connection,
+                     user: @user,
+                     password: @password
+                   )
+                 else
+                   Mongo::Client.new(
+                     @host,
+                     database: @database,
+                     direct_connection: @direct_connection
+                   )
+                 end
 
         begin
           Utility::Logger.debug("Existing Databases #{client.database_names}")
