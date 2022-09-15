@@ -20,6 +20,14 @@ describe Connectors::MongoDB::Connector do
        :collection => {
          :label => 'MongoDB Collection',
          :value => mongodb_collection
+       },
+       :user => {
+         :label => 'Username',
+         :value => mongodb_username
+       },
+       :password => {
+         :label => 'Password',
+         :value => mongodb_password
        }
     }
   end
@@ -27,6 +35,8 @@ describe Connectors::MongoDB::Connector do
   let(:mongodb_host) { '127.0.0.1:27027' }
   let(:mongodb_database) { 'sample-database' }
   let(:mongodb_collection) { 'some-collection' }
+  let(:mongodb_username) { nil }
+  let(:mongodb_password) { nil }
 
   let(:mongo_client) { double }
 
@@ -39,6 +49,7 @@ describe Connectors::MongoDB::Connector do
     allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => mongodb_collection })])
     allow(mongo_client).to receive(:database_names).and_return([Hashie::Mash.new({ :name => mongodb_database })])
     allow(mongo_client).to receive(:[]).with(mongodb_collection).and_return(actual_collection)
+    allow(mongo_client).to receive(:with).and_return(mongo_client)
     allow(mongo_client).to receive(:close)
 
     allow(actual_collection).to receive(:find).and_return(actual_collection_data)
@@ -46,25 +57,51 @@ describe Connectors::MongoDB::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#is_healthy?' do
-    it 'instantiates a mongodb client' do
-      expect(Mongo::Client).to receive(:new).with([mongodb_host], hash_including(:database => mongodb_database))
-
-      subject.is_healthy?
-    end
-
-    it 'closes a client in the end' do
+  shared_examples_for 'closes a client in the end' do
+    it '' do
       expect(mongo_client).to receive(:close)
 
       subject.is_healthy?
     end
   end
 
-  context '#yield_documents' do
-    it 'closes a client in the end' do
-      expect(mongo_client).to receive(:close)
+  shared_examples_for 'handles auth' do
+    context 'when username and password are provided' do
+      let(:mongodb_username) { 'admin' }
+      let(:mongodb_password) { 'some-password' }
+      it 'sets client to use basic auth' do
+        expect(mongo_client).to receive(:with).with(:user => mongodb_username, :password => mongodb_password)
 
-      subject.yield_documents { |doc| }
+        do_test
+      end
+    end
+
+    context 'when no username and password are provided' do
+      it 'does not set client to use basic auth' do
+        expect(mongo_client).to_not receive(:with).with(:user => mongodb_username, :password => mongodb_password)
+
+        do_test
+      end
+    end
+  end
+
+  context '#is_healthy?' do
+    it_behaves_like 'closes a client in the end'
+    it_behaves_like 'handles auth' do
+      let(:do_test) { subject.is_healthy? }
+    end
+
+    it 'instantiates a mongodb client' do
+      expect(Mongo::Client).to receive(:new).with(mongodb_host, hash_including(:database => mongodb_database))
+
+      subject.is_healthy?
+    end
+  end
+
+  context '#yield_documents' do
+    it_behaves_like 'closes a client in the end'
+    it_behaves_like 'handles auth' do
+      let(:do_test) { subject.yield_documents { |doc|; } }
     end
 
     context 'when database is not found' do

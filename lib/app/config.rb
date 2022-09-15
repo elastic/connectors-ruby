@@ -52,6 +52,10 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:gitlab).hash do
       required(:api_token).value(:string)
     end
+
+    optional(:mongo).hash do
+      required(:direct_connection).value(:bool?)
+    end
   end
 end
 
