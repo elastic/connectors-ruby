@@ -16,6 +16,7 @@ gem 'tzinfo', '1.2.10'
 gem 'nokogiri', '>= 1.13.7', :require => false
 gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
+gem 'ecs-logging'
 
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
