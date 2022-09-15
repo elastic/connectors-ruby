@@ -24,12 +24,18 @@ describe Connectors::Example::Connector do
   end
 
   context '#yield_documents' do
+    before do
+      @documents = []
+
+      subject.yield_documents { |doc| @documents << doc }
+    end
+
     it 'returns some documents' do
-      documents = []
+      expect(@documents.size).to be > 0
+    end
 
-      subject.yield_documents { |doc| documents << doc }
-
-      expect(documents.size).to be > 0
+    it 'returns attachments' do
+      expect(@documents.all? { |doc| doc.has_key?(:_attachment) }).to be true
     end
   end
 end
