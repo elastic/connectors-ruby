@@ -60,7 +60,7 @@ module Utility
         first_error = nil
 
         response['items'].each do |item|
-          [ 'index', 'delete' ].each do |op|
+          ['index', 'delete'].each do |op|
             if item.has_key?(op) && item[op].has_key?('error')
               first_error = item
 
