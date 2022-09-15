@@ -57,6 +57,7 @@ GEM
       dry-core (~> 0.5, >= 0.5)
       dry-initializer (~> 3.0)
       dry-schema (~> 1.8, >= 1.8.0)
+    ecs-logging (1.0.0)
     elastic-transport (8.0.1)
       faraday (~> 1)
       multi_json
@@ -220,6 +221,7 @@ DEPENDENCIES
   concurrent-ruby (~> 1.1.9)
   config (~> 4.0.0)
   debase (= 0.2.5.beta2)
+  ecs-logging
   elasticsearch
   faraday (~> 1.10.0)
   faraday_middleware (= 1.0.0)
