@@ -19,6 +19,7 @@ module Connectors
         Core::ConnectorSettings.fetch_crawler_connectors || []
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'Could not retrieve Crawler connectors due to unexpected error.')
+        []
       end
     end
   end

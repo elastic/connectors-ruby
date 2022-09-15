@@ -65,13 +65,6 @@ module Core
         return false
       end
 
-      # We want to sync when sync never actually happened
-      last_synced = connector_settings[:last_synced]
-      if last_synced.nil? || last_synced.empty?
-        Utility::Logger.info("Connector #{connector_settings.id} has never synced yet, running initial sync.")
-        return true
-      end
-
       # Sync when sync_now flag is true for the connector
       if connector_settings[:sync_now] == true
         Utility::Logger.info("Connector #{connector_settings.id} is manually triggered to sync now.")
@@ -83,6 +76,13 @@ module Core
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
         Utility::Logger.info("Connector #{connector_settings.id} scheduling is disabled.")
         return false
+      end
+
+      # We want to sync when sync never actually happened
+      last_synced = connector_settings[:last_synced]
+      if last_synced.nil? || last_synced.empty?
+        Utility::Logger.info("Connector #{connector_settings.id} has never synced yet, running initial sync.")
+        return true
       end
 
       current_schedule = scheduling_settings[:interval]
@@ -97,6 +97,7 @@ module Core
         Utility::Cron.quartz_to_crontab(current_schedule)
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Unable to convert quartz (#{current_schedule}) to crontab.")
+        return false
       end
       cron_parser = Fugit::Cron.parse(current_schedule)
 

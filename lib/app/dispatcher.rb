@@ -82,8 +82,6 @@ module App
       end
 
       def start_sync_task(connector_settings)
-        index_name = connector_settings.index_name
-
         # connector-level checks
         unless Connectors::REGISTRY.registered?(connector_settings.service_type)
           Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported. Skipping...")
@@ -93,7 +91,7 @@ module App
           Utility::Logger.info("The index name of #{connector_settings.formatted} is invalid. Skipping...")
           return
         end
-        Core::ElasticConnectorActions.ensure_content_index_exists(index_name)
+        Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
 
         start_heartbeat_task(connector_settings)
         pool.post do
@@ -118,7 +116,7 @@ module App
         pool.post do
           Utility::Logger.info("Updating configuration for #{connector_settings.formatted}...")
           # when in non-native mode, populate the service type if it's not in connector settings
-          service_type = if App::Config.native_mode && connector_settings.needs_service_type?
+          service_type = if !App::Config.native_mode && connector_settings.needs_service_type?
                            App::Config.service_type
                          else
                            nil
