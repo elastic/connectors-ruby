@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require 'connectors_service'
+ConnectorsService.run!
