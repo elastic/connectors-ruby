@@ -94,9 +94,6 @@ module Core
     end
 
     def add_ingest_metadata(document)
-      # XXX
-      return document
-
       document.tap do |it|
         it['_extract_binary_content'] = @connector_settings.extract_binary_content? if @connector_settings.extract_binary_content?
         it['_reduce_whitespace'] = @connector_settings.reduce_whitespace? if @connector_settings.reduce_whitespace?
