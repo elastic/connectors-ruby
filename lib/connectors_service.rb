@@ -15,6 +15,18 @@ class ConnectorsService
   def self.run!
     Utility::Environment.set_execution_environment(App::Config) do
       App::PreflightCheck.run!
+
+      # set up exits signals to shut down gracefully
+      Signal.trap("INT") {
+        App::Dispatcher.shutdown!
+        exit(0)
+      }
+      Signal.trap("TERM") {
+        App::Dispatcher.shutdown!
+        exit(0)
+      }
+
+      # start the dispatcher
       App::Dispatcher.start!
     rescue App::PreflightCheck::CheckFailure => e
       Utility::Logger.error("Preflight check failed: #{e.message}")
