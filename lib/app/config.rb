@@ -29,7 +29,7 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     required(:elasticsearch).hash do
       optional(:cloud_id).value(:string)
       optional(:hosts).value(:string)
-      required(:api_key).value(:string)
+      optional(:api_key).value(:string)
       optional(:retry_on_failure).value(:integer)
       optional(:request_timeout).value(:integer)
       optional(:disable_warnings).value(:bool?)
@@ -43,11 +43,15 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       optional(:max_queue).value(:integer, gteq?: 0)
     end
 
+    required(:native_mode).value(:bool?)
     optional(:connector_id).value(:string)
     optional(:service_type).value(:string)
     required(:log_level).value(:string)
+    required(:ecs_logging).value(:bool?)
 
-    optional(:idle_timeout).value(:integer)
+    optional(:poll_interval).value(:integer)
+    optional(:termination_timeout).value(:integer)
+    optional(:heartbeat_interval).value(:integer)
 
     optional(:gitlab).hash do
       required(:api_token).value(:string)

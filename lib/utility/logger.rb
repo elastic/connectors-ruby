@@ -6,6 +6,7 @@
 
 require 'logger'
 require 'active_support/core_ext/module'
+require 'ecs_logging/logger'
 
 module Utility
   class Logger
@@ -21,12 +22,16 @@ module Utility
       end
 
       def logger
-        @logger ||= ::Logger.new(STDOUT)
+        @logger ||= Settings[:ecs_logging] ? EcsLogging::Logger.new(STDOUT) : ::Logger.new(STDOUT)
       end
 
       SUPPORTED_LOG_LEVELS.each do |level|
         define_method(level) do |message|
-          logger.public_send(level, message)
+          if logger.is_a?(EcsLogging::Logger)
+            logger.public_send(level, message, service: { name: 'connectors-ruby' })
+          else
+            logger.public_send(level, message)
+          end
         end
       end
 

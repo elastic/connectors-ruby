@@ -65,9 +65,9 @@ eshPipeline(
                  if (isUnix()) {
                    sh('curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64')
                    sh('chmod +x yq')
-                   sh('YQ=`realpath yq` make install build')
+                   sh('YQ=`realpath yq` make install build_service')
                  } else {
-                   bat('make install build')
+                   bat('make install build_service')
                  }
                }
            },

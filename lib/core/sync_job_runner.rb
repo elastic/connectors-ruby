@@ -6,8 +6,6 @@
 
 # frozen_string_literal: true
 
-require 'app/config'
-require 'concurrent'
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
@@ -21,11 +19,11 @@ module Core
   end
 
   class SyncJobRunner
-    def initialize(connector_settings, service_type)
+    def initialize(connector_settings)
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
-      @connector_class = Connectors::REGISTRY.connector_class(service_type)
-      @connector_instance = Connectors::REGISTRY.connector(service_type, connector_settings.configuration)
+      @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
+      @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
       @status = {
         :indexed_document_count => 0,
         :deleted_document_count => 0,

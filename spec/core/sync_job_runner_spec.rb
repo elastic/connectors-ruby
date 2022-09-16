@@ -42,7 +42,7 @@ describe Core::SyncJobRunner do
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
 
-  subject { described_class.new(connector_settings, service_type) }
+  subject { described_class.new(connector_settings) }
 
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
@@ -59,6 +59,7 @@ describe Core::SyncJobRunner do
     allow(sink).to receive(:flush)
 
     allow(connector_settings).to receive(:id).and_return(connector_id)
+    allow(connector_settings).to receive(:service_type).and_return(service_type)
     allow(connector_settings).to receive(:index_name).and_return(output_index_name)
     allow(connector_settings).to receive(:configuration).and_return(connector_stored_configuration)
     allow(connector_settings).to receive(:request_pipeline).and_return(request_pipeline)
