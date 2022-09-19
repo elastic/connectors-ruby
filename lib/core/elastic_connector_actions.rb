@@ -248,7 +248,7 @@ module Core
       private
 
       def client
-        @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
+        @client ||= Utility::EsClient.new(App::Config.elasticsearch)
       end
 
       def get_latest_index_in_alias(alias_name, indicies)
