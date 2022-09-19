@@ -27,13 +27,20 @@ describe Core::Heartbeat do
       described_class.send(connector_settings)
     end
 
-    context 'when it\'s configured' do
+    context 'when it is configured' do
       let(:configured) { true }
       context 'when remote source is up' do
         let(:is_healthy) { true }
 
         it 'updates status' do
-          expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:status => Connectors::ConnectorStatus::CONNECTED))
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(
+              connector_id,
+              hash_including(
+                :status => Connectors::ConnectorStatus::CONNECTED
+              )
+            )
 
           described_class.send(connector_settings)
         end
@@ -43,7 +50,15 @@ describe Core::Heartbeat do
         let(:is_healthy) { false }
 
         it 'updates status' do
-          expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:status => Connectors::ConnectorStatus::ERROR))
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(
+              connector_id,
+              hash_including(
+                :status => Connectors::ConnectorStatus::ERROR,
+                :error => /Health check for 3d party service failed/
+              )
+            )
 
           described_class.send(connector_settings)
         end

@@ -8,7 +8,8 @@ describe Core::SyncJobRunner do
   let(:service_type) { 'foo' }
   let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }
   let(:connector_status) { Connectors::ConnectorStatus::CONNECTED }
-  let(:connector_stored_configuration) do # returned from Elasticsearch with values already specified by user
+  let(:connector_stored_configuration) do
+    # returned from Elasticsearch with values already specified by user
     {
       :lala => {
         :label => 'Lala',
@@ -16,7 +17,8 @@ describe Core::SyncJobRunner do
       }
     }
   end
-  let(:connector_default_configuration) do # returned from Connector class with default values
+  let(:connector_default_configuration) do
+    # returned from Connector class with default values
     {
       :lala => {
         :label => 'Lala',
@@ -179,7 +181,9 @@ describe Core::SyncJobRunner do
           end
 
           it 'changes connector status to error' do
-            expect(Core::ElasticConnectorActions).to receive(:update_connector_status).with(connector_id, Connectors::ConnectorStatus::ERROR)
+            expect(Core::ElasticConnectorActions)
+              .to receive(:update_connector_status)
+              .with(connector_id, Connectors::ConnectorStatus::ERROR, 'whoops')
 
             subject.execute
           end

@@ -60,7 +60,7 @@ module Utility
         first_error = nil
 
         response['items'].each do |item|
-          ['index', 'delete'].each do |op|
+          %w[index delete].each do |op|
             if item.has_key?(op) && item[op].has_key?('error')
               first_error = item
 
@@ -70,7 +70,10 @@ module Utility
         end
 
         if first_error
-          raise IndexingFailedError.new("Failed to index documents into Elasticsearch.\nFirst error in response is: #{first_error.to_json}")
+          trace_id = Utility::Logger.generate_trace_id
+          Utility::Logger.error("Failed to index documents into Elasticsearch. First error in response is: #{first_error.to_json}")
+          short_message = Utility::Logger.abbreviated_message(first_error.to_json)
+          raise IndexingFailedError.new("Failed to index documents into Elasticsearch with an error '#{short_message}'. Look up the error ID [#{trace_id}] in the application logs to see the full error message.")
         else
           raise IndexingFailedError.new('Failed to index documents into Elasticsearch due to unknown error. Try enabling tracing for Elasticsearch and checking the logs.')
         end

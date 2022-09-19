@@ -78,7 +78,7 @@ module Core
       rescue StandardError => e
         @status[:error] = e.message
         Utility::ExceptionTracking.log_exception(e)
-        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR)
+        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR, Utility::Logger.abbreviated_message(e.message))
       ensure
         Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
