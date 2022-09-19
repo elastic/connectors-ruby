@@ -24,19 +24,22 @@ module Connectors
       def self.configurable_fields
         {
            :host => {
-             :label => 'MongoDB Server Hostname'
+             :label => 'Server Hostname'
            },
            :user => {
-             :label => 'MongoDB User'
+             :label => 'Username'
            },
            :password => {
-             :label => 'MongoDB Passwd'
+             :label => 'Password'
            },
            :database => {
-             :label => 'MongoDB Database'
+             :label => 'Database'
            },
            :collection => {
-             :label => 'MongoDB Collection'
+             :label => 'Collection'
+           },
+           :direct_connection => {
+             :label => 'Direct connection? (true/false)'
            }
         }
       end
@@ -49,7 +52,7 @@ module Connectors
         @collection = configuration.dig(:collection, :value)
         @user = configuration.dig(:user, :value)
         @password = configuration.dig(:password, :value)
-        @direct_connection = false
+        @direct_connection = configuration.dig(:direct_connection, :value)
       end
 
       def yield_documents
@@ -71,6 +74,8 @@ module Connectors
       end
 
       def with_client
+        raise "Invalid value for 'Direct connection' : #{@direct_connection}." unless %w[true false].include?(@direct_connection.to_s.strip.downcase)
+
         client = if @user.present? || @password.present?
                    Mongo::Client.new(
                      @host,

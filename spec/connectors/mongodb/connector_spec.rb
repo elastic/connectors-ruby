@@ -9,15 +9,15 @@ describe Connectors::MongoDB::Connector do
   let(:configuration) do
     {
        :host => {
-         :label => 'MongoDB Server Hostname',
+         :label => 'Server Hostname',
          :value => mongodb_host
        },
        :database => {
-         :label => 'MongoDB Database',
+         :label => 'Database',
          :value => mongodb_database
        },
        :collection => {
-         :label => 'MongoDB Collection',
+         :label => 'Collection',
          :value => mongodb_collection
        },
        :user => {
@@ -27,6 +27,10 @@ describe Connectors::MongoDB::Connector do
        :password => {
          :label => 'Password',
          :value => mongodb_password
+       },
+       :direct_connection => {
+         :label => 'Direct connection? (true/false)',
+         :value => direct_connection
        }
     }
   end
@@ -36,6 +40,7 @@ describe Connectors::MongoDB::Connector do
   let(:mongodb_collection) { 'some-collection' }
   let(:mongodb_username) { nil }
   let(:mongodb_password) { nil }
+  let(:direct_connection) { 'false' }
 
   let(:mongo_client) { double }
 
@@ -84,6 +89,26 @@ describe Connectors::MongoDB::Connector do
     end
   end
 
+  shared_examples_for 'validates direct_connection' do
+    %w[true false].each do |value|
+      context "when direct_connection is #{value}" do
+        let(:direct_connection) { value }
+
+        it 'does not throw error' do
+          expect { do_test }.to_not raise_error
+        end
+      end
+    end
+
+    context 'when direct_connection is not a boolean' do
+      let(:direct_connection) { 'foobar' }
+
+      it 'throws error' do
+        expect { do_test }.to raise_error
+      end
+    end
+  end
+
   context '#is_healthy?' do
     it_behaves_like 'closes a client in the end'
     it_behaves_like 'handles auth' do
@@ -100,6 +125,9 @@ describe Connectors::MongoDB::Connector do
   context '#yield_documents' do
     it_behaves_like 'closes a client in the end'
     it_behaves_like 'handles auth' do
+      let(:do_test) { subject.yield_documents { |doc|; } }
+    end
+    it_behaves_like 'validates direct_connection' do
       let(:do_test) { subject.yield_documents { |doc|; } }
     end
 
