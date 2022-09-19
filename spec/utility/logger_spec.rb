@@ -15,9 +15,11 @@ RSpec.describe Utility::Logger do
   let(:message_with_breaks) { 'This is a message with line breaks.\nThis is a message with line breaks.' }
   let(:message_with_tabs) { 'This is a message  with tabs.\t\t\tThis is a message  with tabs.' }
   let(:message_with_many_spaces) { '  This is a    message with a lot of spaces.  ' }
+  let(:global_settings) { double(:ecs_logging => false) }
 
   before do
     stub_const('Utility::Logger::MAX_SHORT_MESSAGE_LENGTH', 100)
+    stub_const('Settings', global_settings)
   end
 
   it 'can give the connectors logger' do
