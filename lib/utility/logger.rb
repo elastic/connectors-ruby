@@ -6,6 +6,7 @@
 
 require 'logger'
 require 'active_support/core_ext/module'
+require 'active_support/core_ext/string/filters'
 require 'ecs_logging/logger'
 
 module Utility
@@ -50,7 +51,7 @@ module Utility
       end
 
       def abbreviated_message(message)
-        message.gsub(/[\n\t]/, ' ').gsub(/\s+/, ' ')[0, MAX_SHORT_MESSAGE_LENGTH].strip
+        message.gsub(/\s+/, ' ').strip.truncate(MAX_SHORT_MESSAGE_LENGTH)
       end
     end
   end
