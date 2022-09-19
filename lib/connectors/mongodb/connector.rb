@@ -41,16 +41,15 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration: {}, remote_configuration: {})
+      def initialize(configuration: {})
         super
 
-        @host = remote_configuration.dig(:host, :value)
-        @database = remote_configuration.dig(:database, :value)
-        @collection = remote_configuration.dig(:collection, :value)
-        @user = remote_configuration.dig(:user, :value)
-        @password = remote_configuration.dig(:password, :value)
-
-        @direct_connection = local_configuration.present? && !!local_configuration[:direct_connection]
+        @host = configuration.dig(:host, :value)
+        @database = configuration.dig(:database, :value)
+        @collection = configuration.dig(:collection, :value)
+        @user = configuration.dig(:user, :value)
+        @password = configuration.dig(:password, :value)
+        @direct_connection = false
       end
 
       def yield_documents

@@ -5,9 +5,8 @@ require 'hashie/mash'
 require 'spec_helper'
 
 describe Connectors::MongoDB::Connector do
-  subject { described_class.new(local_configuration: local_configuration, remote_configuration: remote_configuration) }
-  let(:local_configuration) { {} }
-  let(:remote_configuration) do
+  subject { described_class.new(configuration: configuration) }
+  let(:configuration) do
     {
        :host => {
          :label => 'MongoDB Server Hostname',

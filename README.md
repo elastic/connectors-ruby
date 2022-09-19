@@ -29,7 +29,7 @@ Reference:
 
 ## Terminology
 
-- `connector client` - specific light-weight connector implementation, open-code. Connector clients can be built by Elastic or community built.
+- `connector client` - specific light-weight connector implementation, open-code. Connector clients can be built by Elastic or Community.
 - `connector service` - the app that runs the asynchronous loop that calls Elasticsearch on a regular basis to check whether syncs need to happen.
 - `connector framework` - framework and libraries used to customize and build connector clients. Basically, it's what this repository is.
 - `connector packages` - a previous version of the connector clients. Refer to the [8.3 branch](https://github.com/elastic/connectors-ruby/tree/8.3) if you're looking for connector packages. Also, read more about them in the [custom connector packages guide](https://www.elastic.co/guide/en/workplace-search/8.4/custom-connector-package.html).
@@ -54,7 +54,7 @@ In this section:
 The [connector protocol](docs/CONNECTOR_PROTOCOL.md) is document-based and building a connector is language- and tool-agnostic.
 To create an Elastic connector, you need to implement this protocol. At a high level, you need to create an application (the connector service) that can read and write to a specific document in Elasticsearch that represents the connector. This document "registers" the connector with Kibana, keeps the configuration that is made via the Kibana UI, as well as the scheduling configuration and the state information for the service. You need to update the connector state to keep up with the current status of the connector application and of the third-party data source. You also need to log sync jobs to an additional index, so that the history of synchronization tasks would be available. And of course, you need to write the results of the synchronization to the Elasticsearch document index, created for this connector service.
 
-The procedure to properly implement the protocol _without the connector framework_ is as follows:
+The procedures to properly implement the protocol _without the connector framework_ is as follows:
 
 - Create a new index for the connector via the Kibana UI - Enterprise Search - Create an Elasticsearch index. Use the `Build a connector` option for an ingestion method.
 - Create an API key to work with the connector. It should be done either using the `Generate API key` button, which is available on the next step of the wizard, or by creating a new API key via the Security - API keys - `Create API key`. The second way is more generic and will allow the same API key to be used for multiple connectors.
@@ -70,15 +70,15 @@ Using this connector framework is optional and Ruby-specific. But the framework 
 
 #### Current connector clients
 
-The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [example connector](lib/connectors/example). None of those are production ready clients - rather, they are functional examples, which you can use as a base for your own work.
+The connector clients implemented in this repository are [mongodb](/lib/connectors/mongodb), [gitlab](/lib/connectors/gitlab) and [example connector](lib/connectors/example). None of those are production-ready clients - rather, they are functional examples, which you can use as a base for your own work.
 
 - The `example` connector is the most basic and doesn't have any integration with the third-party data source - it just returns some stub data to ingest.
-- The `mongodb` connector is a MongoDB-based connector. It is lacking some features that one would definitely want in production - for example it does not implement any kind of authentication and it only works with a single collection, but it is still a good example of how to use the connector framework for handling the data from this kind of a document storage.
-- The `gitlab` connector is the most involved out of the three but is is also missing a lot of features - for one, it only grabs the projects and leaves aside all the other types of content, like files, folders, issues etc. In the current simplified version, it also doesn't synchronize document permissions. But it implements the authentication via an API token, and it has the most developed class structure, which is easily extendable.
+- The `mongodb` connector is a MongoDB-based connector. It is lacking some features that one would definitely want in production - for example it does not implement any kind of authentication and it only works with a single collection, but it is still a good example of how to use the connector framework for handling the data from this kind of document storage.
+- The `gitlab` connector is the most involved out of the three but is also missing a lot of features - for one, it only grabs the projects and leaves aside all the other types of content, like files, folders, issues, etc. In the current simplified version, it also doesn't synchronize document permissions. But it implements the authentication via an API token, and it has the most developed class structure, which is easily extendable.
 
 #### System Requirements
 
-Under Linux or Macos, you can run the application using Docker or directly on your system.
+Under Linux or MacOS, you can run the application using Docker or directly on your system.
 
 For the latter you will need:
 - rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
@@ -87,7 +87,7 @@ For the latter you will need:
 
 #### Windows support
 
-We provide an experimental support for Window 10.
+We provide experimental support for Windows 10.
 
 You can run the `win32\install.bat` script to have an unattended installation of Ruby
 and the tools we use. Once installed, you can run the `specs` using `make.bat`
@@ -148,11 +148,13 @@ If you wanted to also have default values for the fields, you could do it as fol
 
 This way, it's not necessary to set the values in the Kibana UI, unless they differ from the defaults.
 
-- Implement the `health_check` method to return a boolean value, corresponding to the health status of the connector. Currently, the `health_check` method is used to evaluate the connector service state to either `OK` or `FAILURE`, depending on whether the method throws an exception or runs normally. So for example, the [mongo connector](lib/connectors/mongodb/connector.rb) just creates the mongo client to make sure the connection to the database is successful.
+- Implement the `do_health_check` method to return a boolean value, corresponding to the health status of the connector. Currently, the `do_health_check` method is used to evaluate the connection to the third-party data source, depending on whether the method throws an exception or runs normally. So for example, the [mongo connector](lib/connectors/mongodb/connector.rb) just creates the mongo client to make sure the connection to the database is successful.
 
 ```ruby
-    def health_check(_params)
-      create_client(@host, @database)
+    def do_health_check
+      with_client do |_client|
+        Utility::Logger.debug("Mongo at #{@host}/#{@database} looks healthy.")
+      end
     end
 ```
 
@@ -160,13 +162,12 @@ This way, it's not necessary to set the values in the Kibana UI, unless they dif
 
 ```ruby
     def yield_documents
-      mongodb_client = create_client(@host, @database)
-    
-      mongodb_client[@collection].find.each do |document|
-        doc = document.with_indifferent_access
-        transform!(doc)
-    
-        yield doc
+      with_client do |client|
+        client[@collection].find.each do |document|
+          doc = document.with_indifferent_access
+      
+          yield serialize(doc)
+        end
       end
     end
 ```
@@ -191,7 +192,6 @@ Or from the [gitlab connector](lib/connectors/gitlab/connector.rb):
 
 First, build the code with:
 
-You can run the connector service using our Dockerfile.
 ```shell
 make build
 ```
@@ -251,22 +251,6 @@ And then use the `encoded` value:
 
 ```
 make run-docker API_KEY="NGVPV2dZSUJBWWRNaUdIY3htS0g6eklKVGhGZzlUTzZ1YVlWeTU3VEZTQQ=="
-```
-
-#### Local connector properties
-
-Sensitive data, such as API keys, credentials, etc. could also be stored in the [configuration file](config/connectors.yml), provided that it's NOT under source control. Every connector reads this file on creation and is looking for the section called `<service_type>`, where `service_type` is the name that was provided in the corresponding property of the configuration file. You can look at it as a short identifier allowing you to specify which third-party service is behind the connector, or anything to help identify which connector you're running. Example:
-
-```yaml
-service_type: gitlab
-gitlab:
-  api_token: <your-api-key>
-```
-
-This way, you're saying that the connector is for GitLab, and there you're providing the API key for GitLab. And it also means that the `GitLab::Connector` class will have a `@local_configuration` variable that will contain whatever is in the `gitlab` section of the configuration file. So inside the connector class, you can access the API key like this:
-
-```ruby
-@local_configuration[:api_token]
 ```
 
 ## Operating the connector

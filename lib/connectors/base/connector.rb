@@ -27,9 +27,8 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      def initialize(local_configuration: {}, remote_configuration: {})
-        @local_configuration = local_configuration || {} # configuration of connector from local file
-        @remote_configuration = remote_configuration || {} # configuration of connector from configurable fields
+      def initialize(configuration: {})
+        @configuration = configuration.dup || {}
       end
 
       def yield_documents; end

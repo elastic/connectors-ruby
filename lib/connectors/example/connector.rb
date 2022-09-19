@@ -29,7 +29,7 @@ module Connectors
         }
       end
 
-      def initialize(local_configuration: {}, remote_configuration: {})
+      def initialize(configuration: {})
         super
       end
 
