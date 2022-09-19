@@ -4,7 +4,7 @@ require 'utility/environment'
 
 RSpec.describe Utility::EsClient do
   let(:host) { 'http://notreallyaserver' }
-  let(:config) do
+  let(:config_hash) do
     {
       :service_type => 'example',
       :log_level => 'INFO',
@@ -16,8 +16,9 @@ RSpec.describe Utility::EsClient do
       }
     }
   end
+  let(:config) { ::Config::Options.new.merge!(config_hash) }
 
-  let(:subject) { described_class.new(config[:elasticsearch]) }
+  let(:subject) { described_class.new(config.elasticsearch) }
 
   before(:each) do
     stub_request(:get, "#{host}:9200/")
