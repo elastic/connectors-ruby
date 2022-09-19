@@ -22,7 +22,7 @@ module Utility
       end
 
       def logger
-        @logger ||= Settings[:ecs_logging] ? EcsLogging::Logger.new(STDOUT) : ::Logger.new(STDOUT)
+        @logger ||= Settings.ecs_logging ? EcsLogging::Logger.new(STDOUT) : ::Logger.new(STDOUT)
       end
 
       SUPPORTED_LOG_LEVELS.each do |level|

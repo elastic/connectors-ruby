@@ -13,10 +13,10 @@ module Utility
     def self.set_execution_environment(config, &block)
       # Set UTC as the timezone
       ENV['TZ'] = 'UTC'
-      Logger.level = config[:log_level]
-      es_config = config[:elasticsearch]
+      Logger.level = config.log_level
+      es_config = config.elasticsearch
       disable_warnings = if es_config.has_key?(:disable_warnings)
-                           es_config[:disable_warnings]
+                           es_config.disable_warnings
                          else
                            true
                          end
