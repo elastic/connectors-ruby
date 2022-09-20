@@ -39,14 +39,6 @@ module Connectors
 
   REGISTRY = Factory.new
 
-  require_relative './example/connector'
-  REGISTRY.register(Connectors::Example::Connector.service_type, Connectors::Example::Connector)
-
-  # loading plugins (might replace this with a directory scan and conventions on names)
-  require_relative './gitlab/connector'
-
-  REGISTRY.register(Connectors::GitLab::Connector.service_type, Connectors::GitLab::Connector)
-
   require_relative 'mongodb/connector'
   REGISTRY.register(Connectors::MongoDB::Connector.service_type, Connectors::MongoDB::Connector)
 end
