@@ -36,7 +36,7 @@ describe Utility::Elasticsearch::Index::Mappings do
             properties: {
               id: Hash,
               additional_urls: Hash,
-              body_content: Hash,
+              body: Hash,
               domains: Hash,
               headings: Hash,
               last_crawled_at: Hash,
