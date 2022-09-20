@@ -7,20 +7,15 @@ require 'spec_helper'
 describe Connectors::GitLab::Connector do
   let(:user_json) { connectors_fixture_raw('gitlab/user.json') }
   let(:base_url) { Connectors::GitLab::DEFAULT_BASE_URL }
-  let(:app_config) do
+  let(:config) do
     {
-      :elasticsearch => { :api_key => 'hello-world', :hosts => 'localhost:9200' },
-      :gitlab => { :api_token => 'some_token' }
-    }
-  end
-  let(:remote_config) do
-    {
-      :base_url => { :value => base_url }
+      :base_url => { :value => base_url },
+      :api_key => { :value => 'some_token' }
     }
   end
 
   subject do
-    Connectors::GitLab::Connector.new(local_configuration: app_config, remote_configuration: remote_config)
+    Connectors::GitLab::Connector.new(configuration: config)
   end
 
   it_behaves_like 'a connector'

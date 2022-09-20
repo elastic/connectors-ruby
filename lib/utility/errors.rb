@@ -119,8 +119,8 @@ module Utility
   end
 
   class HealthCheckFailedError < StandardError
-    def initialize
-      super('Health check failed for 3rd-party service.')
+    def initialize(msg = nil)
+      super("Health check failed for 3rd-party service: #{msg}")
     end
   end
 

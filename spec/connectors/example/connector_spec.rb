@@ -4,9 +4,8 @@ require 'connectors/example/connector'
 require 'spec_helper'
 
 describe Connectors::Example::Connector do
-  subject { described_class.new(local_configuration: local_configuration, remote_configuration: remote_configuration) }
-  let(:local_configuration) { {} }
-  let(:remote_configuration) do
+  subject { described_class.new(configuration: configuration) }
+  let(:configuration) do
     {
        :foo => {
          :label => 'Foo',

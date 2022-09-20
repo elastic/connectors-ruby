@@ -27,9 +27,8 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      def initialize(local_configuration: {}, remote_configuration: {})
-        @local_configuration = local_configuration || {} # configuration of connector from local file
-        @remote_configuration = remote_configuration || {} # configuration of connector from configurable fields
+      def initialize(configuration: {})
+        @configuration = configuration.dup || {}
       end
 
       def yield_documents; end
@@ -42,7 +41,7 @@ module Connectors
         do_health_check
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
-        raise Utility::HealthCheckFailedError.new
+        raise Utility::HealthCheckFailedError.new, e.message
       end
 
       def is_healthy?
