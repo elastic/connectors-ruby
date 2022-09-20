@@ -15,11 +15,13 @@ RSpec.describe Utility::Logger do
   let(:message_with_breaks) { 'This is a message with line breaks.\nThis is a message with line breaks.' }
   let(:message_with_tabs) { 'This is a message  with tabs.\t\t\tThis is a message  with tabs.' }
   let(:message_with_many_spaces) { '  This is a    message with a lot of spaces.  ' }
+  let(:global_settings) { double(:ecs_logging => ecs_logging, :version => version) }
   let(:ecs_logging) { false }
+  let(:version) { 'foobar' }
 
   before do
     stub_const('Utility::Logger::MAX_SHORT_MESSAGE_LENGTH', 100)
-    allow_any_instance_of(::Config::Options).to receive(:ecs_logging).and_return(ecs_logging)
+    stub_const('Settings', global_settings)
   end
 
   it 'can give the connectors logger' do
@@ -47,11 +49,6 @@ RSpec.describe Utility::Logger do
 
   context 'with ecs logging' do
     let(:ecs_logging) { true }
-    let(:version) { '8.5.0' }
-
-    before do
-      allow_any_instance_of(::Config::Options).to receive(:version).and_return(version)
-    end
 
     it 'outputs ecs fields' do
       expect { described_class.info(message) }.to output(/@timestamp/).to_stdout_from_any_process
