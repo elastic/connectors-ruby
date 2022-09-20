@@ -22,8 +22,8 @@ module Core
     def initialize(connector_settings)
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
-      @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
-      @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
+      @connector_class = Connectors::Registry.connector_class(connector_settings.service_type)
+      @connector_instance = Connectors::Registry.connector(connector_settings.service_type, connector_settings.configuration)
       @status = {
         :indexed_document_count => 0,
         :deleted_document_count => 0,

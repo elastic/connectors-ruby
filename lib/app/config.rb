@@ -52,6 +52,8 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:poll_interval).value(:integer)
     optional(:termination_timeout).value(:integer)
     optional(:heartbeat_interval).value(:integer)
+
+    required(:connectors).value(:array, min_size?: 1)
   end
 end
 

@@ -19,7 +19,7 @@ module Core
             :last_seen => Time.now
         }
         if connector_settings.connector_status_allows_sync?
-          connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
+          connector_instance = Connectors::Registry.connector(connector_settings.service_type, connector_settings.configuration)
           doc[:status] = connector_instance.is_healthy? ? Connectors::ConnectorStatus::CONNECTED : Connectors::ConnectorStatus::ERROR
           message = "Health check for 3d party service failed for connector [#{connector_settings.id}], service type [#{connector_settings.service_type}]. Check the application logs for more information."
           doc[:error] = doc[:status] == Connectors::ConnectorStatus::ERROR ? message : nil

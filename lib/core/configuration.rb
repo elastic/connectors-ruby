@@ -18,7 +18,7 @@ module Core
 
       def update(connector_settings, service_type = nil)
         if connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
-          connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type || service_type)
+          connector_class = Connectors::Registry.connector_class(connector_settings.service_type || service_type)
           unless connector_class
             Utility::Logger.error("Couldn't find connector for service type #{connector_settings.service_type || service_type}")
             return

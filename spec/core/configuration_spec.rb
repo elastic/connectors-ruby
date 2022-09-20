@@ -14,7 +14,7 @@ describe Core::Configuration do
 
     before(:each) do
       allow(Core::ElasticConnectorActions).to receive(:update_connector_fields)
-      allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
+      allow(Connectors::Registry).to receive(:connector_class).and_return(connector_class)
       allow(connector_settings).to receive(:id).and_return(connector_id)
       allow(connector_settings).to receive(:service_type).and_return(service_type)
       allow(connector_settings).to receive(:connector_status).and_return(connector_status)

@@ -92,7 +92,7 @@ describe App::Dispatcher do
           allow(connector_settings).to receive(:service_type).and_return('')
           allow(connector_settings).to receive(:index_name).and_return('')
           allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
-          allow(Connectors::REGISTRY).to receive(:registered?).and_return(true)
+          allow(Connectors::Registry).to receive(:registered?).and_return(true)
         end
 
         shared_examples_for 'sync' do
@@ -115,7 +115,7 @@ describe App::Dispatcher do
 
         context 'when service type is not supported' do
           before(:each) do
-            allow(Connectors::REGISTRY).to receive(:registered?).and_return(false)
+            allow(Connectors::Registry).to receive(:registered?).and_return(false)
           end
 
           it_behaves_like 'no sync'

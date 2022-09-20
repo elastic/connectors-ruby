@@ -167,7 +167,7 @@ module App
       connector_settings = Core::ConnectorSettings.fetch_by_id(App::Config.connector_id)
       service_type = App::Config.service_type
       if service_type.present?
-        return registry.connector(service_type, connector_settings.configuration)
+        return Connectors::Registry.connector(service_type, connector_settings.configuration)
       end
       puts 'You have not set connector service type in settings. Please do so before continuing.'
       nil
@@ -176,10 +176,6 @@ module App
     def exit_normally(message = 'Kthxbye!... ¯\_(ツ)_/¯')
       puts(message)
       exit(true)
-    end
-
-    def registry
-      @registry = Connectors::REGISTRY
     end
 
     puts 'Hello Connectors 3.0!'

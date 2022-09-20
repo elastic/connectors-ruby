@@ -83,7 +83,7 @@ module App
 
       def start_sync_task(connector_settings)
         # connector-level checks
-        unless Connectors::REGISTRY.registered?(connector_settings.service_type)
+        unless Connectors::Registry.registered?(connector_settings.service_type)
           Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported. Skipping...")
           return
         end

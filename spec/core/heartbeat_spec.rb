@@ -13,7 +13,7 @@ describe Core::Heartbeat do
 
     before(:each) do
       allow(Core::ElasticConnectorActions).to receive(:update_connector_fields)
-      allow(Connectors::REGISTRY).to receive(:connector).and_return(connector_instance)
+      allow(Connectors::Registry).to receive(:connector).and_return(connector_instance)
       allow(connector_settings).to receive(:id).and_return(connector_id)
       allow(connector_settings).to receive(:service_type).and_return(service_type)
       allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(configured)
