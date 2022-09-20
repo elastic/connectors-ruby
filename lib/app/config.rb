@@ -52,14 +52,6 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:poll_interval).value(:integer)
     optional(:termination_timeout).value(:integer)
     optional(:heartbeat_interval).value(:integer)
-
-    optional(:gitlab).hash do
-      required(:api_token).value(:string)
-    end
-
-    optional(:mongo).hash do
-      required(:direct_connection).value(:bool?)
-    end
   end
 end
 
