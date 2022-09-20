@@ -29,7 +29,7 @@ module Utility
       SUPPORTED_LOG_LEVELS.each do |level|
         define_method(level) do |message|
           if logger.is_a?(EcsLogging::Logger)
-            logger.public_send(level, message, service: { name: 'connectors-ruby' })
+            logger.public_send(level, message, ecs_additional_fields)
           else
             logger.public_send(level, message)
           end
@@ -52,6 +52,24 @@ module Utility
 
       def abbreviated_message(message)
         message.gsub(/\s+/, ' ').strip.truncate(MAX_SHORT_MESSAGE_LENGTH)
+      end
+
+      private
+
+      def ecs_additional_fields
+        {
+          :labels => { :index_date => Time.now.strftime('%Y.%m.%d') },
+          :log => { :logger => logger.progname },
+          :service => {
+            :type => 'connectors-ruby',
+            :version => Settings.version
+          },
+          :process => {
+            :pid => Process.pid,
+            :name => $PROGRAM_NAME,
+            :thread => Thread.current.object_id
+          }
+        }
       end
     end
   end
