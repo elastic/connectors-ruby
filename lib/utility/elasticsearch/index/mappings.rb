@@ -60,7 +60,7 @@ module Utility
 
         CRAWLER_FIELD_MAPPINGS = {
           additional_urls: KEYWORD_FIELD_MAPPING,
-          body_content: TEXT_FIELD_MAPPING,
+          body: TEXT_FIELD_MAPPING,
           domains: KEYWORD_FIELD_MAPPING,
           headings: TEXT_FIELD_MAPPING,
           last_crawled_at: DATE_FIELD_MAPPING,
