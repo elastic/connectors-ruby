@@ -54,7 +54,7 @@ In this section:
 The [connector protocol](docs/CONNECTOR_PROTOCOL.md) is document-based and building a connector is language- and tool-agnostic.
 To create an Elastic connector, you need to implement this protocol. At a high level, you need to create an application (the connector service) that can read and write to a specific document in Elasticsearch that represents the connector. This document "registers" the connector with Kibana, keeps the configuration that is made via the Kibana UI, as well as the scheduling configuration and the state information for the service. You need to update the connector state to keep up with the current status of the connector application and of the third-party data source. You also need to log sync jobs to an additional index, so that the history of synchronization tasks would be available. And of course, you need to write the results of the synchronization to the Elasticsearch document index, created for this connector service.
 
-The procedures to properly implement the protocol _without the connector framework_ is as follows:
+The procedures to properly implement the protocol _without the connector framework_ are as follows:
 
 - Create a new index for the connector via the Kibana UI - Enterprise Search - Create an Elasticsearch index. Use the `Build a connector` option for an ingestion method.
 - Create an API key to work with the connector. It should be done either using the `Generate API key` button, which is available on the next step of the wizard, or by creating a new API key via the Security - API keys - `Create API key`. The second way is more generic and will allow the same API key to be used for multiple connectors.
