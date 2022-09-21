@@ -122,11 +122,11 @@ module App
   Config = ::Settings.tap do |config|
     if ent_search_config = ent_search_es_config
       Utility::Logger.error('Overriding elasticsearch config with ent-search config')
-      original_es_config = config.elasticsearch.to_h
+      original_es_config = config[:elasticsearch].to_h
       original_es_config.delete(:cloud_id)
       original_es_config.delete(:hosts)
       original_es_config.delete(:api_key)
-      config.elasticsearch = original_es_config.merge(ent_search_config)
+      config[:elasticsearch] = original_es_config.merge(ent_search_config)
     end
   end
 end
