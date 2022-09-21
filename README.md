@@ -32,7 +32,7 @@ Reference:
 - `connector client` - specific light-weight connector implementation, open-code. Connector clients can be built by Elastic or Community.
 - `connector service` - the app that runs the asynchronous loop that calls Elasticsearch on a regular basis to check whether syncs need to happen.
 - `connector framework` - framework and libraries used to customize and build connector clients. Basically, it's what this repository is.
-- `connector packages` - a previous version of the connector clients. Refer to the [8.3 branch](https://github.com/elastic/connectors-ruby/tree/8.3) if you're looking for connector packages. Also, read more about them in the [custom connector packages guide](https://www.elastic.co/guide/en/workplace-search/8.4/custom-connector-package.html).
+- `connector packages` - a previous version of the connector clients. Refer to the [8.3 branch](https://github.com/elastic/connectors-ruby/tree/8.3) if you're looking for connector packages. Also, read more about them in the [custom connector packages guide](https://www.elastic.co/guide/en/workplace-search/8.5/custom-connector-package.html).
 - `data source` - file/database/service that provides data to be ingested into Elasticsearch. 
 
 ## Getting help and providing feedback
