@@ -17,7 +17,7 @@ module Core
     DEFAULT_REQUEST_PIPELINE = 'ent-search-generic-ingestion'
     DEFAULT_EXTRACT_BINARY_CONTENT = true
     DEFAULT_REDUCE_WHITESPACE = true
-    DEFAULT_RUN_ML_INFERENCE = false
+    DEFAULT_RUN_ML_INFERENCE = true
 
     DEFAULT_PAGE_SIZE = 100
 
