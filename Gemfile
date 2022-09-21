@@ -13,7 +13,6 @@ gem 'activesupport', '~>5.2.6'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data'
 gem 'tzinfo'
-gem 'nokogiri', '>= 1.13.6', :require => false
 gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
 gem 'ecs-logging', '~> 1.0.0'
