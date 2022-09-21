@@ -59,29 +59,39 @@ module Core
     private
 
     def sync_triggered?(connector_settings)
+      unless Connectors::REGISTRY.registered?(connector_settings.service_type)
+        Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported.")
+        return false
+      end
+
+      unless connector_settings.valid_index_name?
+        Utility::Logger.info("The index name of #{connector_settings.formatted} is invalid.")
+        return false
+      end
+
       unless connector_settings.connector_status_allows_sync?
-        Utility::Logger.info("Connector #{connector_settings.id} is in status \"#{connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} is in status \"#{connector_settings.connector_status}\" and won't sync yet. Connector needs to be in one of the following statuses: #{Connectors::ConnectorStatus::STATUSES_ALLOWING_SYNC} to run.")
 
         return false
       end
 
       # Sync when sync_now flag is true for the connector
       if connector_settings[:sync_now] == true
-        Utility::Logger.info("Connector #{connector_settings.id} is manually triggered to sync now.")
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} is manually triggered to sync now.")
         return true
       end
 
       # Don't sync if sync is explicitly disabled
       scheduling_settings = connector_settings.scheduling_settings
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.info("Connector #{connector_settings.id} scheduling is disabled.")
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} scheduling is disabled.")
         return false
       end
 
       # We want to sync when sync never actually happened
       last_synced = connector_settings[:last_synced]
       if last_synced.nil? || last_synced.empty?
-        Utility::Logger.info("Connector #{connector_settings.id} has never synced yet, running initial sync.")
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} has never synced yet, running initial sync.")
         return true
       end
 
@@ -89,7 +99,7 @@ module Core
 
       # Don't sync if there is no actual scheduling interval
       if current_schedule.nil? || current_schedule.empty?
-        Utility::Logger.warn("No sync schedule configured for connector #{connector_settings.id}.")
+        Utility::Logger.warn("No sync schedule configured for #{connector_settings.formatted}.")
         return false
       end
 
@@ -103,7 +113,7 @@ module Core
 
       # Don't sync if the scheduling interval is non-parsable
       unless cron_parser
-        Utility::Logger.error("Unable to parse sync schedule for connector #{connector_settings.id}: expression #{current_schedule} is not a valid Quartz Cron definition.")
+        Utility::Logger.error("Unable to parse sync schedule for #{connector_settings.formatted}: expression #{current_schedule} is not a valid Quartz Cron definition.")
         return false
       end
 
@@ -111,7 +121,7 @@ module Core
 
       # Sync if next trigger for the connector is in past
       if next_trigger_time < Time.now
-        Utility::Logger.info("Connector #{connector_settings.id} sync is triggered by cron schedule #{current_schedule}.")
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} sync is triggered by cron schedule #{current_schedule}.")
         return true
       end
 
@@ -119,6 +129,11 @@ module Core
     end
 
     def heartbeat_triggered?(connector_settings)
+      unless Connectors::REGISTRY.registered?(connector_settings.service_type)
+        Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported.")
+        return false
+      end
+
       last_seen = connector_settings[:last_seen]
       return true if last_seen.nil? || last_seen.empty?
       last_seen = begin
@@ -132,6 +147,11 @@ module Core
     end
 
     def configuration_triggered?(connector_settings)
+      unless Connectors::REGISTRY.registered?(connector_settings.service_type)
+        Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported.")
+        return false
+      end
+
       connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
     end
   end

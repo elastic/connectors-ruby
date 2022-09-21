@@ -86,13 +86,10 @@ describe App::Dispatcher do
 
       context 'with sync task' do
         let(:task) { :sync }
-        let(:valid_index_name) { true }
 
         before(:each) do
           allow(connector_settings).to receive(:service_type).and_return('')
           allow(connector_settings).to receive(:index_name).and_return('')
-          allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
-          allow(Connectors::REGISTRY).to receive(:registered?).and_return(true)
         end
 
         shared_examples_for 'sync' do
@@ -112,20 +109,6 @@ describe App::Dispatcher do
         end
 
         it_behaves_like 'sync'
-
-        context 'when service type is not supported' do
-          before(:each) do
-            allow(Connectors::REGISTRY).to receive(:registered?).and_return(false)
-          end
-
-          it_behaves_like 'no sync'
-        end
-
-        context 'when index name is invalid' do
-          let(:valid_index_name) { false }
-
-          it_behaves_like 'no sync'
-        end
 
         context 'when sync throws an error' do
           before(:each) do

@@ -82,20 +82,10 @@ module App
       end
 
       def start_sync_task(connector_settings)
-        # connector-level checks
-        unless Connectors::REGISTRY.registered?(connector_settings.service_type)
-          Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported. Skipping...")
-          return
-        end
-        unless connector_settings.valid_index_name?
-          Utility::Logger.info("The index name of #{connector_settings.formatted} is invalid. Skipping...")
-          return
-        end
-        Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-
         start_heartbeat_task(connector_settings)
         pool.post do
           Utility::Logger.info("Starting a sync job for #{connector_settings.formatted}...")
+          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
           job_runner = Core::SyncJobRunner.new(connector_settings)
           job_runner.execute
         rescue StandardError => e
