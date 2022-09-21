@@ -52,7 +52,7 @@ module Connectors
         @collection = configuration.dig(:collection, :value)
         @user = configuration.dig(:user, :value)
         @password = configuration.dig(:password, :value)
-        @direct_connection = configuration.dig(:direct_connection, :value)
+        @direct_connection = !!configuration.dig(:direct_connection, :value)
       end
 
       def yield_documents
