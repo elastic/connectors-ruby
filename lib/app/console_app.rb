@@ -34,11 +34,11 @@ module App
     ]
 
     def connector_id
-      App::Config.connector_id
+      App::Config[:connector_id]
     end
 
     def update_connector_id(connector_id)
-      App::Config.connector_id = connector_id
+      App::Config[:connector_id] = connector_id
     end
 
     def start_sync_now
@@ -49,7 +49,7 @@ module App
 
       config_settings = Core::ConnectorSettings.fetch_by_id(connector_id)
       Core::ElasticConnectorActions.ensure_content_index_exists(config_settings[:index_name])
-      Core::SyncJobRunner.new(config_settings).execute
+      Core::SyncJobRunner.new(config_settings, App::Config[:service_type]).execute
     end
 
     def show_status
@@ -121,7 +121,7 @@ module App
     end
 
     def create_connector(index_name, use_analysis_icu = false, language_code = :en)
-      id = Core::ElasticConnectorActions.create_connector(index_name, App::Config.service_type)
+      id = Core::ElasticConnectorActions.create_connector(index_name, App::Config[:service_type])
       Core::ElasticConnectorActions.ensure_content_index_exists(index_name, use_analysis_icu, language_code)
       puts "Successfully registered connector #{index_name} with ID #{id}"
 
@@ -164,8 +164,8 @@ module App
     end
 
     def current_connector
-      connector_settings = Core::ConnectorSettings.fetch_by_id(App::Config.connector_id)
-      service_type = App::Config.service_type
+      connector_settings = Core::ConnectorSettings.fetch_by_id(App::Config[:connector_id])
+      service_type = App::Config[:service_type]
       if service_type.present?
         return registry.connector(service_type, connector_settings.configuration)
       end
