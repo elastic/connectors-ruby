@@ -12,12 +12,4 @@ Gem::Specification.new do |s|
   s.executables << 'list_connectors'
   s.files       = Dir['lib/**/*'] + %w[config/connectors.yml LICENSE NOTICE.txt]
   s.license     = 'Elastic-2.0'
-  s.add_dependency 'config', '~>4.0.0'
-  s.add_dependency 'ecs-logging', '~> 1.0'
-  s.add_dependency 'activesupport', '~>5.2.6'
-  s.add_dependency 'mime-types', '= 3.1'
-  s.add_dependency 'tzinfo-data'
-  s.add_dependency 'tzinfo'
-  s.add_dependency 'nokogiri', '>= 1.13.6', :require => false
-  s.add_dependency 'fugit', '~> 1.5.3'
 end
