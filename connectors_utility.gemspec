@@ -2,14 +2,14 @@ require_relative 'lib/app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_utility'
-  s.version     = App::Config.version
+  s.version     = App::Config[:version]
   s.homepage    = 'https://github.com/elastic/connectors-ruby'
   s.summary     = 'Gem containing shared Connector Services libraries'
   s.description = ''
   s.authors     = ['Elastic']
   s.metadata    = {
-    "revision" => App::Config.revision,
-    "repository" => App::Config.repository
+    "revision" => App::Config[:revision],
+    "repository" => App::Config[:repository]
   }
   s.email       = 'ent-search-dev@elastic.co'
   s.files       = %w[
@@ -38,5 +38,11 @@ Gem::Specification.new do |s|
                     lib/core/connector_settings.rb
                   ]
   s.license     = 'Elastic-2.0'
-  s.add_runtime_dependency 'fugit'
+  s.add_dependency 'ecs-logging', '~> 1.0'
+  s.add_dependency 'activesupport', '~>5.2.6'
+  s.add_dependency 'mime-types', '= 3.1'
+  s.add_dependency 'tzinfo-data'
+  s.add_dependency 'tzinfo'
+  s.add_dependency 'nokogiri', '>= 1.13.6'
+  s.add_dependency 'fugit', '~> 1.5.3'
 end

@@ -113,7 +113,7 @@ module App
       end
 
       def client
-        @client ||= Utility::EsClient.new(App::Config.elasticsearch)
+        @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
       end
 
       def fail_check!(message)

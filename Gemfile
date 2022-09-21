@@ -9,14 +9,14 @@ source 'https://rubygems.org'
 gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
-gem 'activesupport', '5.2.6'
+gem 'activesupport', '~>5.2.6'
 gem 'mime-types', '= 3.1'
-gem 'tzinfo-data', '= 1.2022.1'
-gem 'tzinfo', '1.2.10'
-gem 'nokogiri', '>= 1.13.7', :require => false
+gem 'tzinfo-data'
+gem 'tzinfo'
+gem 'nokogiri', '>= 1.13.6', :require => false
 gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
-gem 'ecs-logging'
+gem 'ecs-logging', '~> 1.0.0'
 
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
@@ -46,7 +46,7 @@ gem 'httpclient', '~> 2.8.3'
 gem 'attr_extras', '~> 6.2.5'
 gem 'hashie', '~> 5.0.0'
 gem 'concurrent-ruby', '~> 1.1.9'
-gem 'elasticsearch'
+gem 'elasticsearch', '~> 8.4.0'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'
