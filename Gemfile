@@ -9,7 +9,6 @@ source 'https://rubygems.org'
 gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
-gem 'ecs-logging', '~> 1.0'
 gem 'activesupport', '~>5.2.6'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data'
@@ -17,6 +16,7 @@ gem 'tzinfo'
 gem 'nokogiri', '>= 1.13.6', :require => false
 gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
+gem 'ecs-logging', '~> 1.0.0'
 
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
