@@ -21,6 +21,12 @@ module Connectors
         Utility::ExceptionTracking.log_exception(e, 'Could not retrieve Crawler connectors due to unexpected error.')
         []
       end
+
+      private
+
+      def connector_registered?(service_type)
+        service_type == 'elastic-crawler'
+      end
     end
   end
 end

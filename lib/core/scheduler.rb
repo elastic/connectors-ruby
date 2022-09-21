@@ -59,10 +59,7 @@ module Core
     private
 
     def sync_triggered?(connector_settings)
-      unless Connectors::REGISTRY.registered?(connector_settings.service_type)
-        Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported.")
-        return false
-      end
+      return false unless connector_registered?(connector_settings.service_type)
 
       unless connector_settings.valid_index_name?
         Utility::Logger.info("The index name of #{connector_settings.formatted} is invalid.")
@@ -129,10 +126,7 @@ module Core
     end
 
     def heartbeat_triggered?(connector_settings)
-      unless Connectors::REGISTRY.registered?(connector_settings.service_type)
-        Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported.")
-        return false
-      end
+      return false unless connector_registered?(connector_settings.service_type)
 
       last_seen = connector_settings[:last_seen]
       return true if last_seen.nil? || last_seen.empty?
@@ -147,12 +141,18 @@ module Core
     end
 
     def configuration_triggered?(connector_settings)
-      unless Connectors::REGISTRY.registered?(connector_settings.service_type)
-        Utility::Logger.info("The service type (#{connector_settings.service_type}) is not supported.")
-        return false
-      end
+      return false unless connector_registered?(connector_settings.service_type)
 
       connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+    end
+
+    def connector_registered?(service_type)
+      if Connectors::REGISTRY.registered?(service_type)
+        true
+      else
+        Utility::Logger.info("The service type (#{service_type}) is not supported.")
+        false
+      end
     end
   end
 end
