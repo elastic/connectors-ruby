@@ -80,7 +80,7 @@ module Connectors
                    Mongo::Client.new(
                      @host,
                      database: @database,
-                     direct_connection: @direct_connection,
+                     direct_connection: to_b(@direct_connection),
                      user: @user,
                      password: @password
                    )
@@ -88,7 +88,7 @@ module Connectors
                    Mongo::Client.new(
                      @host,
                      database: @database,
-                     direct_connection: @direct_connection
+                     direct_connection: to_b(@direct_connection)
                    )
                  end
 
@@ -128,6 +128,10 @@ module Connectors
         else
           mongodb_document
         end
+      end
+
+      def to_b(value)
+        value == true || value =~ (/(true|t|yes|y|1)$/i)
       end
     end
   end
