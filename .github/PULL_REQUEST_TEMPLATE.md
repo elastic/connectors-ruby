@@ -16,6 +16,7 @@ items that may help during the review.-->
 #### Pre-Review Checklist
 - [ ] Covered the changes with automated tests
 - [ ] Tested the changes locally
+- [ ] (Elastic Only) Built gems and tested that Enterprise Search works well with new gem versions
 
 #### Changes Requiring Extra Attention
 
