@@ -26,7 +26,7 @@ module Core::OutputSink
     def ingest(document)
       return if document.blank?
 
-      @operation_queue << { :index => { :_index => index_name, :_id => document[:id], :data => document } }
+      @operation_queue << { :index => { :_index => index_name, :_id => document['id'], :data => document } }
       flush if ready_to_flush?
     end
 
