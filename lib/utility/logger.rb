@@ -38,7 +38,7 @@ module Utility
 
       def log_stacktrace(stacktrace)
         if logger.is_a?(EcsLogging::Logger)
-          logger.error(nil, extra_ecs_fields.merge(:error => {:stack_trace => stacktrace }))
+          logger.error(nil, extra_ecs_fields.merge(:error => { :stack_trace => stacktrace }))
         else
           logger.error(stacktrace)
         end
