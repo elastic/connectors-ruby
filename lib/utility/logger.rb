@@ -29,10 +29,18 @@ module Utility
       SUPPORTED_LOG_LEVELS.each do |level|
         define_method(level) do |message|
           if logger.is_a?(EcsLogging::Logger)
-            logger.public_send(level, message, ecs_additional_fields)
+            logger.public_send(level, message, extra_ecs_fields)
           else
             logger.public_send(level, message)
           end
+        end
+      end
+
+      def log_stacktrace(stacktrace)
+        if logger.is_a?(EcsLogging::Logger)
+          logger.error(nil, extra_ecs_fields.merge(:error => {:stack_trace => stacktrace }))
+        else
+          logger.error(stacktrace)
         end
       end
 
@@ -56,7 +64,7 @@ module Utility
 
       private
 
-      def ecs_additional_fields
+      def extra_ecs_fields
         {
           :labels => { :index_date => Time.now.strftime('%Y.%m.%d') },
           :log => { :logger => logger.progname },
