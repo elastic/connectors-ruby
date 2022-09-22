@@ -80,7 +80,7 @@ module Connectors
                    Mongo::Client.new(
                      @host,
                      database: @database,
-                     direct_connection: to_b(@direct_connection),
+                     direct_connection: to_boolean(@direct_connection),
                      user: @user,
                      password: @password
                    )
@@ -88,7 +88,7 @@ module Connectors
                    Mongo::Client.new(
                      @host,
                      database: @database,
-                     direct_connection: to_b(@direct_connection)
+                     direct_connection: to_boolean(@direct_connection)
                    )
                  end
 
@@ -130,7 +130,7 @@ module Connectors
         end
       end
 
-      def to_b(value)
+      def to_boolean(value)
         value == true || value =~ (/(true|t|yes|y|1)$/i)
       end
     end
