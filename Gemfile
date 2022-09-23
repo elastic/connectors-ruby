@@ -17,6 +17,7 @@ gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
 gem 'ecs-logging', '~> 1.0.0'
 
+# Remove this section when gem 'config' is removed
 gem 'dry-container', '= 0.9.0'
 gem 'dry-core', '= 0.7.1'
 gem 'dry-configurable', '= 0.13.0'
