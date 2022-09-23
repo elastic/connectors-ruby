@@ -65,9 +65,11 @@ eshPipeline(
                  if (isUnix()) {
                    sh('curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64')
                    sh('chmod +x yq')
-                   sh('YQ=`realpath yq` make install build_service')
+                   sh('YQ=`realpath yq` make install build_service build_service_gem')
+                   sh('gem install .gems/connectors_service-8.*')
                  } else {
-                   bat('make install build_service')
+                   bat('make install build_service build_service_gem')
+                   bat('gem install .gems/connectors_service-8.*')
                  }
                }
            },
