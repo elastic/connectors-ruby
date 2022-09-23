@@ -16,7 +16,7 @@ items that may help during the review.-->
 #### Pre-Review Checklist
 - [ ] Covered the changes with automated tests
 - [ ] Tested the changes locally
-- [ ] (Elastic Only) Built gems (both `connectors_utility` and `connectors_service`) and tested that Enterprise Search works well with new gem versions
+- [ ] (Elastic Only) Built gems (both `connectors_utility` and `connectors_service`) and included into Enterprise Search and tested that Enterprise Search works well with new gem versions.
 
 #### Changes Requiring Extra Attention
 
