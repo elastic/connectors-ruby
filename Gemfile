@@ -17,6 +17,14 @@ gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
 gem 'ecs-logging', '~> 1.0.0'
 
+gem 'dry-container', '= 0.9.0'
+gem 'dry-core', '= 0.7.1'
+gem 'dry-configurable', '= 0.13.0'
+gem 'dry-initializer', '= 3.0.4'
+gem 'dry-inflector', '= 0.2.1'
+gem 'dry-schema',  '= 1.8.0'
+gem 'dry-validation', '= 1.7.0'
+
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
   gem 'rspec-core', '~> 3.10.1'
