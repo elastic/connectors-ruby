@@ -7,6 +7,12 @@ describe Core::Scheduler do
   let(:poll_interval) { 999 }
   let(:heartbeat_interval) { 999 }
   let(:connector_settings) { double }
+  let(:connector_registered) { true }
+
+  before(:each) do
+    allow(connector_settings).to receive(:service_type).and_return('mongodb')
+    allow(Connectors::REGISTRY).to receive(:registered?).and_return(connector_registered)
+  end
 
   shared_examples_for 'triggers' do |task|
     it "yields #{task} task" do
@@ -38,6 +44,7 @@ describe Core::Scheduler do
           :interval => sync_interval
         }
       end
+      let(:valid_index_name) { true }
       let(:cron_parser) { instance_double(Fugit::Cron) }
       let(:next_trigger_time) { Time.now - 60 * 30 }
 
@@ -50,6 +57,8 @@ describe Core::Scheduler do
         allow(connector_settings).to receive(:[]).with(:sync_now).and_return(sync_now)
         allow(connector_settings).to receive(:[]).with(:last_synced).and_return(last_synced)
         allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
+        allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
+        allow(connector_settings).to receive(:formatted).and_return('')
 
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(sync_interval)
         allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
@@ -62,6 +71,18 @@ describe Core::Scheduler do
       end
 
       it_behaves_like 'triggers', :sync
+
+      context 'when connector is not registered' do
+        let(:connector_registered) { false }
+
+        it_behaves_like 'does not trigger', :sync
+      end
+
+      context 'when index name is invalid' do
+        let(:valid_index_name) { false }
+
+        it_behaves_like 'does not trigger', :sync
+      end
 
       context 'when connector is not ready to sync' do
         let(:allow_sync) { false }
@@ -124,6 +145,12 @@ describe Core::Scheduler do
 
       it_behaves_like 'triggers', :heartbeat
 
+      context 'when connector is not registered' do
+        let(:connector_registered) { false }
+
+        it_behaves_like 'does not trigger', :heartbeat
+      end
+
       context 'when there\'s no last_seen' do
         let(:last_seen) { nil }
 
@@ -154,6 +181,12 @@ describe Core::Scheduler do
       end
 
       it_behaves_like 'triggers', :configuration
+
+      context 'when connector is not registered' do
+        let(:connector_registered) { false }
+
+        it_behaves_like 'does not trigger', :configuration
+      end
 
       (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|
         context "when connector status is #{status}" do
