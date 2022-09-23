@@ -21,13 +21,13 @@ module Utility
       end
 
       def capture_exception(exception, context = {})
-        Utility::Logger.error(generate_stack_trace(exception))
+        Utility::Logger.log_stacktrace(generate_stack_trace(exception))
         Utility::Logger.error("Context: #{context.inspect}") if context
       end
 
       def log_exception(exception, message = nil)
         Utility::Logger.error(message) if message
-        Utility::Logger.error(generate_stack_trace(exception))
+        Utility::Logger.log_stacktrace(generate_stack_trace(exception))
       end
 
       def augment_exception(exception)
