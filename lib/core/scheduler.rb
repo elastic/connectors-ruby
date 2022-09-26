@@ -141,9 +141,11 @@ module Core
     end
 
     def configuration_triggered?(connector_settings)
-      return false unless connector_registered?(connector_settings.service_type)
+      if connector_settings.needs_service_type? || connector_registered?(connector_settings.service_type)
+        return connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+      end
 
-      connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+      false
     end
 
     def connector_registered?(service_type)
