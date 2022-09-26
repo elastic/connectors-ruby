@@ -74,7 +74,7 @@ module Core
 
       # Sync when sync_now flag is true for the connector
       if connector_settings[:sync_now] == true
-        Utility::Logger.debug("#{connector_settings.formatted.capitalize} is manually triggered to sync now.")
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} is manually triggered to sync now.")
         return true
       end
 
