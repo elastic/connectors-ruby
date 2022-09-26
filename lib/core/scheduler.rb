@@ -81,7 +81,7 @@ module Core
       # Don't sync if sync is explicitly disabled
       scheduling_settings = connector_settings.scheduling_settings
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.info("#{connector_settings.formatted.capitalize} scheduling is disabled.")
+        Utility::Logger.debug("#{connector_settings.formatted.capitalize} scheduling is disabled.")
         return false
       end
 
