@@ -129,7 +129,7 @@ describe Core::Configuration do
       end
     end
 
-    context 'when in non-native mode' do
+    context 'when in single mode' do
       let(:service_type) { nil }
       let(:param_service_type) { 'mongo' }
       let(:needs_service_type) { true }

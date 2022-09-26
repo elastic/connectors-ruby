@@ -27,8 +27,8 @@ module App
     class << self
       def start!
         running!
-        Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
-        start_polling_jobs!
+        Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'single'} mode...")
+        start_polling_tasks!
       end
 
       def shutdown!
@@ -64,7 +64,7 @@ module App
                        end
       end
 
-      def start_polling_jobs!
+      def start_polling_tasks!
         scheduler.when_triggered do |connector_settings, task|
           case task
           when :sync
@@ -109,7 +109,7 @@ module App
       def start_configuration_task(connector_settings)
         pool.post do
           Utility::Logger.info("Updating configuration for #{connector_settings.formatted}...")
-          # when in non-native mode, populate the service type if it's not in connector settings
+          # when in single mode, populate the service type if it's not in connector settings
           service_type = if !App::Config.native_mode && connector_settings.needs_service_type?
                            App::Config.service_type
                          else

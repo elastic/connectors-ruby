@@ -42,7 +42,7 @@ describe App::Dispatcher do
   describe '.start!' do
     context 'when it\'s called twice' do
       before(:each) do
-        allow(described_class).to receive(:start_polling_jobs!)
+        allow(described_class).to receive(:start_polling_tasks!)
         described_class.start!
       end
 
@@ -180,7 +180,7 @@ describe App::Dispatcher do
           expect { described_class.start! }.to_not raise_error
         end
 
-        context 'in non-native mode' do
+        context 'in single mode' do
           let(:native_mode) { false }
           let(:needs_service_type) { true }
 
@@ -203,7 +203,7 @@ describe App::Dispatcher do
 
   describe '.shutdown!' do
     before(:each) do
-      allow(described_class).to receive(:start_polling_jobs!)
+      allow(described_class).to receive(:start_polling_tasks!)
       described_class.start!
     end
 

@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 
-require 'list_connectors'
-ListConnectors.run!
+require 'app/list_connectors'
+App::ListConnectors.run!
