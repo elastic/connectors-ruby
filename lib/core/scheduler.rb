@@ -45,7 +45,7 @@ module Core
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure
         if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{self.class}.")
+          Utility::Logger.debug("Sleeping for #{@poll_interval} seconds in #{self.class}.")
           sleep(@poll_interval)
         end
       end
@@ -62,7 +62,7 @@ module Core
       return false unless connector_registered?(connector_settings.service_type)
 
       unless connector_settings.valid_index_name?
-        Utility::Logger.info("The index name of #{connector_settings.formatted} is invalid.")
+        Utility::Logger.warn("The index name of #{connector_settings.formatted} is invalid.")
         return false
       end
 
@@ -74,7 +74,7 @@ module Core
 
       # Sync when sync_now flag is true for the connector
       if connector_settings[:sync_now] == true
-        Utility::Logger.info("#{connector_settings.formatted.capitalize} is manually triggered to sync now.")
+        Utility::Logger.debug("#{connector_settings.formatted.capitalize} is manually triggered to sync now.")
         return true
       end
 
