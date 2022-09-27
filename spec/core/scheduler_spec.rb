@@ -178,9 +178,21 @@ describe Core::Scheduler do
         allow(subject).to receive(:sync_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
         allow(connector_settings).to receive(:connector_status).and_return(connector_status)
+        allow(connector_settings).to receive(:needs_service_type?).and_return(false)
       end
 
       it_behaves_like 'triggers', :configuration
+
+      # Regression bug!!!
+      # We need to trigger configuration for the connector that was created with no service_type.
+      # Otherwise on-prem connectors won't be able to start the flow at all.
+      context 'when connector has no service_type' do
+        before(:each) do
+          allow(connector_settings).to receive(:needs_service_type?).and_return(true)
+        end
+
+        it_behaves_like 'triggers', :configuration
+      end
 
       context 'when connector is not registered' do
         let(:connector_registered) { false }

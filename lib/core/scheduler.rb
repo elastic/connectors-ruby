@@ -45,7 +45,7 @@ module Core
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure
         if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{self.class}.")
+          Utility::Logger.debug("Sleeping for #{@poll_interval} seconds in #{self.class}.")
           sleep(@poll_interval)
         end
       end
@@ -62,7 +62,7 @@ module Core
       return false unless connector_registered?(connector_settings.service_type)
 
       unless connector_settings.valid_index_name?
-        Utility::Logger.info("The index name of #{connector_settings.formatted} is invalid.")
+        Utility::Logger.warn("The index name of #{connector_settings.formatted} is invalid.")
         return false
       end
 
@@ -81,7 +81,7 @@ module Core
       # Don't sync if sync is explicitly disabled
       scheduling_settings = connector_settings.scheduling_settings
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.info("#{connector_settings.formatted.capitalize} scheduling is disabled.")
+        Utility::Logger.debug("#{connector_settings.formatted.capitalize} scheduling is disabled.")
         return false
       end
 
@@ -141,9 +141,11 @@ module Core
     end
 
     def configuration_triggered?(connector_settings)
-      return false unless connector_registered?(connector_settings.service_type)
+      if connector_settings.needs_service_type? || connector_registered?(connector_settings.service_type)
+        return connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+      end
 
-      connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+      false
     end
 
     def connector_registered?(service_type)
