@@ -120,11 +120,11 @@ module Connectors
           mongodb_document.map { |v| serialize(v) }
         when Hash
           mongodb_document.map do |key, value|
-            remapped_key = key.to_s == '_id' ? 'id' : key.to_s
+            remapped_key = key.to_sym == :_id ? :id : key.to_sym
 
             remapped_value = serialize(value)
             [remapped_key, remapped_value]
-          end.to_h.with_indifferent_access
+          end.to_h
         else
           mongodb_document
         end
