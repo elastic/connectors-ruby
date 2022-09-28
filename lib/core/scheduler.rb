@@ -45,7 +45,7 @@ module Core
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure
         if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.info("Sleeping for #{@poll_interval} seconds in #{self.class}.")
+          Utility::Logger.debug("Sleeping for #{@poll_interval} seconds in #{self.class}.")
           sleep(@poll_interval)
         end
       end
@@ -150,7 +150,7 @@ module Core
       if Connectors::REGISTRY.registered?(service_type)
         true
       else
-        Utility::Logger.info("The service type (#{service_type}) is not supported.")
+        Utility::Logger.warn("The service type (#{service_type}) is not supported.")
         false
       end
     end
