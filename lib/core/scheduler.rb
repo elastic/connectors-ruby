@@ -152,7 +152,7 @@ module Core
       if Connectors::REGISTRY.registered?(service_type)
         true
       else
-        Utility::Logger.info("The service type (#{service_type}) is not supported.")
+        Utility::Logger.warn("The service type (#{service_type}) is not supported.")
         false
       end
     end
