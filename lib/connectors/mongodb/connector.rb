@@ -124,7 +124,7 @@ module Connectors
 
             remapped_value = serialize(value)
             [remapped_key, remapped_value]
-          end.to_h
+          end.to_h.with_indifferent_access
         else
           mongodb_document
         end
