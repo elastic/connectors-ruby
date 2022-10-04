@@ -322,6 +322,38 @@ describe Core::ElasticConnectorActions do
     end
   end
 
+  context '#find_current_job' do
+    let(:job_id) { 'job-123' }
+    context 'when job exists' do
+      let(:job) do
+        {
+          '_id' => job_id,
+          '_source' => {
+            'connector_id' => connector_id,
+            'status' => Connectors::SyncStatus::IN_PROGRESS
+          }
+        }
+      end
+
+      before(:each) do
+        allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [job] } })
+      end
+
+      it 'returns the current job' do
+        expect(described_class.find_current_job(connector_id)).to eq(job)
+      end
+    end
+    context 'when job does not exist' do
+      before(:each) do
+        allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [] } })
+      end
+
+      it 'returns nil' do
+        expect(described_class.find_current_job(connector_id)).to be_nil
+      end
+    end
+  end
+
   context '#update_connector_status' do
     let(:expected_payload) do
       {

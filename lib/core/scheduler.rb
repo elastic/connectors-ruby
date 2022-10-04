@@ -9,6 +9,7 @@
 require 'time'
 require 'fugit'
 require 'core/connector_settings'
+require 'core/elastic_connector_actions'
 require 'utility/cron'
 require 'utility/logger'
 require 'utility/exception_tracking'
@@ -29,7 +30,11 @@ module Core
       loop do
         connector_settings.each do |cs|
           if sync_triggered?(cs)
-            yield cs, :sync
+            if ElasticConnectorActions.find_current_job(cs.id).nil?
+              yield cs, :sync
+            else
+              Utility::Logger.debug("Sync job for #{cs.formatted} is already running, skipping...")
+            end
           end
           if heartbeat_triggered?(cs)
             yield cs, :heartbeat

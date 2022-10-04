@@ -1,5 +1,7 @@
 require 'core/native_scheduler'
 require 'core/scheduler'
+require 'core/elastic_connector_actions'
+require 'connectors/registry'
 
 describe Core::Scheduler do
   subject { Core::NativeScheduler.new(poll_interval, heartbeat_interval) }
@@ -29,6 +31,7 @@ describe Core::Scheduler do
   describe '#when_triggered' do
     before(:each) do
       allow(subject).to receive(:connector_settings).and_return([connector_settings])
+      allow(Core::ElasticConnectorActions).to receive(:find_current_job).and_return(nil)
       subject.instance_variable_set(:@is_shutting_down, true)
     end
 
@@ -130,6 +133,14 @@ describe Core::Scheduler do
 
       context 'when next trigger time is in the future' do
         let(:next_trigger_time) { Time.now + 60 * 30 }
+
+        it_behaves_like 'does not trigger', :sync
+      end
+
+      context 'when connector already runs sync job' do
+        before(:each) do
+          allow(Core::ElasticConnectorActions).to receive(:find_current_job).and_return('job')
+        end
 
         it_behaves_like 'does not trigger', :sync
       end

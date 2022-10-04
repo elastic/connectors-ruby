@@ -88,6 +88,38 @@ module Core
         job['_id']
       end
 
+      def find_current_job(connector_id)
+        response = client.search(
+          :index => Utility::Constants::JOB_INDEX,
+          :ignore => 404,
+          :body => {
+            :size => 1,
+            :from => 0,
+            :query => {
+              :bool => {
+                :must => [
+                  {
+                    :term => {
+                      :connector_id => connector_id
+                    }
+                  },
+                  {
+                    :term => {
+                      :status => Connectors::SyncStatus::IN_PROGRESS
+                    }
+                  }
+                ]
+              }
+            },
+            :sort => [
+              'created_at' => { :order => 'desc' }
+            ]
+          }
+        )
+        hits = response['hits']['hits']
+        hits.empty? ? nil : hits[0].with_indifferent_access
+      end
+
       def update_connector_status(connector_id, status, error_message = nil)
         if status == Connectors::ConnectorStatus::ERROR && error_message.nil?
           raise ArgumentError, 'error_message is required when status is error'
