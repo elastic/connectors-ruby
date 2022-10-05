@@ -116,7 +116,7 @@ module Core
             ]
           }
         )
-        hits = response['hits']['hits']
+        hits = response.dig('hits', 'hits') || []
         hits.empty? ? nil : hits[0].with_indifferent_access
       end
 
@@ -168,7 +168,7 @@ module Core
           }
           loop do
             response = client.search(:body => body)
-            hits = response['hits']['hits']
+            hits = response.dig('hits', 'hits') || []
 
             ids = hits.map { |h| h['_id'] }
             result += ids
