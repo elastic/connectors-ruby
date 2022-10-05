@@ -418,7 +418,7 @@ describe Core::ElasticConnectorActions do
               :last_synced,
               :last_indexed_document_count,
               :last_deleted_document_count,
-              :last_sync_status => Connectors::SyncStatus::FAILED,
+              :last_sync_status => Connectors::SyncStatus::ERROR,
               :last_sync_error => status[:error],
               :error => status[:error]
             )
