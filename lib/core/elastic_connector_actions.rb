@@ -100,7 +100,7 @@ module Core
       end
 
       def complete_sync(connector_id, job_id, status)
-        sync_status = status[:error] ? Connectors::SyncStatus::FAILED : Connectors::SyncStatus::COMPLETED
+        sync_status = status[:error] ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
