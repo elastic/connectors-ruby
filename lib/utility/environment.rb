@@ -21,13 +21,14 @@ module Utility
                            true
                          end
 
-      if disable_warnings
-        Logger.info('Disabling warnings')
-        Kernel.silence_warnings(&block)
-      else
-        Logger.info('Enabling warnings')
-        Kernel.enable_warnings(&block)
-      end
+      #if disable_warnings
+      #  Logger.info('Disabling warnings')
+      #  Kernel.silence_warnings(&block)
+      #else
+      #  Logger.info('Enabling warnings')
+      #  Kernel.enable_warnings(&block)
+      #end
+      block.call
     end
   end
 end

@@ -9,23 +9,23 @@ source 'https://rubygems.org'
 gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
-gem 'activesupport', '~>5.2.6'
-gem 'mime-types', '= 3.1'
+gem 'activesupport'
+gem 'mime-types', '3.4.1'
 gem 'tzinfo-data'
 gem 'tzinfo'
-gem 'nokogiri', '>= 1.13.6', :require => false
-gem 'fugit', '~> 1.5.3'
-gem 'remedy', '~> 0.3.0'
-gem 'ecs-logging', '~> 1.0.0'
+gem 'nokogiri'
+gem 'fugit'
+gem 'remedy'
+gem 'ecs-logging'
 
 # Remove this section when gem 'config' is removed
-gem 'dry-container', '= 0.9.0'
-gem 'dry-core', '= 0.7.1'
-gem 'dry-configurable', '= 0.13.0'
-gem 'dry-initializer', '= 3.0.4'
-gem 'dry-inflector', '= 0.2.1'
-gem 'dry-schema',  '= 1.8.0'
-gem 'dry-validation', '= 1.7.0'
+gem 'dry-container'
+gem 'dry-core'
+gem 'dry-configurable'
+gem 'dry-initializer'
+gem 'dry-inflector'
+gem 'dry-schema'
+gem 'dry-validation'
 
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
@@ -47,18 +47,18 @@ group :test do
 end
 
 # Dependencies for the HTTP service
-gem 'config', '~> 4.0.0'
-gem 'forwardable', '~> 1.3.2'
-gem 'faraday', '~> 1.10.0'
-gem 'faraday_middleware', '= 1.0.0'
-gem 'httpclient', '~> 2.8.3'
-gem 'attr_extras', '~> 6.2.5'
-gem 'hashie', '~> 5.0.0'
-gem 'concurrent-ruby', '~> 1.1.9'
-gem 'elasticsearch', '~> 8.4.0'
+gem 'config'
+gem 'forwardable'
+gem 'faraday'
+gem 'faraday_middleware'
+gem 'httpclient'
+gem 'attr_extras'
+gem 'hashie'
+gem 'concurrent-ruby'
+gem 'elasticsearch'
 
 # Dependencies for oauth
-gem 'signet', '~> 0.16.0'
+gem 'signet'
 
 # Dependency for mongo connector
-gem 'mongo', '~> 2.18'
+gem 'mongo'

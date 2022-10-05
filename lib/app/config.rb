@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'uri'
 require 'config'
 require_relative '../utility/logger'
 
