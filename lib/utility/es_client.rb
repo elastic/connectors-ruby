@@ -9,6 +9,12 @@
 require 'logger'
 require 'elasticsearch'
 
+require "elasticsearch/api"
+require "elasticsearch/api/version"
+require "elasticsearch/api/namespace/common"
+require "elasticsearch/api/utils"
+require 'elasticsearch/api/response'
+
 module Utility
   class EsClient < ::Elasticsearch::Client
     class IndexingFailedError < StandardError
@@ -50,7 +56,32 @@ module Utility
     end
 
     def bulk(arguments = {})
-      raise_if_necessary(super(arguments))
+      raise ArgumentError, "Required argument 'body' missing" unless arguments[:body]
+
+      headers = arguments.delete(:headers) || {}
+
+      body   = arguments.delete(:body)
+
+      _index = arguments.delete(:index)
+
+      method = ::Elasticsearch::API::HTTP_POST
+      path   = if _index
+                 "#{Utils.__listify(_index)}/_bulk"
+               else
+                 "_bulk"
+               end
+      params = ::Elasticsearch::API::Utils.process_params(arguments)
+
+      if body.is_a? Array
+        payload = ::Elasticsearch::API::Utils.__bulkify(body)
+      else
+        payload = body
+      end
+
+      headers.merge!("Content-Type" => "application/x-ndjson")
+      ::Elasticsearch::API::Response.new(
+        perform_request(method, path, params, payload, headers)
+      )
     end
 
     private

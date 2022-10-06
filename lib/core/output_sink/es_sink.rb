@@ -14,7 +14,7 @@ require 'utility/logger'
 
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
-    def initialize(index_name, request_pipeline, flush_threshold = 50)
+    def initialize(index_name, request_pipeline, flush_threshold = 500)
       super()
       @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name
@@ -64,6 +64,7 @@ module Core::OutputSink
       return if ops.empty?
 
       @client.bulk(:body => ops, :pipeline => @request_pipeline)
+      GC.start
       Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
     end
 
