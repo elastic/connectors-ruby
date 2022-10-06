@@ -285,8 +285,19 @@ describe Core::ElasticConnectorActions do
   end
 
   context '#claim_job' do
+    let(:seq_no) { 1 }
+    let(:primary_term) { 1 }
     before(:each) do
       allow(es_client).to receive(:index).with(:index => jobs_index, :body => anything).and_return({ '_id' => 'job-123' })
+      allow(es_client).to receive(:get)
+        .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+        .and_return(
+          { '_seq_no' => seq_no,
+            '_primary_term' => primary_term,
+            '_source' => {
+              'last_sync_status' => nil
+            } }
+        )
     end
 
     it 'updates connector status fields' do
@@ -301,7 +312,9 @@ describe Core::ElasticConnectorActions do
           )
         },
         :refresh => true,
-        :retry_on_conflict => 3
+        :retry_on_conflict => 3,
+        :if_seq_no => seq_no,
+        :if_primary_term => primary_term
       )
 
       described_class.claim_job(connector_id)
@@ -320,36 +333,32 @@ describe Core::ElasticConnectorActions do
 
       described_class.claim_job(connector_id)
     end
-  end
 
-  context '#find_current_job' do
-    let(:job_id) { 'job-123' }
-    context 'when job exists' do
-      let(:job) do
-        {
-          '_id' => job_id,
-          '_source' => {
-            'connector_id' => connector_id,
-            'status' => Connectors::SyncStatus::IN_PROGRESS
-          }
-        }
-      end
-
+    context 'when connector is already syncing' do
       before(:each) do
-        allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [job] } })
+        allow(es_client).to receive(:get)
+          .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+          .and_return(
+            { '_seq_no' => seq_no,
+              '_primary_term' => primary_term,
+              '_source' => {
+                'last_sync_status' => Connectors::SyncStatus::IN_PROGRESS
+              } }
+          )
       end
-
-      it 'returns the current job' do
-        expect(described_class.find_current_job(connector_id)).to eq(job)
+      it 'raises an error of specific type' do
+        expect { described_class.claim_job(connector_id) }.to raise_error(Core::JobAlreadyRunningError)
       end
     end
-    context 'when job does not exist' do
+    context 'when connector has changed version' do
       before(:each) do
-        allow(es_client).to receive(:search).and_return({ 'hits' => { 'hits' => [] } })
+        allow(es_client).to receive(:update)
+          .with(anything)
+          .and_raise(Core::ConnectorVersionChangedError.new(connector_id, seq_no, primary_term))
       end
-
-      it 'returns nil' do
-        expect(described_class.find_current_job(connector_id)).to be_nil
+      it 'raises an error of specific type' do
+        expect { described_class.claim_job(connector_id) }
+          .to raise_error(Core::ConnectorVersionChangedError)
       end
     end
   end
@@ -658,6 +667,24 @@ describe Core::ElasticConnectorActions do
         )
 
         described_class.update_connector_fields(connector_id, doc)
+      end
+    end
+
+    context 'on version conflict' do
+      let(:doc) { { :something => :something } }
+      let(:seq_no) { 1 }
+      let(:primary_term) { 1 }
+      before(:each) do
+        expect(es_client)
+          .to receive(:update)
+          .with(anything)
+          .and_raise(
+            Elastic::Transport::Transport::Errors::Conflict.new
+          )
+      end
+      it 'raises a version changed error' do
+        expect { described_class.update_connector_fields(connector_id, doc, seq_no, primary_term) }
+          .to raise_error(Core::ConnectorVersionChangedError)
       end
     end
   end

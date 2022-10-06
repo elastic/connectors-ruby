@@ -12,6 +12,7 @@ describe App::Dispatcher do
   let(:scheduler) { double }
   let(:pool) { double }
   let(:job_runner) { double }
+  let(:connector_id) { 123 }
 
   before(:each) do
     allow(described_class).to receive(:scheduler).and_return(scheduler)
@@ -23,6 +24,7 @@ describe App::Dispatcher do
     allow(Core::Heartbeat).to receive(:send)
     allow(job_runner).to receive(:execute)
     allow(Utility::ExceptionTracking).to receive(:log_exception)
+    allow(Utility::Logger).to receive(:debug)
 
     stub_const('App::Dispatcher::POLL_INTERVAL', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
@@ -74,6 +76,12 @@ describe App::Dispatcher do
           expect { described_class.start! }.to_not raise_error
         end
       end
+      shared_examples_for('logs to debug') do
+        it 'logs to debug' do
+          expect { described_class.start! }.to_not raise_error
+          expect(Utility::Logger).to have_received(:debug)
+        end
+      end
 
       context 'with invalid task' do
         let(:task) { :invalid }
@@ -116,6 +124,22 @@ describe App::Dispatcher do
           end
 
           it_behaves_like 'logs exception'
+        end
+
+        context 'when sync is already running' do
+          before(:each) do
+            allow(job_runner).to receive(:execute).and_raise(Core::JobAlreadyRunningError.new(connector_id))
+          end
+
+          it_behaves_like 'logs to debug'
+        end
+
+        context 'on version conflict' do
+          before(:each) do
+            allow(job_runner).to receive(:execute).and_raise(Core::ConnectorVersionChangedError.new(connector_id, 0, 0))
+          end
+
+          it_behaves_like 'logs to debug'
         end
       end
 
