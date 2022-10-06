@@ -13,6 +13,7 @@ describe App::Dispatcher do
   let(:pool) { double }
   let(:job_runner) { double }
   let(:connector_id) { 123 }
+  let(:info_message) { nil }
 
   before(:each) do
     allow(described_class).to receive(:scheduler).and_return(scheduler)
@@ -24,7 +25,7 @@ describe App::Dispatcher do
     allow(Core::Heartbeat).to receive(:send)
     allow(job_runner).to receive(:execute)
     allow(Utility::ExceptionTracking).to receive(:log_exception)
-    allow(Utility::Logger).to receive(:debug)
+    allow(Utility::Logger).to receive(:info)
 
     stub_const('App::Dispatcher::POLL_INTERVAL', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
@@ -76,10 +77,10 @@ describe App::Dispatcher do
           expect { described_class.start! }.to_not raise_error
         end
       end
-      shared_examples_for('logs to debug') do
-        it 'logs to debug' do
+      shared_examples_for('logs info') do
+        it 'does log info' do
           expect { described_class.start! }.to_not raise_error
-          expect(Utility::Logger).to have_received(:debug)
+          expect(Utility::Logger).to have_received(:info).with(Regexp.new(info_message, Regexp::IGNORECASE))
         end
       end
 
@@ -130,16 +131,18 @@ describe App::Dispatcher do
           before(:each) do
             allow(job_runner).to receive(:execute).and_raise(Core::JobAlreadyRunningError.new(connector_id))
           end
+          let(:info_message) { 'already running' }
 
-          it_behaves_like 'logs to debug'
+          it_behaves_like 'logs info'
         end
 
         context 'on version conflict' do
           before(:each) do
             allow(job_runner).to receive(:execute).and_raise(Core::ConnectorVersionChangedError.new(connector_id, 0, 0))
           end
+          let(:info_message) { 'version conflict' }
 
-          it_behaves_like 'logs to debug'
+          it_behaves_like 'logs info'
         end
       end
 

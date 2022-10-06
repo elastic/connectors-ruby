@@ -312,7 +312,6 @@ describe Core::ElasticConnectorActions do
           )
         },
         :refresh => true,
-        :retry_on_conflict => 3,
         :if_seq_no => seq_no,
         :if_primary_term => primary_term
       )

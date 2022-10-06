@@ -84,14 +84,14 @@ module App
       def start_sync_task(connector_settings)
         start_heartbeat_task(connector_settings)
         pool.post do
-          Utility::Logger.info("Starting a sync job for #{connector_settings.formatted}...")
+          Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
           Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
           job_runner = Core::SyncJobRunner.new(connector_settings)
           job_runner.execute
         rescue Core::JobAlreadyRunningError
-          Utility::Logger.debug("Sync job for #{connector_settings.formatted} is already running, skipping...")
+          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
         rescue Core::ConnectorVersionChangedError => e
-          Utility::Logger.debug("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
+          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
         end

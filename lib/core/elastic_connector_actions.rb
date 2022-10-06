@@ -21,7 +21,7 @@ module Core
 
   class ConnectorVersionChangedError < StandardError
     def initialize(connector_id, seq_no, primary_term)
-      super("Seq_no [#{seq_no}] and primary_term [#{primary_term}] do not match for connector '#{connector_id}'.")
+      super("Version conflict: seq_no [#{seq_no}] and primary_term [#{primary_term}] do not match for connector '#{connector_id}'.")
     end
   end
 
@@ -289,6 +289,7 @@ module Core
         if seq_no && primary_term
           update_args[:if_seq_no] = seq_no
           update_args[:if_primary_term] = primary_term
+          update_args.delete(:retry_on_conflict)
         end
         begin
           client.update(update_args)

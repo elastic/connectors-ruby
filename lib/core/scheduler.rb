@@ -30,11 +30,7 @@ module Core
       loop do
         connector_settings.each do |cs|
           if sync_triggered?(cs)
-            if ElasticConnectorActions.find_current_job(cs.id).nil?
-              yield cs, :sync
-            else
-              Utility::Logger.debug("Sync job for #{cs.formatted} is already running, skipping...")
-            end
+            yield cs, :sync
           end
           if heartbeat_triggered?(cs)
             yield cs, :heartbeat
