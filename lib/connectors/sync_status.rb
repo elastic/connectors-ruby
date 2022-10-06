@@ -10,12 +10,12 @@ module Connectors
   class SyncStatus
     COMPLETED = 'completed'
     IN_PROGRESS = 'in_progress'
-    FAILED = 'failed'
+    ERROR = 'error'
 
     STATUSES = [
       COMPLETED,
       IN_PROGRESS,
-      FAILED
+      ERROR
     ]
   end
 end
