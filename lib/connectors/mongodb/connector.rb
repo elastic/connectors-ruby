@@ -57,9 +57,7 @@ module Connectors
       def yield_documents
         with_client do |client|
           client[@collection].find.each do |document|
-            doc = document.with_indifferent_access
-
-            yield serialize(doc)
+            yield serialize(document)
           end
         end
       end
