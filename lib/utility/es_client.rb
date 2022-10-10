@@ -8,9 +8,9 @@
 
 require 'logger'
 require 'elasticsearch'
-require "elasticsearch/api"
-require "elasticsearch/api/namespace/common"
-require "elasticsearch/api/utils"
+require 'elasticsearch/api'
+require 'elasticsearch/api/namespace/common'
+require 'elasticsearch/api/utils'
 require 'elasticsearch/api/response'
 
 module Utility
@@ -70,25 +70,25 @@ module Utility
     def patched_bulk(arguments = {})
       headers = arguments.delete(:headers) || {}
 
-      body   = arguments.delete(:body)
+      body = arguments.delete(:body)
 
-      _index = arguments.delete(:index)
+      index = arguments.delete(:index)
 
       method = ::Elasticsearch::API::HTTP_POST
-      path   = if _index
-                 "#{Utils.__listify(_index)}/_bulk"
-               else
-                 "_bulk"
-               end
+      path = if index
+               "#{Utils.__listify(index)}/_bulk"
+             else
+               '_bulk'
+             end
       params = ::Elasticsearch::API::Utils.process_params(arguments)
 
-      if body.is_a? Array
-        payload = ::Elasticsearch::API::Utils.__bulkify(body)
-      else
-        payload = body
-      end
+      payload = if body.is_a? Array
+                  ::Elasticsearch::API::Utils.__bulkify(body)
+                else
+                  body
+                end
 
-      headers.merge!("Content-Type" => "application/x-ndjson")
+      headers['Content-Type'] = 'application/x-ndjson'
       ::Elasticsearch::API::Response.new(
         perform_request(method, path, params, payload, headers)
       )
