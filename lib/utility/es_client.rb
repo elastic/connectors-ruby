@@ -8,6 +8,10 @@
 
 require 'logger'
 require 'elasticsearch'
+require "elasticsearch/api"
+require "elasticsearch/api/namespace/common"
+require "elasticsearch/api/utils"
+require 'elasticsearch/api/response'
 
 module Utility
   class EsClient < ::Elasticsearch::Client
@@ -50,10 +54,45 @@ module Utility
     end
 
     def bulk(arguments = {})
-      raise_if_necessary(super(arguments))
+      raise_if_necessary(patched_bulk(arguments))
     end
 
     private
+
+    # This method is a copy of a method from original Elasticsearch client from here:
+    # https://github.com/elastic/elasticsearch-ruby/blob/8.5/elasticsearch-api/lib/elasticsearch/api/actions/bulk.rb#L43
+    # Small (or not so small) problem for us was that the original method clones the arguments.
+    # Sometimes our bulk payload is pretty big and .clone on arguments essentially doubles the amount of memory
+    # that is needed to ingest the data. In our case it's an important thing, thus we copy-pasted the method here
+    # and removed the .clone call.
+    # It produces some overhead for us when updating `elasticsearch` gem - we should check that this function did not change
+    # but it seems like a small price to pay for memory usage reduction.
+    def patched_bulk(arguments = {})
+      headers = arguments.delete(:headers) || {}
+
+      body   = arguments.delete(:body)
+
+      _index = arguments.delete(:index)
+
+      method = ::Elasticsearch::API::HTTP_POST
+      path   = if _index
+                 "#{Utils.__listify(_index)}/_bulk"
+               else
+                 "_bulk"
+               end
+      params = ::Elasticsearch::API::Utils.process_params(arguments)
+
+      if body.is_a? Array
+        payload = ::Elasticsearch::API::Utils.__bulkify(body)
+      else
+        payload = body
+      end
+
+      headers.merge!("Content-Type" => "application/x-ndjson")
+      ::Elasticsearch::API::Response.new(
+        perform_request(method, path, params, payload, headers)
+      )
+    end
 
     def raise_if_necessary(response)
       if response['errors']
