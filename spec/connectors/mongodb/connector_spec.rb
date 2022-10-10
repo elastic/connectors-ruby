@@ -48,7 +48,7 @@ describe Connectors::MongoDB::Connector do
   let(:actual_collection_data) { [] }
 
   before(:each) do
-    allow(Mongo::Client).to receive(:new).and_return(mongo_client)
+    allow(Mongo::Client).to receive(:new).and_yield(mongo_client)
 
     allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => mongodb_collection })])
     allow(mongo_client).to receive(:database_names).and_return([Hashie::Mash.new({ :name => mongodb_database })])
@@ -60,14 +60,6 @@ describe Connectors::MongoDB::Connector do
   end
 
   it_behaves_like 'a connector'
-
-  shared_examples_for 'closes a client in the end' do
-    it '' do
-      expect(mongo_client).to receive(:close)
-
-      subject.is_healthy?
-    end
-  end
 
   shared_examples_for 'handles auth' do
     context 'when username and password are provided' do
@@ -110,7 +102,6 @@ describe Connectors::MongoDB::Connector do
   end
 
   context '#is_healthy?' do
-    it_behaves_like 'closes a client in the end'
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.is_healthy? }
     end
@@ -123,7 +114,6 @@ describe Connectors::MongoDB::Connector do
   end
 
   context '#yield_documents' do
-    it_behaves_like 'closes a client in the end'
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.yield_documents { |doc|; } }
     end
