@@ -65,7 +65,7 @@ module Connectors
           cursor = client[@collection].find
           skip = 0
 
-          while true
+          loop do
             found_count = 0
             view = cursor.skip(skip).limit(PAGE_SIZE)
             view.each do |document|
@@ -74,7 +74,6 @@ module Connectors
             end
 
             break if found_count == 0
-
             skip += PAGE_SIZE
           end
         end
