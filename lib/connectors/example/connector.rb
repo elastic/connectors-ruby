@@ -59,7 +59,7 @@ module Connectors
         attachment_dir = "#{File.dirname(__FILE__)}/attachments"
         attachment_path = "#{attachment_dir}/#{path}"
 
-        unless File.exists?(attachment_path)
+        unless File.exist?(attachment_path)
           raise "Attachment at location '#{attachment_path}' doesn't exist. Attachments should be located under #{attachment_dir}"
         end
 
