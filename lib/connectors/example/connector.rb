@@ -42,9 +42,9 @@ module Connectors
 
       def yield_documents
         attachments = [
-          load_attachment("first_attachment.txt"),
-          load_attachment("second_attachment.txt"),
-          load_attachment("third_attachment.txt"),
+          load_attachment('first_attachment.txt'),
+          load_attachment('second_attachment.txt'),
+          load_attachment('third_attachment.txt'),
         ]
 
         attachments.each_with_index do |att, index|
