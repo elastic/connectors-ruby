@@ -1,4 +1,6 @@
-# Releasing the Connectors project
+# Releasing the connector service
+
+> Note: This is for internal use within Elastic. Only Elastic members can release the connector service.
 
 The version scheme we use is **MAJOR.MINOR.PATCH.BUILD** and stored in the [VERSION](https://github.com/elastic/connectors-ruby/blob/main/VERSION) file
 at the root of this repository.
@@ -11,19 +13,19 @@ Look into the Vault in the `ent-search-team/rubygem` secret.
 ## Unified release
 
 **MAJOR.MINOR.PATCH** should match the Elastic and Enterprise Search version it targets
-and the *BUILD* number should be set to **0** the day the Connectors release is created
+and the *BUILD* number should be set to **0** the day the Connector service release is created
 to be included with the Enterprise Search distribution.
 
 For example, when shipping for `8.1.2`, the version is `8.1.2.0`.
 
-To release Connectors:
+To release the connector service:
 
-- Set the VERSION file to the new/incremented version on the release branch
-- Make sure all tests and linter pass with `make lint test`
-- PR these changes to the appropriate Connectors release branch
-- Run `make release`
+1. Set the [VERSION](https://github.com/elastic/connectors-ruby/blob/main/VERSION) file to the new/incremented version on the release branch
+2. Make sure all tests and linter pass with `make lint test`
+3. PR these changes to the appropriate connector service release branch
+4. Run `make release_service release_utility`
 
-A Gem will be published to RubyGems: #TODO: change the name, what's gonna be the new gem, if any is needed? https://rubygems.org/gems/connectors.
+Two Gems will be published to RubyGems: [connectors_service](https://rubygems.org/gems/connectors_service) and [connectors_utility](https://rubygems.org/gems/connectors_utility)
 
 Take care of the branching (minor releases only):
 
@@ -32,11 +34,11 @@ Take care of the branching (minor releases only):
 
 After the Elastic unified release is complete
 
-- Update the **BUILD** version ([example PR](https://github.com/elastic/connectors-ruby/pull/81)). Note that the Connectors project does not immediately bump to the next **PATCH** version. That wont happen until that patch release's FF date.
+- Update the **BUILD** version ([example PR](https://github.com/elastic/connectors-ruby/pull/81)). Note that the Connectors project does not immediately bump to the next **PATCH** version. That won't happen until that patch release's FF date.
 
 ## In-Between releases
 
-Sometimes, we need to release Connectors independantly from Enterprise Search.
+Sometimes, we need to release connector service independently from Enterprise Search.
 For instance, if someone wants to use the project as an HTTP Service and we have a
 bug fix we want them to have as soon as possible.
 
@@ -52,4 +54,4 @@ merged into the next PATCH release. New features are always done in Developer pr
 ## Developer preview releases
 
 For developer previews, we are adding a `pre` tag using an ISO8601 date.
-You can use `make release_dev` instead of `make release` in that case.
+You can use `make release_service_dev release_utility_dev` instead of `make release_service release_utility` in that case.
