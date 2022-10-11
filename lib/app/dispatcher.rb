@@ -11,6 +11,7 @@ require 'connectors'
 require 'core'
 require 'utility'
 require 'app/config'
+require 'objspace'
 
 module App
   class Dispatcher
@@ -42,9 +43,16 @@ module App
       end
 
       def start_polling_jobs!
+        last_dump_time = Time.now
         scheduler.when_triggered do |connector_settings, task|
           case task
           when :sync
+            if Time.now - last_dump_time > 60
+              last_dump_time = Time.now
+              file = File.open("/tmp/{Time.now}.dump", 'w')
+              ObjectSpace.dump_all(output: file)
+              file.close
+            end
             start_sync_task(connector_settings)
           when :heartbeat
             start_heartbeat_task(connector_settings)

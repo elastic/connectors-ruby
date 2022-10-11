@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+
 ruby File.read(File.join(__dir__, '.ruby-version')).strip
 
 # Pull gem index from rubygems
@@ -61,3 +62,6 @@ gem 'signet', '~> 0.16.0'
 
 # Dependency for mongo connector
 gem 'mongo', '~> 2.18'
+
+# BLA
+gem 'heapy'

@@ -11,8 +11,9 @@ require 'mongo'
 
 module Connectors
   module MongoDB
-    $gclient_cache = {}
     class Connector < Connectors::Base::Connector
+      PAGE_SIZE = 100
+
       def self.service_type
         'mongodb'
       end
@@ -53,61 +54,60 @@ module Connectors
         @user = configuration.dig(:user, :value)
         @password = configuration.dig(:password, :value)
         @direct_connection = configuration.dig(:direct_connection, :value)
-
-        if $gclient_cache.key?(@host) 
-          @client = $gclient_cache[@host]
-        else
-          @client = if @user.present? || @password.present?
-                     Mongo::Client.new(
-                       @host,
-                       database: @database,
-                       direct_connection: to_boolean(@direct_connection),
-                       user: @user,
-                       password: @password,
-                       max_pool_size: 1,
-                       monitoring: false
-                     )
-                   else
-                     Mongo::Client.new(
-                       @host,
-                       database: @database,
-                       direct_connection: to_boolean(@direct_connection),
-                       max_pool_size: 1,
-                       monitoring: false
-                     )
-                   end
-          $gclient_cache[@host] = @client
-        end
-
       end
 
       def yield_documents
-        cursor = @client[@collection].find
-        skip = 0
+        with_client do |client|
+          cursor = client[@collection].find
+          skip = 0
 
-        while true
-          found_count = 0
-          view = cursor.skip(skip).limit(100)
-          puts "COUNT IS #{view.count_documents}"
-          view.each do |document|
-            ser = serialize(document)
-            puts ser['id']
-            yield ser
-            found_count += 1
+          loop do
+            found_count = 0
+            view = cursor.skip(skip).limit(PAGE_SIZE)
+            view.each do |document|
+              yield serialize(document)
+              found_count += 1
+            end
+
+            break if found_count == 0
+            skip += PAGE_SIZE
           end
-
-          puts "FOUND #{found_count}"
-          break if found_count == 0
-
-          skip+= 100
-          puts "skipping #{skip}"
         end
       end
 
       private
 
       def do_health_check
-        Utility::Logger.debug("Mongo at #{@host}/#{@database} looks healthy.")
+        with_client do |_client|
+          Utility::Logger.debug("Mongo at #{@host}/#{@database} looks healthy.")
+        end
+      end
+
+      def with_client
+        raise "Invalid value for 'Direct connection' : #{@direct_connection}." unless %w[true false].include?(@direct_connection.to_s.strip.downcase)
+
+        args = if @user.present? || @password.present?
+                   {
+                     database: @database,
+                     direct_connection: to_boolean(@direct_connection),
+                     user: @user,
+                     password: @password
+                   }
+                 else
+                   {
+                     database: @database,
+                     direct_connection: to_boolean(@direct_connection)
+                   }
+                 end
+
+        Mongo::Client.new(@host, args) do |client|
+          Utility::Logger.debug("Existing Databases #{client.database_names}")
+          Utility::Logger.debug('Existing Collections:')
+
+          client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+
+          yield client
+        end
       end
 
       def serialize(mongodb_document)
@@ -126,9 +126,10 @@ module Connectors
           mongodb_document.map { |v| serialize(v) }
         when Hash
           mongodb_document.map do |key, value|
-            key = 'id' if key == '_id'
+            remapped_key = key.to_sym == '_id' ? 'id' : key.to_sym
+
             remapped_value = serialize(value)
-            [key, remapped_value]
+            [remapped_key, remapped_value]
           end.to_h
         else
           mongodb_document

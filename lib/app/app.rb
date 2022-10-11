@@ -13,6 +13,9 @@ require 'app/config'
 require 'app/preflight_check'
 require 'utility/environment'
 require 'utility/logger'
+require 'objspace'
+
+ObjectSpace.trace_object_allocations_start
 
 module App
   Utility::Environment.set_execution_environment(App::Config) do

@@ -33,17 +33,7 @@ module Core
 
     def execute
       validate_configuration!
-      puts "x"*50
-      puts "GC STATS BEFORE:"
-      puts "x"*50
-      puts GC.stat
-
       do_sync!
-
-      puts "x"*50
-      puts "GC STATS AFTER:"
-      puts "x"*50
-      puts GC.stat
     end
 
     private
