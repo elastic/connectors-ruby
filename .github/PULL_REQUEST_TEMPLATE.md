@@ -43,4 +43,3 @@ author(s) can easily look it up.-->
 ## For Elastic Internal Use Only
 - [ ] Considered corresponding documentation changes to [contribute separately](https://github.com/elastic/enterprise-search-pubs#contribute-docs-changes-for-product-changes)
 - [ ] New configuration settings added in this PR follow the [official guidelines](https://github.com/elastic/ent-search/blob/main/doc/enterprise-search-config.md)
-- [ ] [Manual test steps](https://github.com/elastic/connectors-ruby/blob/main/docs/INTERNAL.md#minimal-manual-tests) are successful
