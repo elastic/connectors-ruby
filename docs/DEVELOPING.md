@@ -22,11 +22,17 @@ make install
 
 ### Building
 
-The repository can generate a ruby gem, if needed.
+The repository can generate ruby gems (connectors service itself or shared connectors service library), if needed.
 
+Generate Connector Service gem:
 ```shell
-make build
+make build_service_gem
 ```
+
+Generate shared Connector Services libraries gem:
+````shell
+make build_utility_gem
+````
 
 ### Testing
 ```shell
