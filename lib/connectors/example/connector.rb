@@ -42,15 +42,28 @@ module Connectors
 
       def yield_documents
         attachments = [
-          File.open('./lib/connectors/example/example_attachments/first_attachment.txt'),
-          File.open('./lib/connectors/example/example_attachments/second_attachment.txt'),
-          File.open('./lib/connectors/example/example_attachments/third_attachment.txt')
+          load_attachment("first_attachment.txt"),
+          load_attachment("second_attachment.txt"),
+          load_attachment("third_attachment.txt"),
         ]
 
         attachments.each_with_index do |att, index|
           data = { id: (index + 1).to_s, name: "example document #{index + 1}", _attachment: File.read(att) }
           yield data
         end
+      end
+
+      private
+
+      def load_attachment(path)
+        attachment_dir = "#{File.dirname(__FILE__)}/attachments"
+        attachment_path = "#{attachment_dir}/#{path}"
+
+        unless File.exists?(attachment_path)
+          raise "Attachment at location '#{attachment_path}' doesn't exist. Attachments should be located under #{attachment_dir}"
+        end
+
+        File.open(attachment_path)
       end
     end
   end

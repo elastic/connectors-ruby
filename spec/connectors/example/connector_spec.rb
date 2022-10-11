@@ -29,8 +29,8 @@ describe Connectors::Example::Connector do
       subject.yield_documents { |doc| @documents << doc }
     end
 
-    it 'returns some documents' do
-      expect(@documents.size).to be > 0
+    it 'returns three documents' do
+      expect(@documents.size).to be 3
     end
 
     it 'returns attachments' do
