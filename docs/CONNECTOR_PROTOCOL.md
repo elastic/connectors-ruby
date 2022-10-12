@@ -175,18 +175,15 @@ sequenceDiagram
     participant Elasticsearch
     participant Connector
     participant Data source
-    rect
-    note right of User: Custom connector
-    User->>Kibana: Creates a connector via Build a connector
-    Kibana->>Elasticsearch: Saves connector definition
-    User->>Kibana: Generates new API key & id
-    Kibana->>Elasticsearch: Saves API key & id
-    User->>Connector: Deploys with API key, id & Elasticsearch host (for custom connector)
-    end
-    rect
-    note right of User: Native connector
-    User->>Kibana: Creates a connector via Use a connector
-    Kibana->>Elasticsearch: Saves connector definition
+    alt Custom connector
+        User->>Kibana: Creates a connector via Build a connector
+        Kibana->>Elasticsearch: Saves connector definition
+        User->>Kibana: Generates new API key & id
+        Kibana->>Elasticsearch: Saves API key & id
+        User->>Connector: Deploys with API key, id & Elasticsearch host (for custom connector)
+    else Native connector
+        User->>Kibana: Creates a connector via Use a connector
+        Kibana->>Elasticsearch: Saves connector definition
     end
     User->>Kibana: Enters necessary configuration and synchronization schedule
     Kibana->>Elasticsearch: Writes configuration and synchronization schedule
