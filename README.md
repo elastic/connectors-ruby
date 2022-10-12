@@ -8,14 +8,14 @@ The home of Elastic connector service and native connectors. This repository con
 
 Before getting started, review important information about this feature:
 
-- [Terminology](docs/SUPPORT.md)
+- [Terminology](docs/TERMINOLOGY.md)
 - [Getting help and providing feedback](docs/SUPPORT.md)
-- [Understand the connector protocol](link to elastic docs)
+- [Understand the connector protocol](docs/CONNECTOR_PROTOCOL.md)
 
 Build, deploy, and operate your own connector:
 
 - [Building/Deploying a connector](docs/DEVELOPING.md)
-- [Operating the connector](https://www.elastic.co/guide/en/enterprise-search/current/connectors.html)
+- [Operating a connector](https://www.elastic.co/guide/en/enterprise-search/current/connectors.html)
 
 How to publish your connector:
 
@@ -24,6 +24,12 @@ How to publish your connector:
 ## Other guides
 
 - [Code of Conduct](https://www.elastic.co/community/codeofconduct)
-- [Configuration](docs/CONFIG.md)
+- [Getting Support](docs/SUPPORT.md)
 - [Releasing](docs/RELEASING.md)
+- [Developer guide](docs/DEVELOPING.md)
 - [Security Policy](docs/SECURITY.md)
+- [Elastic-internal guide](docs/INTERNAL.md)
+- [Connector Protocol](docs/CONNECTOR_PROTOCOL.md)
+- [Configuration](docs/CONFIG.md)
+- [Terminology](docs/TERMINOLOGY.md)
+- [Contributing guide](docs/CONTRIBUTING.md)
