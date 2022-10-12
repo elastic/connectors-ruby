@@ -93,14 +93,30 @@ module Connectors
                  end
 
         begin
-          Utility::Logger.debug("Existing Databases #{client.database_names}")
-          Utility::Logger.debug('Existing Collections:')
+          databases = client.database_names
+          collections = client.collections.map(&:name)
 
-          client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+          Utility::Logger.debug("Existing Databases: #{databases}")
+          Utility::Logger.debug("Existing Collections: #{collections}")
+
+          check_database_exists!(databases, @database)
+          check_collection_exists!(collections, @collection)
 
           yield client
         ensure
           client.close
+        end
+      end
+
+      def check_database_exists!(databases, database)
+        unless databases.include?(database)
+          raise "Database '#{@database}' does not exist. Existing databases: #{databases.join(', ')}"
+        end
+      end
+
+      def check_collection_exists!(collections, collection)
+        unless collections.include?(collection)
+          raise "Collection '#{@collection}' does not exist. Existing collections: #{collections.join(', ')}"
         end
       end
 
