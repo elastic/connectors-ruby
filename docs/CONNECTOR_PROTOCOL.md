@@ -30,6 +30,7 @@ All communication will need to go through Elasticsearch. We've created a connect
 This is our main communication index, used to communicate the connector's configuration, status and other related data. All dates in UTC.
 ```
 {
+  api_key_id: string;   -> ID of the current API key in use
   configuration: {
     [key]: {
       label: string     -> The label to be displayed for the field in Kibana
@@ -82,6 +83,7 @@ This is our main communication index, used to communicate the connector's config
 ```
 "mappings" : {
   "properties" : {
+    "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
     "description" : { "type" : "text" },
     "error" : { "type" : "text" },
@@ -123,6 +125,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   connector_id: string; -> ID of the connector document in .elastic-connectors
   status: string; -> Same enum as sync_status above
   error: string; -> Optional error message
+  index_name: string; -> The name of the content index
   worker_hostname: string; -> The hostname of the worker to run the sync job
   indexed_document_count: number; -> Number of documents indexed in the sync job
   deleted_document_count: number; -> Number of documents deleted in the sync job
@@ -137,6 +140,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "connector_id" : { "type" : "keyword" },
     "status" : { "type" : "keyword" },
     "error" : { "type" : "text" },
+    "index_name" : { "type" : "keyword" },
     "worker_hostname" : { "type" : "keyword" },
     "indexed_document_count" : { "type" : "integer" },
     "deleted_document_count" : { "type" : "integer" },
