@@ -46,19 +46,23 @@ describe Connectors::MongoDB::Connector do
 
   let(:actual_collection) { double }
   let(:actual_collection_name) { 'sample-collection' }
+  let(:actual_collection_names) { [actual_collection_name] }
   let(:actual_collection_data) { [] }
 
+  let(:actual_database) { double }
   let(:actual_database_names) { ['sample-database'] }
 
   before(:each) do
     allow(Mongo::Client).to receive(:new).and_return(mongo_client)
 
     allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => actual_collection_name })])
+    allow(mongo_client).to receive(:database).and_return(actual_database)
     allow(mongo_client).to receive(:database_names).and_return(actual_database_names)
     allow(mongo_client).to receive(:[]).with(mongodb_collection).and_return(actual_collection)
     allow(mongo_client).to receive(:with).and_return(mongo_client)
     allow(mongo_client).to receive(:close)
 
+    allow(actual_database).to receive(:collection_names).and_return(actual_collection_names)
     allow(actual_collection).to receive(:find).and_return(actual_collection_data)
   end
 
