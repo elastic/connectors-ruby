@@ -109,15 +109,15 @@ module Connectors
       end
 
       def check_database_exists!(databases, database)
-        unless databases.include?(database)
-          raise "Database '#{@database}' does not exist. Existing databases: #{databases.join(', ')}"
-        end
+        return if databases.include?(database)
+
+        raise "Database '#{@database}' does not exist. Existing databases: #{databases.join(', ')}"
       end
 
       def check_collection_exists!(collections, collection)
-        unless collections.include?(collection)
-          raise "Collection '#{@collection}' does not exist. Existing collections: #{collections.join(', ')}"
-        end
+        return if collections.include?(collection)
+
+        raise "Collection '#{@collection}' does not exist. Existing collections: #{collections.join(', ')}"
       end
 
       def serialize(mongodb_document)
