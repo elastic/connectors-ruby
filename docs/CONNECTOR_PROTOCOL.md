@@ -218,7 +218,7 @@ sequenceDiagram
 If the mapping of `.elastic-connectors` or `.elastic-connectors-sync-jobs` is updated in a future version in a way that necessitates a complete re-indexing, Kibana will migrate that data if a user with sufficient permissions is logged in.
 
 To facilitate migrations we'll use aliases for the `.elastic-connectors` and `.elastic-connectors-sync-jobs` indices, and update the underlying index the alias points to when we need to migrate data to a new mapping. The name of those indices will be the same as the alias, with a version appended. So right now, those indices are:
-`.elastic-connectors-v1`
-`.elastic-connectors-sync-jobs-v1`
+- `.elastic-connectors-v1`
+- `.elastic-connectors-sync-jobs-v1`
 
 In addition to the name of the index, we'll store a version number in each index's metadata to check against and make sure we're operating on the correct version of each index, and migrate the data otherwise.
