@@ -54,4 +54,4 @@ merged into the next PATCH release. New features are always done in Developer pr
 ## Developer preview releases
 
 For developer previews, we are adding a `pre` tag using an ISO8601 date.
-You can use `make release_service_dev release_utility_dev` instead of `make release_service release_utility` in that case.
+You can use `make build_service build_utility`, and the gems will be generated in directory `.gems/`
