@@ -1,4 +1,4 @@
-# Elastic connectors
+# Elastic Ruby connectors
 
 ![logo](logo-enterprise-search.png)
 
