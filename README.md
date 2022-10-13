@@ -1,5 +1,7 @@
 # Elastic connectors
 
+![logo](logo-enterprise-search.png)
+
 The home of Elastic connector service and native connectors. This repository contains the framework for customizing Elastic native connectors, or writing your own connectors for advanced use cases.
 
 **The connector will be operated by an administrative user from within Kibana.**
