@@ -93,15 +93,32 @@ module Connectors
                  end
 
         begin
-          Utility::Logger.debug("Existing Databases #{client.database_names}")
-          Utility::Logger.debug('Existing Collections:')
+          databases = client.database_names
 
-          client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+          Utility::Logger.debug("Existing Databases: #{databases}")
+          check_database_exists!(databases, @database)
+
+          collections = client.database.collection_names
+
+          Utility::Logger.debug("Existing Collections: #{collections}")
+          check_collection_exists!(collections, @database, @collection)
 
           yield client
         ensure
           client.close
         end
+      end
+
+      def check_database_exists!(databases, database)
+        return if databases.include?(database)
+
+        raise "Database (#{database}) does not exist. Existing databases: #{databases.join(', ')}"
+      end
+
+      def check_collection_exists!(collections, database, collection)
+        return if collections.include?(collection)
+
+        raise "Collection (#{collection}) does not exist within database '#{database}'. Existing collections: #{collections.join(', ')}"
       end
 
       def serialize(mongodb_document)
