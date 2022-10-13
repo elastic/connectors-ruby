@@ -6,7 +6,7 @@ After you've made your changes, if you'd like to contribute back, please see the
 
 ## Requirements
 - rbenv (see [rbenv installation](https://github.com/rbenv/rbenv#installation))
-- bundler (for version, see [.bundler-version](./.bundler-version))
+- bundler (for version, see [.bundler-version](../.bundler-version))
 - yq (see [yq installation](https://github.com/mikefarah/yq#install))
 
 ## Setup
@@ -22,7 +22,7 @@ make install
 
 ## Code Organization
 
-- `config/connectors.yml`: This is where the config lives. See [Config](./CONFIG.md) for detailed explanation.
+- `config/connectors.yml`: This is where the config lives. See [Configuration](./CONFIG.md) for detailed explanation.
 - `lib/app`: This is where the connector service application and its helpers live.
 - `lib/connectors`: This is where the connector clients live. Each directory represent one connector client, e.g. `mongodb`, `gitlab`. The directory name must be the same as the service type. Connectors are hierarchical, so you may find that much of the underlying code for any given connector lives in `lib/connectors/base/**/*.rb`, rather than in the specific connector's implementation.
 - `lib/core`: The main components of the connector service application, e.g. `scheduler`, `sync_job_runner`, `output_sync`, etc..
@@ -34,7 +34,7 @@ make install
 
 To add a new custom connector, all you have to do is adding a new directory under `lib/connectors`, and make it implement the connector protocol.
 
-1. Copy the [example connector](lib/connectors/example/connector.rb) into a separate folder under the [connectors](lib/connectors) (Ignore the [example_attachments] ). Rename the directory to the service type, and rename the class accordingly
+1. Copy the [example connector](../lib/connectors/example/connector.rb) into a separate folder under the [connectors](../lib/connectors) (Ignore the [example_attachments] ). Rename the directory to the service type, and rename the class accordingly
     ```shell
     mkdir lib/connectors/{service_type}
     cp lib/connectors/example/connector.rb lib/connectors/{service_type}/connector.rb
