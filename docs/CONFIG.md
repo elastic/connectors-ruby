@@ -32,3 +32,17 @@ cp config/connectors.yml.example config/connectors.yml
 - `connector_id`: The ID of the connector that the application will sync data for. This is required when `native_mode` is `false`.
 - `service_type`: The service type of the connector that the application will sync data for. This is required when `native_mode` is `false`. 
 
+## Run the connector service on Elastic Cloud
+
+When you have an Enterprise Search deployment on Elastic Cloud post 8.5.0, the connector service is automatically deployed. The connector service can only run in native mode on Elastic Cloud (i.e. `native_mode` is always `true`), and the Elasticsearch connection configurations (i.e. `cloud_id`, `hosts`, `api_key`) will be overridden, and a special Cloud user `cloud-internal-enterprise_search-server` will be used for Elasticsearch connection, which will have proper privilege on the connector index (`.elastic-connectors`), the connector job index (`.elastic-connectors-sync-jobs`) and the connector content indices (`search-*`).
+
+## Run the connector service on-prem
+
+### Run the connector service in native mode
+
+1. Set `native_mode` to `true`
+2. Generate the API key via _Stack Management_ > _Security_ > _API keys_ > _Create API key_. Make sure the API key has at least the privileges to `manage`, `read` and `write` the connector index (`.elastic-connectors`), the connector job index (`.elastic-connectors-sync-jobs`) and the connector content indices (`search-*`).
+
+### Run the connector service for a custom connector
+
+Refer to [Test your connector](./DEVELOPING.md#test-your-connector) for detailed explanation.
