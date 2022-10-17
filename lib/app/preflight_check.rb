@@ -78,7 +78,7 @@ module App
         rescue *Utility::AUTHORIZATION_ERRORS => e
           Utility::ExceptionTracking.log_exception(e)
 
-          fail_check!("Elasticsearch returned a response 'Unauthorized'. Check your authentication details. Terminating...")
+          fail_check!("Elasticsearch returned 'Unauthorized' response. Check your authentication details. Terminating...")
         rescue *App::RETRYABLE_CONNECTION_ERRORS => e
           Utility::Logger.warn('Could not connect to Elasticsearch. Make sure it is running and healthy.')
           Utility::Logger.debug("Error: #{e.full_message}")
