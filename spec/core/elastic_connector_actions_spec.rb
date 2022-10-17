@@ -154,6 +154,18 @@ describe Core::ElasticConnectorActions do
     it 'gets the meta' do
       expect(described_class.connectors_meta).to eq({ 'version' => '1' })
     end
+
+    context 'api key is invalid' do
+      before(:each) do
+        allow(es_client_indices_api)
+          .to receive(:get_mapping)
+          .and_raise(Elastic::Transport::Transport::Errors::Unauthorized)
+      end
+
+      it 'raises InvalidApiKeyError' do
+        expect { described_class.connectors_meta }.to raise_error(Utility::AuthorizationError)
+      end
+    end
   end
 
   context '#search_connectors' do

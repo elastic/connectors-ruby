@@ -89,6 +89,7 @@ module Utility
   class InvalidTokenError < StandardError; end
   class TokenRefreshFailedError < StandardError; end
   class ConnectorNotAvailableError < StandardError; end
+  class AuthorizationError < StandardError; end
 
   # For when we want to explicitly set a #cause but can't
   class ExplicitlyCausedError < StandardError

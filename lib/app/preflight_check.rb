@@ -75,6 +75,10 @@ module App
           else
             raise UnhealthyCluster, "Unexpected cluster status: #{response['status']}"
           end
+        rescue *App::AUTHORIZATION_ERROR => e
+          Utility::Logger.debug("Error: #{e.message}")
+
+          fail_check!("Elasticsearch returned a response 'Unauthorized'. Check your authentication details. Terminating...")
         rescue *App::RETRYABLE_CONNECTION_ERRORS => e
           Utility::Logger.warn('Could not connect to Elasticsearch. Make sure it is running and healthy.')
           Utility::Logger.debug("Error: #{e.full_message}")
@@ -121,6 +125,8 @@ module App
       end
     end
   end
+
+  AUTHORIZATION_ERROR = [Elastic::Transport::Transport::Errors::Unauthorized]
 
   RETRYABLE_CONNECTION_ERRORS = [
       ::Faraday::ConnectionFailed,
