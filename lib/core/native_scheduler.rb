@@ -16,6 +16,9 @@ module Core
   class NativeScheduler < Core::Scheduler
     def connector_settings
       Core::ConnectorSettings.fetch_native_connectors || []
+    rescue *Utility::AUTHORIZATION_ERRORS => e
+      # should be handled by the general scheduler
+      raise e
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, 'Could not retrieve native connectors due to unexpected error.')
       []

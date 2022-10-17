@@ -28,5 +28,15 @@ describe Core::NativeScheduler do
         expect(subject.connector_settings).to be_empty
       end
     end
+
+    context 'when authorization error appears' do
+      before(:each) do
+        allow(Core::ConnectorSettings).to receive(:fetch_native_connectors).and_raise(Elastic::Transport::Transport::Errors::Unauthorized, 'Unauthorized')
+      end
+
+      it 'rethrows error' do
+        expect { subject.connector_settings }.to raise_error(Elastic::Transport::Transport::Errors::Unauthorized, 'Unauthorized')
+      end
+    end
   end
 end
