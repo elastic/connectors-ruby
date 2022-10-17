@@ -34,8 +34,8 @@ describe Core::NativeScheduler do
         allow(Core::ConnectorSettings).to receive(:fetch_native_connectors).and_raise(Elastic::Transport::Transport::Errors::Unauthorized, 'Unauthorized')
       end
 
-      it 'raises internal authorization error' do
-        expect { subject.connector_settings }.to raise_error(Utility::AuthorizationError, 'Unauthorized')
+      it 'rethrows error' do
+        expect { subject.connector_settings }.to raise_error(Elastic::Transport::Transport::Errors::Unauthorized, 'Unauthorized')
       end
     end
   end

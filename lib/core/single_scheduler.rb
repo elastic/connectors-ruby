@@ -21,8 +21,9 @@ module Core
     def connector_settings
       connector_settings = Core::ConnectorSettings.fetch_by_id(@connector_id)
       [connector_settings]
-    rescue Elastic::Transport::Transport::Errors::Unauthorized => e
-      raise Utility::AuthorizationError.new, e.message
+    rescue *Utility::AUTHORIZATION_ERRORS => e
+      # should be handled by the general scheduler
+      raise e
     rescue StandardError => e
       Utility::ExceptionTracking.log_exception(e, "Could not retrieve the connector by id #{@connector_id} due to unexpected error.")
       []
