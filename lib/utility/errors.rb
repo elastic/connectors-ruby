@@ -5,6 +5,7 @@
 #
 
 require 'active_support/core_ext/string'
+require 'elasticsearch'
 
 module Utility
   class DocumentError
