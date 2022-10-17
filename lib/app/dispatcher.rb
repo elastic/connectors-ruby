@@ -13,6 +13,8 @@ require 'utility'
 require 'app/config'
 require 'objspace'
 
+$inc = 0
+
 module App
   class Dispatcher
     POLL_INTERVAL = (App::Config.poll_interval || 3).to_i
@@ -49,9 +51,10 @@ module App
           when :sync
             if Time.now - last_dump_time > 60
               last_dump_time = Time.now
-              file = File.open("/tmp/{Time.now}.dump", 'w')
+              file = File.open("/tmp/sync-#{$inc}.dump", 'w')
               ObjectSpace.dump_all(output: file)
               file.close
+              $inc+=1
             end
             start_sync_task(connector_settings)
           when :heartbeat

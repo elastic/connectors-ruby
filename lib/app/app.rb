@@ -8,6 +8,7 @@
 
 $LOAD_PATH << '../'
 
+require 'app/trace'
 require 'app/dispatcher'
 require 'app/config'
 require 'app/preflight_check'
@@ -15,7 +16,9 @@ require 'utility/environment'
 require 'utility/logger'
 require 'objspace'
 
-ObjectSpace.trace_object_allocations_start
+file = File.open("/tmp/startup.dump", 'w')
+ObjectSpace.dump_all(output: file)
+file.close
 
 module App
   Utility::Environment.set_execution_environment(App::Config) do

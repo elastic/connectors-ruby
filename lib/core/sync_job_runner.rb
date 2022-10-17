@@ -11,6 +11,7 @@ require 'connectors/registry'
 require 'core/output_sink'
 require 'utility'
 
+
 module Core
   class IncompatibleConfigurableFieldsError < StandardError
     def initialize(service_type, expected_fields, actual_fields)

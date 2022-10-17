@@ -73,6 +73,8 @@ module Connectors
             skip += PAGE_SIZE
           end
         end
+
+        return
       end
 
       private
@@ -90,12 +92,14 @@ module Connectors
                    {
                      database: @database,
                      direct_connection: to_boolean(@direct_connection),
+                     monitoring: false,
                      user: @user,
                      password: @password
                    }
                  else
                    {
                      database: @database,
+                     monitoring: false,
                      direct_connection: to_boolean(@direct_connection)
                    }
                  end
