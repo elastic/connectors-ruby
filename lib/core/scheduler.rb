@@ -41,6 +41,9 @@ module Core
         if @is_shutting_down
           break
         end
+      rescue Utility::AuthorizationError => e
+        Utility::Logger.error('Could not retrieve connectors settings due to authorization error. Check debug logs for full error message.')
+        Utility::Logger.debug("Error: #{e.message}")
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
       ensure

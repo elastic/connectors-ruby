@@ -37,11 +37,6 @@ module Core
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta') || {}
-      rescue Elastic::Transport::Transport::Errors::Unauthorized => e
-        Utility::Logger.error('Could not retrieve connectors metadata due to authorization error. Check debug logs for full error message.')
-        Utility::Logger.debug("Error: #{e.message}")
-
-        raise Utility::AuthorizationError.new, 'Unauthorized'
       end
 
       def search_connectors(query, page_size, offset)
