@@ -16,10 +16,10 @@ For example, when shipping for `8.1.2`, the version is `8.1.2.0`.
 
 To release the connector service:
 
-1. Set the [VERSION](https://github.com/elastic/connectors-ruby/blob/main/VERSION) file to the new/incremented version on the release branch
-2. Make sure all tests and linter pass with `make lint test`
-3. PR these changes to the appropriate connector service release branch
-4. Run `make release_service release_utility`
+1. Make sure all tests and linter pass with `make lint test`
+2. Run `make release_service release_utility`
+3. Set the [VERSION](../VERSION) file to the new/incremented version on the release branch
+4. PR these changes to the appropriate connector service release branch
 
 Two Gems will be published to RubyGems: [connectors_service](https://rubygems.org/gems/connectors_service) and [connectors_utility](https://rubygems.org/gems/connectors_utility)
 
