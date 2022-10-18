@@ -23,7 +23,7 @@ module Utility
         TEXT_FIELD_MAPPING = {
           type: 'text',
           analyzer: 'iq_text_base',
-          index_options: 'freqs',
+          index_options: 'positions',
           fields: {
             'stem': {
               type: 'text',
@@ -33,18 +33,15 @@ module Utility
               type: 'text',
               analyzer: 'i_prefix',
               search_analyzer: 'q_prefix',
-              index_options: 'docs'
             },
             'delimiter' => {
               type: 'text',
               analyzer: 'iq_text_delimiter',
-              index_options: 'freqs'
             },
             'joined': {
               type: 'text',
               analyzer: 'i_text_bigram',
               search_analyzer: 'q_text_bigram',
-              index_options: 'freqs'
             },
             'enum': {
               type: 'keyword',
