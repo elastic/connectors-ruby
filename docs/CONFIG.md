@@ -42,6 +42,10 @@ When you have an Enterprise Search deployment on Elastic Cloud post 8.5.0, the c
 
 1. Set `native_mode` to `true`
 2. Generate the API key via _Stack Management_ > _Security_ > _API keys_ > _Create API key_. Make sure the API key has at least the privileges to `manage`, `read` and `write` the connector index (`.elastic-connectors`), the connector job index (`.elastic-connectors-sync-jobs`) and the connector content indices (`search-*`).
+3. Run the connector service with
+    ```shell
+    make run
+    ```
 
 ### Run the connector service for a custom connector
 
