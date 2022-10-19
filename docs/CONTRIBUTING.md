@@ -9,10 +9,7 @@ You may also want to read the [development guide](./DEVELOPING.md).
 * Prior to opening a pull request, please:
     * Read the entirety of this document
     * [Create an issue](https://github.com/elastic/connectors-ruby/issues) to discuss the scope of your proposal.
-    * Sign the [Contributor License Agreement](https://www.elastic.co/contributor-agreement/). We are not asking you to
-      assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all
-      contributors in order to assure our users of the origin and continuing existence of the code. You only need to 
-      sign the CLA once.
+    * Sign the [Contributor License Agreement](https://www.elastic.co/contributor-agreement/). We are not asking you to assign copyright to us, but to give us the right to distribute your code without restriction. We ask this of all contributors in order to assure our users of the origin and continuing existence of the code. You only need to sign the CLA once.
     * Run all tests locally, and ensure they are all passing  
 * Please write simple code and concise documentation, when appropriate.
 
@@ -31,10 +28,7 @@ make test
 
 ### Branching Strategy
 
-Our `main` branch holds the latest development code for the next release. If the next release will be a minor release,
-the expecation is that no breaking changes will be in `main`. If a change would be breaking, we need to put it behind a
-feature flag, or make it an opt-in change. We will only merge breaking PRs when we are ready to start working on the
-next major.
+Our `main` branch holds the latest development code for the next release. If the next release will be a minor release, the expecation is that no breaking changes will be in `main`. If a change would be breaking, we need to put it behind a feature flag, or make it an opt-in change. We will only merge breaking PRs when we are ready to start working on the next major.
 
 All PRs should be created from a fork, to keep a clean set of branches on `origin`.
 
