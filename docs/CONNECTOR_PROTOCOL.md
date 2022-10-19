@@ -68,7 +68,7 @@ This is our main communication index, used to communicate the connector's config
 ```
 **Possible values for 'status'**
 - `created` -> A document for a connector has been created in connector index but the connector has not connected to elasticsearch (written by index creator).
-- `needs_configuration` -> Configurable fields have been written into the connector, either by Kibana (for native connector) or connector (for custom connector.
+- `needs_configuration` -> Configurable fields have been written into the connector, either by Kibana (for native connector) or connector (for custom connector).
 - `configured` -> A connector has been fully configured (written by Kibana on updating configuration, or directly by connector if no further configuration is necessary).
 - `connected` -> A connector has successfully connected to the data source (written by connector on successfully connecting to data source).
 - `error` -> A connector has encountered an error, either because the data source is not healthy or the last sync failed.
@@ -77,7 +77,7 @@ This is our main communication index, used to communicate the connector's config
 - `null` -> No sync job has ever started.
 - `in_progress` -> A sync job successfully started.
 - `completed` -> A sync job successfully completed.
-- `failed` -> A sync job failed.
+- `error` -> A sync job failed.
 
 #### Elasticsearch mappings for `.elastic-connectors`:
 ```
@@ -123,7 +123,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
 ```
 {
   connector_id: string; -> ID of the connector document in .elastic-connectors
-  status: string; -> Same enum as sync_status above
+  status: string; -> Same enum as last_sync_status above except the null value
   error: string; -> Optional error message
   index_name: string; -> The name of the content index
   worker_hostname: string; -> The hostname of the worker to run the sync job
