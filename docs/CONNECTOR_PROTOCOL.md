@@ -127,6 +127,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   error: string; -> Optional error message
   index_name: string; -> The name of the content index
   worker_hostname: string; -> The hostname of the worker to run the sync job
+  ingestion_type: string; -> Enum: [full, partial]
   indexed_document_count: number; -> Number of documents indexed in the sync job
   deleted_document_count: number; -> Number of documents deleted in the sync job
   created_at: date; -> The date/time when the sync job is created
@@ -142,6 +143,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "error" : { "type" : "text" },
     "index_name" : { "type" : "keyword" },
     "worker_hostname" : { "type" : "keyword" },
+    "ingestion_type" : { "type" : "keyword" },
     "indexed_document_count" : { "type" : "integer" },
     "deleted_document_count" : { "type" : "integer" },
     "created_at" : { "type" : "date" },
