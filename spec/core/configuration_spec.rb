@@ -21,6 +21,7 @@ describe Core::Configuration do
       allow(connector_settings).to receive(:needs_service_type?).and_return(needs_service_type)
       allow(connector_settings).to receive(:formatted).and_return('')
       allow(connector_class).to receive(:configurable_fields).and_return(configuration)
+      allow(connector_class).to receive(:configurable_fields_indifferent_access).and_return(configuration.with_indifferent_access)
     end
 
     (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|

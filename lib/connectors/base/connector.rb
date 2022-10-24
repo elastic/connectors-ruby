@@ -19,6 +19,11 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
+      # Used as a framework util method, don't override
+      def self.configurable_fields_indifferent_access
+        configurable_fields.with_indifferent_access
+      end
+
       def self.configurable_fields
         {}
       end
