@@ -20,11 +20,12 @@ module Connectors
         'Example Connector'
       end
 
+      # Field 'Foo' won't have a default value. Field 'Bar' will have the default value 'Value'.
       def self.configurable_fields
         {
           'foo' => {
             'label' => 'Foo',
-            'value' => 'Value'
+            'value' => nil
           },
           :bar => {
             :label => 'Bar',
