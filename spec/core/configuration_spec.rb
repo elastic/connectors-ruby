@@ -1,5 +1,6 @@
 require 'core/configuration'
 require 'connectors/connector_status'
+require 'active_support/core_ext/hash/indifferent_access'
 
 describe Core::Configuration do
   describe '.update' do

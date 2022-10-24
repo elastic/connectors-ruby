@@ -11,6 +11,7 @@ require 'core/output_sink'
 require 'utility/exception_tracking'
 require 'utility/errors'
 require 'app/config'
+require 'active_support/core_ext/hash/indifferent_access'
 
 module Connectors
   module Base
