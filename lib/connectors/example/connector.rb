@@ -24,7 +24,11 @@ module Connectors
         {
           'foo' => {
             'label' => 'Foo',
-            'value' => nil
+            'value' => 'Value'
+          },
+          :bar => {
+            :label => 'Bar',
+            :value => 'Value'
           }
         }
       end

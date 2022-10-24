@@ -31,7 +31,7 @@ module Core
           doc[:service_type] = service_type if service_type && connector_settings.needs_service_type?
 
           # We want to set connector to CONFIGURED status if all configurable fields have default values
-          new_connector_status = if configuration.values.all? { |setting| setting[:value].present? }
+          new_connector_status = if configuration.with_indifferent_access.values.all? { |setting| setting[:value].present? }
                                    Utility::Logger.debug("All connector configurable fields provided default values for #{connector_settings.formatted}.")
                                    Connectors::ConnectorStatus::CONFIGURED
                                  else
