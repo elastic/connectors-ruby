@@ -42,7 +42,7 @@ module Core
 
     private
 
-    def do_sync!(remove_job_callback)
+    def do_sync!(job_cleanup_proc)
       Utility::Logger.info("Starting sync for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
@@ -95,7 +95,7 @@ module Core
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
 
-        remove_job_callback.call
+        job_cleanup_proc.call
       end
     end
 
