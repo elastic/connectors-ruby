@@ -141,6 +141,19 @@ describe App::PreflightCheck do
               expect { described_class.run! }.to raise_error(described_class::CheckFailure)
             end
           end
+
+          context 'when authorization error appears' do
+            let(:connector_index_exist) { true }
+            let(:job_index_exist) { true }
+
+            before(:each) do
+              allow(client).to receive_message_chain(:cluster, :health).and_raise(Elastic::Transport::Transport::Errors::Unauthorized)
+            end
+
+            it 'should fail the check' do
+              expect { described_class.run! }.to raise_error(described_class::CheckFailure)
+            end
+          end
         end
       end
     end

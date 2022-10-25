@@ -11,12 +11,18 @@ require 'core/output_sink'
 require 'utility/exception_tracking'
 require 'utility/errors'
 require 'app/config'
+require 'active_support/core_ext/hash/indifferent_access'
 
 module Connectors
   module Base
     class Connector
       def self.display_name
         raise 'Not implemented for this connector'
+      end
+
+      # Used as a framework util method, don't override
+      def self.configurable_fields_indifferent_access
+        configurable_fields.with_indifferent_access
       end
 
       def self.configurable_fields

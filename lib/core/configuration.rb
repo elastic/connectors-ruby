@@ -23,7 +23,7 @@ module Core
             Utility::Logger.error("Couldn't find connector for service type #{connector_settings.service_type || service_type}")
             return
           end
-          configuration = connector_class.configurable_fields
+          configuration = connector_class.configurable_fields_indifferent_access
           doc = {
             :configuration => configuration
           }

@@ -16,7 +16,6 @@ items that may help during the review.-->
 #### Pre-Review Checklist
 - [ ] Covered the changes with automated tests
 - [ ] Tested the changes locally
-- [ ] (Elastic Only) Built gems (both `connectors_utility` and `connectors_service`) and included into Enterprise Search and tested that Enterprise Search works well with new gem versions.
 
 #### Changes Requiring Extra Attention
 
@@ -43,4 +42,4 @@ author(s) can easily look it up.-->
 ## For Elastic Internal Use Only
 - [ ] Considered corresponding documentation changes to [contribute separately](https://github.com/elastic/enterprise-search-pubs#contribute-docs-changes-for-product-changes)
 - [ ] New configuration settings added in this PR follow the [official guidelines](https://github.com/elastic/ent-search/blob/main/doc/enterprise-search-config.md)
-- [ ] [Manual test steps](https://github.com/elastic/connectors-ruby/blob/main/docs/INTERNAL.md#minimal-manual-tests) are successful
+- [ ] Built gems (both `connectors_utility` and `connectors_service`) and included into Enterprise Search and tested that Enterprise Search works well with new gem versions. Instruction can be found [here](https://docs.google.com/document/d/10KJOIhe4sauDul8iWeV9Cn-_3uPWa76qG8SwYk6BCAA/edit)

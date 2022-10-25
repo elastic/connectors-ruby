@@ -37,7 +37,7 @@ describe Connectors::MongoDB::Connector do
 
   let(:mongodb_host) { '127.0.0.1:27027' }
   let(:mongodb_database) { 'sample-database' }
-  let(:mongodb_collection) { 'some-collection' }
+  let(:mongodb_collection) { 'sample-collection' }
   let(:mongodb_username) { nil }
   let(:mongodb_password) { nil }
   let(:direct_connection) { 'false' }
@@ -45,29 +45,28 @@ describe Connectors::MongoDB::Connector do
   let(:mongo_client) { double }
 
   let(:actual_collection) { double }
+  let(:actual_collection_name) { 'sample-collection' }
+  let(:actual_collection_names) { [actual_collection_name] }
   let(:actual_collection_data) { [] }
 
-  before(:each) do
-    allow(Mongo::Client).to receive(:new).and_return(mongo_client)
+  let(:actual_database) { double }
+  let(:actual_database_names) { ['sample-database'] }
 
-    allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => mongodb_collection })])
-    allow(mongo_client).to receive(:database_names).and_return([Hashie::Mash.new({ :name => mongodb_database })])
+  before(:each) do
+    allow(Mongo::Client).to receive(:new).and_yield(mongo_client)
+
+    allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => actual_collection_name })])
+    allow(mongo_client).to receive(:database).and_return(actual_database)
+    allow(mongo_client).to receive(:database_names).and_return(actual_database_names)
     allow(mongo_client).to receive(:[]).with(mongodb_collection).and_return(actual_collection)
     allow(mongo_client).to receive(:with).and_return(mongo_client)
     allow(mongo_client).to receive(:close)
 
+    allow(actual_database).to receive(:collection_names).and_return(actual_collection_names)
     allow(actual_collection).to receive(:find).and_return(actual_collection_data)
   end
 
   it_behaves_like 'a connector'
-
-  shared_examples_for 'closes a client in the end' do
-    it '' do
-      expect(mongo_client).to receive(:close)
-
-      subject.is_healthy?
-    end
-  end
 
   shared_examples_for 'handles auth' do
     context 'when username and password are provided' do
@@ -110,7 +109,6 @@ describe Connectors::MongoDB::Connector do
   end
 
   context '#is_healthy?' do
-    it_behaves_like 'closes a client in the end'
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.is_healthy? }
     end
@@ -123,7 +121,6 @@ describe Connectors::MongoDB::Connector do
   end
 
   context '#yield_documents' do
-    it_behaves_like 'closes a client in the end'
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.yield_documents { |doc|; } }
     end
@@ -132,24 +129,18 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'when database is not found' do
-      xit 'no error is raised' do
-        # Leaving this here to describe the work of MongoDB client:
-        # When database is not found on the server, the client does not raise errors
-        # Instead, it acts as if a database exists on server, but has no collections
-        # So every call to .collection will return empty iterator.
+      let(:mongodb_database) { 'non-existing-database' }
+
+      it 'does raise' do
+        expect { |b| subject.yield_documents(&b) }.to raise_error(anything)
       end
     end
 
     context 'when collection is not found' do
-      # mongo client does not raise an error when collection is not found on the server, instead it just returns an empty collection
-      let(:actual_collection_data) { [] }
+      let(:mongodb_collection) { 'non-existing-collection' }
 
-      it 'does not raise' do
-        expect { |b| subject.yield_documents(&b) }.to_not raise_error(anything)
-      end
-
-      it 'does not yield' do
-        expect { |b| subject.yield_documents(&b) }.to_not yield_with_args(anything)
+      it 'does raise' do
+        expect { |b| subject.yield_documents(&b) }.to raise_error(anything)
       end
     end
 

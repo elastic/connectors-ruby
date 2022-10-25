@@ -5,6 +5,7 @@
 #
 
 require 'active_support/core_ext/string'
+require 'elasticsearch'
 
 module Utility
   class DocumentError
@@ -89,6 +90,7 @@ module Utility
   class InvalidTokenError < StandardError; end
   class TokenRefreshFailedError < StandardError; end
   class ConnectorNotAvailableError < StandardError; end
+  class AuthorizationError < StandardError; end
 
   # For when we want to explicitly set a #cause but can't
   class ExplicitlyCausedError < StandardError
@@ -124,6 +126,7 @@ module Utility
     end
   end
 
+  AUTHORIZATION_ERRORS = [Elastic::Transport::Transport::Errors::Unauthorized]
   INTERNAL_SERVER_ERROR = Utility::Error.new(500, 'INTERNAL_SERVER_ERROR', 'Internal server error')
   INVALID_API_KEY = Utility::Error.new(401, 'INVALID_API_KEY', 'Invalid API key')
   UNSUPPORTED_AUTH_SCHEME = Utility::Error.new(401, 'UNSUPPORTED_AUTH_SCHEME', 'Unsupported authorization scheme')
