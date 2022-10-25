@@ -12,8 +12,6 @@ require 'mongo'
 module Connectors
   module MongoDB
     class Connector < Connectors::Base::Connector
-      PAGE_SIZE = 100
-
       def self.service_type
         'mongodb'
       end
@@ -41,6 +39,10 @@ module Connectors
            },
            :direct_connection => {
              :label => 'Direct connection? (true/false)'
+           },
+           :batch_size => {
+             :label => 'Batch Size',
+             :value => 100
            }
         }
       end
@@ -54,6 +56,7 @@ module Connectors
         @user = configuration.dig(:user, :value)
         @password = configuration.dig(:password, :value)
         @direct_connection = configuration.dig(:direct_connection, :value)
+        @batch_size = configuration.dig(:batch_size, :value).to_i.freeze
       end
 
       def yield_documents
@@ -62,19 +65,18 @@ module Connectors
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
           # It's done due to the fact that usage of .find.each leads to memory leaks or overuse of memory - the whole result set seems to stay in memory
           # during the sync. Sometimes (not 100% sure) it even leads to a real leak, when the memory for these objects is never recycled.
-          cursor = client[@collection].find
           skip = 0
 
           loop do
             found_count = 0
-            view = cursor.skip(skip).limit(PAGE_SIZE)
+            view = client[@collection].find.skip(skip).limit(100)
             view.each do |document|
               yield serialize(document)
               found_count += 1
             end
 
             break if found_count == 0
-            skip += PAGE_SIZE
+            skip += @batch_size
           end
         end
       end
