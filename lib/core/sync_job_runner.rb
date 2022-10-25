@@ -31,7 +31,7 @@ module Core
       }
     end
 
-    def execute(job_cleanup_proc)
+    def execute(job_cleanup_proc = proc {})
       validate_configuration!
       do_sync!(job_cleanup_proc)
     end
