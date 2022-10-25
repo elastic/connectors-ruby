@@ -117,6 +117,21 @@ describe App::Dispatcher do
 
           it_behaves_like 'logs exception'
         end
+
+        context 'when app exits unexpectedly' do
+          let(:task) { :sync }
+
+          before(:each) do
+            allow(connector_settings).to receive(:service_type).and_return('')
+            allow(connector_settings).to receive(:index_name).and_return('')
+            allow(job_runner).to receive(:execute).and_raise(Interrupt)
+          end
+
+          it 'shuts down sync jobs' do
+            expect(described_class).to receive(:shutdown_sync_jobs_with_error)
+            expect { described_class.start! }.to_not raise_error
+          end
+        end
       end
 
       context 'with heartbeat task' do
@@ -184,6 +199,7 @@ describe App::Dispatcher do
       expect(scheduler).to receive(:shutdown)
       expect(pool).to receive(:shutdown)
       expect(pool).to receive(:wait_for_termination)
+      expect(described_class).to receive(:shutdown_sync_jobs_with_error)
       described_class.shutdown!
     end
   end

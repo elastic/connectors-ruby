@@ -36,6 +36,10 @@ module Core
       do_sync!
     end
 
+    def sync_error(message)
+      @status[:error] = message
+    end
+
     private
 
     def do_sync!
@@ -86,10 +90,12 @@ module Core
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
 
         if @status[:error]
-          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error #{@status[:error]}.")
+          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error '#{@status[:error]}'.")
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
+
+        App::Dispatcher.remove_sync_job(object_id)
       end
     end
 
