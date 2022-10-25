@@ -31,9 +31,9 @@ module Core
       }
     end
 
-    def execute
+    def execute(remove_job_callback)
       validate_configuration!
-      do_sync!
+      do_sync!(remove_job_callback)
     end
 
     def sync_error(message)
@@ -42,7 +42,7 @@ module Core
 
     private
 
-    def do_sync!
+    def do_sync!(remove_job_callback)
       Utility::Logger.info("Starting sync for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
@@ -95,7 +95,7 @@ module Core
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
 
-        App::Dispatcher.remove_sync_job(object_id)
+        remove_job_callback.call
       end
     end
 
