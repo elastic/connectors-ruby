@@ -61,7 +61,7 @@ module Core
         @connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
-          incoming_ids << document[:id]
+          incoming_ids << document['id']
           @status[:indexed_document_count] += 1
         end
 
