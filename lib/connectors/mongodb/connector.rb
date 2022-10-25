@@ -6,7 +6,6 @@
 
 # frozen_string_literal: true
 
-require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/base/connector'
 require 'mongo'
 
@@ -58,9 +57,7 @@ module Connectors
       def yield_documents
         with_client do |client|
           client[@collection].find.each do |document|
-            doc = document.with_indifferent_access
-
-            yield serialize(doc)
+            yield serialize(document)
           end
         end
       end
@@ -120,11 +117,10 @@ module Connectors
           mongodb_document.map { |v| serialize(v) }
         when Hash
           mongodb_document.map do |key, value|
-            remapped_key = key.to_sym == :_id ? :id : key.to_sym
-
+            key = 'id' if key == '_id'
             remapped_value = serialize(value)
-            [remapped_key, remapped_value]
-          end.to_h.with_indifferent_access
+            [key, remapped_value]
+          end.to_h
         else
           mongodb_document
         end
