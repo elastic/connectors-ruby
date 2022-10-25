@@ -9,6 +9,7 @@
 require 'time'
 require 'fugit'
 require 'core/connector_settings'
+require 'core/elastic_connector_actions'
 require 'utility/cron'
 require 'utility/logger'
 require 'utility/exception_tracking'

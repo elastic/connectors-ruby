@@ -23,10 +23,8 @@ module App
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
-    @sync_jobs = Concurrent::Hash.new
 
     class << self
-
       def start!
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
@@ -37,19 +35,8 @@ module App
         Utility::Logger.info("Shutting down connector service with pool [#{pool.class}]...")
         running.make_false
         scheduler.shutdown
-        shutdown_sync_jobs_with_error('Connector was shut down.')
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
-      end
-
-      def cache_sync_job(object_id, job)
-        @sync_jobs[object_id] = job
-        Utility::Logger.info("Cached sync job with id '#{object_id}' in dispatcher.")
-      end
-
-      def remove_sync_job(object_id)
-        @sync_jobs.delete(object_id) if object_id.present?
-        Utility::Logger.info("Deleted sync job with id '#{object_id}' from dispatcher.")
       end
 
       private
@@ -67,10 +54,6 @@ module App
           max_queue: MAX_QUEUE,
           fallback_policy: :abort
         )
-      end
-
-      def shutdown_sync_jobs_with_error(message)
-        @sync_jobs.each { |_, job| job.sync_error(message) }
       end
 
       def scheduler
@@ -94,11 +77,6 @@ module App
             Utility::Logger.error("Unknown task type: #{task}. Skipping...")
           end
         end
-      rescue *Utility::UNEXPECTED_APP_EXITS => e
-        error_message = 'Connector service quit unexpectedly.'
-
-        Utility::ExceptionTracking.log_exception(e, error_message)
-        shutdown_sync_jobs_with_error(error_message)
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'The connector service failed due to unexpected error.')
       end
@@ -106,17 +84,14 @@ module App
       def start_sync_task(connector_settings)
         start_heartbeat_task(connector_settings)
         pool.post do
-          Utility::Logger.info("Starting a sync job for #{connector_settings.formatted}...")
+          Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
           Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-
           job_runner = Core::SyncJobRunner.new(connector_settings)
-          job_runner_obj_id = job_runner.object_id
-
-          cache_sync_job(job_runner_obj_id, job_runner)
-
-          job_cleanup_proc = proc { remove_sync_job(object_id) }
-          job_runner.execute(job_cleanup_proc)
-
+          job_runner.execute
+        rescue Core::JobAlreadyRunningError
+          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
+        rescue Core::ConnectorVersionChangedError => e
+          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
         end

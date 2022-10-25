@@ -31,19 +31,15 @@ module Core
       }
     end
 
-    def execute(job_cleanup_proc = proc {})
+    def execute
       validate_configuration!
-      do_sync!(job_cleanup_proc)
-    end
-
-    def sync_error(message)
-      @status[:error] = message
+      do_sync!
     end
 
     private
 
-    def do_sync!(job_cleanup_proc)
-      Utility::Logger.info("Starting sync for connector #{@connector_settings.id}.")
+    def do_sync!
+      Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
@@ -65,7 +61,7 @@ module Core
         @connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
-          incoming_ids << document[:id]
+          incoming_ids << document['id']
           @status[:indexed_document_count] += 1
         end
 
@@ -90,12 +86,10 @@ module Core
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
 
         if @status[:error]
-          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error '#{@status[:error]}'.")
+          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error #{@status[:error]}.")
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
-
-        job_cleanup_proc.call
       end
     end
 
