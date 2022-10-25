@@ -31,14 +31,18 @@ module Core
       }
     end
 
-    def execute
+    def execute(pre_sync_hook = proc {}, after_sync_hook = proc {})
       validate_configuration!
-      do_sync!
+      do_sync!(pre_sync_hook, after_sync_hook)
+    end
+
+    def sync_error(message)
+      @status[:error] = message
     end
 
     private
 
-    def do_sync!
+    def do_sync!(pre_sync_hook, after_sync_hook)
       Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
@@ -49,6 +53,9 @@ module Core
       end
 
       begin
+        # pre_sync_hook only gets executed, if job was claimed successfully
+        pre_sync_hook.call(self)
+
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
         @connector_instance.do_health_check!
@@ -86,10 +93,13 @@ module Core
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
 
         if @status[:error]
-          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error #{@status[:error]}.")
+          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error '#{@status[:error]}'.")
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
+
+        # possible cleanup work (f.e. remove a job from dispatcher cache)
+        after_sync_hook.call
       end
     end
 

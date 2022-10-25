@@ -23,6 +23,7 @@ module App
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
+    @sync_jobs = Concurrent::Hash.new
 
     class << self
       def start!
@@ -35,11 +36,26 @@ module App
         Utility::Logger.info("Shutting down connector service with pool [#{pool.class}]...")
         running.make_false
         scheduler.shutdown
+        shutdown_sync_jobs_with_error('Connector was shut down.')
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
       end
 
       private
+
+      def shutdown_sync_jobs_with_error(message)
+        @sync_jobs.each { |_, job| job.sync_error(message) }
+      end
+
+      def cache_sync_job(job_obj_id, job_obj)
+        @sync_jobs[job_obj_id] = job_obj
+        Utility::Logger.info("Cached sync job with id '#{job_obj_id}' in dispatcher.")
+      end
+
+      def remove_sync_job(job_obj_id)
+        @sync_jobs.delete(job_obj_id) if job_obj_id.present?
+        Utility::Logger.info("Deleted sync job with id '#{job_obj_id}' from dispatcher.")
+      end
 
       attr_reader :running
 
@@ -77,6 +93,11 @@ module App
             Utility::Logger.error("Unknown task type: #{task}. Skipping...")
           end
         end
+      rescue *Utility::UNEXPECTED_APP_EXITS => e
+        error_message = 'Connector service quit unexpectedly.'
+
+        Utility::ExceptionTracking.log_exception(e, error_message)
+        shutdown_sync_jobs_with_error(error_message)
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'The connector service failed due to unexpected error.')
       end
@@ -86,8 +107,14 @@ module App
         pool.post do
           Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
           Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-          job_runner = Core::SyncJobRunner.new(connector_settings)
-          job_runner.execute
+
+          job_instance = Core::SyncJobRunner.new(connector_settings)
+          job_instance_obj_id = job_instance.object_id
+
+          pre_sync_hook = proc { |job_runner_instance| cache_sync_job(job_instance_obj_id, job_runner_instance) }
+          after_sync_hook = proc { remove_sync_job(job_instance_obj_id) }
+
+          job_instance.execute(pre_sync_hook, after_sync_hook)
         rescue Core::JobAlreadyRunningError
           Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
         rescue Core::ConnectorVersionChangedError => e
