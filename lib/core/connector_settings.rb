@@ -120,8 +120,8 @@ module Core
       loop do
         response = ElasticConnectorActions.search_connectors(query, page_size, offset)
 
-        hits = response['hits']['hits']
-        total = response['hits']['total']['value']
+        hits = response.dig('hits', 'hits') || []
+        total = response.dig('hits', 'total', 'value') || 0
         results += hits.map do |hit|
           Core::ConnectorSettings.new(hit, connectors_meta)
         end
