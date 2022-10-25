@@ -1,5 +1,7 @@
 require 'core/native_scheduler'
 require 'core/scheduler'
+require 'core/elastic_connector_actions'
+require 'connectors/registry'
 
 describe Core::Scheduler do
   subject { Core::NativeScheduler.new(poll_interval, heartbeat_interval) }
