@@ -114,8 +114,8 @@ module App
 
           cache_sync_job(job_runner_obj_id, job_runner)
 
-          remove_proc = proc { remove_sync_job(object_id) }
-          job_runner.execute(remove_proc)
+          job_cleanup_proc = proc { remove_sync_job(object_id) }
+          job_runner.execute(job_cleanup_proc)
 
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")

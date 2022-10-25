@@ -31,9 +31,9 @@ module Core
       }
     end
 
-    def execute(remove_job_callback)
+    def execute(job_cleanup_proc)
       validate_configuration!
-      do_sync!(remove_job_callback)
+      do_sync!(job_cleanup_proc)
     end
 
     def sync_error(message)
