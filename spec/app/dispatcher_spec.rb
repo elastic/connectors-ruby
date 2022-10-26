@@ -146,7 +146,6 @@ describe App::Dispatcher do
 
             it_behaves_like 'interrupt'
           end
-
         end
 
         context 'when sync is already running' do
