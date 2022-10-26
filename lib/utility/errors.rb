@@ -127,7 +127,6 @@ module Utility
   end
 
   AUTHORIZATION_ERRORS = [Elastic::Transport::Transport::Errors::Unauthorized]
-  UNEXPECTED_APP_EXITS = [SystemExit, Interrupt]
 
   INTERNAL_SERVER_ERROR = Utility::Error.new(500, 'INTERNAL_SERVER_ERROR', 'Internal server error')
   INVALID_API_KEY = Utility::Error.new(401, 'INVALID_API_KEY', 'Invalid API key')
