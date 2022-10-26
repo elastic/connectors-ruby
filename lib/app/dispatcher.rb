@@ -25,7 +25,6 @@ module App
     @running = Concurrent::AtomicBoolean.new(false)
 
     class << self
-
       def start!
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
@@ -87,7 +86,6 @@ module App
         pool.post do
           Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
           Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-
           job_runner = Core::SyncJobRunner.new(connector_settings)
           job_runner.execute
         rescue Core::JobAlreadyRunningError
