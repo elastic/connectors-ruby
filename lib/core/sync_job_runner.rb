@@ -24,6 +24,7 @@ module Core
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
+      @sync_finished = false
       @status = {
         :indexed_document_count => 0,
         :deleted_document_count => 0,
@@ -31,18 +32,14 @@ module Core
       }
     end
 
-    def execute(pre_sync_hook = proc {}, after_sync_hook = proc {})
+    def execute
       validate_configuration!
-      do_sync!(pre_sync_hook, after_sync_hook)
-    end
-
-    def sync_error(message)
-      @status[:error] = message
+      do_sync!
     end
 
     private
 
-    def do_sync!(pre_sync_hook, after_sync_hook)
+    def do_sync!
       Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
@@ -53,9 +50,6 @@ module Core
       end
 
       begin
-        # pre_sync_hook only gets executed, if job was claimed successfully
-        pre_sync_hook.call(job_id, self)
-
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
         @connector_instance.do_health_check!
@@ -82,6 +76,7 @@ module Core
         end
 
         @sink.flush
+        @sync_finished = true
       rescue StandardError => e
         @status[:error] = e.message
         Utility::ExceptionTracking.log_exception(e)
@@ -90,6 +85,8 @@ module Core
         Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
 
+        @status[:error] = 'Sync thread didn\'t finish execution. Check connector logs for more details.' unless @sync_finished
+
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
 
         if @status[:error]
@@ -97,9 +94,6 @@ module Core
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
-
-        # possible cleanup work (f.e. remove a job from dispatcher cache)
-        after_sync_hook.call(job_id)
       end
     end
 

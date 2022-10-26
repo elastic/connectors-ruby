@@ -132,23 +132,21 @@ describe Core::SyncJobRunner do
       subject.execute
     end
 
-    context 'when pre_sync_hook is set' do
-      it 'executes pre_sync_hook with job_id and job_instance' do
-        pre_sync_hook = proc { |_, _| }
+    it 'marks the sync as finished' do
+      subject.execute
 
-        expect(pre_sync_hook).to receive(:call).with(job_id, subject)
-
-        subject.execute(pre_sync_hook)
-      end
+      expect(subject.instance_variable_get(:@sync_finished)).to eq(true)
     end
 
-    context 'when after_sync_hook is set' do
-      it 'executes after_sync_hook with job_id' do
-        after_sync_hook = proc { |_, _| }
+    context 'when an error occurs' do
+      before(:each) do
+        allow(connector_instance).to receive(:do_health_check!).and_raise(StandardError)
+      end
 
-        expect(after_sync_hook).to receive(:call).with(job_id)
+      it 'marks the sync as unfinished' do
+        subject.execute
 
-        subject.execute(proc {}, after_sync_hook)
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
       end
     end
 
