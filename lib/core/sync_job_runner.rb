@@ -76,6 +76,9 @@ module Core
         end
 
         @sink.flush
+
+        # We use this mechanism for checking, whether an interrupt (or something else lead to the thread not finishing)
+        # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
         @sync_finished = true
       rescue StandardError => e
         @status[:error] = e.message
@@ -85,7 +88,10 @@ module Core
         Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
 
-        @status[:error] = 'Sync thread didn\'t finish execution. Check connector logs for more details.' unless @sync_finished
+        # Make sure to not override a previous error message
+        if !@sync_finished && @status[:error].nil?
+          @status[:error] = 'Sync thread didn\'t finish execution. Check connector logs for more details.'
+        end
 
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
 
