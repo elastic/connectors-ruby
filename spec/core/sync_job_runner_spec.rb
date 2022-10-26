@@ -132,6 +132,26 @@ describe Core::SyncJobRunner do
       subject.execute
     end
 
+    context 'when pre_sync_hook is set' do
+      it 'executes pre_sync_hook with job_id and job_instance' do
+        pre_sync_hook = proc { |_, _| }
+
+        expect(pre_sync_hook).to receive(:call).with(job_id, subject)
+
+        subject.execute(pre_sync_hook)
+      end
+    end
+
+    context 'when after_sync_hook is set' do
+      it 'executes after_sync_hook with job_id' do
+        after_sync_hook = proc { |_, _| }
+
+        expect(after_sync_hook).to receive(:call).with(job_id)
+
+        subject.execute(proc {}, after_sync_hook)
+      end
+    end
+
     context 'when a bunch of documents are returned from 3rd-party system' do
       let(:doc1) do
         {

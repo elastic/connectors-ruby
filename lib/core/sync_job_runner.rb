@@ -54,7 +54,7 @@ module Core
 
       begin
         # pre_sync_hook only gets executed, if job was claimed successfully
-        pre_sync_hook.call(self)
+        pre_sync_hook.call(job_id, self)
 
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
@@ -99,7 +99,7 @@ module Core
         end
 
         # possible cleanup work (f.e. remove a job from dispatcher cache)
-        after_sync_hook.call
+        after_sync_hook.call(job_id)
       end
     end
 

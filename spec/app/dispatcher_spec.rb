@@ -117,6 +117,13 @@ describe App::Dispatcher do
           end
         end
 
+        shared_examples_for 'interrupt' do
+          it 'shuts down sync jobs' do
+            expect(described_class).to receive(:shutdown_sync_jobs_with_error)
+            expect { described_class.start! }.to_not raise_error
+          end
+        end
+
         it_behaves_like 'sync'
 
         context 'when sync throws an error' do
@@ -128,18 +135,18 @@ describe App::Dispatcher do
         end
 
         context 'when app exits unexpectedly' do
-          let(:task) { :sync }
+          context 'one sync job runs' do
+            let(:task) { :sync }
 
-          before(:each) do
-            allow(connector_settings).to receive(:service_type).and_return('')
-            allow(connector_settings).to receive(:index_name).and_return('')
-            allow(job_runner).to receive(:execute).and_raise(Interrupt)
+            before(:each) do
+              allow(connector_settings).to receive(:service_type).and_return('')
+              allow(connector_settings).to receive(:index_name).and_return('')
+              allow(job_runner).to receive(:execute).and_raise(Interrupt)
+            end
+
+            it_behaves_like 'interrupt'
           end
 
-          it 'shuts down sync jobs' do
-            expect(described_class).to receive(:shutdown_sync_jobs_with_error)
-            expect { described_class.start! }.to_not raise_error
-          end
         end
 
         context 'when sync is already running' do
