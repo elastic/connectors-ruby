@@ -273,29 +273,6 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   },
   "properties" : {
     "completed_at" : { "type" : "date" },
-    "connector" : {
-      "properties" : {
-        "api_key_id" : { "type" : "keyword" },
-        "configuration" : { "type" : "object" },
-        "error" : { "type" : "keyword" },
-        "index_name" : { "type" : "keyword" },
-        "language" : { "type" : "keyword" },
-        "last_seen" : { "type" : "date" },
-        "last_sync_error" : { "type" : "keyword" },
-        "last_sync_status" : { "type" : "keyword" },
-        "last_synced" : { "type" : "date" },
-        "name" : { "type" : "keyword" },
-        "scheduling" : {
-          "properties" : {
-            "enabled" : { "type" : "boolean" },
-            "interval" : { "type" : "text" }
-          }
-        },
-        "service_type" : { "type" : "keyword" },
-        "status" : { "type" : "keyword" },
-        "sync_now" : { "type" : "boolean" }
-      }
-    },
     "connector_id" : { "type" : "keyword" },
     "created_at" : { "type" : "date" },
     "deleted_document_count" : { "type" : "integer" },
