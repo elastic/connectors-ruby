@@ -120,41 +120,41 @@ This is our main communication index, used to communicate the connector's config
     "version": "1"
   },
   "properties": {
-    "api_key_id": { "type" :  "keyword" },
-    "configuration": { "type" :  "object" },
-    "description": { "type" :  "text" },
-    "error": { "type" :  "keyword" },
+    "api_key_id": { "type" : "keyword" },
+    "configuration": { "type" : "object" },
+    "description": { "type" : "text" },
+    "error": { "type" : "keyword" },
     "filtering": {
       "properties": {
-        "domain": { "type" :  "keyword" },
+        "domain": { "type" : "keyword" },
         "active": {
           "properties": {
             "rules": {
               "properties": {
-                "id": { "type" :  "keyword" },
-                "policy": { "type" :  "keyword" },
-                "field": { "type" :  "keyword" },
-                "rule": { "type" :  "keyword" },
-                "value": { "type" :  "keyword" },
-                "order": { "type" :  "short" },
-                "created_at": { "type" :  "date" },
-                "updated_at": { "type" :  "date" }
+                "id": { "type" : "keyword" },
+                "policy": { "type" : "keyword" },
+                "field": { "type" : "keyword" },
+                "rule": { "type" : "keyword" },
+                "value": { "type" : "keyword" },
+                "order": { "type" : "short" },
+                "created_at": { "type" : "date" },
+                "updated_at": { "type" : "date" }
               }
             },
             "advanced_snippet": {
               "properties": {
-                "value": { "type" :  "object" },
-                "created_at": { "type" :  "date" },
-                "updated_at": { "type" :  "date" }
+                "value": { "type" : "object" },
+                "created_at": { "type" : "date" },
+                "updated_at": { "type" : "date" }
               }
             },
             "validation": {
               "properties": {
-                "state": { "type" :  "keyword" },
+                "state": { "type" : "keyword" },
                 "errors": {
                   "properties": {
-                    "ids": { "type" :  "keyword" },
-                    "messages": { "type" :  "text" }
+                    "ids": { "type" : "keyword" },
+                    "messages": { "type" : "text" }
                   }
                 }
               }
@@ -165,30 +165,30 @@ This is our main communication index, used to communicate the connector's config
           "properties": {
             "rules": {
               "properties": {
-                "id": { "type" :  "keyword" },
-                "policy": { "type" :  "keyword" },
-                "field": { "type" :  "keyword" },
-                "rule": { "type" :  "keyword" },
-                "value": { "type" :  "keyword" },
-                "order": { "type" :  "short" },
-                "created_at": { "type" :  "date" },
-                "updated_at": { "type" :  "date" }
+                "id": { "type" : "keyword" },
+                "policy": { "type" : "keyword" },
+                "field": { "type" : "keyword" },
+                "rule": { "type" : "keyword" },
+                "value": { "type" : "keyword" },
+                "order": { "type" : "short" },
+                "created_at": { "type" : "date" },
+                "updated_at": { "type" : "date" }
               }
             },
             "advanced_snippet": {
               "properties": {
-                "value": { "type" :  "object" },
-                "created_at": { "type" :  "date" },
-                "updated_at": { "type" :  "date" }
+                "value": { "type" : "object" },
+                "created_at": { "type" : "date" },
+                "updated_at": { "type" : "date" }
               }
             },
             "validation": {
               "properties": {
-                "state": { "type" :  "keyword" },
+                "state": { "type" : "keyword" },
                 "errors": {
                   "properties": {
-                    "ids": { "type" :  "keyword" },
-                    "messages": { "type" :  "text" }
+                    "ids": { "type" : "keyword" },
+                    "messages": { "type" : "text" }
                   }
                 }
               }
@@ -197,33 +197,33 @@ This is our main communication index, used to communicate the connector's config
         }
       }
     },
-    "index_name": { "type" :  "keyword" },
-    "is_native": { "type" :  "boolean" },
-    "language": { "type" :  "keyword" },
-    "last_seen": { "type" :  "date" },
-    "last_sync_error": { "type" :  "keyword" },
-    "last_sync_status": { "type" :  "keyword" },
-    "last_synced": { "type" :  "date" },
-    "last_indexed_document_count": { "type" :  "integer" },
-    "last_deleted_document_count": { "type" :  "integer" },
-    "name": { "type" :  "keyword" },
+    "index_name": { "type" : "keyword" },
+    "is_native": { "type" : "boolean" },
+    "language": { "type" : "keyword" },
+    "last_seen": { "type" : "date" },
+    "last_sync_error": { "type" : "keyword" },
+    "last_sync_status": { "type" : "keyword" },
+    "last_synced": { "type" : "date" },
+    "last_indexed_document_count": { "type" : "integer" },
+    "last_deleted_document_count": { "type" : "integer" },
+    "name": { "type" : "keyword" },
     "pipeline": {
       "properties": {
-        "extract_binary_content": { "type" :  "boolean" },
-        "name": { "type" :  "keyword" },
-        "reduce_whitespace": { "type" :  "boolean" },
-        "run_ml_inference": { "type" :  "boolean" }
+        "extract_binary_content": { "type" : "boolean" },
+        "name": { "type" : "keyword" },
+        "reduce_whitespace": { "type" : "boolean" },
+        "run_ml_inference": { "type" : "boolean" }
       }
     },
     "scheduling": {
       "properties": {
-        "enabled": { "type" :  "boolean" },
-        "interval": { "type" :  "text" }
+        "enabled": { "type" : "boolean" },
+        "interval": { "type" : "text" }
       }
     },
-    "service_type": { "type" :  "keyword" },
-    "status": { "type" :  "keyword" },
-    "sync_now": { "type" :  "boolean" }
+    "service_type": { "type" : "keyword" },
+    "status": { "type" : "keyword" },
+    "sync_now": { "type" : "boolean" }
   }
 }
 ```
@@ -272,67 +272,67 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "version": 1
   },
   "properties": {
-    "completed_at": { "type" :  "date" },
+    "completed_at": { "type" : "date" },
     "connector": {
       "properties": {
-        "api_key_id": { "type" :  "keyword" },
-        "configuration": { "type" :  "object" },
-        "error": { "type" :  "keyword" },
-        "index_name": { "type" :  "keyword" },
-        "language": { "type" :  "keyword" },
-        "last_seen": { "type" :  "date" },
-        "last_sync_error": { "type" :  "keyword" },
-        "last_sync_status": { "type" :  "keyword" },
-        "last_synced": { "type" :  "date" },
-        "name": { "type" :  "keyword" },
+        "api_key_id": { "type" : "keyword" },
+        "configuration": { "type" : "object" },
+        "error": { "type" : "keyword" },
+        "index_name": { "type" : "keyword" },
+        "language": { "type" : "keyword" },
+        "last_seen": { "type" : "date" },
+        "last_sync_error": { "type" : "keyword" },
+        "last_sync_status": { "type" : "keyword" },
+        "last_synced": { "type" : "date" },
+        "name": { "type" : "keyword" },
         "scheduling": {
           "properties": {
-            "enabled": { "type" :  "boolean" },
-            "interval": { "type" :  "text" }
+            "enabled": { "type" : "boolean" },
+            "interval": { "type" : "text" }
           }
         },
-        "service_type": { "type" :  "keyword" },
-        "status": { "type" :  "keyword" },
-        "sync_now": { "type" :  "boolean" }
+        "service_type": { "type" : "keyword" },
+        "status": { "type" : "keyword" },
+        "sync_now": { "type" : "boolean" }
       }
     },
-    "connector_id": { "type" :  "keyword" },
-    "created_at": { "type" :  "date" },
-    "deleted_document_count": { "type" :  "integer" },
-    "error": { "type" :  "keyword" },
+    "connector_id": { "type" : "keyword" },
+    "created_at": { "type" : "date" },
+    "deleted_document_count": { "type" : "integer" },
+    "error": { "type" : "keyword" },
     "filtering": {
       "properties": {
-        "domain": { "type" :  "keyword" },
+        "domain": { "type" : "keyword" },
         "rules": {
           "properties": {
-            "id": { "type" :  "keyword" },
-            "policy": { "type" :  "keyword" },
-            "field": { "type" :  "keyword" },
-            "rule": { "type" :  "keyword" },
-            "value": { "type" :  "keyword" },
-            "order": { "type" :  "short" },
-            "created_at": { "type" :  "date" },
-            "updated_at": { "type" :  "date" }
+            "id": { "type" : "keyword" },
+            "policy": { "type" : "keyword" },
+            "field": { "type" : "keyword" },
+            "rule": { "type" : "keyword" },
+            "value": { "type" : "keyword" },
+            "order": { "type" : "short" },
+            "created_at": { "type" : "date" },
+            "updated_at": { "type" : "date" }
           }
         },
         "advanced_snippet": {
           "properties": {
-            "value": { "type" :  "object" },
-            "created_at": { "type" :  "date" },
-            "updated_at": { "type" :  "date" }
+            "value": { "type" : "object" },
+            "created_at": { "type" : "date" },
+            "updated_at": { "type" : "date" }
           }
         },
         "warnings": {
           "properties": {
-            "ids": { "type" :  "keyword" },
-            "messages": { "type" :  "text" }
+            "ids": { "type" : "keyword" },
+            "messages": { "type" : "text" }
           }
         }
       }
     },
-    "indexed_document_count": { "type" :  "integer" },
-    "status": { "type" :  "keyword" },
-    "worker_hostname": { "type" :  "keyword" }
+    "indexed_document_count": { "type" : "integer" },
+    "status": { "type" : "keyword" },
+    "worker_hostname": { "type" : "keyword" }
   }
 }
 ```
