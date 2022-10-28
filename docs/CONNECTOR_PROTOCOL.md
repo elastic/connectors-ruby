@@ -204,8 +204,8 @@ This is our main communication index, used to communicate the connector's config
     "last_sync_error" : { "type" : "keyword" },
     "last_sync_status" : { "type" : "keyword" },
     "last_synced" : { "type" : "date" },
-    "last_indexed_document_count" : { "type" : "integer" },
-    "last_deleted_document_count" : { "type" : "integer" },
+    "last_indexed_document_count" : { "type" : "long" },
+    "last_deleted_document_count" : { "type" : "long" },
     "name" : { "type" : "keyword" },
     "pipeline" : {
       "properties" : {
