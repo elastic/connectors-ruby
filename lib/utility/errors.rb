@@ -32,6 +32,8 @@ module Utility
   end
 
   class ClientError < StandardError; end
+
+  class InvalidFilterConfigError < ClientError; end
   class EvictionWithNoProgressError < StandardError; end
   class EvictionError < StandardError
     attr_accessor :cursors
