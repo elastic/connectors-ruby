@@ -6,6 +6,7 @@ require 'spec_helper'
 
 describe Connectors::MongoDB::Connector do
   subject { described_class.new(configuration: configuration) }
+
   let(:configuration) do
     {
        :host => {
@@ -34,6 +35,73 @@ describe Connectors::MongoDB::Connector do
        }
     }
   end
+
+  let(:rules) {
+    [
+      # empty rules for now, replace, when rules are supported
+    ]
+  }
+
+  let(:pipeline) {
+    [
+      {
+        :$group” => {
+          :_id => { :$dateToString => { :format => '%Y-%m-%d', :date => '$date' } },
+          :totalOrderValue => { :$sum => { :$multiply => %w[$price $quantity] } },
+          :averageOrderQuantity => { :$avg => '$quantity' }
+        }
+      }
+    ]
+  }
+
+  let(:filter) {
+    {
+      :$text => {
+        :$search => 'garden',
+        :$caseSensitive => false
+      }
+    }
+  }
+
+  let(:options) {
+    {
+      :skip => 10,
+      :limit => 1000
+    }
+  }
+
+  let(:find) {
+    {
+      :filter => filter,
+      :options => options
+    }
+  }
+
+  let(:aggregate) {
+    {
+      :pipeline => pipeline,
+      :options => options
+    }
+  }
+
+  let(:advanced_config) {
+    {
+      :find => find
+    }
+  }
+
+  let(:filtering) {
+    {
+      :rules => rules,
+      :advanced_config => advanced_config
+    }
+  }
+
+  let(:job_description) {
+    {
+      :filtering => filtering
+    }
+  }
 
   let(:mongodb_host) { '127.0.0.1:27027' }
   let(:mongodb_database) { 'sample-database' }
@@ -65,6 +133,7 @@ describe Connectors::MongoDB::Connector do
 
     allow(actual_database).to receive(:collection_names).and_return(actual_collection_names)
     allow(actual_collection).to receive(:find).and_return(mongo_collection_cursor)
+    allow(actual_collection).to receive(:aggregate).and_return(mongo_collection_cursor)
 
     allow(mongo_collection_cursor).to receive(:skip).and_return(mongo_collection_cursor)
     allow(mongo_collection_cursor).to receive(:limit).and_return(mongo_collection_data)
@@ -208,6 +277,70 @@ describe Connectors::MongoDB::Connector do
             expect(yielded_documents).to include(a_hash_including('id' => id))
           end
         end
+
+        context 'an overall limit is set' do
+          let(:options) {
+            {
+              :limit => 1
+            }
+          }
+
+          let(:advanced_config) {
+            {
+              :find => {
+                :options => options
+              },
+            }
+          }
+
+          it 'fetches 1 document overall' do
+            yielded_documents = []
+
+            subject.yield_documents(job_description) { |doc| yielded_documents << doc }
+
+            expect(yielded_documents.size).to eq(1)
+          end
+        end
+
+        context 'skip is set for filtering' do
+          let(:options) {
+            {
+              :skip => 1
+            }
+          }
+
+          let(:advanced_config) {
+            {
+              :find => {
+                :options => options
+              },
+            }
+          }
+
+          before(:each) do
+            allow(mongo_collection_cursor).to receive(:skip).with(1).and_return(mongo_collection_cursor)
+
+            # skip first element
+            allow(mongo_collection_cursor).to receive(:limit).and_return(first_page_data[1..2])
+
+            # start at page_size + 1 element (skipped element at the beginning)
+            allow(mongo_collection_cursor).to receive(:skip).with(page_size + 1).and_return(second_page_cursor)
+            allow(second_page_cursor).to receive(:limit).and_return(second_page_data)
+
+            # start at (page_size * 2) + 1 element (skipped element at the beginning)
+            allow(mongo_collection_cursor).to receive(:skip).with((page_size * 2) + 1).and_return(third_page_cursor)
+
+            allow(third_page_cursor).to receive(:limit).and_return(third_page_data)
+          end
+
+          it 'skips the first element, yielding 3 overall' do
+            yielded_documents = []
+
+            subject.yield_documents(job_description) { |doc| yielded_documents << doc }
+
+            expect(yielded_documents.size).to eq(3)
+          end
+        end
       end
 
       context 'when field of type BSON::ObjectId is met' do
@@ -290,6 +423,204 @@ describe Connectors::MongoDB::Connector do
             expect(doc['rooms'][0]['price']).to eq(BigDecimal(price))
           end
         end
+      end
+    end
+
+    shared_examples_for 'logs a warning' do
+      it 'logs a warning' do
+        expect(Utility::Logger).to receive(:warn)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'find field exists (with filter and options) in an active advanced filtering snippet' do
+      it 'calls the mongo client\'s find method with filter and options' do
+        expect(actual_collection).to receive(:find).with(filter, options)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'rules and advanced filtering snippet is empty' do
+      let(:rules) { [] }
+      let(:advanced_config) { {} }
+
+      it 'calls find without arguments' do
+        expect(actual_collection).to receive(:find).with(no_args)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'find and aggregate exist' do
+      let(:advanced_config) {
+        {
+          :find => {
+            :filter => filter,
+            :options => options
+          },
+          :aggregate => {
+            :pipeline => pipeline,
+            :options => options
+          }
+        }
+      }
+
+      it 'raises an error as find and aggregate are not allowed at the same time' do
+        expect { subject.yield_documents(job_description) }.to raise_error(Utility::InvalidFilterConfigError)
+      end
+    end
+
+    context 'find field exists (with filter and empty options) in an active advanced filtering snippet' do
+      let(:options) {
+        {}
+      }
+
+      it 'calls the mongo client find method with filter and empty options' do
+        expect(actual_collection).to receive(:find).with(filter, {})
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'find field exists (with filter and nil options) in an active advanced filtering snippet' do
+      let(:options) {
+        nil
+      }
+
+      it 'calls the mongo client find method with filter and nil options without breaking' do
+        expect(actual_collection).to receive(:find).with(filter, {})
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'find field exists (with empty filter and existing options) in an active advanced filtering snippet' do
+      let(:filter) {
+        {}
+      }
+
+      it 'calls the mongo client fiend method with empty filter and existing options' do
+        expect(actual_collection).to receive(:find).with({}, options)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'find field exists (with nil filter and existing options) in an active advanced filtering snippet' do
+      let(:filter) {
+        nil
+      }
+
+      it 'calls the mongo client find method with nil and existing options' do
+        # nil is also the default value in the mongodb client, so it's ok to pass it
+        expect(actual_collection).to receive(:find).with(nil, options)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'find field exists with empty filter and empty options' do
+      let(:find) {
+        {
+          :filter => {},
+          :options => {}
+        }
+      }
+
+      it_behaves_like 'logs a warning'
+    end
+
+    context 'aggregate field exists (with pipeline and options) in an active advanced filtering snippet' do
+      # find should not exist
+      let(:advanced_config) {
+        {
+          :aggregate => aggregate
+        }
+      }
+
+      it 'calls the mongo client aggregate method with pipeline and options' do
+        expect(actual_collection).to receive(:aggregate).with(pipeline, options)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'aggregate field exists (with pipeline and options) in an active advanced filtering snippet' do
+      let(:aggregate) {
+        {
+          :pipeline => pipeline,
+          # empty options
+          :options => {}
+        }
+      }
+
+      # find should not exist
+      let(:advanced_config) {
+        {
+          :aggregate => aggregate
+        }
+      }
+
+      it 'calls the mongo client aggregate method with pipeline and empty options' do
+        expect(actual_collection).to receive(:aggregate).with(pipeline, {})
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'aggregate field exists (with pipeline and options) in an active advanced filtering snippet' do
+      let(:aggregate) {
+        {
+          # empty pipeline
+          :pipeline => [],
+          :options => options
+        }
+      }
+
+      # find should not exist
+      let(:advanced_config) {
+        {
+          :aggregate => aggregate
+        }
+      }
+
+      it 'calls the mongo client aggregate method with pipeline and empty options' do
+        expect(actual_collection).to receive(:aggregate).with([], options)
+
+        subject.yield_documents(job_description)
+      end
+    end
+
+    context 'aggregate exists, but pipeline and options are empty' do
+      let(:aggregate) {
+        {
+          :pipeline => [],
+          :options => {}
+        }
+      }
+
+      let(:advanced_config) {
+        {
+          :aggregate => aggregate
+        }
+      }
+
+      it_behaves_like 'logs a warning'
+    end
+
+    context 'wrong top level keys exist' do
+      let(:advanced_config) {
+        {
+          :wrong_key_one => {},
+          :wrong_key_two => {},
+          :wrong_key_three => {}
+        }
+      }
+
+      it 'raises an InvalidFilterConfigError, when only wrong keys are present' do
+        expect { subject.yield_documents(job_description) }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
   end
