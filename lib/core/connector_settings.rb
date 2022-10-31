@@ -19,6 +19,9 @@ module Core
     DEFAULT_REDUCE_WHITESPACE = true
     DEFAULT_RUN_ML_INFERENCE = true
 
+    DEFAULT_FILTERING = {}
+    DEFAULT_ADVANCED_FILTER_CONFIG = {}
+
     DEFAULT_PAGE_SIZE = 100
 
     # Error Classes
@@ -80,20 +83,33 @@ module Core
       self[:scheduling]
     end
 
+    def filtering
+      Utility::Commons.return_if_present(@elasticsearch_response[:filtering], DEFAULT_FILTERING)
+    end
+
+    def active_filter_config
+      # assume for now, that first object in filtering array or a filter object itself is the only filtering object
+      filter = filtering.is_a?(Array) ? filtering[0] : filtering
+
+      return DEFAULT_ADVANCED_FILTER_CONFIG if filter.nil? || filter.empty?
+
+      Utility::Commons.return_if_present(filter.dig(:active, :advanced_config), DEFAULT_ADVANCED_FILTER_CONFIG)
+    end
+
     def request_pipeline
-      return_if_present(@elasticsearch_response.dig(:pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
+      Utility::Commons.return_if_present(@elasticsearch_response.dig(:pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
     end
 
     def extract_binary_content?
-      return_if_present(@elasticsearch_response.dig(:pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
+      Utility::Commons.return_if_present(@elasticsearch_response.dig(:pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
     end
 
     def reduce_whitespace?
-      return_if_present(@elasticsearch_response.dig(:pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
+      Utility::Commons.return_if_present(@elasticsearch_response.dig(:pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
     end
 
     def run_ml_inference?
-      return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
+      Utility::Commons.return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
     end
 
     def formatted
@@ -109,8 +125,6 @@ module Core
     def valid_index_name?
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
     end
-
-    private
 
     def self.fetch_connectors_by_query(query, page_size)
       connectors_meta = ElasticConnectorActions.connectors_meta
@@ -132,11 +146,5 @@ module Core
       results
     end
 
-    def return_if_present(*args)
-      args.each do |arg|
-        return arg unless arg.nil?
-      end
-      nil
-    end
   end
 end
