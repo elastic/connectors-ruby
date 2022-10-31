@@ -22,7 +22,7 @@ describe Connectors::Base::Connector do
   }
 
   context '.advanced_config_present?' do
-    shared_examples_for 'advanced_config not present' do
+    shared_examples_for 'advanced_config is not present' do
       it 'returns false' do
         expect(subject.advanced_config_present?(advanced_config)).to eq(false)
       end
@@ -39,7 +39,7 @@ describe Connectors::Base::Connector do
         nil
       }
 
-      it_behaves_like 'advanced_config not present'
+      it_behaves_like 'advanced_config is not present'
     end
 
     context 'advanced config is empty' do
@@ -47,7 +47,7 @@ describe Connectors::Base::Connector do
         {}
       }
 
-      it_behaves_like 'advanced_config not present'
+      it_behaves_like 'advanced_config is not present'
     end
   end
 
