@@ -426,7 +426,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    shared_examples_for 'logs a warning' do
+    shared_examples_for 'logs a warning on yield documents' do
       it 'logs a warning' do
         expect(Utility::Logger).to receive(:warn)
 
@@ -434,7 +434,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find field exists (with filter and options) in an active advanced filtering snippet' do
+    context 'find field exists (with filter and options) in an active advanced filtering config' do
       it 'calls the mongo client\'s find method with filter and options' do
         expect(actual_collection).to receive(:find).with(filter, options)
 
@@ -442,7 +442,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'rules and advanced filtering snippet is empty' do
+    context 'rules and advanced filtering config are empty' do
       let(:rules) { [] }
       let(:advanced_config) { {} }
 
@@ -467,12 +467,12 @@ describe Connectors::MongoDB::Connector do
         }
       }
 
-      it 'raises an error as find and aggregate are not allowed at the same time' do
+      it 'raises an InvalidFilterConfigError' do
         expect { subject.yield_documents(job_description) }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
 
-    context 'find field exists (with filter and empty options) in an active advanced filtering snippet' do
+    context 'find field exists (with filter and empty options) in an active advanced filtering config' do
       let(:options) {
         {}
       }
@@ -484,7 +484,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find field exists (with filter and nil options) in an active advanced filtering snippet' do
+    context 'find field exists (with filter and nil options) in an active advanced filtering config' do
       let(:options) {
         nil
       }
@@ -496,7 +496,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find field exists (with empty filter and existing options) in an active advanced filtering snippet' do
+    context 'find field exists (with empty filter and existing options) in an active advanced filtering config' do
       let(:filter) {
         {}
       }
@@ -508,7 +508,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find field exists (with nil filter and existing options) in an active advanced filtering snippet' do
+    context 'find field exists (with nil filter and existing options) in an active advanced filtering config' do
       let(:filter) {
         nil
       }
@@ -529,10 +529,10 @@ describe Connectors::MongoDB::Connector do
         }
       }
 
-      it_behaves_like 'logs a warning'
+      it_behaves_like 'logs a warning on yield documents'
     end
 
-    context 'aggregate field exists (with pipeline and options) in an active advanced filtering snippet' do
+    context 'aggregate field exists (with pipeline and options) in an active advanced filtering config' do
       # find should not exist
       let(:advanced_config) {
         {
@@ -547,7 +547,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'aggregate field exists (with pipeline and options) in an active advanced filtering snippet' do
+    context 'aggregate field exists (with pipeline and options) in an active advanced filtering config' do
       let(:aggregate) {
         {
           :pipeline => pipeline,
@@ -570,7 +570,7 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'aggregate field exists (with pipeline and options) in an active advanced filtering snippet' do
+    context 'aggregate field exists (with pipeline and options) in an active advanced filtering config' do
       let(:aggregate) {
         {
           # empty pipeline
@@ -607,7 +607,7 @@ describe Connectors::MongoDB::Connector do
         }
       }
 
-      it_behaves_like 'logs a warning'
+      it_behaves_like 'logs a warning on yield documents'
     end
 
     context 'wrong top level keys exist' do
