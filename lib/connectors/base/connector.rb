@@ -37,7 +37,19 @@ module Connectors
         @configuration = configuration.dup || {}
       end
 
-      def yield_documents; end
+      def yield_documents(job_description = {}); end
+
+      def filtering_present?(rules, advanced_config)
+        rules_present?(rules) || advanced_config_present?(advanced_config)
+      end
+
+      def advanced_config_present?(advanced_config)
+        !advanced_config.nil? && !advanced_config.empty?
+      end
+
+      def rules_present?(rules)
+        !rules.nil? && !rules.empty?
+      end
 
       def do_health_check
         raise 'Not implemented for this connector'
