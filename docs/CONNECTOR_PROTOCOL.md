@@ -229,6 +229,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   connector_id: string; -> ID of the connector document in .elastic-connectors
   status: string; -> Job status Enum, see below
   error: string; -> Optional error message
+  trigger_method: string; -> How the job is triggered. Possible values are on-demand, scheduled.
   filtering: {          -> Filtering rules
     domain: string,     -> what data domain these rules apply to
     rules: {
@@ -254,9 +255,15 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   index_name: string; -> The name of the content index
   worker_hostname: string; -> The hostname of the worker to run the job
   indexed_document_count: number; -> Number of documents indexed in the job
+  indexed_document_volume: number; -> The volume (in bytes) of documents indexed in the job
   deleted_document_count: number; -> Number of documents deleted in the job
+  metadata: object; -> Connector-specific metadata
   created_at: date; -> The date/time when the job is created
+  started_at: date; -> The date/time when the job is started
+  cancelation_requested_at: date; -> The date/time when the cancelation of the job is requested
+  canceled_at: date; -> The date/time when the job is canceled
   completed_at: date; -> The data/time when the job is completed
+  updated_at: date; -> The date/time when the job is updated
 }
 ```
 
@@ -279,6 +286,13 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "completed_at" : { "type" : "date" },
     "connector_id" : { "type" : "keyword" },
     "created_at" : { "type" : "date" },
+    "status" : { "type" : "keyword" },
+    "error" : { "type" : "text" },
+    "trigger_method" : { "type" : "keyword" },
+    "index_name" : { "type" : "keyword" },
+    "worker_hostname" : { "type" : "keyword" },
+    "indexed_document_count" : { "type" : "integer" },
+    "indexed_document_volume" : { "type" : "integer" },
     "deleted_document_count" : { "type" : "integer" },
     "error" : { "type" : "keyword" },
     "filtering" : {
@@ -314,6 +328,13 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "indexed_document_count" : { "type" : "integer" },
     "status" : { "type" : "keyword" },
     "worker_hostname" : { "type" : "keyword" }
+    "metadata" : { "type" : "object" },
+    "created_at" : { "type" : "date" },
+    "started_at" : { "type" : "date" },
+    "cancelation_requested_at" : { "type" : "date" },
+    "canceled_at" : { "type" : "date" },
+    "completed_at" : { "type" : "date" },
+    "updated_at" : { "type" : "date" }
   }
 }
 ```

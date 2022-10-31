@@ -278,11 +278,19 @@ module Core
             :connector_id => { :type => :keyword },
             :status => { :type => :keyword },
             :error => { :type => :text },
+            :trigger_method => { :type => :keyword },
+            :index_name => { :type => :keyword },
             :worker_hostname => { :type => :keyword },
             :indexed_document_count => { :type => :integer },
+            :indexed_document_volume => { :type => :integer },
             :deleted_document_count => { :type => :integer },
+            :metadata => { :type => :object },
             :created_at => { :type => :date },
-            :completed_at => { :type => :date }
+            :started_at => { :type => :date },
+            :cancelation_requested_at => { :type => :date },
+            :canceled_at => { :type => :date },
+            :completed_at => { :type => :date },
+            :updated_at => { :type => :date }
           }
         }
         ensure_index_exists("#{Utility::Constants::JOB_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::JOB_INDEX, :mappings => mappings))
