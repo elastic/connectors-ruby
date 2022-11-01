@@ -29,26 +29,28 @@ module Core::OutputSink
     def ingest(document)
       return if document.blank?
 
-      @operation_queue.add_operation_with_payload(
-        { 'index' => { '_index' => index_name, '_id' => document['id'] } },
-        document
+      index_op = serialize({ 'index' => { '_index' => index_name, '_id' => document['id'] } })
+      index_data = serialize(document)
+
+      flush unless @operation_queue.will_fit?(index_op, index_data)
+
+      @operation_queue.add(
+        index_op,
+        index_data
       )
 
       @ingested_count += 1
-
-      flush if ready_to_flush?
     end
 
     def delete(doc_id)
       return if doc_id.nil?
 
-      @operation_queue.add_operation(
-        { 'delete' => { '_index' => index_name, '_id' => doc_id } }
-      )
+      delete_op = serialize({ 'delete' => { '_index' => index_name, '_id' => doc_id } })
+      flush unless @operation_queue.will_fit?(delete_op)
+
+      @operation_queue.add(delete_op)
 
       @deleted_count += 1
-
-      flush if ready_to_flush?
     end
 
     def flush
@@ -80,10 +82,12 @@ module Core::OutputSink
 
     private
 
-    attr_accessor :index_name
-
-    def ready_to_flush?
-      @operation_queue.is_full?
+    def serialize(obj)
+      # TODO: actually properly serialize
+      # Now dates are serialized like strings
+      JSON.generate(obj)
     end
+
+    attr_accessor :index_name
   end
 end

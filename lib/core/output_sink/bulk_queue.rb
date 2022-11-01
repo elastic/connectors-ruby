@@ -8,7 +8,7 @@ module Core::OutputSink
 
       @buffer = ''
 
-      @current_op_size = 0
+      @current_op_count = 0
 
       @current_buffer_size = 0
       @current_data_size = 0
@@ -16,39 +16,7 @@ module Core::OutputSink
       @total_data_size = 0
     end
 
-    def add_operation_with_payload(operation, payload)
-      add_operation(operation)
-
-      serialised_payload = serialise(payload)
-      serialised_payload_size = serialised_payload.bytesize
-
-      @buffer << serialised_payload
-      @buffer << "\n"
-
-      @current_buffer_size += serialised_payload_size
-      @current_data_size += serialised_payload_size
-      @total_data_size += serialised_payload_size
-    end
-
-    def add_operation(operation) 
-      raise 'queue is full' if is_full?
-
-      serialised_operation = serialise(operation)
-
-      serialised_operation_size = serialised_operation.bytesize
-
-      @buffer << serialised_operation
-      @buffer << "\n"
-
-      # update stats
-      @current_op_size += 1
-      @current_buffer_size += serialised_operation_size
-    end
-
     def pop_request
-      puts "Current op size: #{@current_op_size}"
-      puts "Current buffer size: #{@current_buffer_size}"
-
       result = @buffer
 
       reset
@@ -56,16 +24,39 @@ module Core::OutputSink
       return result
     end
 
-    def is_full?
-      return true if @current_op_size >= @count_threshold
-      return true if @current_buffer_size >= @size_threshold
+    def add(operation, payload = nil)
+      raise 'We will overflow!!!!' unless will_fit?(operation, payload) #TODO: actual error class
 
-      return false
+      operation_size = get_size(operation)
+      payload_size = get_size(payload)
+
+      @current_op_count += 1
+      @current_buffer_size += operation_size
+      @current_buffer_size += payload_size
+      @current_data_size += payload_size
+      @total_data_size += payload_size
+
+      @buffer << operation
+      @buffer << "\n"
+
+      if payload
+        @buffer << payload
+        @buffer << "\n"
+      end
+    end
+
+    def will_fit?(operation, payload = nil)
+      return false if @current_op_count + 1 >= @count_threshold
+
+      operation_size = get_size(operation)
+      payload_size = get_size(payload)
+
+      @current_buffer_size + operation_size + payload_size < @size_threshold
     end
 
     def current_stats
       {
-        :current_op_count => @current_op_size,
+        :current_op_count => @current_op_count,
         :current_buffer_size => @current_buffer_size
       }
     end
@@ -77,16 +68,18 @@ module Core::OutputSink
     end
 
     private 
+
+    def get_size(str)
+      return 0 if !str
+      return str.bytesize
+    end
+
     def reset
-      @current_op_size = 0
+      @current_op_count = 0
       @current_buffer_size = 0
       @current_data_size = 0
 
       @buffer = ''
-    end
-
-    def serialise(obj)
-      JSON.generate(obj)
     end
   end
 end
