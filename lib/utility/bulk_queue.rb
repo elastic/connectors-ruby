@@ -1,6 +1,6 @@
 require 'json'
 
-module Core::OutputSink
+module Utility
   class BulkQueue
     def initialize(count_threshold = 500, size_threshold = 5 * 1024 * 1024) # 500 items or 5MB
       @count_threshold = count_threshold.freeze

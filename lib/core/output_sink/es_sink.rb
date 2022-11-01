@@ -9,9 +9,10 @@
 require 'active_support/core_ext/numeric/time'
 require 'app/config'
 require 'core/output_sink/base_sink'
-require 'core/output_sink/bulk_queue'
+require 'utility/bulk_queue'
 require 'utility/es_client'
 require 'utility/logger'
+require 'elasticsearch/api'
 
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
@@ -85,7 +86,8 @@ module Core::OutputSink
     def serialize(obj)
       # TODO: actually properly serialize
       # Now dates are serialized like strings
-      JSON.generate(obj)
+      #
+      Elasticsearch::API.serializer.dump(obj)
     end
 
     attr_accessor :index_name
