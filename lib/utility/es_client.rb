@@ -20,8 +20,8 @@ module Utility
       attr_reader :cause
     end
 
-    def initialize(es_config)
-      super(connection_configs(es_config))
+    def initialize(es_config, &block)
+      super(connection_configs(es_config), &block)
     end
 
     def connection_configs(es_config)
