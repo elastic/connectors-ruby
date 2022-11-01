@@ -9,41 +9,55 @@
 require 'active_support/core_ext/numeric/time'
 require 'app/config'
 require 'core/output_sink/base_sink'
+require 'core/output_sink/bulk_queue'
 require 'utility/es_client'
 require 'utility/logger'
 
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
-    def initialize(index_name, request_pipeline, flush_threshold = 50)
+
+    def initialize(index_name, request_pipeline)
       super()
       @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name
       @request_pipeline = request_pipeline
-      @operation_queue = []
-      @flush_threshold = flush_threshold
+      @operation_queue = Core::OutputSink::BulkQueue.new
+      @ingested_count = 0
+      @deleted_count = 0
     end
 
     def ingest(document)
       return if document.blank?
 
-      @operation_queue << { :index => { :_index => index_name, :_id => document[:id], :data => document } }
+      @operation_queue.add_operation_with_payload(
+        { 'index' => { '_index' => index_name, '_id' => document['id'] } },
+        document
+      )
+
+      @ingested_count += 1
+
       flush if ready_to_flush?
     end
 
     def delete(doc_id)
       return if doc_id.nil?
 
-      @operation_queue << { :delete => { :_index => index_name, :_id => doc_id } }
+      @operation_queue.add_operation(
+        { 'delete' => { '_index' => index_name, '_id' => doc_id } }
+      )
+
+      @deleted_count += 1
+
       flush if ready_to_flush?
     end
 
-    def flush(size: nil)
-      flush_size = size || @flush_threshold
+    def flush
+      stats = @operation_queue.current_stats
+      data = @operation_queue.pop_request
+      return if data.empty?
 
-      while @operation_queue.any?
-        data_to_flush = @operation_queue.pop(flush_size)
-        send_data(data_to_flush)
-      end
+      @client.bulk(:body => data, :pipeline => @request_pipeline)
+      Utility::Logger.info "Applied #{stats[:current_op_count]} upsert/delete operations to the index #{index_name}."
     end
 
     def ingest_multiple(documents)
@@ -57,22 +71,19 @@ module Core::OutputSink
     end
 
     def ingestion_stats
-      {}
+      {
+        :indexed_document_count => @ingested_count,
+        :indexed_document_volume => @operation_queue.total_stats[:total_data_size],
+        :deleted_document_count => @deleted_count
+      }
     end
 
     private
 
     attr_accessor :index_name
 
-    def send_data(ops)
-      return if ops.empty?
-
-      @client.bulk(:body => ops, :pipeline => @request_pipeline)
-      Utility::Logger.info "Applied #{ops.size} upsert/delete operations to the index #{index_name}."
-    end
-
     def ready_to_flush?
-      @operation_queue.size >= @flush_threshold
+      @operation_queue.is_full?
     end
   end
 end

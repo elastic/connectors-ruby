@@ -79,6 +79,7 @@ module Core
 
         ids_to_delete.each do |id|
           @sink.delete(id)
+
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
             ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
@@ -94,8 +95,21 @@ module Core
         @sync_error = e.message
         Utility::ExceptionTracking.log_exception(e)
       ensure
+<<<<<<< HEAD
         Utility::Logger.info("Upserted #{@sink.ingestion_stats[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@sink.ingestion_stats[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
+=======
+        stats = @sink.ingestion_stats
+
+        Utility::Logger.debug("Sync stats are: #{stats}")
+
+        @status[:indexed_document_count] = stats[:indexed_document_count]
+        @status[:deleted_document_count] = stats[:deleted_document_count]
+        @status[:indexed_document_volume] = stats[:indexed_document_volume]
+
+        Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
+        Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
+>>>>>>> 488b49b (WIP for ingestion stats)
 
         # Make sure to not override a previous error message
         if !@sync_finished && @sync_error.nil?
