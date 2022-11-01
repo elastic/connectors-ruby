@@ -56,6 +56,14 @@ module Core::OutputSink
       ids.each { |id| delete(id) }
     end
 
+    def ingestion_stats
+      {
+          :indexed_document_count => 0,
+          :indexed_document_volume => 0,
+          :deleted_document_count => 0
+      }
+    end
+
     private
 
     attr_accessor :index_name

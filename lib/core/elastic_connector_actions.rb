@@ -115,6 +115,7 @@ module Core
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now,
+          :updated_at => Time.now,
           :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
 
@@ -145,22 +146,31 @@ module Core
         update_connector_fields(connector_id, body)
       end
 
-      def complete_sync(connector_id, job_id, status)
-        sync_status = status[:error] ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
+      def update_sync(job_id, status)
+        body = {
+            :doc => { :updated_at => Time.now }.merge(status)
+        }
+        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
+      end
+
+      def complete_sync(connector_id, job_id, ingestion_stats, error)
+        sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
-                                :last_sync_error => status[:error],
-                                :error => status[:error],
+                                :last_sync_error => error,
+                                :error => error,
                                 :last_synced => Time.now,
-                                :last_indexed_document_count => status[:indexed_document_count],
-                                :last_deleted_document_count => status[:deleted_document_count])
+                                :last_indexed_document_count => ingestion_stats[:indexed_document_count],
+                                :last_deleted_document_count => ingestion_stats[:deleted_document_count])
 
         body = {
           :doc => {
             :status => sync_status,
-            :completed_at => Time.now
-          }.merge(status)
+            :completed_at => Time.now,
+            :updated_at => Time.now,
+            :error => error
+          }.merge(ingestion_stats)
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
