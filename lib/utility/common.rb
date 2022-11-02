@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 module Utility
-  class Commons
+  class Common
     class << self
       def return_if_present(*args)
         args.each do |arg|
