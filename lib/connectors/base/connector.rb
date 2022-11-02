@@ -8,8 +8,7 @@
 
 require 'bson'
 require 'core/output_sink'
-require 'utility/exception_tracking'
-require 'utility/errors'
+require 'utility'
 require 'app/config'
 require 'active_support/core_ext/hash/indifferent_access'
 
@@ -33,23 +32,16 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
+      attr_reader :active_rules, :active_filter_config
+
       def initialize(configuration: {})
         @configuration = configuration.dup || {}
+
+        @active_rules = extract_active_rules(@configuration)
+        @active_filter_config = extract_active_filter_config(@configuration)
       end
 
-      def yield_documents(job_description = {}); end
-
-      def filtering_present?(rules, advanced_config)
-        rules_present?(rules) || advanced_config_present?(advanced_config)
-      end
-
-      def advanced_config_present?(advanced_config)
-        !advanced_config.nil? && !advanced_config.empty?
-      end
-
-      def rules_present?(rules)
-        !rules.nil? && !rules.empty?
-      end
+      def yield_documents; end
 
       def do_health_check
         raise 'Not implemented for this connector'
@@ -69,6 +61,28 @@ module Connectors
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
         false
+      end
+
+      def filtering_present?
+        active_rules_present? || active_filter_config_present?
+      end
+
+      def active_filter_config_present?
+        !@active_filter_config.nil? && !@active_filter_config.empty?
+      end
+
+      def active_rules_present?
+        !@active_rules.nil? && !@active_rules.empty?
+      end
+
+      private
+
+      def extract_active_rules(job_description)
+        Utility::Common.return_if_present(job_description.dig(:filtering, :active, :rules), [])
+      end
+
+      def extract_active_filter_config(job_description)
+        Utility::Common.return_if_present(job_description.dig(:filtering, :active, :advanced_config), {})
       end
     end
   end
