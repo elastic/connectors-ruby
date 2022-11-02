@@ -27,16 +27,6 @@ describe Core::SyncJobRunner do
     }
   end
 
-  let(:filtering) do
-    []
-  end
-
-  let(:job_description) do
-    {
-      :filtering => filtering
-    }
-  end
-
   let(:connector_settings) { double }
   let(:connector_class) { double }
   let(:connector_instance) { double }
@@ -76,14 +66,13 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
-    allow(connector_settings).to receive(:filtering).and_return(filtering)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
     allow(connector_instance).to receive(:do_health_check!)
-    allow_statement = allow(connector_instance).to receive(:yield_documents).with(job_description)
+    allow_statement = allow(connector_instance).to receive(:yield_documents)
     extracted_documents.each { |document| allow_statement.and_yield(document) }
   end
 
