@@ -146,14 +146,14 @@ module Core
         update_connector_fields(connector_id, body)
       end
 
-      def update_sync(job_id, status)
+      def update_sync(job_id, metadata)
         body = {
-            :doc => { :updated_at => Time.now }.merge(status)
+            :doc => { :updated_at => Time.now }.merge(metadata)
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
 
-      def complete_sync(connector_id, job_id, ingestion_stats, error)
+      def complete_sync(connector_id, job_id, metadata, error)
         sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
         update_connector_fields(connector_id,
@@ -161,8 +161,8 @@ module Core
                                 :last_sync_error => error,
                                 :error => error,
                                 :last_synced => Time.now,
-                                :last_indexed_document_count => ingestion_stats[:indexed_document_count],
-                                :last_deleted_document_count => ingestion_stats[:deleted_document_count])
+                                :last_indexed_document_count => metadata[:indexed_document_count],
+                                :last_deleted_document_count => metadata[:deleted_document_count])
 
         body = {
           :doc => {
@@ -170,7 +170,7 @@ module Core
             :completed_at => Time.now,
             :updated_at => Time.now,
             :error => error
-          }.merge(ingestion_stats)
+          }.merge(metadata)
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end

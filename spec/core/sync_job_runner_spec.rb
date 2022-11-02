@@ -39,6 +39,7 @@ describe Core::SyncJobRunner do
   let(:output_index_name) { 'test-ingest-index' }
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
+  let(:connector_metadata) { { :foo => 'bar'} } # metadata returned from connectors
 
   let(:job_id) { 'job-123' }
   let(:job_definition) do
@@ -50,6 +51,7 @@ describe Core::SyncJobRunner do
   let(:extract_binary_content) { true }
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
+  let(:job_reporting_interval) { 10 }
 
   subject { described_class.new(connector_settings) }
 
@@ -75,6 +77,7 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
+    allow(connector_settings).to receive(:job_reporting_interval).and_return(job_reporting_interval)
     allow(connector_settings).to receive(:filtering).and_return(filtering)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
@@ -83,10 +86,15 @@ describe Core::SyncJobRunner do
 
     allow(connector_instance).to receive(:do_health_check!)
     allow_statement = allow(connector_instance).to receive(:yield_documents)
-    extracted_documents.each { |document| allow_statement.and_yield(document) }
+    extracted_documents.each { |document| allow_statement.and_yield(document, connector_metadata) }
   end
 
   context '.execute' do
+    let(:ingestion_stats) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
+    before(:each) do
+      allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
+    end
+
     context 'when job_id is not present' do
       let(:job_id) { nil }
 
@@ -157,7 +165,7 @@ describe Core::SyncJobRunner do
         subject.execute
 
         expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
-        expect(subject.instance_variable_get(:@status)[:error]).to eq('error message')
+        expect(subject.instance_variable_get(:@sync_error)).to eq('error message')
       end
     end
 
@@ -214,7 +222,7 @@ describe Core::SyncJobRunner do
         end
 
         it 'marks the job as complete with job stats' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, { :indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => nil })
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, ingestion_stats.merge(:metadata => connector_metadata), nil)
 
           subject.execute
         end
@@ -224,16 +232,8 @@ describe Core::SyncJobRunner do
             allow(sink).to receive(:flush).and_raise('whoops')
           end
 
-          it 'changes connector status to error' do
-            expect(Core::ElasticConnectorActions)
-              .to receive(:update_connector_status)
-              .with(connector_id, Connectors::ConnectorStatus::ERROR, 'whoops')
-
-            subject.execute
-          end
-
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, { :indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => anything })
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, ingestion_stats.merge(:metadata => connector_metadata), 'whoops')
 
             subject.execute
           end

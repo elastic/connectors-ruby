@@ -23,6 +23,8 @@ module Core
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
+      @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
+      @connector_metadata = {}
       @sync_finished = false
       @sync_error = nil
     end
@@ -58,13 +60,14 @@ module Core
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
         reporting_cycle_start = Time.now
-        connector_instance.yield_documents do |document, metadata = {}|
+        connector_instance.yield_documents do |document, connector_metadata = {}|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
           incoming_ids << document['id']
+          @connector_metadata = connector_metadata
 
           if Time.now - reporting_cycle_start >= @connector_settings.job_reporting_interval
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => metadata))
+            ElasticConnectorActions.update_sync(job_id, metadata)
             reporting_cycle_start = Time.now
           end
         end
@@ -76,7 +79,7 @@ module Core
         ids_to_delete.each do |id|
           @sink.delete(id)
           if Time.now - reporting_cycle_start >= @connector_settings.job_reporting_interval
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats)
+            ElasticConnectorActions.update_sync(job_id, metadata)
             reporting_cycle_start = Time.now
           end
         end
@@ -98,7 +101,7 @@ module Core
           @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.'
         end
 
-        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @sink.ingestion_stats, @sync_error)
+        ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, metadata, @sync_error)
 
         if @sync_error
           Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error '#{@sync_error}'.")
@@ -121,6 +124,10 @@ module Core
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
       raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
+    end
+
+    def metadata
+      @sink.ingestion_stats.merge(:metadata => @connector_metadata.dup)
     end
   end
 end
