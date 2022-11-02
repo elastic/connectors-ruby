@@ -70,7 +70,7 @@ describe Core::ConnectorSettings do
             {
               :domain => 'DEFAULT',
               :active => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {},
               }
             }
@@ -83,7 +83,7 @@ describe Core::ConnectorSettings do
         first_filter = filtering[0]
 
         expect(first_filter[:domain]).to eq('DEFAULT')
-        expect(first_filter[:active][:rules]).to_not be_nil
+        expect(first_filter[:active][:active_rules]).to_not be_nil
         expect(first_filter[:active][:advanced_config]).to_not be_nil
       end
     end
@@ -115,7 +115,7 @@ describe Core::ConnectorSettings do
             {
               :domain => 'DEFAULT',
               :active => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {
                   :find => {
                     :options => {
@@ -125,7 +125,7 @@ describe Core::ConnectorSettings do
                 },
               },
               :draft => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {}
               }
             },
@@ -142,7 +142,7 @@ describe Core::ConnectorSettings do
           :filtering => {
               :domain => 'DEFAULT',
               :active => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {
                   :find => {
                     :options => {
@@ -152,7 +152,7 @@ describe Core::ConnectorSettings do
                 },
               },
               :draft => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {}
               }
             }
@@ -169,11 +169,11 @@ describe Core::ConnectorSettings do
             {
               :domain => 'DEFAULT',
               :active => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {}
               },
               :draft => {
-                :rules => [],
+                :active_rules => [],
                 :advanced_config => {
                   :find => {
                     :options => {
