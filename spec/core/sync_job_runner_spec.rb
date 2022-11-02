@@ -39,7 +39,7 @@ describe Core::SyncJobRunner do
   let(:output_index_name) { 'test-ingest-index' }
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
-  let(:connector_metadata) { { :foo => 'bar'} } # metadata returned from connectors
+  let(:connector_metadata) { { :foo => 'bar' } } # metadata returned from connectors
 
   let(:job_id) { 'job-123' }
   let(:job_definition) do
