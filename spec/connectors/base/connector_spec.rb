@@ -245,7 +245,7 @@ describe Connectors::Base::Connector do
       end
 
       context 'filter config is nil' do
-        let(:advanced_config){
+        let(:advanced_config) {
           nil
         }
 

@@ -247,7 +247,7 @@ describe Connectors::MongoDB::Connector do
         let(:second_page_cursor) { double }
         let(:third_page_cursor) { double }
 
-        let(:options){
+        let(:options) {
           nil
         }
 
