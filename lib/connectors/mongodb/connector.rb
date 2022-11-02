@@ -63,23 +63,17 @@ module Connectors
       def yield_documents(&on_doc_serialization)
         check_filter_config
 
-        function, args = setup_db_function_with_args
-
-        call_db_function_on_collection(function, args, &on_doc_serialization)
+        call_db_function_on_collection(&on_doc_serialization)
       end
 
       private
 
-      def setup_db_function_with_args
-        # default parameters
-        function = 'find'
-        args = []
+      def create_db_cursor_on_collection(collection)
+        return create_find_cursor(collection) if @active_filter_config[:find].present?
 
-        function, args = setup_find if find_present?
+        return create_aggregate_cursor(collection) if @active_filter_config[:aggregate].present?
 
-        function, args = setup_aggregate if aggregate_present?
-
-        [function, args]
+        collection.find
       end
 
       def check_filter_config
@@ -93,16 +87,15 @@ module Connectors
         raise Utility::InvalidFilterConfigError.new(invalid_keys_msg) if @active_filter_config.keys.size != 1
       end
 
-      def call_db_function_on_collection(function, args, &on_doc_serialization)
+      def call_db_function_on_collection(&on_doc_serialization)
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
           # It's done due to the fact that usage of .find.each leads to memory leaks or overuse of memory - the whole result set seems to stay in memory
           # during the sync. Sometimes (not 100% sure) it even leads to a real leak, when the memory for these objects is never recycled.
-          cursor = client[@collection].send(function, *args)
+          cursor, options = create_db_cursor_on_collection(client[@collection])
           skip = 0
 
-          options = args[1]
           found_overall = 0
 
           # if no overall limit is specified by filtering use -1 to not break ingestion, when no overall limit is specified (found_overall is only increased,
@@ -142,54 +135,34 @@ module Connectors
         end
       end
 
-      def setup_aggregate
+      def create_aggregate_cursor(collection)
         aggregate = @active_filter_config[:aggregate]
 
         pipeline = aggregate[:pipeline]
         options = extract_options(aggregate)
 
-        if !pipeline_present?(pipeline) && !options_present?(options)
+        if !pipeline.nil? && pipeline.empty? && !options_present?(options)
           Utility::Logger.warn('\'Aggregate\' was specified with an empty pipeline and empty options.')
         end
 
-        arguments = [pipeline, options]
-
-        ['aggregate', arguments]
+        [collection.aggregate(pipeline, options), options]
       end
 
-      def setup_find
+      def create_find_cursor(collection)
         find = @active_filter_config[:find]
 
         filter = find[:filter]
         options = extract_options(find)
 
-        if !filter_present?(filter) && !options_present?(options)
+        if !filter.nil? && filter.empty? && !options_present?(options)
           Utility::Logger.warn('\'Find\' was specified with an empty filter and empty options.')
         end
 
-        arguments = [filter, options]
-
-        ['find', arguments]
+        [collection.find(filter, options), options]
       end
 
       def extract_options(mongodb_function)
         options_present?(mongodb_function[:options]) ? mongodb_function[:options] : {}
-      end
-
-      def find_present?
-        @active_filter_config[:find].present?
-      end
-
-      def filter_present?(filter)
-        !filter.nil? && !filter.empty?
-      end
-
-      def aggregate_present?
-        @active_filter_config[:aggregate].present?
-      end
-
-      def pipeline_present?(pipeline)
-        !pipeline.nil? && !pipeline.empty?
       end
 
       def options_present?(options)

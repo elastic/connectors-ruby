@@ -95,7 +95,7 @@ describe Connectors::MongoDB::Connector do
 
   let(:filtering) {
     {
-      :active_rules => active_rules,
+      :rules => active_rules,
       :advanced_config => advanced_config
     }
   }
@@ -450,7 +450,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'rules and advanced filtering config are empty' do
-      let(:active_rules) { [] }
+      let(:rules) { [] }
       let(:advanced_config) { {} }
 
       it 'calls find without arguments' do
