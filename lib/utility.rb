@@ -6,7 +6,7 @@
 
 require 'utility/constants'
 require 'utility/cron'
-require 'utility/commons'
+require 'utility/common'
 require 'utility/errors'
 require 'utility/es_client'
 require 'utility/environment'
@@ -15,4 +15,3 @@ require 'utility/extension_mapping_util'
 require 'utility/logger'
 require 'utility/elasticsearch/index/mappings'
 require 'utility/elasticsearch/index/text_analysis_settings'
-require 'utility/strings'
