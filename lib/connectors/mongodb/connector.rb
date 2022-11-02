@@ -16,16 +16,6 @@ module Connectors
 
       ALLOWED_TOP_LEVEL_FILTER_KEYS = %w[find aggregate]
 
-      FIND = 'find'
-      AGGREGATE = 'aggregate'
-      NO_ARGS = []
-      DEFAULT_ADVANCED_CONFIG = {}
-      DEFAULT_RULES = []
-
-      EMPTY_PIPELINE = []
-      EMPTY_FILTER = {}
-      EMPTY_OPTIONS = {}
-
       PAGE_SIZE = 100
 
       def self.service_type
@@ -60,7 +50,7 @@ module Connectors
       end
 
       def initialize(configuration: {})
-        super
+        super(configuration: configuration)
 
         @host = configuration.dig(:host, :value)
         @database = configuration.dig(:database, :value)
@@ -70,62 +60,37 @@ module Connectors
         @direct_connection = configuration.dig(:direct_connection, :value)
       end
 
-      def yield_documents(job_description = {}, &on_doc_serialization)
-        advanced_filter_config = extract_filter_config(job_description)
-        rules = extract_rules(job_description)
+      def yield_documents(&on_doc_serialization)
+        check_filter_config
 
-        check_filter_config!(rules, advanced_filter_config)
-
-        function, args = setup_db_function_with_args(advanced_filter_config)
+        function, args = setup_db_function_with_args
 
         call_db_function_on_collection(function, args, &on_doc_serialization)
       end
 
       private
 
-      def extract_rules(job_description)
-        Utility::Commons.return_if_present(job_description.dig(:filtering, :rules), DEFAULT_RULES)
-      end
-
-      def extract_filter_config(job_description)
-        Utility::Commons.return_if_present(job_description.dig(:filtering, :advanced_config), DEFAULT_ADVANCED_CONFIG)
-      end
-
-      def setup_db_function_with_args(filter_config)
+      def setup_db_function_with_args
         # default parameters
-        function = FIND
-        args = NO_ARGS
+        function = 'find'
+        args = []
 
-        function, args = setup_find(filter_config) if find_present?(filter_config)
+        function, args = setup_find if find_present?
 
-        function, args = setup_aggregate(filter_config) if aggregate_present?(filter_config)
+        function, args = setup_aggregate if aggregate_present?
 
         [function, args]
       end
 
-      def check_filter_config!(rules, config)
-        return unless filtering_present?(rules, config)
+      def check_filter_config
+        return unless filtering_present?
 
-        check_find_and_aggregate_present!(config)
-
-        check_find_and_aggregate_missing!(config)
+        check_find_and_aggregate
       end
 
-      def check_find_and_aggregate_missing!(config)
-        allowed_keys = Utility::Strings.format_string_array(ALLOWED_TOP_LEVEL_FILTER_KEYS, default: ' ')
-        keys_present = Utility::Strings.format_string_array(config.keys, default: ' ')
-
-        find_and_aggregate_missing = !find_present?(config) && !aggregate_present?(config)
-        both_missing_msg = "Only one of #{allowed_keys} is allowed in the filtering object. Keys present: '#{keys_present}'."
-
-        raise Utility::InvalidFilterConfigError.new(both_missing_msg) if find_and_aggregate_missing
-      end
-
-      def check_find_and_aggregate_present!(config)
-        find_and_aggregate_present = find_present?(config) && aggregate_present?(config)
-        both_present_msg = '\'find\' and \'aggregate\' functions cannot be used at the same time for MongoDB. Please drop one from the configuration.'
-
-        raise Utility::InvalidFilterConfigError.new(both_present_msg) if find_and_aggregate_present
+      def check_find_and_aggregate
+        invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@active_filter_config.keys}'."
+        raise Utility::InvalidFilterConfigError.new(invalid_keys_msg) if @active_filter_config.keys.size != 1
       end
 
       def call_db_function_on_collection(function, args, &on_doc_serialization)
@@ -144,11 +109,11 @@ module Connectors
           # thus can never reach -1)
           overall_limit = -1
 
-          unless options.nil?
+          if options_present?(options)
             # there could be a skip parameter defined for filtering
-            skip = Utility::Commons.return_if_present(options[:skip], 0)
+            skip = Utility::Common.return_if_present(options[:skip], 0)
             # there could be a limit parameter defined for filtering -> used for an overall limit (not a page limit, which was introduced for memory optimization)
-            overall_limit = Utility::Commons.return_if_present(options[:limit], -1)
+            overall_limit = Utility::Common.return_if_present(options[:limit], -1)
           end
 
           overall_limit_reached = false
@@ -177,8 +142,8 @@ module Connectors
         end
       end
 
-      def setup_aggregate(advanced_config)
-        aggregate = advanced_config[:aggregate]
+      def setup_aggregate
+        aggregate = @active_filter_config[:aggregate]
 
         pipeline = aggregate[:pipeline]
         options = extract_options(aggregate)
@@ -189,11 +154,11 @@ module Connectors
 
         arguments = [pipeline, options]
 
-        [AGGREGATE, arguments]
+        ['aggregate', arguments]
       end
 
-      def setup_find(advanced_config)
-        find = advanced_config[:find]
+      def setup_find
+        find = @active_filter_config[:find]
 
         filter = find[:filter]
         options = extract_options(find)
@@ -204,31 +169,31 @@ module Connectors
 
         arguments = [filter, options]
 
-        [FIND, arguments]
+        ['find', arguments]
       end
 
-      def extract_options(advanced_config)
-        options_present?(advanced_config[:options]) ? advanced_config[:options] : EMPTY_OPTIONS
+      def extract_options(mongodb_function)
+        options_present?(mongodb_function[:options]) ? mongodb_function[:options] : {}
       end
 
-      def find_present?(advanced_config)
-        advanced_config[:find].present?
+      def find_present?
+        @active_filter_config[:find].present?
       end
 
       def filter_present?(filter)
-        !filter.nil? && filter != EMPTY_FILTER
+        !filter.nil? && !filter.empty?
       end
 
-      def aggregate_present?(advanced_config)
-        advanced_config[:aggregate].present?
+      def aggregate_present?
+        @active_filter_config[:aggregate].present?
       end
 
       def pipeline_present?(pipeline)
-        !pipeline.nil? && pipeline != EMPTY_PIPELINE
+        !pipeline.nil? && !pipeline.empty?
       end
 
       def options_present?(options)
-        !options.nil? && options != EMPTY_OPTIONS
+        !options.nil? && !options.empty?
       end
 
       def do_health_check

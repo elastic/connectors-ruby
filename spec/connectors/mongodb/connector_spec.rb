@@ -32,11 +32,14 @@ describe Connectors::MongoDB::Connector do
        :direct_connection => {
          :label => 'Direct connection? (true/false)',
          :value => direct_connection
+       },
+       :filtering => {
+         :active => filtering
        }
     }
   end
 
-  let(:rules) {
+  let(:active_rules) {
     [
       # empty rules for now, replace, when rules are supported
     ]
@@ -92,7 +95,7 @@ describe Connectors::MongoDB::Connector do
 
   let(:filtering) {
     {
-      :rules => rules,
+      :active_rules => active_rules,
       :advanced_config => advanced_config
     }
   }
@@ -244,6 +247,10 @@ describe Connectors::MongoDB::Connector do
         let(:second_page_cursor) { double }
         let(:third_page_cursor) { double }
 
+        let(:options){
+          nil
+        }
+
         before(:each) do
           stub_const('Connectors::MongoDB::Connector::PAGE_SIZE', page_size)
           allow(mongo_collection_cursor).to receive(:skip).with(0).and_return(mongo_collection_cursor)
@@ -296,7 +303,7 @@ describe Connectors::MongoDB::Connector do
           it 'fetches 1 document overall' do
             yielded_documents = []
 
-            subject.yield_documents(job_description) { |doc| yielded_documents << doc }
+            subject.yield_documents { |doc| yielded_documents << doc }
 
             expect(yielded_documents.size).to eq(1)
           end
@@ -336,7 +343,7 @@ describe Connectors::MongoDB::Connector do
           it 'skips the first element, yielding 3 overall' do
             yielded_documents = []
 
-            subject.yield_documents(job_description) { |doc| yielded_documents << doc }
+            subject.yield_documents { |doc| yielded_documents << doc }
 
             expect(yielded_documents.size).to eq(3)
           end
@@ -430,7 +437,7 @@ describe Connectors::MongoDB::Connector do
       it 'logs a warning' do
         expect(Utility::Logger).to receive(:warn)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -438,18 +445,18 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client\'s find method with filter and options' do
         expect(actual_collection).to receive(:find).with(filter, options)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
     context 'rules and advanced filtering config are empty' do
-      let(:rules) { [] }
+      let(:active_rules) { [] }
       let(:advanced_config) { {} }
 
       it 'calls find without arguments' do
         expect(actual_collection).to receive(:find).with(no_args)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -468,7 +475,7 @@ describe Connectors::MongoDB::Connector do
       }
 
       it 'raises an InvalidFilterConfigError' do
-        expect { subject.yield_documents(job_description) }.to raise_error(Utility::InvalidFilterConfigError)
+        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
 
@@ -480,7 +487,7 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client find method with filter and empty options' do
         expect(actual_collection).to receive(:find).with(filter, {})
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -492,7 +499,7 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client find method with filter and nil options without breaking' do
         expect(actual_collection).to receive(:find).with(filter, {})
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -504,7 +511,7 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client fiend method with empty filter and existing options' do
         expect(actual_collection).to receive(:find).with({}, options)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -517,7 +524,7 @@ describe Connectors::MongoDB::Connector do
         # nil is also the default value in the mongodb client, so it's ok to pass it
         expect(actual_collection).to receive(:find).with(nil, options)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -543,7 +550,7 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client aggregate method with pipeline and options' do
         expect(actual_collection).to receive(:aggregate).with(pipeline, options)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -566,7 +573,7 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client aggregate method with pipeline and empty options' do
         expect(actual_collection).to receive(:aggregate).with(pipeline, {})
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -589,7 +596,7 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client aggregate method with pipeline and empty options' do
         expect(actual_collection).to receive(:aggregate).with([], options)
 
-        subject.yield_documents(job_description)
+        subject.yield_documents
       end
     end
 
@@ -620,7 +627,7 @@ describe Connectors::MongoDB::Connector do
       }
 
       it 'raises an InvalidFilterConfigError, when only wrong keys are present' do
-        expect { subject.yield_documents(job_description) }.to raise_error(Utility::InvalidFilterConfigError)
+        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
   end
