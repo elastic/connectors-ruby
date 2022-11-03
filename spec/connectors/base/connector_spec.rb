@@ -50,7 +50,7 @@ describe Connectors::Base::Connector do
     }
   }
 
-  let(:job_description){
+  let(:job_description) {
     {
       :filtering => filtering
     }
