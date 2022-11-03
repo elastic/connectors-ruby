@@ -28,6 +28,10 @@ describe Core::SyncJobRunner do
   end
 
   let(:connector_settings) { double }
+  let(:filtering){
+    {}
+  }
+
   let(:connector_class) { double }
   let(:connector_instance) { double }
   let(:sink) { double }
@@ -66,6 +70,7 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
+    allow(connector_settings).to receive(:filtering).and_return(filtering)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
