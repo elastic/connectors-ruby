@@ -93,7 +93,7 @@ describe Core::ConnectorSettings do
         filtering = subject.filtering
 
         expect(filtering).to_not be_nil
-        expect(filtering.empty?).to eq(true)
+        expect(filtering).to be_empty
       end
     end
   end
