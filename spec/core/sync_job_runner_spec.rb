@@ -132,6 +132,25 @@ describe Core::SyncJobRunner do
       subject.execute
     end
 
+    it 'marks the sync as finished' do
+      subject.execute
+
+      expect(subject.instance_variable_get(:@sync_finished)).to eq(true)
+    end
+
+    context 'when an error occurs' do
+      before(:each) do
+        allow(connector_instance).to receive(:do_health_check!).and_raise(StandardError.new('error message'))
+      end
+
+      it 'marks the sync as unfinished without overriding the error message with the thread error message' do
+        subject.execute
+
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@status)[:error]).to eq('error message')
+      end
+    end
+
     context 'when a bunch of documents are returned from 3rd-party system' do
       let(:doc1) do
         {
