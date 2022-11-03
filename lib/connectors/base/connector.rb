@@ -32,16 +32,11 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      attr_reader :active_rules, :advanced_filter_config
-
       def initialize(configuration: {})
         @configuration = configuration.dup || {}
-
-        @active_rules = extract_active_rules(@configuration)
-        @advanced_filter_config = extract_advanced_filter_config(@configuration)
       end
 
-      def yield_documents; end
+      def yield_documents(job_description: {}); end
 
       def do_health_check
         raise 'Not implemented for this connector'
@@ -63,26 +58,25 @@ module Connectors
         false
       end
 
-      def filtering_present?
-        active_rules_present? || advanced_filter_config_present
+      def filtering_present?(filtering)
+        advanced_filter_config(filtering).present? || rules(filtering).present?
       end
 
-      def advanced_filter_config_present
-        !@advanced_filter_config.nil? && !@advanced_filter_config.empty?
+      def advanced_filter_config(filtering)
+        Utility::Common.return_if_present(get_filter(filtering)[:advanced_config], {})
       end
 
-      def active_rules_present?
-        !@active_rules.nil? && !@active_rules.empty?
+      def rules(filtering)
+        Utility::Common.return_if_present(get_filter(filtering)[:rules], [])
       end
 
       private
 
-      def extract_active_rules(job_description)
-        Utility::Common.return_if_present(job_description.dig(:filtering, :active, :rules), [])
-      end
+      def get_filter(filtering)
+        # assume for now, that first object in filtering array or a filter object itself is the only filtering object
+        filter = filtering.is_a?(Array) ? filtering[0] : filtering
 
-      def extract_advanced_filter_config(job_description)
-        Utility::Common.return_if_present(job_description.dig(:filtering, :active, :advanced_config), {})
+        filter.present? ? filter : {}
       end
     end
   end

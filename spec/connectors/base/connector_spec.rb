@@ -9,43 +9,57 @@
 require 'connectors/base/connector'
 
 describe Connectors::Base::Connector do
-  subject { described_class.new(configuration: configuration) }
+  subject { described_class.new }
 
   let(:advanced_config) {
     {
-      :some_config => {}
+      :find => {
+        :filter => {
+          :$text => {
+            :$search => 'garden',
+            :$caseSensitive => false
+          }
+        },
+        :options => {
+          :skip => 10,
+          :limit => 1000
+        }
+      }
     }
   }
 
-  let(:active_rules) {
-    [{ :some_rule => {} }]
+  let(:rules) {
+    [
+      {
+        :id => '90owilfksdoifuw',
+        :policy => 'exclude',
+        :field => 'url',
+        :rule => 'regex',
+        :value => '.*/sample/.*\.pdf',
+        :order => 0,
+        :created_at => '2022-10-10T00:00:00Z',
+        :updated_at => '2022-10-10T00:00:00Z'
+      }
+    ]
   }
 
   let(:filtering) {
     {
       :advanced_config => advanced_config,
-      :rules => active_rules
+      :rules => rules
     }
   }
 
-  let(:configuration) {
-    {
-      :filtering => {
-        :active => filtering
-      }
-    }
-  }
-
-  context '.advanced_config_present?' do
+  context '.advanced_filter_config?' do
     shared_examples_for 'advanced_config is not present' do
-      it 'returns false' do
-        expect(subject.advanced_filter_config_present).to eq(false)
+      it 'returns empty object' do
+        expect(subject.advanced_filter_config(filtering)).to be_empty
       end
     end
 
     context 'advanced config is present' do
-      it 'returns true' do
-        expect(subject.advanced_filter_config_present).to eq(true)
+      it 'returns advanced filter config' do
+        expect(subject.advanced_filter_config(filtering)).to eq(advanced_config)
       end
     end
 
@@ -66,21 +80,21 @@ describe Connectors::Base::Connector do
     end
   end
 
-  context '.rules_present?' do
+  context '.rules' do
     shared_examples_for 'rules are not present' do
-      it 'returns false' do
-        expect(subject.active_rules_present?).to eq(false)
+      it 'returns empty array' do
+        expect(subject.rules(filtering)).to be_empty
       end
     end
 
     context 'rules are present' do
       it 'returns true' do
-        expect(subject.active_rules_present?).to eq(true)
+        expect(subject.rules(filtering)).to eq(rules)
       end
     end
 
     context 'rules are nil' do
-      let(:active_rules) {
+      let(:rules) {
         nil
       }
 
@@ -88,7 +102,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'rules are empty' do
-      let(:active_rules) {
+      let(:rules) {
         []
       }
 
@@ -99,13 +113,13 @@ describe Connectors::Base::Connector do
   context '.filtering_present?' do
     shared_examples_for 'filtering is not present' do
       it 'returns false' do
-        expect(subject.filtering_present?).to eq(false)
+        expect(subject.filtering_present?(filtering)).to eq(false)
       end
     end
 
     shared_examples_for 'filtering is present' do
       it 'returns true' do
-        expect(subject.filtering_present?).to eq(true)
+        expect(subject.filtering_present?(filtering)).to eq(true)
       end
     end
 
@@ -114,7 +128,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'only rules are nil' do
-      let(:active_rules) {
+      let(:rules) {
         nil
       }
 
@@ -122,14 +136,14 @@ describe Connectors::Base::Connector do
     end
 
     context 'only rules are empty' do
-      let(:active_rules) {
+      let(:rules) {
         []
       }
 
       it_behaves_like 'filtering is present'
     end
 
-    context 'advanced_config is empty' do
+    context 'only advanced_config is empty' do
       let(:advanced_config) {
         {}
       }
@@ -137,7 +151,7 @@ describe Connectors::Base::Connector do
       it_behaves_like 'filtering is present'
     end
 
-    context 'advanced_config is nil' do
+    context 'only advanced_config is nil' do
       let(:advanced_config) {
         nil
       }
@@ -146,7 +160,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'rules are empty and advanced_config is empty' do
-      let(:active_rules) {
+      let(:rules) {
         []
       }
 
@@ -158,7 +172,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'rules are nil and advanced_config is nil' do
-      let(:active_rules) {
+      let(:rules) {
         nil
       }
 
@@ -169,31 +183,47 @@ describe Connectors::Base::Connector do
       it_behaves_like 'filtering is not present'
     end
 
-    context '.initialize' do
-      context 'three rules are present' do
-        let(:active_rules) {
-          [
-          { :name => 'rule one' },
-          { :name => 'rule two' },
-          { :name => 'rule three' },
+    context '.rules' do
+      let(:rules) {
+        [
+          {
+            :id => '90owilfksdoifuw',
+            :policy => 'exclude',
+            :field => 'url',
+            :rule => 'regex',
+            :value => '.*/sample/.*\.pdf',
+            :order => 0,
+            :created_at => '2022-10-10T00:00:00Z',
+            :updated_at => '2022-10-10T00:00:00Z'
+          },
+          {
+            :id => '09wuekwisdfjslk',
+            :policy => 'include',
+            :field => 'id',
+            :rule => 'regex',
+            :value => '.*',
+            :order => 1,
+            :created_at => '2022-10-10T00:00:00Z',
+            :updated_at => '2022-10-10T00:00:00Z'
+          }
         ]
-        }
+      }
 
+      context 'two rules are present' do
         it 'should extract three rules from job description' do
-          extracted_rules = subject.active_rules
+          extracted_rules = subject.rules(filtering)
 
           expect(extracted_rules).to_not be_nil
-          expect(extracted_rules.size).to eq(3)
+          expect(extracted_rules.size).to eq(2)
 
-          expect(extracted_rules[0][:name]).to eq('rule one')
-          expect(extracted_rules[1][:name]).to eq('rule two')
-          expect(extracted_rules[2][:name]).to eq('rule three')
+          expect(extracted_rules[0]).to eq(rules[0])
+          expect(extracted_rules[1]).to eq(rules[1])
         end
       end
 
       shared_examples_for 'has default rules value' do
         it 'defaults to an empty array' do
-          extracted_rules = subject.active_rules
+          extracted_rules = subject.rules(filtering)
 
           expect(extracted_rules).to_not be_nil
           expect(extracted_rules.size).to eq(0)
@@ -201,7 +231,7 @@ describe Connectors::Base::Connector do
       end
 
       context 'no rules are present' do
-        let(:active_rules) {
+        let(:rules) {
           []
         }
 
@@ -209,38 +239,27 @@ describe Connectors::Base::Connector do
       end
 
       context 'rules are nil' do
-        let(:active_rules) {
+        let(:rules) {
           nil
         }
 
         it_behaves_like 'has default rules value'
       end
 
-      context 'filter config is present' do
-        let(:advanced_config) {
-          {
-            :field_one => 'field one',
-            :field_two => 'field two',
-            :field_three => 'field three',
-          }
-        }
+      context 'advanced filter config is present' do
+        it 'extracts the advanced filter config' do
+          advanced_filter_config = subject.advanced_filter_config(filtering)
 
-        it 'extracts the filter config' do
-          extracted_filter_config = subject.advanced_filter_config
-
-          expect(extracted_filter_config).to_not be_nil
-          expect(extracted_filter_config[:field_one]).to eq('field one')
-          expect(extracted_filter_config[:field_two]).to eq('field two')
-          expect(extracted_filter_config[:field_three]).to eq('field three')
+          expect(advanced_filter_config).to eq(advanced_config)
         end
       end
 
       shared_examples_for 'has default filter config value' do
         it 'defaults to an empty hash' do
-          extracted_filter_config = subject.advanced_filter_config
+          advanced_filter_config = subject.advanced_filter_config(filtering)
 
-          expect(extracted_filter_config).to_not be_nil
-          expect(extracted_filter_config).to eq({})
+          expect(advanced_filter_config).to_not be_nil
+          expect(advanced_filter_config).to eq({})
         end
       end
 
