@@ -88,7 +88,7 @@ module Core
         seq_no = nil
         primary_term = nil
         sync_in_progress = false
-        client.get(
+        connector_record = client.get(
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :ignore => 404,
@@ -114,11 +114,24 @@ module Core
           :connector_id => connector_id,
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
-          :created_at => Time.now
+          :created_at => Time.now,
+          :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
-        job = client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
 
-        job['_id']
+        client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
+      end
+
+      def convert_connector_filtering_to_job_filtering(connector_filtering)
+        return [] unless connector_filtering
+        connector_filtering = [connector_filtering] unless connector_filtering.is_a?(Array)
+        connector_filtering.each_with_object([]) do |filtering_domain, job_filtering|
+          job_filtering << {
+            'domain' => filtering_domain['domain'],
+            'rules' => filtering_domain.dig('active', 'rules'),
+            'advanced_snippet' => filtering_domain.dig('active', 'advanced_snippet'),
+            'warnings' => [] # TODO in https://github.com/elastic/enterprise-search-team/issues/3174
+          }
+        end
       end
 
       def update_connector_status(connector_id, status, error_message = nil)
