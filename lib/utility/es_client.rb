@@ -20,8 +20,8 @@ module Utility
       attr_reader :cause
     end
 
-    def initialize(es_config)
-      super(connection_configs(es_config))
+    def initialize(es_config, &block)
+      super(connection_configs(es_config), &block)
     end
 
     def connection_configs(es_config)
@@ -38,6 +38,10 @@ module Utility
       configs[:request_timeout] = es_config[:request_timeout] || nil
       configs[:log] = es_config[:log] || false
       configs[:trace] = es_config[:trace] || false
+
+      # transport options
+      configs[:transport_options] = es_config[:transport_options] if es_config[:transport_options]
+      configs[:ca_fingerprint] = es_config[:ca_fingerprint] if es_config[:ca_fingerprint]
 
       # if log or trace is activated, we use the application logger
       configs[:logger] = if configs[:log] || configs[:trace]
