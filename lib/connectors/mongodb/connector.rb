@@ -85,7 +85,7 @@ module Connectors
       end
 
       def check_find_and_aggregate(advanced_filter_config)
-        if advanced_filter_config.key.size != 1
+        if advanced_filter_config.keys.size != 1
           invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{advanced_filter_config.keys}'."
           raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
         end
