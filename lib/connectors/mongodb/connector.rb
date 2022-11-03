@@ -91,31 +91,22 @@ module Connectors
       def with_client
         raise "Invalid value for 'Direct connection' : #{@direct_connection}." unless %w[true false].include?(@direct_connection.to_s.strip.downcase)
 
-        client = if @user.present? || @password.present?
-                   Mongo::Client.new(
-                     @host,
-                     database: @database,
-                     direct_connection: to_boolean(@direct_connection),
-                     user: @user,
-                     password: @password
-                   )
-                 else
-                   Mongo::Client.new(
-                     @host,
-                     database: @database,
-                     direct_connection: to_boolean(@direct_connection)
-                   )
-                 end
+        args = {
+                 database: @database,
+                 direct_connection: to_boolean(@direct_connection)
+               }
 
-        begin
+        if @user.present? || @password.present?
+          args[:user] = @user
+          args[:password] = @password
+        end
+
+        Mongo::Client.new(@host, args) do |client|
           Utility::Logger.debug("Existing Databases #{client.database_names}")
           Utility::Logger.debug('Existing Collections:')
-
           client.collections.each { |coll| Utility::Logger.debug(coll.name) }
 
           yield client
-        ensure
-          client.close
         end
       end
 
