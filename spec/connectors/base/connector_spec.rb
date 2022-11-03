@@ -39,13 +39,13 @@ describe Connectors::Base::Connector do
   context '.advanced_config_present?' do
     shared_examples_for 'advanced_config is not present' do
       it 'returns false' do
-        expect(subject.active_filter_config_present?).to eq(false)
+        expect(subject.advanced_filter_config_present).to eq(false)
       end
     end
 
     context 'advanced config is present' do
       it 'returns true' do
-        expect(subject.active_filter_config_present?).to eq(true)
+        expect(subject.advanced_filter_config_present).to eq(true)
       end
     end
 
@@ -226,7 +226,7 @@ describe Connectors::Base::Connector do
         }
 
         it 'extracts the filter config' do
-          extracted_filter_config = subject.active_filter_config
+          extracted_filter_config = subject.advanced_filter_config
 
           expect(extracted_filter_config).to_not be_nil
           expect(extracted_filter_config[:field_one]).to eq('field one')
@@ -237,7 +237,7 @@ describe Connectors::Base::Connector do
 
       shared_examples_for 'has default filter config value' do
         it 'defaults to an empty hash' do
-          extracted_filter_config = subject.active_filter_config
+          extracted_filter_config = subject.advanced_filter_config
 
           expect(extracted_filter_config).to_not be_nil
           expect(extracted_filter_config).to eq({})

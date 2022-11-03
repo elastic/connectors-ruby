@@ -32,13 +32,13 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      attr_reader :active_rules, :active_filter_config
+      attr_reader :active_rules, :advanced_filter_config
 
       def initialize(configuration: {})
         @configuration = configuration.dup || {}
 
         @active_rules = extract_active_rules(@configuration)
-        @active_filter_config = extract_active_filter_config(@configuration)
+        @advanced_filter_config = extract_advanced_filter_config(@configuration)
       end
 
       def yield_documents; end
@@ -64,11 +64,11 @@ module Connectors
       end
 
       def filtering_present?
-        active_rules_present? || active_filter_config_present?
+        active_rules_present? || advanced_filter_config_present
       end
 
-      def active_filter_config_present?
-        !@active_filter_config.nil? && !@active_filter_config.empty?
+      def advanced_filter_config_present
+        !@advanced_filter_config.nil? && !@advanced_filter_config.empty?
       end
 
       def active_rules_present?
@@ -81,7 +81,7 @@ module Connectors
         Utility::Common.return_if_present(job_description.dig(:filtering, :active, :rules), [])
       end
 
-      def extract_active_filter_config(job_description)
+      def extract_advanced_filter_config(job_description)
         Utility::Common.return_if_present(job_description.dig(:filtering, :active, :advanced_config), {})
       end
     end

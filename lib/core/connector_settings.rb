@@ -87,7 +87,7 @@ module Core
       Utility::Common.return_if_present(@elasticsearch_response[:filtering], DEFAULT_FILTERING)
     end
 
-    def active_filter_config
+    def advanced_filter_config
       # assume for now, that first object in filtering array or a filter object itself is the only filtering object
       filter = filtering.is_a?(Array) ? filtering[0] : filtering
 

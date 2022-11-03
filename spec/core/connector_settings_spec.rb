@@ -99,9 +99,9 @@ describe Core::ConnectorSettings do
   end
 
   context '.active_advanced_filter_config' do
-    shared_examples_for 'extracts active_filter_config' do
+    shared_examples_for 'extracts advanced_filter_config' do
       it 'extracts active_advanced_filter_config' do
-        advanced_config = subject.active_filter_config
+        advanced_config = subject.advanced_filter_config
 
         expect(advanced_config).to_not be_nil
         expect(advanced_config[:find][:options][:skip]).to eq(10)
@@ -133,7 +133,7 @@ describe Core::ConnectorSettings do
         }
       }
 
-      it_behaves_like 'extracts active_filter_config'
+      it_behaves_like 'extracts advanced_filter_config'
     end
 
     context 'active advanced config exists as an object' do
@@ -159,7 +159,7 @@ describe Core::ConnectorSettings do
         }
       }
 
-      it_behaves_like 'extracts active_filter_config'
+      it_behaves_like 'extracts advanced_filter_config'
     end
 
     context 'no active advanced_config exists' do
@@ -188,7 +188,7 @@ describe Core::ConnectorSettings do
       }
 
       it 'returns empty hash, if no active advanced_config exists' do
-        advanced_config = subject.active_filter_config
+        advanced_config = subject.advanced_filter_config
 
         expect(advanced_config.empty?).to eq(true)
       end
@@ -202,7 +202,7 @@ describe Core::ConnectorSettings do
       }
 
       it 'returns empty hash, if no filtering hash exists' do
-        advanced_config = subject.active_filter_config
+        advanced_config = subject.advanced_filter_config
 
         expect(advanced_config.empty?).to eq(true)
       end

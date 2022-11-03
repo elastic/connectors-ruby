@@ -69,9 +69,9 @@ module Connectors
       private
 
       def create_db_cursor_on_collection(collection)
-        return create_find_cursor(collection) if @active_filter_config[:find].present?
+        return create_find_cursor(collection) if @advanced_filter_config[:find].present?
 
-        return create_aggregate_cursor(collection) if @active_filter_config[:aggregate].present?
+        return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
 
         collection.find
       end
@@ -83,8 +83,8 @@ module Connectors
       end
 
       def check_find_and_aggregate
-        invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@active_filter_config.keys}'."
-        raise Utility::InvalidFilterConfigError.new(invalid_keys_msg) if @active_filter_config.keys.size != 1
+        invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
+        raise Utility::InvalidFilterConfigError.new(invalid_keys_msg) if @advanced_filter_config.keys.size != 1
       end
 
       def call_db_function_on_collection(&on_doc_serialization)
@@ -136,7 +136,7 @@ module Connectors
       end
 
       def create_aggregate_cursor(collection)
-        aggregate = @active_filter_config[:aggregate]
+        aggregate = @advanced_filter_config[:aggregate]
 
         pipeline = aggregate[:pipeline]
         options = extract_options(aggregate)
@@ -149,7 +149,7 @@ module Connectors
       end
 
       def create_find_cursor(collection)
-        find = @active_filter_config[:find]
+        find = @advanced_filter_config[:find]
 
         filter = find[:filter]
         options = extract_options(find)
