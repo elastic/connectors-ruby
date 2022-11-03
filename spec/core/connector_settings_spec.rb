@@ -70,7 +70,7 @@ describe Core::ConnectorSettings do
             {
               :domain => 'DEFAULT',
               :active => {
-                :active_rules => [],
+                :rules => [],
                 :advanced_config => {},
               }
             }
@@ -83,7 +83,7 @@ describe Core::ConnectorSettings do
         first_filter = filtering[0]
 
         expect(first_filter[:domain]).to eq('DEFAULT')
-        expect(first_filter[:active][:active_rules]).to_not be_nil
+        expect(first_filter[:active][:rules]).to_not be_nil
         expect(first_filter[:active][:advanced_config]).to_not be_nil
       end
     end
@@ -94,117 +94,6 @@ describe Core::ConnectorSettings do
 
         expect(filtering).to_not be_nil
         expect(filtering.empty?).to eq(true)
-      end
-    end
-  end
-
-  context '.active_advanced_filter_config' do
-    shared_examples_for 'extracts advanced_filter_config' do
-      it 'extracts active_advanced_filter_config' do
-        advanced_config = subject.advanced_filter_config
-
-        expect(advanced_config).to_not be_nil
-        expect(advanced_config[:find][:options][:skip]).to eq(10)
-      end
-    end
-
-    context 'active advanced config exists as one element array' do
-      let(:elasticsearch_response) {
-        {
-          :filtering => [
-            {
-              :domain => 'DEFAULT',
-              :active => {
-                :active_rules => [],
-                :advanced_config => {
-                  :find => {
-                    :options => {
-                      :skip => 10
-                    }
-                  }
-                },
-              },
-              :draft => {
-                :active_rules => [],
-                :advanced_config => {}
-              }
-            },
-          ]
-        }
-      }
-
-      it_behaves_like 'extracts advanced_filter_config'
-    end
-
-    context 'active advanced config exists as an object' do
-      let(:elasticsearch_response) {
-        {
-          :filtering => {
-              :domain => 'DEFAULT',
-              :active => {
-                :active_rules => [],
-                :advanced_config => {
-                  :find => {
-                    :options => {
-                      :skip => 10
-                    }
-                  }
-                },
-              },
-              :draft => {
-                :active_rules => [],
-                :advanced_config => {}
-              }
-            }
-        }
-      }
-
-      it_behaves_like 'extracts advanced_filter_config'
-    end
-
-    context 'no active advanced_config exists' do
-      let(:elasticsearch_response) {
-        {
-          :filtering => [
-            {
-              :domain => 'DEFAULT',
-              :active => {
-                :active_rules => [],
-                :advanced_config => {}
-              },
-              :draft => {
-                :active_rules => [],
-                :advanced_config => {
-                  :find => {
-                    :options => {
-                      :skip => 10
-                    }
-                  }
-                }
-              }
-            }
-          ]
-        }
-      }
-
-      it 'returns empty hash, if no active advanced_config exists' do
-        advanced_config = subject.advanced_filter_config
-
-        expect(advanced_config.empty?).to eq(true)
-      end
-    end
-
-    context 'no filtering object exists' do
-      let(:elasticsearch_response) {
-        {
-          # no :filtering present
-        }
-      }
-
-      it 'returns empty hash, if no filtering hash exists' do
-        advanced_config = subject.advanced_filter_config
-
-        expect(advanced_config.empty?).to eq(true)
       end
     end
   end

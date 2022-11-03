@@ -20,7 +20,6 @@ module Core
     DEFAULT_RUN_ML_INFERENCE = true
 
     DEFAULT_FILTERING = {}
-    DEFAULT_ADVANCED_FILTER_CONFIG = {}
 
     DEFAULT_PAGE_SIZE = 100
 
@@ -85,15 +84,6 @@ module Core
 
     def filtering
       Utility::Common.return_if_present(@elasticsearch_response[:filtering], DEFAULT_FILTERING)
-    end
-
-    def advanced_filter_config
-      # assume for now, that first object in filtering array or a filter object itself is the only filtering object
-      filter = filtering.is_a?(Array) ? filtering[0] : filtering
-
-      return DEFAULT_ADVANCED_FILTER_CONFIG if filter.nil? || filter.empty?
-
-      Utility::Common.return_if_present(filter.dig(:active, :advanced_config), DEFAULT_ADVANCED_FILTER_CONFIG)
     end
 
     def request_pipeline
