@@ -35,6 +35,8 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       optional(:disable_warnings).value(:bool?)
       optional(:trace).value(:bool?)
       optional(:log).value(:bool?)
+      optional(:ca_fingerprint).value(:string)
+      optional(:transport_options).value(:hash)
     end
 
     optional(:thread_pool).hash do
