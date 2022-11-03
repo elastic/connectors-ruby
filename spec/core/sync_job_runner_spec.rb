@@ -28,7 +28,7 @@ describe Core::SyncJobRunner do
   end
 
   let(:connector_settings) { double }
-  let(:filtering){
+  let(:filtering) {
     {}
   }
 
