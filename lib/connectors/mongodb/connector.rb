@@ -50,7 +50,7 @@ module Connectors
       end
 
       def initialize(configuration: {})
-        super(configuration: configuration)
+        super
 
         @host = configuration.dig(:host, :value)
         @database = configuration.dig(:database, :value)
