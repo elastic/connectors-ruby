@@ -8,11 +8,11 @@
 
 module Connectors
   class ConnectorStatus
-    CREATED = 'created'
+    CREATED             = 'created'
     NEEDS_CONFIGURATION = 'needs_configuration'
-    CONFIGURED = 'configured'
-    CONNECTED = 'connected'
-    ERROR = 'error'
+    CONFIGURED          = 'configured'
+    CONNECTED           = 'connected'
+    ERROR               = 'error'
 
     STATUSES = [
       CREATED,
