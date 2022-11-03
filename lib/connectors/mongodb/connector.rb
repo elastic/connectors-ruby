@@ -49,7 +49,7 @@ module Connectors
         }
       end
 
-      def initialize(configuration: {})
+      def initialize(configuration: {}, job_description: {})
         super
 
         @host = configuration.dig(:host, :value)
@@ -60,47 +60,42 @@ module Connectors
         @direct_connection = configuration.dig(:direct_connection, :value)
       end
 
-      def yield_documents(job_description = {}, &on_doc_serialization)
-        filtering = job_description[:filtering]
+      def yield_documents(&on_doc_serialization)
+        check_filtering
 
-        check_filtering(filtering)
-
-        call_db_function_on_collection(filtering, &on_doc_serialization)
+        call_db_function_on_collection(&on_doc_serialization)
       end
 
       private
 
-      def create_db_cursor_on_collection(advanced_filter_config, collection)
-        return create_find_cursor(collection, advanced_filter_config) if advanced_filter_config[:find].present?
+      def create_db_cursor_on_collection(collection)
+        return create_find_cursor(collection) if @advanced_filter_config[:find].present?
 
-        return create_aggregate_cursor(collection, advanced_filter_config) if advanced_filter_config[:aggregate].present?
+        return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
 
         collection.find
       end
 
-      def check_filtering(filtering)
-        return unless filtering_present?(filtering)
+      def check_filtering
+        return unless filtering_present?
 
-        check_find_and_aggregate(advanced_filter_config(filtering))
+        check_find_and_aggregate
       end
 
-      def check_find_and_aggregate(advanced_filter_config)
-        if advanced_filter_config.keys.size != 1
-          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{advanced_filter_config.keys}'."
+      def check_find_and_aggregate
+        if @advanced_filter_config.keys.size != 1
+          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
           raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
         end
       end
 
-      def call_db_function_on_collection(filtering, &on_doc_serialization)
+      def call_db_function_on_collection(&on_doc_serialization)
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
           # It's done due to the fact that usage of .find.each leads to memory leaks or overuse of memory - the whole result set seems to stay in memory
           # during the sync. Sometimes (not 100% sure) it even leads to a real leak, when the memory for these objects is never recycled.
-          collection = client[@collection]
-          advanced_filter_config = advanced_filter_config(filtering)
-
-          cursor, options = create_db_cursor_on_collection(advanced_filter_config, collection)
+          cursor, options = create_db_cursor_on_collection(client[@collection])
           skip = 0
 
           found_overall = 0
@@ -142,8 +137,8 @@ module Connectors
         end
       end
 
-      def create_aggregate_cursor(collection, advanced_filter_config)
-        aggregate = advanced_filter_config[:aggregate]
+      def create_aggregate_cursor(collection)
+        aggregate = @advanced_filter_config[:aggregate]
 
         pipeline = aggregate[:pipeline]
         options = extract_options(aggregate)
@@ -155,8 +150,8 @@ module Connectors
         [collection.aggregate(pipeline, options), options]
       end
 
-      def create_find_cursor(collection, advanced_filter_config)
-        find = advanced_filter_config[:find]
+      def create_find_cursor(collection)
+        find = @advanced_filter_config[:find]
 
         filter = find[:filter]
         options = extract_options(find)

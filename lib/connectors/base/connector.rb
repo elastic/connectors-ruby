@@ -32,8 +32,16 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      def initialize(configuration: {})
+      attr_reader :rules, :advanced_filter_config
+
+      def initialize(configuration: {}, job_description: {})
         @configuration = configuration.dup || {}
+        @job_description = job_description.dup || {}
+
+        filter = get_filter(@job_description[:filtering])
+
+        @rules = Utility::Common.return_if_present(filter[:rules], [])
+        @advanced_filter_config = Utility::Common.return_if_present(filter[:advanced_config], {})
       end
 
       def yield_documents(job_description: {}); end
@@ -58,16 +66,8 @@ module Connectors
         false
       end
 
-      def filtering_present?(filtering)
-        advanced_filter_config(filtering).present? || rules(filtering).present?
-      end
-
-      def advanced_filter_config(filtering)
-        Utility::Common.return_if_present(get_filter(filtering)[:advanced_config], {})
-      end
-
-      def rules(filtering)
-        Utility::Common.return_if_present(get_filter(filtering)[:rules], [])
+      def filtering_present?
+        @advanced_filter_config.present? || @rules.present?
       end
 
       private

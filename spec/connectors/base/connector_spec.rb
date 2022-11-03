@@ -9,7 +9,7 @@
 require 'connectors/base/connector'
 
 describe Connectors::Base::Connector do
-  subject { described_class.new }
+  subject { described_class.new(job_description: job_description) }
 
   let(:advanced_config) {
     {
@@ -50,16 +50,22 @@ describe Connectors::Base::Connector do
     }
   }
 
+  let(:job_description){
+    {
+      :filtering => filtering
+    }
+  }
+
   context '.advanced_filter_config?' do
     shared_examples_for 'advanced_config is not present' do
       it 'returns empty object' do
-        expect(subject.advanced_filter_config(filtering)).to be_empty
+        expect(subject.advanced_filter_config).to be_empty
       end
     end
 
     context 'advanced config is present' do
       it 'returns advanced filter config' do
-        expect(subject.advanced_filter_config(filtering)).to eq(advanced_config)
+        expect(subject.advanced_filter_config).to eq(advanced_config)
       end
     end
 
@@ -83,13 +89,13 @@ describe Connectors::Base::Connector do
   context '.rules' do
     shared_examples_for 'rules are not present' do
       it 'returns empty array' do
-        expect(subject.rules(filtering)).to be_empty
+        expect(subject.rules).to be_empty
       end
     end
 
     context 'rules are present' do
       it 'returns true' do
-        expect(subject.rules(filtering)).to eq(rules)
+        expect(subject.rules).to eq(rules)
       end
     end
 
@@ -113,13 +119,13 @@ describe Connectors::Base::Connector do
   context '.filtering_present?' do
     shared_examples_for 'filtering is not present' do
       it 'returns false' do
-        expect(subject.filtering_present?(filtering)).to eq(false)
+        expect(subject.filtering_present?).to eq(false)
       end
     end
 
     shared_examples_for 'filtering is present' do
       it 'returns true' do
-        expect(subject.filtering_present?(filtering)).to eq(true)
+        expect(subject.filtering_present?).to eq(true)
       end
     end
 
@@ -211,7 +217,7 @@ describe Connectors::Base::Connector do
 
       context 'two rules are present' do
         it 'should extract three rules from job description' do
-          extracted_rules = subject.rules(filtering)
+          extracted_rules = subject.rules
 
           expect(extracted_rules).to_not be_nil
           expect(extracted_rules.size).to eq(2)
@@ -223,7 +229,7 @@ describe Connectors::Base::Connector do
 
       shared_examples_for 'has default rules value' do
         it 'defaults to an empty array' do
-          extracted_rules = subject.rules(filtering)
+          extracted_rules = subject.rules
 
           expect(extracted_rules).to_not be_nil
           expect(extracted_rules.size).to eq(0)
@@ -248,7 +254,7 @@ describe Connectors::Base::Connector do
 
       context 'advanced filter config is present' do
         it 'extracts the advanced filter config' do
-          advanced_filter_config = subject.advanced_filter_config(filtering)
+          advanced_filter_config = subject.advanced_filter_config
 
           expect(advanced_filter_config).to eq(advanced_config)
         end
@@ -256,7 +262,7 @@ describe Connectors::Base::Connector do
 
       shared_examples_for 'has default filter config value' do
         it 'defaults to an empty hash' do
-          advanced_filter_config = subject.advanced_filter_config(filtering)
+          advanced_filter_config = subject.advanced_filter_config
 
           expect(advanced_filter_config).to_not be_nil
           expect(advanced_filter_config).to eq({})
