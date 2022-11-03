@@ -115,7 +115,6 @@ module Core
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now,
-          :updated_at => Time.now,
           :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
 
@@ -148,7 +147,7 @@ module Core
 
       def update_sync(job_id, metadata)
         body = {
-            :doc => { :updated_at => Time.now }.merge(metadata)
+          :doc => metadata
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
@@ -168,7 +167,6 @@ module Core
           :doc => {
             :status => sync_status,
             :completed_at => Time.now,
-            :updated_at => Time.now,
             :error => error
           }.merge(metadata)
         }
