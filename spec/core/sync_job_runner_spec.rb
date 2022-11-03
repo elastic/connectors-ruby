@@ -55,6 +55,13 @@ describe Core::SyncJobRunner do
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
   let(:total_document_count) { 100 }
+  let(:ingestion_stats) do
+    {
+      :indexed_document_count => 0,
+      :deleted_document_count => 0,
+      :indexed_document_volume => 0
+    }
+  end
 
   subject { described_class.new(connector_settings) }
 
@@ -72,6 +79,7 @@ describe Core::SyncJobRunner do
     allow(sink).to receive(:ingest)
     allow(sink).to receive(:delete)
     allow(sink).to receive(:flush)
+    allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
 
     allow(connector_settings).to receive(:id).and_return(connector_id)
     allow(connector_settings).to receive(:service_type).and_return(service_type)
@@ -216,6 +224,14 @@ describe Core::SyncJobRunner do
 
       context 'when some documents were present before' do
         let(:existing_document_ids) { [3, 4, 'lala', 'some other id'] }
+        let(:ingestion_stats) do
+          {
+            :indexed_document_count => 15,
+            :deleted_document_count => 10,
+            :indexed_document_volume => 1241251
+          }
+        end
+
 
         it 'attempts to remove existing documents' do
           existing_document_ids.each do |id|
@@ -225,29 +241,32 @@ describe Core::SyncJobRunner do
           subject.execute
         end
 
-        it 'marks the job as complete with job stats' do
-          expect(Core::ElasticConnectorActions)
-            .to receive(:complete_sync)
-            .with(connector_id,
-                  job_id,
-                  ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
-                  nil)
+        it 'marks the job as complete' do
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(:error => nil))
+
+          subject.execute
+        end
+
+        it 'updates job stats' do
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats))
 
           subject.execute
         end
 
         context 'when an error happens during sync' do
+          let(:error_message) { 'whoops' }
           before(:each) do
-            allow(sink).to receive(:flush).and_raise('whoops')
+            allow(sink).to receive(:flush).and_raise(error_message)
           end
 
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions)
-              .to receive(:complete_sync)
-              .with(connector_id,
-                    job_id,
-                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
-                    'whoops')
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(:error => error_message))
+
+            subject.execute
+          end
+
+          it 'updates job stats' do
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats))
 
             subject.execute
           end

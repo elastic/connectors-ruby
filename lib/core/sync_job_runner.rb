@@ -26,7 +26,16 @@ module Core
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
+<<<<<<< HEAD
       @sync_error = nil
+=======
+      @status = {
+        :indexed_document_count => 0,
+        :deleted_document_count => 0,
+        :indexed_document_volume => 0,
+        :error => nil
+      }
+>>>>>>> ccbef1d (Fix tests for SyncJobRunner)
     end
 
     def execute
@@ -95,10 +104,6 @@ module Core
         @sync_error = e.message
         Utility::ExceptionTracking.log_exception(e)
       ensure
-<<<<<<< HEAD
-        Utility::Logger.info("Upserted #{@sink.ingestion_stats[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
-        Utility::Logger.info("Deleted #{@sink.ingestion_stats[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
-=======
         stats = @sink.ingestion_stats
 
         Utility::Logger.debug("Sync stats are: #{stats}")
@@ -109,7 +114,6 @@ module Core
 
         Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
->>>>>>> 488b49b (WIP for ingestion stats)
 
         # Make sure to not override a previous error message
         if !@sync_finished && @sync_error.nil?
