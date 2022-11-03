@@ -40,6 +40,34 @@ This is our main communication index, used to communicate the connector's config
                            fields
   description: string;  -> the description of the connector
   error: string;        -> Optional error message
+  filtering: {          -> Filtering rules
+    domain: string,     -> what data domain these rules apply to
+    active: {           -> "active" rules are run in jobs. 
+      rules: {
+        id: string,         -> rule identifier
+        policy: string,     -> one of ["include", "exclude"]
+        field: string,      -> the field on the document this rule applies to
+        rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
+        value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
+        order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
+        created_at: string, -> when the rule was added
+        updated_at: string  -> when the rule was last edited
+      },
+      advanced_snippet: {   -> used for filtering data from the 3rd party at query time
+        value: object,      -> this JSON object is passed directly to the connector
+        created_at: string, -> when this JSON object was created
+        updated_at: string  -> when this JSON object was last edited
+      },
+      validation: {
+        state: string,      -> one of ["edited", "valid", "invalid"]
+        errors: {
+          ids: string,      -> the id(s) of any rules that are deemed invalid
+          messages: string  -> the message(s) to display in Kibana, explaining what is invalid
+        }
+      }
+    },
+    draft: object;      -> Identical to the above "active" object, but used when drafting edits to filtering rules
+  };
   index_name: string;   -> The name of the content index where data will be written to
   is_native: boolean;   -> Whether this is a native connector
   language: string;     -> the language used for the analyzer
@@ -82,29 +110,111 @@ This is our main communication index, used to communicate the connector's config
 #### Elasticsearch mappings for `.elastic-connectors`:
 ```
 "mappings" : {
+  "_meta" : {
+    "pipeline" : {
+      "default_extract_binary_content" : true,
+      "default_name" : "ent-search-generic-ingestion",
+      "default_reduce_whitespace" : true,
+      "default_run_ml_inference" : true
+    },
+    "version" : "1"
+  },
   "properties" : {
     "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
     "description" : { "type" : "text" },
-    "error" : { "type" : "text" },
+    "error" : { "type" : "keyword" },
+    "filtering" : {
+      "properties" : {
+        "domain" : { "type" : "keyword" },
+        "active" : {
+          "properties" : {
+            "rules" : {
+              "properties" : {
+                "id" : { "type" : "keyword" },
+                "policy" : { "type" : "keyword" },
+                "field" : { "type" : "keyword" },
+                "rule" : { "type" : "keyword" },
+                "value" : { "type" : "keyword" },
+                "order" : { "type" : "short" },
+                "created_at" : { "type" : "date" },
+                "updated_at" : { "type" : "date" }
+              }
+            },
+            "advanced_snippet" : {
+              "properties" : {
+                "value" : { "type" : "object" },
+                "created_at" : { "type" : "date" },
+                "updated_at" : { "type" : "date" }
+              }
+            },
+            "validation" : {
+              "properties" : {
+                "state" : { "type" : "keyword" },
+                "errors" : {
+                  "properties" : {
+                    "ids" : { "type" : "keyword" },
+                    "messages" : { "type" : "text" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "draft" : {
+          "properties" : {
+            "rules" : {
+              "properties" : {
+                "id" : { "type" : "keyword" },
+                "policy" : { "type" : "keyword" },
+                "field" : { "type" : "keyword" },
+                "rule" : { "type" : "keyword" },
+                "value" : { "type" : "keyword" },
+                "order" : { "type" : "short" },
+                "created_at" : { "type" : "date" },
+                "updated_at" : { "type" : "date" }
+              }
+            },
+            "advanced_snippet" : {
+              "properties" : {
+                "value" : { "type" : "object" },
+                "created_at" : { "type" : "date" },
+                "updated_at" : { "type" : "date" }
+              }
+            },
+            "validation" : {
+              "properties" : {
+                "state" : { "type" : "keyword" },
+                "errors" : {
+                  "properties" : {
+                    "ids" : { "type" : "keyword" },
+                    "messages" : { "type" : "text" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "index_name" : { "type" : "keyword" },
     "is_native" : { "type" : "boolean" },
     "language" : { "type" : "keyword" },
     "last_seen" : { "type" : "date" },
-    "last_sync_error" : { "type" : "text" },
+    "last_sync_error" : { "type" : "keyword" },
     "last_sync_status" : { "type" : "keyword" },
     "last_synced" : { "type" : "date" },
-    "last_indexed_document_count" : { "type" : "integer" },
-    "last_deleted_document_count" : { "type" : "integer" },
+    "last_indexed_document_count" : { "type" : "long" },
+    "last_deleted_document_count" : { "type" : "long" },
     "name" : { "type" : "keyword" },
     "pipeline" : {
       "properties" : {
-        "extract_binary_content": { "type" : "boolean" },
+        "extract_binary_content" : { "type" : "boolean" },
         "name" : { "type" : "keyword" },
         "reduce_whitespace" : { "type" : "boolean" },
-        "run_ml_inference" : { "type" : "boolean" },
+        "run_ml_inference" : { "type" : "boolean" }
       }
-    }
+    },
     "scheduling" : {
       "properties" : {
         "enabled" : { "type" : "boolean" },
@@ -113,7 +223,7 @@ This is our main communication index, used to communicate the connector's config
     },
     "service_type" : { "type" : "keyword" },
     "status" : { "type" : "keyword" },
-    "sync_now" : { "type" : "boolean" },
+    "sync_now" : { "type" : "boolean" }
   }
 }
 ```
@@ -125,6 +235,28 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   connector_id: string; -> ID of the connector document in .elastic-connectors
   status: string; -> Same enum as last_sync_status above except the null value
   error: string; -> Optional error message
+  filtering: {          -> Filtering rules
+    domain: string,     -> what data domain these rules apply to
+    rules: {
+      id: string,         -> rule identifier
+      policy: string,     -> one of ["include", "exclude"]
+      field: string,      -> the field on the document this rule applies to
+      rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
+      value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
+      order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
+      created_at: string, -> when the rule was added
+      updated_at: string  -> when the rule was last edited
+    },
+    advanced_snippet: {   -> used for filtering data from the 3rd party at query time
+      value: object,      -> this JSON object is passed directly to the connector
+      created_at: string, -> when this JSON object was created
+      updated_at: string  -> when this JSON object was last edited
+    },
+    warnings: {
+      ids: string,      -> the id(s) of any rules that cannot be used for query-time filtering
+      messages: string  -> the reason(s) those rules cannot be used for query-time filtering
+    }
+  };
   index_name: string; -> The name of the content index
   worker_hostname: string; -> The hostname of the worker to run the sync job
   indexed_document_count: number; -> Number of documents indexed in the sync job
@@ -136,16 +268,48 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
 #### Elasticsearch mappings for `.elastic-connectors-sync-jobs`:
 ```
 "mappings" " {
+  "_meta" : {
+    "version" : 1
+  },
   "properties" : {
+    "completed_at" : { "type" : "date" },
     "connector_id" : { "type" : "keyword" },
-    "status" : { "type" : "keyword" },
-    "error" : { "type" : "text" },
-    "index_name" : { "type" : "keyword" },
-    "worker_hostname" : { "type" : "keyword" },
-    "indexed_document_count" : { "type" : "integer" },
-    "deleted_document_count" : { "type" : "integer" },
     "created_at" : { "type" : "date" },
-    "completed_at" : { "type" : "date" }
+    "deleted_document_count" : { "type" : "integer" },
+    "error" : { "type" : "keyword" },
+    "filtering" : {
+      "properties" : {
+        "domain" : { "type" : "keyword" },
+        "rules" : {
+          "properties" : {
+            "id" : { "type" : "keyword" },
+            "policy" : { "type" : "keyword" },
+            "field" : { "type" : "keyword" },
+            "rule" : { "type" : "keyword" },
+            "value" : { "type" : "keyword" },
+            "order" : { "type" : "short" },
+            "created_at" : { "type" : "date" },
+            "updated_at" : { "type" : "date" }
+          }
+        },
+        "advanced_snippet" : {
+          "properties" : {
+            "value" : { "type" : "object" },
+            "created_at" : { "type" : "date" },
+            "updated_at" : { "type" : "date" }
+          }
+        },
+        "warnings" : {
+          "properties" : {
+            "ids" : { "type" : "keyword" },
+            "messages" : { "type" : "text" }
+          }
+        }
+      }
+    },
+    "indexed_document_count" : { "type" : "integer" },
+    "status" : { "type" : "keyword" },
+    "worker_hostname" : { "type" : "keyword" }
   }
 }
 ```
@@ -196,12 +360,14 @@ sequenceDiagram
             Connector->>Elasticsearch: Updates last_seen and status regularly
         and Configuration
             Connector->>Elasticsearch: Updates configurable fields for custom connector
+        and Rule Validation
+            Connector->>Elasticsearch: Updates validation state of filtering rules
         and Sync job
-            Connector->>Elasticsearch: Reads sync_now flag and sync schedule
+            Connector->>Elasticsearch: Reads sync_now flag and sync schedule and filtering rules
             opt Sync_now is true or sync_schedule requires synchronization
                 Connector->>Elasticsearch: Sets sync_now to false and last_sync_status to in_progress
-                Connector->>Data source: Reads data
-                Connector->>Elasticsearch: Indexes data
+                Connector->>Data source: Queries data
+                Connector->>Elasticsearch: Indexes filtered data
                 alt Sync successfully completed
                     Connector->>Elasticsearch: Sets last_sync_status to completed
                 else Sync error
@@ -215,7 +381,7 @@ sequenceDiagram
 
 
 ### Migration concerns
-If the mapping of `.elastic-connectors` or `.elastic-connectors-sync-jobs` is updated in a future version in a way that necessitates a complete re-indexing, Kibana will migrate that data if a user with sufficient permissions is logged in.
+If the mapping of `.elastic-connectors` or `.elastic-connectors-sync-jobs` is updated in a future version in a way that necessitates a complete re-indexing, Enterprise Search will migrate that data on startup.
 
 To facilitate migrations we'll use aliases for the `.elastic-connectors` and `.elastic-connectors-sync-jobs` indices, and update the underlying index the alias points to when we need to migrate data to a new mapping. The name of those indices will be the same as the alias, with a version appended. So right now, those indices are:
 - `.elastic-connectors-v1`
