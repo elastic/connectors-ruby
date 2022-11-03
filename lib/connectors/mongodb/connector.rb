@@ -102,7 +102,7 @@ module Connectors
           # thus can never reach -1)
           overall_limit = -1
 
-          if options_present?(options)
+          if options.present?
             # there could be a skip parameter defined for filtering
             skip = Utility::Common.return_if_present(options[:skip], 0)
             # there could be a limit parameter defined for filtering -> used for an overall limit (not a page limit, which was introduced for memory optimization)
@@ -141,7 +141,7 @@ module Connectors
         pipeline = aggregate[:pipeline]
         options = extract_options(aggregate)
 
-        if !pipeline.nil? && pipeline.empty? && !options_present?(options)
+        if !pipeline.nil? && pipeline.empty? && !options.present?
           Utility::Logger.warn('\'Aggregate\' was specified with an empty pipeline and empty options.')
         end
 
@@ -154,7 +154,7 @@ module Connectors
         filter = find[:filter]
         options = extract_options(find)
 
-        if !filter.nil? && filter.empty? && !options_present?(options)
+        if !filter.nil? && filter.empty? && !options.present?
           Utility::Logger.warn('\'Find\' was specified with an empty filter and empty options.')
         end
 
@@ -162,11 +162,7 @@ module Connectors
       end
 
       def extract_options(mongodb_function)
-        options_present?(mongodb_function[:options]) ? mongodb_function[:options] : {}
-      end
-
-      def options_present?(options)
-        !options.nil? && !options.empty?
+        mongodb_function[:options].present? ? mongodb_function[:options] : {}
       end
 
       def do_health_check
