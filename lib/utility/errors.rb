@@ -33,7 +33,7 @@ module Utility
 
   class ClientError < StandardError; end
 
-  class InvalidFilterConfigError < ClientError; end
+  class InvalidFilterConfigError < StandardError; end
   class EvictionWithNoProgressError < StandardError; end
   class EvictionError < StandardError
     attr_accessor :cursors
