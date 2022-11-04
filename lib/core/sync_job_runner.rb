@@ -23,7 +23,6 @@ module Core
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
-      @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
       @sync_finished = false
       @status = {
         :indexed_document_count => 0,
@@ -52,14 +51,18 @@ module Core
       begin
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
-        @connector_instance.do_health_check!
+        # will be replaced when job claiming returns full job description object
+        job_description = { :filtering => @connector_settings.filtering }
+        connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description)
+
+        connector_instance.do_health_check!
 
         incoming_ids = []
         existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
 
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
-        @connector_instance.yield_documents do |document|
+        connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
           incoming_ids << document['id']

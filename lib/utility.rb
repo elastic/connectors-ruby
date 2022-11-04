@@ -6,6 +6,7 @@
 
 require 'utility/constants'
 require 'utility/cron'
+require 'utility/common'
 require 'utility/errors'
 require 'utility/es_client'
 require 'utility/environment'

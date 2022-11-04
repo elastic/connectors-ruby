@@ -24,10 +24,10 @@ module Connectors
       @connectors[name]
     end
 
-    def connector(name, configuration)
+    def connector(name, configuration, job_description)
       klass = connector_class(name)
       if klass.present?
-        return klass.new(configuration: configuration)
+        return klass.new(configuration: configuration, job_description: job_description)
       end
       raise "Connector #{name} is not yet registered. You need to register it before use"
     end

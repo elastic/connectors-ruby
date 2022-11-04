@@ -8,10 +8,14 @@
 
 require 'connectors/base/connector'
 require 'mongo'
+require 'utility'
 
 module Connectors
   module MongoDB
     class Connector < Connectors::Base::Connector
+
+      ALLOWED_TOP_LEVEL_FILTER_KEYS = %w[find aggregate]
+
       PAGE_SIZE = 100
 
       def self.service_type
@@ -45,7 +49,7 @@ module Connectors
         }
       end
 
-      def initialize(configuration: {})
+      def initialize(configuration: {}, job_description: {})
         super
 
         @host = configuration.dig(:host, :value)
@@ -57,29 +61,107 @@ module Connectors
       end
 
       def yield_documents
+        check_filtering
+
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
           # It's done due to the fact that usage of .find.each leads to memory leaks or overuse of memory - the whole result set seems to stay in memory
           # during the sync. Sometimes (not 100% sure) it even leads to a real leak, when the memory for these objects is never recycled.
-          cursor = client[@collection].find
+          cursor, options = create_db_cursor_on_collection(client[@collection])
           skip = 0
 
+          found_overall = 0
+
+          # if no overall limit is specified by filtering use -1 to not break ingestion, when no overall limit is specified (found_overall is only increased,
+          # thus can never reach -1)
+          overall_limit = Float::INFINITY
+
+          if options.present?
+            # there could be a skip parameter defined for filtering
+            skip = options.fetch(:skip, skip)
+            # there could be a limit parameter defined for filtering -> used for an overall limit (not a page limit, which was introduced for memory optimization)
+            overall_limit = options.fetch(:limit, overall_limit)
+          end
+
+          overall_limit_reached = false
+
           loop do
-            found_count = 0
+            found_in_page = 0
+
             view = cursor.skip(skip).limit(PAGE_SIZE)
             view.each do |document|
               yield serialize(document)
-              found_count += 1
+
+              found_in_page += 1
+              found_overall += 1
+
+              overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
+
+              break if overall_limit_reached
             end
 
-            break if found_count == 0
+            page_was_empty = found_in_page == 0
+
+            break if page_was_empty || overall_limit_reached
+
             skip += PAGE_SIZE
           end
         end
       end
 
       private
+
+      def create_db_cursor_on_collection(collection)
+        return create_find_cursor(collection) if @advanced_filter_config[:find].present?
+
+        return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
+
+        collection.find
+      end
+
+      def check_filtering
+        return unless filtering_present?
+
+        check_find_and_aggregate
+      end
+
+      def check_find_and_aggregate
+        if @advanced_filter_config.keys.size != 1
+          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
+          raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
+        end
+      end
+
+      def create_aggregate_cursor(collection)
+        aggregate = @advanced_filter_config[:aggregate]
+
+        pipeline = aggregate[:pipeline]
+        options = extract_options(aggregate)
+
+        if !pipeline.nil? && pipeline.empty? && !options.present?
+          Utility::Logger.warn('\'Aggregate\' was specified with an empty pipeline and empty options.')
+        end
+
+        [collection.aggregate(pipeline, options), options]
+      end
+
+      def create_find_cursor(collection)
+        find = @advanced_filter_config[:find]
+
+        filter = find[:filter]
+        options = extract_options(find)
+
+        if !filter.nil? && filter.empty? && !options.present?
+          Utility::Logger.warn('\'Find\' was specified with an empty filter and empty options.')
+        end
+
+        [collection.find(filter, options), options]
+      end
+
+      def extract_options(mongodb_function)
+        mongodb_function[:options].present? ? mongodb_function[:options] : {}
+      end
 
       def do_health_check
         with_client do |_client|

@@ -8,8 +8,7 @@
 
 require 'bson'
 require 'core/output_sink'
-require 'utility/exception_tracking'
-require 'utility/errors'
+require 'utility'
 require 'app/config'
 require 'active_support/core_ext/hash/indifferent_access'
 
@@ -33,8 +32,16 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
-      def initialize(configuration: {})
+      attr_reader :rules, :advanced_filter_config
+
+      def initialize(configuration: {}, job_description: {})
         @configuration = configuration.dup || {}
+        @job_description = job_description.dup || {}
+
+        filter = get_filter(@job_description[:filtering])
+
+        @rules = Utility::Common.return_if_present(filter[:rules], [])
+        @advanced_filter_config = Utility::Common.return_if_present(filter[:advanced_config], {})
       end
 
       def yield_documents; end
@@ -57,6 +64,19 @@ module Connectors
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
         false
+      end
+
+      def filtering_present?
+        @advanced_filter_config.present? || @rules.present?
+      end
+
+      private
+
+      def get_filter(filtering)
+        # assume for now, that first object in filtering array or a filter object itself is the only filtering object
+        filter = filtering.is_a?(Array) ? filtering[0] : filtering
+
+        filter.present? ? filter : {}
       end
     end
   end

@@ -62,6 +62,42 @@ describe Core::ConnectorSettings do
     end
   end
 
+  context '.filtering' do
+    context 'filtering is present' do
+      let(:elasticsearch_response) {
+        {
+          :filtering => [
+            {
+              :domain => 'DEFAULT',
+              :active => {
+                :rules => [],
+                :advanced_config => {},
+              }
+            }
+          ]
+        }
+      }
+
+      it 'extracts filtering field' do
+        filtering = subject.filtering
+        first_filter = filtering[0]
+
+        expect(first_filter[:domain]).to eq('DEFAULT')
+        expect(first_filter[:active][:rules]).to_not be_nil
+        expect(first_filter[:active][:advanced_config]).to_not be_nil
+      end
+    end
+
+    context 'filtering is not present' do
+      it 'returns default filtering object' do
+        filtering = subject.filtering
+
+        expect(filtering).to_not be_nil
+        expect(filtering).to be_empty
+      end
+    end
+  end
+
   context '.fetch_native_connectors' do
     let(:connectors_meta) {
       {
