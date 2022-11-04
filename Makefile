@@ -2,25 +2,28 @@ YQ ?= "yq"
 .phony: test ftest lint autocorrect update_config autocorrect-unsafe install build-docker run-docker exec_app tag exec_cli
 .phony: build_utility build_service release_utility_dev release_service_dev release_utility release_service build_utility_gem build_service_gem
 
+bundle:
+	bundle _$(shell cat .bundler-version)_
+
 config/connectors.yml:
 	cp config/connectors.yml.example config/connectors.yml
 
-test: config/connectors.yml
-	bundle _$(shell cat .bundler-version)_ exec rspec spec --order rand
+test: config/connectors.yml | bundle
+	exec rspec spec --order rand
 
 ftest:
 	-cp config/connectors.yml config/connectors.yml.$$(date +%Y%m%d%H%M%S).saved 2>/dev/null
 	cp tests/connectors.yml config/connectors.yml
 	rbenv exec bundle exec ruby tests/ftest.rb
 
-lint: config/connectors.yml
-	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec
+lint: config/connectors.yml | bundle
+	exec rubocop lib spec
 
-autocorrect: config/connectors.yml
-	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -a
+autocorrect: config/connectors.yml | bundle
+	exec rubocop lib spec -a
 
-autocorrect-unsafe: config/connectors.yml
-	bundle _$(shell cat .bundler-version)_ exec rubocop lib spec -A
+autocorrect-unsafe: config/connectors.yml | bundle
+	exec rubocop lib spec -A
 
 # build will set the revision key in the config we use in the Gem
 # we can add more build=time info there if we want
@@ -50,21 +53,21 @@ tag:
 	git tag v$(shell cat VERSION)
 	git push --tags
 
-build_utility_gem:
+build_utility_gem: | bundle
 	mkdir -p .gems
-	bundle _$(shell cat .bundler-version)_ exec gem build connectors_utility.gemspec
+	exec gem build connectors_utility.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
 	echo "DO NOT FORGET TO UPDATE ENT-SEARCH"
 
-build_service_gem:
+build_service_gem: | bundle
 	mkdir -p .gems
-	bundle _$(shell cat .bundler-version)_ exec gem build connectors_service.gemspec
+	exec gem build connectors_service.gemspec
 	rm -f .gems/*
 	mv *.gem .gems/
 
-push_gem:
-	bundle _$(shell cat .bundler-version)_ exec gem push .gems/*
+push_gem: | bundle
+	exec gem push .gems/*
 
 install:
 	rbenv install -s
@@ -77,10 +80,10 @@ build-docker:
 run-docker:
 	docker run --env "elasticsearch.hosts=http://host.docker.internal:9200" --env "elasticsearch.api_key=$(API_KEY)" --rm -it connectors
 
-exec_app:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby -r "./application.rb" -e "App::Application.run!"
+exec_app: | bundle
+	bin/connectors_service
 
-exec_cli:
-	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb
+exec_cli: | bundle
+	cd lib/app; exec ruby console_app.rb
 
 run: | update_config_dev exec_app
