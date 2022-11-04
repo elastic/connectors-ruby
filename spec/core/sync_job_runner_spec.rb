@@ -52,6 +52,7 @@ describe Core::SyncJobRunner do
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
   let(:job_reporting_interval) { 10 }
+  let(:total_document_count) { 100 }
 
   subject { described_class.new(connector_settings) }
 
@@ -62,6 +63,7 @@ describe Core::SyncJobRunner do
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:complete_sync)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
+    allow(Core::ElasticConnectorActions).to receive(:document_count).and_return(total_document_count)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
     allow(Core::OutputSink::EsSink).to receive(:new).with(output_index_name, request_pipeline).and_return(sink)
@@ -84,9 +86,10 @@ describe Core::SyncJobRunner do
     allow(connector_class).to receive(:service_type).and_return(service_type)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
+    allow(connector_instance).to receive(:metadata).and_return(connector_metadata)
     allow(connector_instance).to receive(:do_health_check!)
     allow_statement = allow(connector_instance).to receive(:yield_documents)
-    extracted_documents.each { |document| allow_statement.and_yield(document, connector_metadata) }
+    extracted_documents.each { |document| allow_statement.and_yield(document) }
   end
 
   context '.execute' do
@@ -222,7 +225,12 @@ describe Core::SyncJobRunner do
         end
 
         it 'marks the job as complete with job stats' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, ingestion_stats.merge(:metadata => connector_metadata), nil)
+          expect(Core::ElasticConnectorActions)
+            .to receive(:complete_sync)
+            .with(connector_id,
+                  job_id,
+                  ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
+                  nil)
 
           subject.execute
         end
@@ -233,7 +241,12 @@ describe Core::SyncJobRunner do
           end
 
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, ingestion_stats.merge(:metadata => connector_metadata), 'whoops')
+            expect(Core::ElasticConnectorActions)
+              .to receive(:complete_sync)
+              .with(connector_id,
+                    job_id,
+                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
+                    'whoops')
 
             subject.execute
           end

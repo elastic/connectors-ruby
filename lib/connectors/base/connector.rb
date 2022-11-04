@@ -70,6 +70,10 @@ module Connectors
         @advanced_filter_config.present? || @rules.present?
       end
 
+      def metadata
+        {}
+      end
+
       private
 
       def get_filter(filtering)

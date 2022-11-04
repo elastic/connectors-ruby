@@ -23,7 +23,6 @@ module Core
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
-      @connector_metadata = {}
       @sync_finished = false
       @sync_error = nil
     end
@@ -59,14 +58,13 @@ module Core
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
         reporting_cycle_start = Time.now
-        connector_instance.yield_documents do |document, connector_metadata = {}|
+        connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
           incoming_ids << document['id']
-          @connector_metadata = connector_metadata
 
           if Time.now - reporting_cycle_start >= @connector_settings.job_reporting_interval
-            ElasticConnectorActions.update_sync(job_id, metadata)
+            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
@@ -78,7 +76,7 @@ module Core
         ids_to_delete.each do |id|
           @sink.delete(id)
           if Time.now - reporting_cycle_start >= @connector_settings.job_reporting_interval
-            ElasticConnectorActions.update_sync(job_id, metadata)
+            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
@@ -99,6 +97,9 @@ module Core
         if !@sync_finished && @sync_error.nil?
           @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.'
         end
+
+        metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
+        metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
 
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, metadata, @sync_error)
 
@@ -123,10 +124,6 @@ module Core
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
       raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
-    end
-
-    def metadata
-      @sink.ingestion_stats.merge(:metadata => @connector_metadata.dup)
     end
   end
 end
