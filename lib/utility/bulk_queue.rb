@@ -4,8 +4,6 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-# frozen_string_literal: true
-
 require 'json'
 
 module Utility

@@ -28,6 +28,10 @@ module Core
       def flush(_size: nil)
         raise 'not implemented'
       end
+
+      def ingestion_stats
+        raise 'not implemented'
+      end
     end
   end
 end

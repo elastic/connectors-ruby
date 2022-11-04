@@ -9,11 +9,10 @@ RSpec::Matchers.define :array_of_size do |x|
 end
 
 describe Core::OutputSink::EsSink do
-  subject { described_class.new(index_name, request_pipeline, flush_threshold) }
+  subject { described_class.new(index_name, request_pipeline) }
   let(:index_name) { 'some-index-name' }
   let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }
   let(:es_client) { double }
-  let(:flush_threshold) { 1000 }
 
   before(:each) do
     allow(Utility::EsClient).to receive(:new).and_return(es_client)

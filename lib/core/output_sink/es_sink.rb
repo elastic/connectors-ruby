@@ -22,7 +22,7 @@ module Core::OutputSink
       @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name
       @request_pipeline = request_pipeline
-      @operation_queue = Core::OutputSink::BulkQueue.new
+      @operation_queue = Utility::BulkQueue.new
       @ingested_count = 0
       @deleted_count = 0
     end
