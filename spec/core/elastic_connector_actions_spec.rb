@@ -349,6 +349,7 @@ describe Core::ElasticConnectorActions do
         expect { described_class.claim_job(connector_id) }.to raise_error(Core::JobAlreadyRunningError)
       end
     end
+
     context 'when connector has changed version' do
       before(:each) do
         allow(es_client).to receive(:update)
@@ -360,6 +361,113 @@ describe Core::ElasticConnectorActions do
           .to raise_error(Core::ConnectorVersionChangedError)
       end
     end
+
+    context 'filtering rules' do
+      let(:connector_filtering) do
+        {
+          'domain' => 'default',
+          'active' => {
+            'rules' => [],
+            'advanced_snippet' => {},
+            'validation' => {}
+          },
+          'draft' => {
+            'rules' => [],
+            'advanced_snippet' => {},
+            'validation' => {}
+          }
+        }
+      end
+
+      let(:job_filtering) do
+        {
+          'domain' => 'default',
+          'rules' => [],
+          'advanced_snippet' => {},
+          'warnings' => []
+        }
+      end
+
+      before(:each) do
+        allow(es_client).to receive(:get)
+          .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+          .and_return(
+            { '_seq_no' => seq_no,
+              '_primary_term' => primary_term,
+              '_source' => {
+                'last_sync_status' => nil,
+                'filtering' => connector_filtering
+              } }
+          )
+      end
+
+      it 'has filtering rules' do
+        expect(es_client).to receive(:index).with(:index => jobs_index, :body => hash_including(:filtering => [job_filtering]))
+        described_class.claim_job(connector_id)
+      end
+    end
+  end
+
+  context '#convert_connector_filtering_to_job_filtering' do
+    shared_examples_for 'job filtering' do
+      it 'has the right filtering rules' do
+        expect(described_class.convert_connector_filtering_to_job_filtering(connector_filtering)).to eq(job_filtering)
+      end
+    end
+
+    context 'missing input filtering' do
+      let(:connector_filtering) { nil }
+      let(:job_filtering) { [] }
+      it_behaves_like 'job filtering'
+    end
+
+    context 'with active rules' do
+      let(:single_filtering) do
+        {
+          'domain' => 'default',
+          'active' => {
+            'rules' => ['active'],
+            'advanced_snippet' => { 'active' => 'true' },
+            'validation' => {}
+          },
+          'draft' => {
+            'rules' => ['draft'],
+            'advanced_snippet' => { 'draft' => 'true' },
+            'validation' => {}
+          }
+        }
+      end
+      let(:connector_filtering) { single_filtering }
+      let(:single_job) do
+        {
+          'domain' => 'default',
+          'rules' => ['active'],
+          'advanced_snippet' => { 'active' => 'true' },
+          'warnings' => []
+        }
+      end
+      let(:job_filtering) { [single_job] }
+      it_behaves_like 'job filtering'
+
+      context 'with multiples' do
+        let(:connector_filtering) do
+          [
+            single_filtering,
+            single_filtering.merge!('domain' => 'second')
+          ]
+        end
+        let(:job_filtering) do
+          [
+            single_job,
+            single_job.merge!('domain' => 'second')
+          ]
+        end
+        it_behaves_like 'job filtering'
+      end
+    end
+
+    context
+
   end
 
   context '#update_connector_status' do
