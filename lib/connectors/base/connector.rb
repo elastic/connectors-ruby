@@ -44,7 +44,7 @@ module Connectors
         @advanced_filter_config = Utility::Common.return_if_present(filter[:advanced_config], {})
       end
 
-      def yield_documents(job_description: {}); end
+      def yield_documents; end
 
       def do_health_check
         raise 'Not implemented for this connector'
