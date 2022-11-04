@@ -62,7 +62,7 @@ module Core
 
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
-        connector_instance.yield_documents(job_description) do |document|
+        connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
           incoming_ids << document['id']
