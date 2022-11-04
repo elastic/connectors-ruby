@@ -23,7 +23,6 @@ module Core
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
-      @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
       @connector_metadata = {}
       @sync_finished = false
       @sync_error = nil
