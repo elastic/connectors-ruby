@@ -53,7 +53,7 @@ module Core
 
         # will be replaced when job claiming returns full job description object
         job_description = { :filtering => @connector_settings.filtering }
-        connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description)
+        connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: job_description)
 
         connector_instance.do_health_check!
 
