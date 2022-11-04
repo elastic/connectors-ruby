@@ -60,36 +60,9 @@ module Connectors
         @direct_connection = configuration.dig(:direct_connection, :value)
       end
 
-      def yield_documents(&on_doc_serialization)
+      def yield_documents
         check_filtering
 
-        call_db_function_on_collection(&on_doc_serialization)
-      end
-
-      private
-
-      def create_db_cursor_on_collection(collection)
-        return create_find_cursor(collection) if @advanced_filter_config[:find].present?
-
-        return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
-
-        collection.find
-      end
-
-      def check_filtering
-        return unless filtering_present?
-
-        check_find_and_aggregate
-      end
-
-      def check_find_and_aggregate
-        if @advanced_filter_config.keys.size != 1
-          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
-          raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
-        end
-      end
-
-      def call_db_function_on_collection(&on_doc_serialization)
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
@@ -118,7 +91,7 @@ module Connectors
 
             view = cursor.skip(skip).limit(PAGE_SIZE)
             view.each do |document|
-              yield serialize(document) { on_doc_serialization.call if block_given? }
+              yield serialize(document)
 
               found_in_page += 1
               found_overall += 1
@@ -134,6 +107,29 @@ module Connectors
 
             skip += PAGE_SIZE
           end
+        end
+      end
+
+      private
+
+      def create_db_cursor_on_collection(collection)
+        return create_find_cursor(collection) if @advanced_filter_config[:find].present?
+
+        return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
+
+        collection.find
+      end
+
+      def check_filtering
+        return unless filtering_present?
+
+        check_find_and_aggregate
+      end
+
+      def check_find_and_aggregate
+        if @advanced_filter_config.keys.size != 1
+          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
+          raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
         end
       end
 
