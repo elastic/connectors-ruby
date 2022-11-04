@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
                     lib/connectors_utility.rb
                     lib/utility/es_client.rb
                     lib/utility/logger.rb
+                    lib/utility/common.rb
                     lib/utility/constants.rb
                     lib/utility/cron.rb
                     lib/utility/errors.rb
