@@ -36,7 +36,7 @@ module Connectors
 
       def initialize(configuration: {}, job_description: {})
         @configuration = configuration.dup || {}
-        @job_description = job_description.dup || {}
+        @job_description = job_description&.dup || {}
 
         filter = get_filter(@job_description[:filtering])
 

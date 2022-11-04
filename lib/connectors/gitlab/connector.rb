@@ -36,7 +36,7 @@ module Connectors
         }
       end
 
-      def initialize(configuration: {})
+      def initialize(configuration: {}, job_description: {})
         super
 
         @extractor = Connectors::GitLab::Extractor.new(
