@@ -465,9 +465,6 @@ describe Core::ElasticConnectorActions do
         it_behaves_like 'job filtering'
       end
     end
-
-    context
-
   end
 
   context '#update_connector_status' do

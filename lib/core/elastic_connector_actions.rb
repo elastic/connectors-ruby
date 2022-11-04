@@ -129,7 +129,7 @@ module Core
             'domain' => filtering_domain['domain'],
             'rules' => filtering_domain.dig('active', 'rules'),
             'advanced_snippet' => filtering_domain.dig('active', 'advanced_snippet'),
-            'warnings' => [] # TODO in https://github.com/elastic/enterprise-search-team/issues/3174
+            'warnings' => [] # TODO: in https://github.com/elastic/enterprise-search-team/issues/3174
           }
         end
       end
