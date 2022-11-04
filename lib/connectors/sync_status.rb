@@ -8,13 +8,32 @@
 
 module Connectors
   class SyncStatus
-    COMPLETED = 'completed'
+    PENDING     = 'pending'
     IN_PROGRESS = 'in_progress'
-    ERROR = 'error'
+    CANCELING   = 'canceling'
+    CANCELED    = 'canceled'
+    SUSPENDED   = 'suspended'
+    COMPLETED   = 'completed'
+    ERROR       = 'error'
 
     STATUSES = [
-      COMPLETED,
+      PENDING,
       IN_PROGRESS,
+      CANCELING,
+      CANCELED,
+      SUSPENDED,
+      COMPLETED,
+      ERROR
+    ]
+
+    PENDING_STATUES = [
+      PENDING,
+      SUSPENDED
+    ]
+
+    TERMINAL_STATUSES = [
+      CANCELED,
+      COMPLETED,
       ERROR
     ]
   end
