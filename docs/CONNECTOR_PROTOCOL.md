@@ -228,6 +228,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   cancelation_requested_at: date; -> The date/time when the cancelation of the job is requested
   canceled_at: date; -> The date/time when the job is canceled
   completed_at: date; -> The data/time when the job is completed
+  configuration: object; -> Connector configuration
   connector_id: string; -> ID of the connector document in .elastic-connectors
   created_at: date; -> The date/time when the job is created
   deleted_document_count: number; -> Number of documents deleted in the job
@@ -259,8 +260,15 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   indexed_document_volume: number; -> The volume (in bytes) of documents indexed in the job
   last_seen: date; -> Connector writes check-in date-time regularly (UTC)
   metadata: object; -> Connector-specific metadata
+  pipeline: { -> Connector pipeline
+    extract_binary_content: boolean;
+    name: string;
+    reduce_whitespace: boolean;
+    run_ml_inference: boolean;
+  },
   started_at: date; -> The date/time when the job is started
   status: string; -> Job status Enum, see below
+  total_document_count: number; -> Number of documents in the index after the job completes
   trigger_method: string; -> How the job is triggered. Possible values are on-demand, scheduled.
   worker_hostname: string; -> The hostname of the worker to run the job
 }
@@ -285,6 +293,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "cancelation_requested_at" : { "type" : "date" },
     "canceled_at" : { "type" : "date" },
     "completed_at" : { "type" : "date" },
+    "configuration" : { "type" : "object" },
     "connector_id" : { "type" : "keyword" },
     "created_at" : { "type" : "date" },
     "deleted_document_count" : { "type" : "integer" },
@@ -324,8 +333,17 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "indexed_document_volume" : { "type" : "integer" },
     "last_seen" : { "type" : "date" },
     "metadata" : { "type" : "object" },
+    "pipeline" : {
+      "properties" : {
+        "extract_binary_content" : { "type" : "boolean" },
+        "name" : { "type" : "keyword" },
+        "reduce_whitespace" : { "type" : "boolean" },
+        "run_ml_inference" : { "type" : "boolean" }
+      }
+    },
     "started_at" : { "type" : "date" },
     "status" : { "type" : "keyword" },
+    "total_document_count" : { "type" : "integer" },
     "trigger_method" : { "type" : "keyword" },
     "worker_hostname" : { "type" : "keyword" }
   }
