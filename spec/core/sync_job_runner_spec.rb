@@ -41,6 +41,11 @@ describe Core::SyncJobRunner do
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
 
   let(:job_id) { 'job-123' }
+  let(:job_definition) do
+    {
+      '_id' => job_id
+    }
+  end
 
   let(:extract_binary_content) { true }
   let(:reduce_whitespace) { true }
@@ -51,7 +56,7 @@ describe Core::SyncJobRunner do
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
 
-    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_id)
+    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_definition)
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:complete_sync)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
