@@ -24,7 +24,7 @@ describe Utility::BulkQueue do
       end
 
       it 'raises an error' do
-        expect { subject.add("some-op") }.to raise_error(Utility::BulkQueue::QueueOverflowError)
+        expect { subject.add('some-op') }.to raise_error(Utility::BulkQueue::QueueOverflowError)
       end
     end
 
@@ -45,7 +45,7 @@ describe Utility::BulkQueue do
       it 'adds both operation and payload to the buffer' do
         subject.add(op, payload)
 
-        buffer = subject.pop_all 
+        buffer = subject.pop_all
 
         expect(buffer).to include(op)
         expect(buffer).to include(payload)
@@ -66,11 +66,11 @@ describe Utility::BulkQueue do
       let(:count_threshold) { 10 }
 
       before(:each) do
-        5.times.each do |i|
+        4.times.each do |i|
           subject.add("op: #{i}")
         end
 
-        5.times.each do |i|
+        6.times.each do |i|
           subject.add("op-w-payload: #{i}, payload: #{i}")
         end
       end
@@ -97,12 +97,12 @@ describe Utility::BulkQueue do
         expect(subject.will_fit?(big_operation)).to eq(false)
       end
     end
-  end 
+  end
 
   context '.pop_all' do
     context 'when queue is empty' do
       it 'returns empty string' do
-        expect(subject.pop_all). to eq('')
+        expect(subject.pop_all).to eq('')
       end
     end
 
@@ -116,7 +116,7 @@ describe Utility::BulkQueue do
       it 'cleans up the queue' do
         subject.pop_all
 
-        expect(subject.pop_all). to eq('')
+        expect(subject.pop_all).to eq('')
       end
     end
   end
@@ -147,13 +147,13 @@ describe Utility::BulkQueue do
         subject.pop_all
       end
 
-    it 'returns expected number of operations' do
-      expect(subject.current_stats[:current_op_count]).to eq(0)
-    end
+      it 'returns expected number of operations' do
+        expect(subject.current_stats[:current_op_count]).to eq(0)
+      end
 
-    it 'returns expected size of operations' do
-      expect(subject.current_stats[:current_buffer_size]).to eq(0)
-    end
+      it 'returns expected size of operations' do
+        expect(subject.current_stats[:current_buffer_size]).to eq(0)
+      end
     end
   end
 end

@@ -2,7 +2,7 @@ require 'core/output_sink'
 
 describe Core::OutputSink::BaseSink do
   subject { described_class.new }
-  let(:document) { { :id => 15 }}
+  let(:document) { { :id => 15 } }
   let(:deleted_id) { 25 }
 
   it 'base_sink methods raise an error when called' do
@@ -10,7 +10,7 @@ describe Core::OutputSink::BaseSink do
     expect { subject.ingest_multiple([document]) }.to raise_error(NotImplementedError)
     expect { subject.delete(deleted_id) }.to raise_error(NotImplementedError)
     expect { subject.delete_multiple([deleted_id]) }.to raise_error(NotImplementedError)
-    expect { subject.flush() }.to raise_error(NotImplementedError)
+    expect { subject.flush }.to raise_error(NotImplementedError)
   end
 
   context 'when all private methods are implemented' do
@@ -50,9 +50,9 @@ describe Core::OutputSink::BaseSink do
     end
 
     context '#ingest_multiple' do
-      let(:document1) {  {:id => 1 } }
-      let(:document2) {  {:id => 2 } }
-      let(:document3) {  {:id => 3 } }
+      let(:document1) {  { :id => 1 } }
+      let(:document2) {  { :id => 2 } }
+      let(:document3) {  { :id => 3 } }
 
       it 'calls ingest on each ingested document' do
         expect(subject).to receive(:ingest).with(document1)
@@ -124,9 +124,9 @@ describe Core::OutputSink::BaseSink do
 
         before(:each) do
           allow(subject).to receive(:do_serialize).and_return(serialized_object)
-      
+
           document_count.times.each do |id|
-            subject.ingest({:id => id})
+            subject.ingest({ :id => id })
           end
         end
 

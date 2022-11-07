@@ -232,7 +232,6 @@ describe Core::SyncJobRunner do
           }
         end
 
-
         it 'attempts to remove existing documents' do
           existing_document_ids.each do |id|
             expect(sink).to receive(:delete).with(id)

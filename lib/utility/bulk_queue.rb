@@ -8,9 +8,10 @@ require 'json'
 
 module Utility
   class BulkQueue
-    class QueueOverflowError < StandardError ; end
+    class QueueOverflowError < StandardError; end
 
-    def initialize(count_threshold = 500, size_threshold = 5 * 1024 * 1024) # 500 items or 5MB
+    # 500 items or 5MB
+    def initialize(count_threshold = 500, size_threshold = 5 * 1024 * 1024)
       @count_threshold = count_threshold.freeze
       @size_threshold = size_threshold.freeze
 
@@ -27,11 +28,11 @@ module Utility
 
       reset
 
-      return result
+      result
     end
 
     def add(operation, payload = nil)
-      raise QueueOverflowError unless will_fit?(operation, payload) #TODO: actual error class
+      raise QueueOverflowError unless will_fit?(operation, payload)
 
       operation_size = get_size(operation)
       payload_size = get_size(payload)
@@ -66,11 +67,11 @@ module Utility
       }
     end
 
-    private 
+    private
 
     def get_size(str)
-      return 0 if !str
-      return str.bytesize
+      return 0 unless str
+      str.bytesize
     end
 
     def reset

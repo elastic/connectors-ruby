@@ -68,7 +68,7 @@ describe Core::OutputSink::EsSink do
           :id => 2,
           :text => 'work work!'
         }
-      end 
+      end
       let(:serialized_document) { 'id: 1, text: "hoho, haha!"' }
       let(:another_serialized_document) { 'id: 2, text: "work work!"' }
 
@@ -76,7 +76,7 @@ describe Core::OutputSink::EsSink do
         # emulated behaviour is:
         # Queue will be full once first item is added to it
         allow(bulk_queue).to receive(:will_fit?).and_return(true, false)
-        allow(bulk_queue).to receive(:pop_all).and_return([ serialized_document ])
+        allow(bulk_queue).to receive(:pop_all).and_return([serialized_document])
 
         allow(serializer).to receive(:dump).with(document).and_return(serialized_document)
         allow(serializer).to receive(:dump).with(another_document).and_return(another_serialized_document)
@@ -132,11 +132,11 @@ describe Core::OutputSink::EsSink do
         allow(bulk_queue).to receive(:pop_all).and_return(serialized_delete_op)
 
         allow(serializer).to receive(:dump)
-          .with({'delete' => hash_including('_id' => delete_id)})
+          .with({ 'delete' => hash_including('_id' => delete_id) })
           .and_return(serialized_delete_op)
 
         allow(serializer).to receive(:dump)
-          .with({'delete' => hash_including('_id' => another_delete_id)})
+          .with({ 'delete' => hash_including('_id' => another_delete_id) })
           .and_return(another_serialized_delete_op)
       end
 
@@ -168,7 +168,7 @@ describe Core::OutputSink::EsSink do
   end
 
   context '.flush' do
-    let(:operation) { 'bulk: delete something \n insert something else' } 
+    let(:operation) { 'bulk: delete something \n insert something else' }
 
     before(:each) do
       allow(bulk_queue).to receive(:pop_all)
