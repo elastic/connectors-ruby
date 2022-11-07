@@ -24,8 +24,10 @@ module Core
             return
           end
           configuration = connector_class.configurable_fields_indifferent_access
+          features = connector_class.kibana_features
           doc = {
-            :configuration => configuration
+            :configuration => configuration,
+            :features => features
           }
 
           doc[:service_type] = service_type if service_type && connector_settings.needs_service_type?

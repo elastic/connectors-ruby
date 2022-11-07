@@ -118,6 +118,7 @@ This is our main communication index, used to communicate the connector's config
     "configuration" : { "type" : "object" },
     "description" : { "type" : "text" },
     "error" : { "type" : "keyword" },
+    "features": { "type": "keyword" },
     "filtering" : {
       "properties" : {
         "domain" : { "type" : "keyword" },
@@ -229,6 +230,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   connector_id: string; -> ID of the connector document in .elastic-connectors
   status: string; -> Job status Enum, see below
   error: string; -> Optional error message
+  features: string; -> List of optional feature names that the connector supports from the Kibana UI
   filtering: {          -> Filtering rules
     domain: string,     -> what data domain these rules apply to
     rules: {
@@ -268,6 +270,10 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
 - `suspended` -> A job is successfully started.
 - `completed` -> A job is successfully completed.
 - `error` -> A job failed.
+
+**Possible values for `features`**
+- `filtering_rules` -> if present, the Filtering Rules table will be visible for this connector in the Kibana UI
+- `filtering_advanced_config` -> if present, the Filtering Advanced Configuration will be visible for this connector in the Kibana UI
 
 #### Elasticsearch mappings for `.elastic-connectors-sync-jobs`:
 ```

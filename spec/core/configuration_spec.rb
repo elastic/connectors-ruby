@@ -1,6 +1,8 @@
 require 'core/configuration'
+require 'connectors/base/connector'
 require 'connectors/connector_status'
 require 'active_support/core_ext/hash/indifferent_access'
+require 'utility/constants'
 
 describe Core::Configuration do
   describe '.update' do
@@ -23,6 +25,7 @@ describe Core::Configuration do
       allow(connector_settings).to receive(:formatted).and_return('')
       allow(connector_class).to receive(:configurable_fields).and_return(configuration)
       allow(connector_class).to receive(:configurable_fields_indifferent_access).and_return(configuration.with_indifferent_access)
+      allow(connector_class).to receive(:kibana_features).and_return(Connectors::Base::Connector.kibana_features)
     end
 
     (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|
@@ -49,8 +52,11 @@ describe Core::Configuration do
       expect(Core::ElasticConnectorActions)
         .to receive(:update_connector_fields)
         .with(connector_id,
-              hash_including(:configuration => configuration,
-                             :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
+              hash_including(
+                :configuration => configuration,
+                :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION,
+                :features => [Utility::Constants::FILTERING_RULES_FEATURE, Utility::Constants::FILTERING_ADVANCED_FEATURE]
+              ))
 
       described_class.update(connector_settings)
     end
