@@ -249,6 +249,7 @@ module Core
             :api_key_id => { :type => :keyword },
             :configuration => { :type => :object },
             :error => { :type => :text },
+            :features => { :type => :keyword },
             :index_name => { :type => :keyword },
             :last_seen => { :type => :date },
             :last_synced => { :type => :date },
