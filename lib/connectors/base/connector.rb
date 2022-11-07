@@ -41,7 +41,7 @@ module Connectors
         filter = get_filter(@job_description[:filtering])
 
         @rules = Utility::Common.return_if_present(filter[:rules], [])
-        @advanced_filter_config = Utility::Common.return_if_present(filter[:advanced_config], {})
+        @advanced_filter_config = Utility::Common.return_if_present(filter[:advanced_snippet], {})
       end
 
       def yield_documents; end

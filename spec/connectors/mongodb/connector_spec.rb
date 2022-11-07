@@ -87,7 +87,7 @@ describe Connectors::MongoDB::Connector do
     }
   }
 
-  let(:advanced_config) {
+  let(:advanced_snippet) {
     {
       :find => find
     }
@@ -96,7 +96,7 @@ describe Connectors::MongoDB::Connector do
   let(:filtering) {
     {
       :rules => rules,
-      :advanced_config => advanced_config
+      :advanced_snippet => advanced_snippet
     }
   }
 
@@ -292,7 +292,7 @@ describe Connectors::MongoDB::Connector do
             }
           }
 
-          let(:advanced_config) {
+          let(:advanced_snippet) {
             {
               :find => {
                 :options => options
@@ -316,7 +316,7 @@ describe Connectors::MongoDB::Connector do
             }
           }
 
-          let(:advanced_config) {
+          let(:advanced_snippet) {
             {
               :find => {
                 :options => options
@@ -443,7 +443,7 @@ describe Connectors::MongoDB::Connector do
 
     context 'rules and advanced filtering config are empty' do
       let(:rules) { [] }
-      let(:advanced_config) { {} }
+      let(:advanced_snippet) { {} }
 
       it 'calls find without arguments' do
         expect(actual_collection).to receive(:find).with(no_args)
@@ -453,7 +453,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'find and aggregate exist' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :find => {
             :filter => filter,
@@ -537,7 +537,7 @@ describe Connectors::MongoDB::Connector do
 
     context 'aggregate field exists (with pipeline and options) in an active advanced filtering config' do
       # find should not exist
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -560,7 +560,7 @@ describe Connectors::MongoDB::Connector do
       }
 
       # find should not exist
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -583,7 +583,7 @@ describe Connectors::MongoDB::Connector do
       }
 
       # find should not exist
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -604,7 +604,7 @@ describe Connectors::MongoDB::Connector do
         }
       }
 
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -618,7 +618,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'wrong top level keys exist' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :wrong_key_one => {},
           :wrong_key_two => {},
