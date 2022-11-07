@@ -51,7 +51,6 @@ describe Core::SyncJobRunner do
   let(:extract_binary_content) { true }
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
-  let(:job_reporting_interval) { 10 }
   let(:total_document_count) { 100 }
 
   subject { described_class.new(connector_settings) }
@@ -79,7 +78,6 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
-    allow(connector_settings).to receive(:job_reporting_interval).and_return(job_reporting_interval)
     allow(connector_settings).to receive(:filtering).and_return(filtering)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)

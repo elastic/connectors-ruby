@@ -19,6 +19,8 @@ module Core
   end
 
   class SyncJobRunner
+    JOB_REPORTING_INTERVAL = 10
+
     def initialize(connector_settings)
       @connector_settings = connector_settings
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
@@ -63,7 +65,7 @@ module Core
           @sink.ingest(document)
           incoming_ids << document['id']
 
-          if Time.now - reporting_cycle_start >= @connector_settings.job_reporting_interval
+          if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
             ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
@@ -75,7 +77,7 @@ module Core
 
         ids_to_delete.each do |id|
           @sink.delete(id)
-          if Time.now - reporting_cycle_start >= @connector_settings.job_reporting_interval
+          if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
             ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end

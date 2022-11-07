@@ -18,7 +18,6 @@ module Core
     DEFAULT_EXTRACT_BINARY_CONTENT = true
     DEFAULT_REDUCE_WHITESPACE = true
     DEFAULT_RUN_ML_INFERENCE = true
-    DEFAULT_JOB_REPORTING_INTERVAL = 10
 
     DEFAULT_FILTERING = {}
 
@@ -101,10 +100,6 @@ module Core
 
     def run_ml_inference?
       Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
-    end
-
-    def job_reporting_interval
-      return_if_present(@connectors_meta.dig(:job, :reporting_interval), DEFAULT_JOB_REPORTING_INTERVAL)
     end
 
     def formatted
