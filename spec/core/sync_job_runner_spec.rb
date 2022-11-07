@@ -161,6 +161,21 @@ describe Core::SyncJobRunner do
       end
     end
 
+    context 'when validation thread did not finish execution' do
+      before(:each) do
+        # Exception, which is not rescued (treated like something, which stopped the sync thread)
+        allow(connector_instance).to receive(:do_health_check!).and_raise(Exception.new('Oh no!'))
+      end
+
+      it 'sets an error, that the validation thread was killed' do
+        # Check for exception thrown on purpose, so that the test is not marked as failed for the wrong reason
+        expect { subject.execute }.to raise_exception
+
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@status)[:error]).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
+      end
+    end
+
     context 'when a bunch of documents are returned from 3rd-party system' do
       let(:doc1) do
         {
