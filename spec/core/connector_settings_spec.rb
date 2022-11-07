@@ -71,7 +71,7 @@ describe Core::ConnectorSettings do
               :domain => 'DEFAULT',
               :active => {
                 :rules => [],
-                :advanced_config => {},
+                :advanced_snippet => {},
               }
             }
           ]
@@ -84,7 +84,7 @@ describe Core::ConnectorSettings do
 
         expect(first_filter[:domain]).to eq('DEFAULT')
         expect(first_filter[:active][:rules]).to_not be_nil
-        expect(first_filter[:active][:advanced_config]).to_not be_nil
+        expect(first_filter[:active][:advanced_snippet]).to_not be_nil
       end
     end
 
