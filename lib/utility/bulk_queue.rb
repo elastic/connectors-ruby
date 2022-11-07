@@ -18,11 +18,9 @@ module Utility
 
       @current_buffer_size = 0
       @current_data_size = 0
-
-      @total_data_size = 0
     end
 
-    def pop_request
+    def pop_all
       result = @buffer
 
       reset
@@ -40,7 +38,6 @@ module Utility
       @current_buffer_size += operation_size
       @current_buffer_size += payload_size
       @current_data_size += payload_size
-      @total_data_size += payload_size
 
       @buffer << operation
       @buffer << "\n"
@@ -64,12 +61,6 @@ module Utility
       {
         :current_op_count => @current_op_count,
         :current_buffer_size => @current_buffer_size
-      }
-    end
-
-    def total_stats
-      {
-        :total_data_size => @total_data_size
       }
     end
 

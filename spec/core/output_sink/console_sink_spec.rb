@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Core::OutputSink::ConsoleSink do
   subject { described_class.new }
 
-  it_behaves_like 'implements all methods of base class' do
+  it_behaves_like 'implements all private methods of base class' do
     let(:concrete_class_instance) { subject }
     let(:base_class_instance) { Core::OutputSink::BaseSink.new }
   end

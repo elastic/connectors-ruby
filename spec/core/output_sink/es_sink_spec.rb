@@ -9,103 +9,107 @@ RSpec::Matchers.define :array_of_size do |x|
 end
 
 describe Core::OutputSink::EsSink do
-  subject { described_class.new(index_name, request_pipeline) }
+  subject { described_class.new(index_name, request_pipeline, bulk_queue) }
   let(:index_name) { 'some-index-name' }
   let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }
   let(:es_client) { double }
+  let(:bulk_queue) { double }
+  let(:serializer) { double }
 
   before(:each) do
     allow(Utility::EsClient).to receive(:new).and_return(es_client)
+
     allow(es_client).to receive(:bulk)
+
+    # I attempted to test with this class mocked but it just made things much much harder
+    allow(bulk_queue).to receive(:will_fit?).and_return(true)
+    allow(bulk_queue).to receive(:add)
+    allow(bulk_queue).to receive(:pop_all)
+
+    allow(Elasticsearch::API).to receive(:serializer).and_return(serializer)
+    allow(serializer).to receive(:dump).and_return('')
   end
 
-  it_behaves_like 'implements all methods of base class' do
+  it_behaves_like 'implements all private methods of base class' do
     let(:concrete_class_instance) { subject }
     let(:base_class_instance) { Core::OutputSink::BaseSink.new }
   end
 
   context '.ingest' do
-    context('when flush threshold is not reached') do
-      let(:doc) { { :id => 1, :something => :else } }
+    let(:document) do
+      {
+        :id => 1,
+        'text' => 'hoho, haha!'
+      }
+    end
+    let(:serialized_document) { 'id: 1, text: "hoho, haha!"' }
 
+    before(:each) do
+      allow(serializer).to receive(:dump).with(document).and_return(serialized_document)
+    end
+
+    context('when bulk queue still has capacity') do
       it 'does not immediately send the document into elasticsearch' do
         expect(es_client).to_not receive(:bulk)
 
-        subject.ingest(doc)
+        subject.ingest(document)
       end
     end
 
-    context 'when flush threshold is reached' do
-      let(:flush_threshold) { 50 }
-      let(:doc_count) { 55 }
+    context 'when bulk queue reports that it is full' do
+      let(:document) do
+        {
+          :id => 1,
+          'text' => 'hoho, haha!'
+        }
+      end
+      let(:another_document) do
+        {
+          :id => 2,
+          :text => 'work work!'
+        }
+      end 
+      let(:serialized_document) { 'id: 1, text: "hoho, haha!"' }
+      let(:another_serialized_document) { 'id: 2, text: "work work!"' }
 
-      it 'sends out one batch of documents' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
+      before(:each) do
+        # emulated behaviour is:
+        # Queue will be full once first item is added to it
+        allow(bulk_queue).to receive(:will_fit?).and_return(true, false)
+        allow(bulk_queue).to receive(:pop_all).and_return([ serialized_document ])
 
-        (1..doc_count).each do |id|
-          doc = { :id => id, :data => 'same data' }
-          subject.ingest(doc)
-        end
+        allow(serializer).to receive(:dump).with(document).and_return(serialized_document)
+        allow(serializer).to receive(:dump).with(another_document).and_return(another_serialized_document)
       end
 
-      context 'when flush is called afterwards' do
-        it 'second flush sends out the rest of the documents' do
-          (1..doc_count).each do |id|
-            doc = { :id => id, :data => 'same data' }
-            subject.ingest(doc)
-          end
+      it 'sends a bulk request with data returned from bulk queue' do
+        expect(es_client).to receive(:bulk)
+          .once
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
-
-          subject.flush
-        end
-      end
-    end
-  end
-
-  context '.ingest_multiple' do
-    context('when flush threshold is not reached') do
-      let(:documents) { [{ :id => 1, :something => :else }, { :id => 2, :another => :one }] }
-
-      it 'does not immediately send the document into elasticsearch' do
-        expect(es_client).to_not receive(:bulk)
-
-        subject.ingest_multiple(documents)
-      end
-    end
-
-    context 'when flush threshold is reached' do
-      let(:flush_threshold) { 50 }
-      let(:doc_count) { 55 }
-
-      it 'sends out one batch of documents' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
-
-        documents = (1..doc_count).map do |id|
-          { :id => id, :data => 'same data' }
-        end
-
-        subject.ingest_multiple(documents)
+        subject.ingest(document)
+        subject.ingest(another_document)
       end
 
-      context 'when flush is called afterwards' do
-        it 'second flush sends out the rest of the documents' do
-          documents = (1..doc_count).map do |id|
-            { :id => id, :data => 'same data' }
-          end
+      it 'pops existing documents before adding a new one' do
+        expect(bulk_queue).to receive(:add)
+          .with(anything, serialized_document)
+          .ordered
 
-          subject.ingest_multiple(documents)
+        expect(bulk_queue).to receive(:pop_all)
+          .ordered
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
+        expect(bulk_queue).to receive(:add)
+          .with(anything, another_serialized_document)
+          .ordered
 
-          subject.flush
-        end
+        subject.ingest(document)
+        subject.ingest(another_document)
       end
     end
   end
 
   context '.delete' do
-    context('when flush threshold is not reached') do
+    context('when bulk queue still has capacity') do
       let(:id) { 15 }
 
       it 'does not immediately send the document into elasticsearch' do
@@ -115,76 +119,65 @@ describe Core::OutputSink::EsSink do
       end
     end
 
-    context 'when flush threshold is reached' do
-      let(:flush_threshold) { 50 }
-      let(:doc_count) { 55 }
+    context 'when bulk queue reports that it is full' do
+      let(:delete_id) { 10 }
+      let(:serialized_delete_op) { 'delete: 10' }
+      let(:another_delete_id) { 11 }
+      let(:another_serialized_delete_op) { 'delete: 11' }
+
+      before(:each) do
+        # emulated behaviour is:
+        # Queue will be full once first item is added to it
+        allow(bulk_queue).to receive(:will_fit?).and_return(true, false)
+        allow(bulk_queue).to receive(:pop_all).and_return(serialized_delete_op)
+
+        allow(serializer).to receive(:dump)
+          .with({'delete' => hash_including('_id' => delete_id)})
+          .and_return(serialized_delete_op)
+
+        allow(serializer).to receive(:dump)
+          .with({'delete' => hash_including('_id' => another_delete_id)})
+          .and_return(another_serialized_delete_op)
+      end
 
       it 'sends out one batch of changes' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
+        expect(es_client).to receive(:bulk)
+          .once
+          .with(hash_including(:body => a_string_including(serialized_delete_op)))
 
-        (1..doc_count).each do |id|
-          subject.delete(id)
-        end
+        subject.delete(delete_id)
+        subject.delete(another_delete_id)
       end
 
-      context 'when flush is called afterwards' do
-        it 'second flush sends out the rest of the documents' do
-          (1..doc_count).each do |id|
-            subject.delete(id)
-          end
+      it 'pops existing documents before adding a new one' do
+        expect(bulk_queue).to receive(:add)
+          .with(serialized_delete_op)
+          .ordered
 
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
+        expect(bulk_queue).to receive(:pop_all)
+          .ordered
 
-          subject.flush
-        end
-      end
-    end
-  end
+        expect(bulk_queue).to receive(:add)
+          .with(another_serialized_delete_op)
+          .ordered
 
-  context '.delete_multiple' do
-    context('when flush threshold is not reached') do
-      let(:ids) { [15, 12, 11] }
-
-      it 'does not immediately send the document into elasticsearch' do
-        expect(es_client).to_not receive(:bulk)
-
-        subject.delete_multiple(ids)
-      end
-    end
-
-    context 'when flush threshold is reached' do
-      let(:flush_threshold) { 50 }
-      let(:doc_count) { 55 }
-
-      it 'sends out one batch of documents' do
-        expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(flush_threshold), :pipeline => request_pipeline })
-
-        subject.delete_multiple((1..doc_count).to_a)
-      end
-
-      context 'when flush is called afterwards' do
-        it 'second flush sends out the rest of the documents' do
-          subject.delete_multiple((1..doc_count).to_a)
-
-          expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count - flush_threshold), :pipeline => request_pipeline })
-
-          subject.flush
-        end
+        subject.delete(delete_id)
+        subject.delete(another_delete_id)
       end
     end
   end
 
   context '.flush' do
-    let(:flush_threshold) { 50 }
-    let(:doc_count) { 5 }
+    let(:operation) { 'bulk: delete something \n insert something else' } 
 
-    it 'sends the documents once flush is triggered' do
-      expect(es_client).to receive(:bulk).once.with({ :body => array_of_size(doc_count), :pipeline => request_pipeline })
+    before(:each) do
+      allow(bulk_queue).to receive(:pop_all)
+        .and_return(operation)
+    end
 
-      (1..doc_count).each do |id|
-        doc = { :id => id, :data => 'same data' }
-        subject.ingest(doc)
-      end
+    it 'sends data from bulk queue to elasticsearch' do
+      expect(es_client).to receive(:bulk)
+        .with(hash_including(:body => operation))
 
       subject.flush
     end

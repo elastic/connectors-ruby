@@ -17,76 +17,42 @@ require 'elasticsearch/api'
 module Core::OutputSink
   class EsSink < Core::OutputSink::BaseSink
 
-    def initialize(index_name, request_pipeline)
+    def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new)
       super()
       @client = Utility::EsClient.new(App::Config[:elasticsearch])
       @index_name = index_name
       @request_pipeline = request_pipeline
-      @operation_queue = Utility::BulkQueue.new
-      @ingested_count = 0
-      @deleted_count = 0
-    end
-
-    def ingest(document)
-      return if document.blank?
-
-      index_op = serialize({ 'index' => { '_index' => index_name, '_id' => document['id'] } })
-      index_data = serialize(document)
-
-      flush unless @operation_queue.will_fit?(index_op, index_data)
-
-      @operation_queue.add(
-        index_op,
-        index_data
-      )
-
-      @ingested_count += 1
-    end
-
-    def delete(doc_id)
-      return if doc_id.nil?
-
-      delete_op = serialize({ 'delete' => { '_index' => index_name, '_id' => doc_id } })
-      flush unless @operation_queue.will_fit?(delete_op)
-
-      @operation_queue.add(delete_op)
-
-      @deleted_count += 1
-    end
-
-    def flush
-      stats = @operation_queue.current_stats
-      data = @operation_queue.pop_request
-      return if data.empty?
-
-      @client.bulk(:body => data, :pipeline => @request_pipeline)
-      Utility::Logger.info "Applied #{stats[:current_op_count]} upsert/delete operations to the index #{index_name}."
-    end
-
-    def ingest_multiple(documents)
-      Utility::Logger.debug "Enqueueing #{documents&.size} documents to the index #{index_name}."
-      documents.each { |doc| ingest(doc) }
-    end
-
-    def delete_multiple(ids)
-      Utility::Logger.debug "Enqueueing #{ids&.size} ids to delete from the index #{index_name}."
-      ids.each { |id| delete(id) }
-    end
-
-    def ingestion_stats
-      {
-        :indexed_document_count => @ingested_count,
-        :indexed_document_volume => @operation_queue.total_stats[:total_data_size],
-        :deleted_document_count => @deleted_count
-      }
+      @operation_queue = bulk_queue
     end
 
     private
 
-    def serialize(obj)
-      # TODO: actually properly serialize
-      # Now dates are serialized like strings
-      #
+    def do_ingest(id, serialized_document)
+      index_op = do_serialize({ 'index' => { '_index' => index_name, '_id' => id } })
+
+      flush unless @operation_queue.will_fit?(index_op, serialized_document)
+
+      @operation_queue.add(
+        index_op,
+        serialized_document
+      )
+    end
+
+    def do_delete(doc_id)
+      delete_op = do_serialize({ 'delete' => { '_index' => index_name, '_id' => doc_id } })
+      flush unless @operation_queue.will_fit?(delete_op)
+
+      @operation_queue.add(delete_op)
+    end
+
+    def do_flush
+      data = @operation_queue.pop_all
+      return if data.empty?
+
+      @client.bulk(:body => data, :pipeline => @request_pipeline)
+    end
+
+    def do_serialize(obj)
       Elasticsearch::API.serializer.dump(obj)
     end
 
