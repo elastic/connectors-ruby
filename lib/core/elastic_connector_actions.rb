@@ -115,6 +115,7 @@ module Core
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now,
+          :started_at => Time.now,
           :last_seen => Time.now,
           :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }

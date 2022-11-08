@@ -325,6 +325,7 @@ describe Core::ElasticConnectorActions do
         :body => hash_including(
           :worker_hostname,
           :created_at,
+          :started_at,
           :connector_id => connector_id,
           :status => Connectors::SyncStatus::IN_PROGRESS
         )
