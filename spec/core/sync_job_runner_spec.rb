@@ -2,6 +2,8 @@ require 'connectors/connector_status'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'core/sync_job_runner'
+require 'core/filtering/validation_status'
+require 'utility'
 
 describe Core::SyncJobRunner do
   let(:connector_id) { '123' }
@@ -28,6 +30,12 @@ describe Core::SyncJobRunner do
   end
 
   let(:connector_settings) { double }
+  let(:job_description) {
+    {
+      :_id => job_id,
+      :filtering => filtering
+    }
+  }
   let(:filtering) {
     {}
   }
@@ -40,6 +48,12 @@ describe Core::SyncJobRunner do
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
 
+  let(:filtering_validation_result) {
+    {
+      :state => Core::Filtering::ValidationStatus::VALID,
+      :errors => []
+    }
+  }
   let(:job_id) { 'job-123' }
 
   let(:extract_binary_content) { true }
@@ -51,7 +65,7 @@ describe Core::SyncJobRunner do
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
 
-    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_id)
+    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_description)
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:complete_sync)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
@@ -70,10 +84,10 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
-    allow(connector_settings).to receive(:filtering).and_return(filtering)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
+    allow(connector_class).to receive(:validate_filtering).and_return(filtering_validation_result)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
     allow(connector_instance).to receive(:do_health_check!)
@@ -82,6 +96,28 @@ describe Core::SyncJobRunner do
   end
 
   context '.execute' do
+    shared_examples_for 'sync stops with error' do
+      it 'stops with error' do
+        expect(Core::ElasticConnectorActions).to receive(:complete_sync) { |actual_connector_id, actual_job_id, actual_status|
+          expect(actual_connector_id).to eq(connector_id)
+          expect(actual_job_id).to eq(job_id)
+          expect(actual_status[:error]).to_not be_empty
+        }
+
+        subject.execute
+
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+      end
+    end
+
+    shared_examples_for 'runs a full sync' do
+      it 'finishes a sync job' do
+        subject.execute
+
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(true)
+      end
+    end
+
     context 'when job_id is not present' do
       let(:job_id) { nil }
 
@@ -97,6 +133,50 @@ describe Core::SyncJobRunner do
 
         subject.execute
       end
+    end
+
+    context 'when filtering is in state invalid' do
+      let(:filtering_validation_result) {
+        {
+          :state => Core::Filtering::ValidationStatus::INVALID,
+          :errors => []
+        }
+      }
+
+      it_behaves_like 'sync stops with error'
+    end
+
+    context 'when filtering is in state edited' do
+      let(:filtering_validation_result) {
+        {
+          :state => Core::Filtering::ValidationStatus::EDITED,
+          :errors => []
+        }
+      }
+
+      it_behaves_like 'sync stops with error'
+    end
+
+    context 'when filtering is in state valid, but errors are present' do
+      let(:filtering_validation_result) {
+        {
+          :state => Core::Filtering::ValidationStatus::VALID,
+          :errors => ['Error']
+        }
+      }
+
+      it_behaves_like 'sync stops with error'
+    end
+
+    context 'when filtering is in state valid and no errors are present' do
+      let(:filtering_validation_result) {
+        {
+          :state => Core::Filtering::ValidationStatus::VALID,
+          :errors => []
+        }
+      }
+
+      it_behaves_like 'runs a full sync'
     end
 
     context 'when connector was already configured with different configurable field set' do
@@ -137,11 +217,7 @@ describe Core::SyncJobRunner do
       subject.execute
     end
 
-    it 'marks the sync as finished' do
-      subject.execute
-
-      expect(subject.instance_variable_get(:@sync_finished)).to eq(true)
-    end
+    it_behaves_like 'runs a full sync'
 
     context 'when an error occurs' do
       before(:each) do
@@ -153,6 +229,21 @@ describe Core::SyncJobRunner do
 
         expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
         expect(subject.instance_variable_get(:@status)[:error]).to eq('error message')
+      end
+    end
+
+    context 'when validation thread did not finish execution' do
+      before(:each) do
+        # Exception, which is not rescued (treated like something, which stopped the sync thread)
+        allow(connector_instance).to receive(:do_health_check!).and_raise(Exception.new('Oh no!'))
+      end
+
+      it 'sets an error, that the validation thread was killed' do
+        # Check for exception thrown on purpose, so that the test is not marked as failed for the wrong reason
+        expect { subject.execute }.to raise_exception
+
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@status)[:error]).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
       end
     end
 

@@ -8,6 +8,7 @@
 
 require 'connectors/connector_status'
 require 'connectors/registry'
+require 'core/filtering/validation_status'
 require 'core/output_sink'
 require 'utility'
 
@@ -41,7 +42,8 @@ module Core
     def do_sync!
       Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
-      job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_description = ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_id = job_description.with_indifferent_access['_id']
 
       unless job_id.present?
         Utility::Logger.error("Failed to claim the job for #{@connector_settings.id}. Please check the logs for the cause of this error.")
@@ -51,8 +53,10 @@ module Core
       begin
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
-        # will be replaced when job claiming returns full job description object
-        job_description = { :filtering => @connector_settings.filtering }
+        Utility::Logger.info("Checking active filtering for sync job #{job_id} for connector #{@connector_settings.id}.")
+        validate_filtering(job_description[:filtering])
+        Utility::Logger.debug("Active filtering for sync job #{job_id} for connector #{@connector_settings.id} is valid.")
+
         connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: job_description)
 
         connector_instance.do_health_check!
@@ -119,6 +123,16 @@ module Core
       actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
 
       raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
+    end
+
+    def validate_filtering(filtering)
+      validation_result = @connector_class.validate_filtering(filtering)
+
+      wrong_state_error = Utility::InvalidFilterConfigError.new("Active filtering is not in valid state (current state: #{validation_result[:state]}) for connector #{@connector_settings.id}. Please check active filtering in connectors index.")
+      raise wrong_state_error if validation_result[:state] != Core::Filtering::ValidationStatus::VALID
+
+      errors_present_error = Utility::InvalidFilterConfigError.new("Active filtering is in valid state, but errors were detected (errors: #{validation_result[:errors]}) for connector #{@connector_settings.id}. Please check active filtering in connectors index.")
+      raise errors_present_error if validation_result[:errors].present?
     end
   end
 end
