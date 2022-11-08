@@ -6,12 +6,14 @@
 # frozen_string_literal: true
 
 require 'core'
+require 'core/filtering/validation_job_runner'
 require 'app/dispatcher'
 
 describe App::Dispatcher do
   let(:scheduler) { double }
   let(:pool) { double }
-  let(:job_runner) { double }
+  let(:sync_job_runner) { double }
+  let(:filter_validation_job_runner) { double }
   let(:connector_id) { 123 }
   let(:info_message) { nil }
 
@@ -21,9 +23,11 @@ describe App::Dispatcher do
 
     allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
     allow(pool).to receive(:post).and_yield
-    allow(Core::SyncJobRunner).to receive(:new).and_return(job_runner)
+    allow(Core::SyncJobRunner).to receive(:new).and_return(sync_job_runner)
+    allow(sync_job_runner).to receive(:execute)
+    allow(Core::Filtering::ValidationJobRunner).to receive(:new).and_return(filter_validation_job_runner)
+    allow(filter_validation_job_runner).to receive(:execute)
     allow(Core::Heartbeat).to receive(:send)
-    allow(job_runner).to receive(:execute)
     allow(Utility::ExceptionTracking).to receive(:log_exception)
     allow(Utility::Logger).to receive(:info)
 
@@ -104,7 +108,7 @@ describe App::Dispatcher do
         shared_examples_for 'sync' do
           it 'starts sync job' do
             expect(described_class).to receive(:start_heartbeat_task)
-            expect(job_runner).to receive(:execute)
+            expect(sync_job_runner).to receive(:execute)
             expect { described_class.start! }.to_not raise_error
           end
         end
@@ -112,7 +116,7 @@ describe App::Dispatcher do
         shared_examples_for 'no sync' do
           it 'does not start sync job' do
             expect(described_class).to_not receive(:start_heartbeat_task)
-            expect(job_runner).to_not receive(:execute)
+            expect(sync_job_runner).to_not receive(:execute)
             expect { described_class.start! }.to_not raise_error
           end
         end
@@ -121,7 +125,7 @@ describe App::Dispatcher do
 
         context 'when sync throws an error' do
           before(:each) do
-            allow(job_runner).to receive(:execute).and_raise('Oh no!')
+            allow(sync_job_runner).to receive(:execute).and_raise('Oh no!')
           end
 
           it_behaves_like 'logs exception'
@@ -129,7 +133,7 @@ describe App::Dispatcher do
 
         context 'when sync is already running' do
           before(:each) do
-            allow(job_runner).to receive(:execute).and_raise(Core::JobAlreadyRunningError.new(connector_id))
+            allow(sync_job_runner).to receive(:execute).and_raise(Core::JobAlreadyRunningError.new(connector_id))
           end
           let(:info_message) { 'already running' }
 
@@ -138,7 +142,7 @@ describe App::Dispatcher do
 
         context 'on version conflict' do
           before(:each) do
-            allow(job_runner).to receive(:execute).and_raise(Core::ConnectorVersionChangedError.new(connector_id, 0, 0))
+            allow(sync_job_runner).to receive(:execute).and_raise(Core::ConnectorVersionChangedError.new(connector_id, 0, 0))
           end
           let(:info_message) { 'version conflict' }
 
@@ -193,6 +197,27 @@ describe App::Dispatcher do
         context 'when configuration throws an error' do
           before(:each) do
             allow(Core::Configuration).to receive(:update).and_raise('Oh no!')
+          end
+
+          it_behaves_like 'logs exception'
+        end
+      end
+
+      context 'with filter validation task' do
+        let(:task) { :filter_validation }
+
+        before(:each) do
+          allow(filter_validation_job_runner).to receive(:execute)
+        end
+
+        it 'should run the filter validation task' do
+          expect(described_class).to receive(:start_filter_validation_task)
+          expect { described_class.start! }.to_not raise_error
+        end
+
+        context 'when filter validation throws an error' do
+          before(:each) do
+            allow(filter_validation_job_runner).to receive(:execute).and_raise('Oh no!')
           end
 
           it_behaves_like 'logs exception'
