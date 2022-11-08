@@ -494,7 +494,22 @@ describe Core::ElasticConnectorActions do
         'wrong format'
       }
 
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => ['error']
+          }
+        }
+      }
+
       it_behaves_like 'does not update any validation result'
+
+      it 'also logs an error' do
+        expect(Utility::Logger).to receive(:error).with(anything)
+
+        described_class.update_filtering_validation(connector_id, new_validation_states)
+      end
     end
 
     context 'connector not present' do

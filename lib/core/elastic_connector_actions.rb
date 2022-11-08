@@ -100,6 +100,7 @@ module Core
           end
         else
           Utility::Logger.error("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+          return
         end
 
         update_connector_fields(connector_id, { :filtering => filtering })
