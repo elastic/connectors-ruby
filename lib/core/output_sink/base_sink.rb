@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'utility/logger'
+
 module Core
   module OutputSink
     class BaseSink
@@ -16,7 +18,10 @@ module Core
       end
 
       def ingest(document)
-        return if document.blank?
+        unless document && document.any?
+          Utility::Logger.warn('Connector attempted to ingest an empty document, skipping')
+          return
+        end
 
         serialized_document = do_serialize(document)
         do_ingest(document['id'], serialized_document)

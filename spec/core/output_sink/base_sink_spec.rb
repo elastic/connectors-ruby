@@ -1,4 +1,5 @@
 require 'core/output_sink'
+require 'utility/logger'
 
 describe Core::OutputSink::BaseSink do
   subject { described_class.new }
@@ -22,11 +23,33 @@ describe Core::OutputSink::BaseSink do
     end
 
     context '#ingest' do
+      context 'when ingested document is nil' do
+        let(:document) { {} }
+
+        it 'does not call do_ingest' do
+          expect(subject).to_not receive(:do_ingest)
+
+          subject.ingest(document)
+        end
+
+        it 'produces a warning' do
+          expect(Utility::Logger).to receive(:warn)
+
+          subject.ingest(document)
+        end
+      end
+
       context 'when ingested document is empty' do
         let(:document) { {} }
 
         it 'does not call do_ingest' do
           expect(subject).to_not receive(:do_ingest)
+
+          subject.ingest(document)
+        end
+
+        it 'produces a warning' do
+          expect(Utility::Logger).to receive(:warn)
 
           subject.ingest(document)
         end
