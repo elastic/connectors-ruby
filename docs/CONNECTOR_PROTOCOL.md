@@ -71,12 +71,12 @@ This is our main communication index, used to communicate the connector's config
   index_name: string;   -> The name of the content index where data will be written to
   is_native: boolean;   -> Whether this is a native connector
   language: string;     -> the language used for the analyzer
+  last_deleted_document_count: number;    -> How many documents were deleted in the last job
+  last_indexed_document_count: number;    -> How many documents were indexed in the last job  
   last_seen: date;      -> Connector writes check-in date-time regularly (UTC)
   last_sync_error: string;   -> Optional last job error message
   last_sync_status: string;  -> Status of the last job, or null if no job has been executed
   last_synced: date;    -> Date/time of last job (UTC)
-  last_deleted_document_count: number;    -> How many documents were deleted in the last job
-  last_indexed_document_count: number;    -> How many documents were indexed in the last job
   name: string; -> the name to use for the connector
   pipeline: {
     extract_binary_content: boolean; -> Whether the `request_pipeline` should handle binary data
@@ -193,12 +193,12 @@ This is our main communication index, used to communicate the connector's config
     "index_name" : { "type" : "keyword" },
     "is_native" : { "type" : "boolean" },
     "language" : { "type" : "keyword" },
+    "last_deleted_document_count" : { "type" : "long" },
+    "last_indexed_document_count" : { "type" : "long" },
     "last_seen" : { "type" : "date" },
     "last_sync_error" : { "type" : "keyword" },
     "last_sync_status" : { "type" : "keyword" },
     "last_synced" : { "type" : "date" },
-    "last_deleted_document_count" : { "type" : "long" },
-    "last_indexed_document_count" : { "type" : "long" },
     "name" : { "type" : "keyword" },
     "pipeline" : {
       "properties" : {
