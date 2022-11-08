@@ -71,7 +71,7 @@ describe Core::ConnectorSettings do
               :domain => 'DEFAULT',
               :active => {
                 :rules => [],
-                :advanced_config => {},
+                :advanced_snippet => {},
               }
             }
           ]
@@ -79,12 +79,11 @@ describe Core::ConnectorSettings do
       }
 
       it 'extracts filtering field' do
-        filtering = subject.filtering
-        first_filter = filtering[0]
+        filter = subject.filtering
 
-        expect(first_filter[:domain]).to eq('DEFAULT')
-        expect(first_filter[:active][:rules]).to_not be_nil
-        expect(first_filter[:active][:advanced_config]).to_not be_nil
+        expect(filter[:domain]).to eq('DEFAULT')
+        expect(filter[:active][:rules]).to_not be_nil
+        expect(filter[:active][:advanced_snippet]).to_not be_nil
       end
     end
 
