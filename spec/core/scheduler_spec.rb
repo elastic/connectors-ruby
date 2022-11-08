@@ -1,6 +1,7 @@
 require 'core/native_scheduler'
 require 'core/scheduler'
 require 'core/elastic_connector_actions'
+require 'core/filtering/validation_status'
 require 'connectors/registry'
 
 describe Core::Scheduler do
@@ -53,6 +54,7 @@ describe Core::Scheduler do
       before(:each) do
         allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:configuration_triggered?).with(connector_settings).and_return(false)
+        allow(subject).to receive(:filtering_validation_triggered?).with(connector_settings).and_return(false)
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(allow_sync)
         allow(connector_settings).to receive(:id).and_return('123')
         allow(connector_settings).to receive(:connector_status).and_return('configured')
@@ -142,6 +144,7 @@ describe Core::Scheduler do
       before(:each) do
         allow(subject).to receive(:sync_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:configuration_triggered?).with(connector_settings).and_return(false)
+        allow(subject).to receive(:filtering_validation_triggered?).with(connector_settings).and_return(false)
         allow(connector_settings).to receive(:[]).with(:last_seen).and_return(last_seen)
       end
 
@@ -179,6 +182,7 @@ describe Core::Scheduler do
       before(:each) do
         allow(subject).to receive(:sync_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
+        allow(subject).to receive(:filtering_validation_triggered?).with(connector_settings).and_return(false)
         allow(connector_settings).to receive(:connector_status).and_return(connector_status)
         allow(connector_settings).to receive(:needs_service_type?).and_return(false)
       end
@@ -208,6 +212,145 @@ describe Core::Scheduler do
 
           it_behaves_like 'does not trigger', :configuration
         end
+      end
+    end
+
+    context 'with filtering validation task' do
+      let(:state) {
+        Core::Filtering::ValidationStatus::EDITED
+      }
+
+      let(:advanced_config) {
+        {
+          :find => {
+            :filter => {
+              :$text => {
+                :$search => 'garden',
+                :$caseSensitive => false
+              }
+            },
+            :options => {
+              :skip => 10,
+              :limit => 1000
+            }
+          }
+        }
+      }
+
+      let(:validation) {
+        {
+          :state => state,
+          :errors => []
+        }
+      }
+
+      let(:filtering) {
+        {
+          :domain => 'DEFAULT',
+          :active => {},
+          :draft => {
+            :rules => [],
+            :advanced_config => advanced_config,
+            :validation => validation
+          }
+        }
+      }
+
+      before(:each) do
+        allow(subject).to receive(:sync_triggered?).with(connector_settings).and_return(false)
+        allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
+        allow(subject).to receive(:configuration_triggered?).with(connector_settings).and_return(false)
+
+        allow(connector_settings).to receive(:filtering).and_return(filtering)
+        allow(connector_settings).to receive(:formatted).and_return('')
+      end
+
+      context 'filtering is not present' do
+        context 'filtering is nil' do
+          let(:filtering) {
+            nil
+          }
+
+          it_behaves_like 'does not trigger', :filter_validation
+        end
+
+        context 'filtering is an empty array' do
+          let(:filtering) {
+            []
+          }
+
+          it_behaves_like 'does not trigger', :filter_validation
+        end
+
+        context 'filtering is an empty hash' do
+          let(:filtering) {
+            {}
+          }
+
+          it_behaves_like 'does not trigger', :filter_validation
+        end
+      end
+
+      context 'filtering does not contain draft field' do
+        let(:filtering) {
+          {
+            :domain => 'DEFAULT',
+            :active => {},
+            :validation => {}
+          }
+        }
+
+        it_behaves_like 'does not trigger', :filter_validation
+      end
+
+      context 'filtering draft advanced config is not present' do
+        context 'advanced config is nil' do
+          let(:advanced_config) {
+            nil
+          }
+
+          it_behaves_like 'does not trigger', :filter_validation
+        end
+
+        context 'advanced config is an empty hash' do
+          let(:advanced_config) {
+            {}
+          }
+
+          it_behaves_like 'does not trigger', :filter_validation
+        end
+      end
+
+      context 'filtering validation is nil' do
+        let(:validation) {
+          nil
+        }
+
+        it_behaves_like 'does not trigger', :filter_validation
+      end
+
+      context 'filtering validation state is \'invalid\'' do
+        let(:state) {
+          Core::Filtering::ValidationStatus::INVALID
+        }
+
+        it_behaves_like 'does not trigger', :filter_validation
+      end
+
+      context 'filtering validation state is \'valid\'' do
+        let(:state) {
+          Core::Filtering::ValidationStatus::VALID
+        }
+
+        it_behaves_like 'does not trigger', :filter_validation
+      end
+
+      context 'filtering validation state is \'edited\'' do
+        let(:state) {
+          Core::Filtering::ValidationStatus::EDITED
+        }
+
+        it_behaves_like 'triggers', :filter_validation
       end
     end
   end
