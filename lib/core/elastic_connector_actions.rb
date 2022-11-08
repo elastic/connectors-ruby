@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 #
-require 'active_support'
+require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
