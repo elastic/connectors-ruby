@@ -887,8 +887,9 @@ describe Core::ElasticConnectorActions do
 
   describe '#complete_sync' do
     let(:job_id) { 'completed-job-1' }
+    let(:sync_status) { Connectors::SyncStatus::COMPLETED }
+    let(:sync_error) { nil }
     let(:metadata) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
-    let(:error) { nil }
 
     it 'updates last connector sync status, sync time and counts' do
       expect(es_client).to receive(:update).with(
@@ -899,14 +900,14 @@ describe Core::ElasticConnectorActions do
             :last_synced,
             :last_indexed_document_count,
             :last_deleted_document_count,
-            :last_sync_status => Connectors::SyncStatus::COMPLETED
+            :last_sync_status => sync_status
           )
         },
         :refresh => true,
         :retry_on_conflict => 3
       )
 
-      described_class.complete_sync(connector_id, job_id, metadata, error)
+      described_class.complete_sync(connector_id, job_id, sync_status, sync_error, metadata)
     end
 
     it 'updates the record in jobs index' do
@@ -920,16 +921,17 @@ describe Core::ElasticConnectorActions do
             :indexed_document_count,
             :indexed_document_volume,
             :deleted_document_count,
-            :status => Connectors::SyncStatus::COMPLETED
+            :status => sync_status
           )
         }
       )
 
-      described_class.complete_sync(connector_id, job_id, metadata, error)
+      described_class.complete_sync(connector_id, job_id, sync_status, sync_error, metadata)
     end
 
     context 'when status contains an error' do
-      let(:error) { 'something really went wrong' }
+      let(:sync_status) { Connectors::SyncStatus::ERROR }
+      let(:sync_error) { 'something really went wrong' }
 
       it 'updates last connector sync status to error' do
         expect(es_client).to receive(:update).with(
@@ -940,16 +942,40 @@ describe Core::ElasticConnectorActions do
               :last_synced,
               :last_indexed_document_count,
               :last_deleted_document_count,
-              :last_sync_status => Connectors::SyncStatus::ERROR,
-              :last_sync_error => error,
-              :error => error
+              :last_sync_status => sync_status,
+              :last_sync_error => sync_error,
+              :error => sync_error
             )
           },
           :refresh => true,
           :retry_on_conflict => 3
         )
 
-        described_class.complete_sync(connector_id, job_id, metadata, error)
+        described_class.complete_sync(connector_id, job_id, sync_status, sync_error, metadata)
+      end
+    end
+
+    context 'when job is canceled' do
+      let(:sync_status) { Connectors::SyncStatus::CANCELED }
+
+      it 'updates canceled_at' do
+        expect(es_client).to receive(:update).with(
+          :index => jobs_index,
+          :id => job_id,
+          :body => {
+            :doc => hash_including(
+              :completed_at,
+              :canceled_at,
+              :last_seen,
+              :indexed_document_count,
+              :indexed_document_volume,
+              :deleted_document_count,
+              :status => sync_status
+            )
+          }
+        )
+
+        described_class.complete_sync(connector_id, job_id, sync_status, sync_error, metadata)
       end
     end
   end

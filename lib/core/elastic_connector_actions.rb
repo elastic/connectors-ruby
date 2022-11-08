@@ -227,15 +227,12 @@ module Core
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
 
-      def complete_sync(connector_id, job_id, metadata, error)
-        sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
-
+      def complete_sync(connector_id, job_id, sync_status, sync_error, metadata)
         metadata ||= {}
-
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
-                                :last_sync_error => error,
-                                :error => error,
+                                :last_sync_error => sync_error,
+                                :error => sync_error,
                                 :last_synced => Time.now,
                                 :last_indexed_document_count => metadata[:indexed_document_count],
                                 :last_deleted_document_count => metadata[:deleted_document_count])
@@ -245,8 +242,10 @@ module Core
             :status => sync_status,
             :completed_at => Time.now,
             :last_seen => Time.now,
-            :error => error
-          }.merge(metadata)
+            :error => sync_error
+          }.merge(metadata).tap do |doc|
+            doc[:canceled_at] = Time.now if sync_status == Connectors::SyncStatus::CANCELED
+          end
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end

@@ -168,7 +168,7 @@ describe Core::SyncJobRunner do
 
         subject.execute
 
-        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@sync_status)).to eq(Connectors::SyncStatus::ERROR)
       end
     end
 
@@ -176,7 +176,7 @@ describe Core::SyncJobRunner do
       it 'finishes a sync job' do
         subject.execute
 
-        expect(subject.instance_variable_get(:@sync_finished)).to eq(true)
+        expect(subject.instance_variable_get(:@sync_status)).to eq(Connectors::SyncStatus::COMPLETED)
       end
     end
 
@@ -287,10 +287,10 @@ describe Core::SyncJobRunner do
         allow(connector_instance).to receive(:do_health_check!).and_raise(StandardError.new('error message'))
       end
 
-      it 'marks the sync as unfinished without overriding the error message with the thread error message' do
+      it 'marks the sync as error without overriding the error message with the thread error message' do
         subject.execute
 
-        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@sync_status)).to eq(Connectors::SyncStatus::ERROR)
         expect(subject.instance_variable_get(:@sync_error)).to eq('error message')
       end
     end
@@ -320,7 +320,7 @@ describe Core::SyncJobRunner do
         # Check for exception thrown on purpose, so that the test is not marked as failed for the wrong reason
         expect { subject.execute }.to raise_exception
 
-        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@sync_status)).to eq(Connectors::SyncStatus::ERROR)
         expect(subject.instance_variable_get(:@sync_error)).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
       end
     end
@@ -402,11 +402,14 @@ describe Core::SyncJobRunner do
           subject.execute
         end
 
-        it 'marks the job as complete' do
-          expected_error = nil
-
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, anything, expected_error)
-
+        it 'marks the job as complete with job stats' do
+          expect(Core::ElasticConnectorActions)
+              .to receive(:complete_sync)
+                      .with(connector_id,
+                            job_id,
+                            Connectors::SyncStatus::COMPLETED,
+                            nil,
+                            ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata))
           subject.execute
         end
 
@@ -423,7 +426,12 @@ describe Core::SyncJobRunner do
           end
 
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, anything, error_message)
+            expect(Core::ElasticConnectorActions)
+              .to receive(:complete_sync)
+              .with(connector_id,
+                    job_id,
+                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
+                    error_message)
 
             subject.execute
           end
