@@ -29,7 +29,7 @@ module Connectors
         rules || []
       end
 
-      def parse_rule(rule)
+      def parse_rule(_rule)
         raise 'Not implemented'
       end
 

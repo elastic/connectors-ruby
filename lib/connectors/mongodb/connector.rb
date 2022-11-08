@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'connectors/mongodb/mongo_rules_parser'
 require 'mongo'
 require 'utility'
 
@@ -28,24 +29,24 @@ module Connectors
 
       def self.configurable_fields
         {
-           :host => {
-             :label => 'Server Hostname'
-           },
-           :user => {
-             :label => 'Username'
-           },
-           :password => {
-             :label => 'Password'
-           },
-           :database => {
-             :label => 'Database'
-           },
-           :collection => {
-             :label => 'Collection'
-           },
-           :direct_connection => {
-             :label => 'Direct connection? (true/false)'
-           }
+          :host => {
+            :label => 'Server Hostname'
+          },
+          :user => {
+            :label => 'Username'
+          },
+          :password => {
+            :label => 'Password'
+          },
+          :database => {
+            :label => 'Database'
+          },
+          :collection => {
+            :label => 'Collection'
+          },
+          :direct_connection => {
+            :label => 'Direct connection? (true/false)'
+          }
         }
       end
 
@@ -117,6 +118,8 @@ module Connectors
 
         return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
 
+        return create_simple_rules_cursor(collection) if @rules.present?
+
         collection.find
       end
 
@@ -159,6 +162,15 @@ module Connectors
         [collection.find(filter, options), options]
       end
 
+      def create_simple_rules_cursor(collection)
+        filter = {}
+        if @rules.present?
+          parser = MongoRulesParser.new(@rules)
+          filter = parser.parse
+        end
+        collection.find(filter)
+      end
+
       def extract_options(mongodb_function)
         mongodb_function[:options].present? ? mongodb_function[:options] : {}
       end
@@ -173,9 +185,9 @@ module Connectors
         raise "Invalid value for 'Direct connection' : #{@direct_connection}." unless %w[true false].include?(@direct_connection.to_s.strip.downcase)
 
         args = {
-                 database: @database,
-                 direct_connection: to_boolean(@direct_connection)
-               }
+          database: @database,
+          direct_connection: to_boolean(@direct_connection)
+        }
 
         if @user.present? || @password.present?
           args[:user] = @user
