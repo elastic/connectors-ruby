@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 #
-require 'active_support/core_ext/hash'
+require 'active_support'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
@@ -84,11 +84,32 @@ module Core
         update_connector_configuration(connector_id, payload)
       end
 
+      def update_filtering_validation(connector_id, domain_validations = {})
+        return if domain_validations.empty?
+
+        filtering = get_connector(connector_id)[:filtering]
+
+        case filtering
+        when Hash
+          update_filter_validation(filtering, domain_validations)
+        when Array
+          return unless should_update_validations?(domain_validations, filtering)
+
+          filtering.each do |filter|
+            update_filter_validation(filter, domain_validations)
+          end
+        else
+          Utility::Logger.error("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+        end
+
+        update_connector_fields(connector_id, { :filtering => filtering })
+      end
+
       def claim_job(connector_id)
         seq_no = nil
         primary_term = nil
         sync_in_progress = false
-        client.get(
+        connector_record = client.get(
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :ignore => 404,
@@ -114,11 +135,24 @@ module Core
           :connector_id => connector_id,
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
-          :created_at => Time.now
+          :created_at => Time.now,
+          :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
-        job = client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
 
-        job['_id']
+        client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
+      end
+
+      def convert_connector_filtering_to_job_filtering(connector_filtering)
+        return [] unless connector_filtering
+        connector_filtering = [connector_filtering] unless connector_filtering.is_a?(Array)
+        connector_filtering.each_with_object([]) do |filtering_domain, job_filtering|
+          job_filtering << {
+            'domain' => filtering_domain['domain'],
+            'rules' => filtering_domain.dig('active', 'rules'),
+            'advanced_snippet' => filtering_domain.dig('active', 'advanced_snippet'),
+            'warnings' => [] # TODO: in https://github.com/elastic/enterprise-search-team/issues/3174
+          }
+        end
       end
 
       def update_connector_status(connector_id, status, error_message = nil)
@@ -302,6 +336,14 @@ module Core
 
       private
 
+      def should_update_validations?(domain_validations, filtering)
+        domains_present = filtering.collect(&->(filter) { filter[:domain] })
+        domains_to_update = domain_validations.keys
+
+        # non-empty intersection -> domains to update present
+        !(domains_present & domains_to_update).empty?
+      end
+
       def client
         @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
       end
@@ -310,6 +352,15 @@ module Core
         index_versions = indicies.map { |index| index.gsub("#{alias_name}-v", '').to_i }
         index_version = index_versions.max # gets the largest suffix number
         "#{alias_name}-v#{index_version}"
+      end
+
+      def update_filter_validation(filter, domain_validations)
+        domain = filter[:domain]
+
+        if domain_validations.key?(domain)
+          new_validation_state = { :draft => { :validation => domain_validations[domain] } }
+          filter.deep_merge!(new_validation_state)
+        end
       end
     end
   end
