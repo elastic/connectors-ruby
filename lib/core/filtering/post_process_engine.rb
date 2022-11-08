@@ -18,7 +18,7 @@ module Core
         @ordered_rules = ordered_rules(job_description['filtering'])
       end
 
-      def self.process(document)
+      def process(document)
         @ordered_rules.each do |rule|
           if rule.match?(document)
             return PostProcessResult.new(document, rule)
