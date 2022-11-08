@@ -24,7 +24,7 @@ module Connectors
         when 'regex'
           parse_regex(rule, field, value)
         else
-          raise "Unknown operator: #{rule}"
+          raise "Unknown operator: #{op}"
         end
       end
 

@@ -67,7 +67,7 @@ module Connectors
       end
 
       def filtering_present?
-        @advanced_filter_config.present? || @rules.present?
+        @advanced_filter_config.present? && !@advanced_filter_config.empty? || @rules.present?
       end
 
       private

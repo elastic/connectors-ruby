@@ -5,6 +5,8 @@
 #
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash/indifferent_access'
+
 module Connectors
   module Base
     class SimpleRulesParser
@@ -14,6 +16,7 @@ module Connectors
 
       def parse
         merge_rules(@rules.map do |rule|
+          rule = rule.with_indifferent_access
           unless is_include?(rule) || is_exclude?(rule)
             raise "Unknown policy: #{rule[:policy]}"
           end
@@ -34,11 +37,11 @@ module Connectors
       end
 
       def is_include?(rule)
-        rule[:policy] == 'include'
+        rule['policy'] == 'include'
       end
 
       def is_exclude?(rule)
-        rule[:policy] == 'exclude'
+        rule['policy'] == 'exclude'
       end
     end
   end
