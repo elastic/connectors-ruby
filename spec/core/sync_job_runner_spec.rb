@@ -181,7 +181,7 @@ describe Core::SyncJobRunner do
         expect { subject.execute }.to raise_exception
 
         expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
-        expect(subject.instance_variable_get(:@status)[:error]).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
+        expect(subject.instance_variable_get(:@sync_error)).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
       end
     end
 
