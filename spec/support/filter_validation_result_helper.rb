@@ -1,5 +1,5 @@
-module DomainValidationHelpers
-  def domain_validation(domain, state, errors)
+module FilterValidationResultHelper
+  def filter_validation_result(domain, state, errors)
     {
       :domain => domain,
       :draft => {

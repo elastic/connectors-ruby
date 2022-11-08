@@ -2,10 +2,10 @@ require 'core'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
-require './spec/support/domain_validation_helpers'
+require './spec/support/filter_validation_result_helper'
 
 RSpec.configure do |c|
-  c.include DomainValidationHelpers
+  c.include FilterValidationResultHelper
 end
 
 describe Core::ElasticConnectorActions do
@@ -337,9 +337,9 @@ describe Core::ElasticConnectorActions do
     context 'filtering contains an array with multiple domains, only one should be updated' do
       let(:current_filtering) {
         [
-          domain_validation('domain-one', Core::Filtering::ValidationStatus::EDITED, []),
-          domain_validation('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
-          domain_validation('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
         ]
       }
 
@@ -354,9 +354,9 @@ describe Core::ElasticConnectorActions do
 
       let(:expected_filtering_update) {
         [
-          domain_validation('domain-one', Core::Filtering::ValidationStatus::VALID, []),
-          domain_validation('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
-          domain_validation('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::VALID, []),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
         ]
       }
 
@@ -366,13 +366,13 @@ describe Core::ElasticConnectorActions do
     context 'filtering contains an array with multiple domains, two should be updated' do
       let(:current_filtering) {
         [
-          domain_validation('domain-one', Core::Filtering::ValidationStatus::EDITED, []),
-          domain_validation('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
-          domain_validation('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
         ]
       }
 
-      let(:new_validation_states) {
+      let(:new_filter_validation_states) {
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
@@ -387,9 +387,9 @@ describe Core::ElasticConnectorActions do
 
       let(:expected_filtering_update) {
         [
-          domain_validation('domain-one', Core::Filtering::ValidationStatus::INVALID, ['some error']),
-          domain_validation('domain-two', Core::Filtering::ValidationStatus::INVALID, ['another error', 'and another one']),
-          domain_validation('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, ['some error']),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::INVALID, ['another error', 'and another one']),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
         ]
       }
 
@@ -398,7 +398,7 @@ describe Core::ElasticConnectorActions do
 
     context 'filtering is an object' do
       let(:current_filtering) {
-        domain_validation('domain-one', Core::Filtering::ValidationStatus::EDITED, [])
+        filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, [])
       }
 
       let(:new_validation_states) {
@@ -411,7 +411,7 @@ describe Core::ElasticConnectorActions do
       }
 
       let(:expected_filtering_update) {
-        domain_validation('domain-one', Core::Filtering::ValidationStatus::VALID, [])
+        filter_validation_result('domain-one', Core::Filtering::ValidationStatus::VALID, [])
       }
 
       it_behaves_like 'updates domain validation results'
@@ -420,7 +420,7 @@ describe Core::ElasticConnectorActions do
     context 'filtering contains an array with only one object' do
       let(:current_filtering) {
         [
-          domain_validation('domain-one', Core::Filtering::ValidationStatus::EDITED, [])
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, [])
         ]
       }
 
@@ -435,7 +435,7 @@ describe Core::ElasticConnectorActions do
 
       let(:expected_filtering_update) {
         [
-          domain_validation('domain-one', Core::Filtering::ValidationStatus::INVALID, ['error'])
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, ['error'])
         ]
       }
 
