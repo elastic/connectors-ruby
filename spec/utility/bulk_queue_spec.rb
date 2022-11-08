@@ -135,7 +135,7 @@ describe Utility::BulkQueue do
     end
 
     it 'returns expected number of operations' do
-      expect(subject.current_stats[:current_op_count]).to eq(op_count)
+      expect(subject.current_stats[:current_operation_count]).to eq(op_count)
     end
 
     it 'returns expected size of operations' do
@@ -148,7 +148,7 @@ describe Utility::BulkQueue do
       end
 
       it 'returns expected number of operations' do
-        expect(subject.current_stats[:current_op_count]).to eq(0)
+        expect(subject.current_stats[:current_operation_count]).to eq(0)
       end
 
       it 'returns expected size of operations' do

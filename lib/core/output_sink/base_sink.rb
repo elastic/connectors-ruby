@@ -18,7 +18,7 @@ module Core
       end
 
       def ingest(document)
-        unless document && document.any?
+        unless document&.any?
           Utility::Logger.warn('Connector attempted to ingest an empty document, skipping')
           return
         end

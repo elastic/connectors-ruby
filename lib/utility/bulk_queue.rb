@@ -11,13 +11,13 @@ module Utility
     class QueueOverflowError < StandardError; end
 
     # 500 items or 5MB
-    def initialize(count_threshold = 500, size_threshold = 5 * 1024 * 1024)
-      @count_threshold = count_threshold.freeze
+    def initialize(operation_count_threshold = 500, size_threshold = 5 * 1024 * 1024)
+      @operation_count_threshold = operation_count_threshold.freeze
       @size_threshold = size_threshold.freeze
 
       @buffer = ''
 
-      @current_op_count = 0
+      @current_operation_count = 0
 
       @current_buffer_size = 0
       @current_data_size = 0
@@ -37,7 +37,7 @@ module Utility
       operation_size = get_size(operation)
       payload_size = get_size(payload)
 
-      @current_op_count += 1
+      @current_operation_count += 1
       @current_buffer_size += operation_size
       @current_buffer_size += payload_size
       @current_data_size += payload_size
@@ -52,7 +52,7 @@ module Utility
     end
 
     def will_fit?(operation, payload = nil)
-      return false if @current_op_count + 1 > @count_threshold
+      return false if @current_operation_count + 1 > @operation_count_threshold
 
       operation_size = get_size(operation)
       payload_size = get_size(payload)
@@ -62,7 +62,7 @@ module Utility
 
     def current_stats
       {
-        :current_op_count => @current_op_count,
+        :current_operation_count => @current_operation_count,
         :current_buffer_size => @current_buffer_size
       }
     end
@@ -75,7 +75,7 @@ module Utility
     end
 
     def reset
-      @current_op_count = 0
+      @current_operation_count = 0
       @current_buffer_size = 0
       @current_data_size = 0
 
