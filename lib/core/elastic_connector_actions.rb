@@ -249,7 +249,12 @@ module Core
             :api_key_id => { :type => :keyword },
             :configuration => { :type => :object },
             :error => { :type => :text },
-            :features => { :type => :keyword },
+            features: {
+              properties: {
+                filtering_advanced_config: { type: :boolean },
+                filtering_rules: { type: :boolean }
+              }
+            },
             :index_name => { :type => :keyword },
             :last_seen => { :type => :date },
             :last_synced => { :type => :date },

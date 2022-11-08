@@ -55,7 +55,10 @@ describe Core::Configuration do
               hash_including(
                 :configuration => configuration,
                 :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION,
-                :features => [Utility::Constants::FILTERING_RULES_FEATURE, Utility::Constants::FILTERING_ADVANCED_FEATURE]
+                :features => {
+                  Utility::Constants::FILTERING_RULES_FEATURE => true,
+                  Utility::Constants::FILTERING_ADVANCED_FEATURE => true
+                }
               ))
 
       described_class.update(connector_settings)
