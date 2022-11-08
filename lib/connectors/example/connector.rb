@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'core/filtering/validation_status'
 require 'utility'
 
 module Connectors
@@ -43,6 +44,13 @@ module Connectors
         #
         # To emulate unhealthy 3rd-party system situation, uncomment the following line:
         # raise 'something went wrong'
+      end
+
+      def self.validate_filtering(filtering = {})
+        # TODO: real filtering validation will follow later
+        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => ['Filtering not implemented yet for MongoDB'] } if filtering.present?
+
+        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
       end
 
       def yield_documents

@@ -36,6 +36,13 @@ module Connectors
         }
       end
 
+      def self.validate_filtering(filtering = {})
+        # TODO: real filtering validation will follow later
+        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => ['No Filtering implemented yet for GitLab connector'] } if filtering.present?
+
+        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+      end
+
       def initialize(configuration: {}, job_description: {})
         super
 

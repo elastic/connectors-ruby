@@ -32,16 +32,20 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
+      def self.validate_filtering(_filtering = {})
+        raise 'Not implemented for this connector'
+      end
+
       attr_reader :rules, :advanced_filter_config
 
       def initialize(configuration: {}, job_description: {})
         @configuration = configuration.dup || {}
         @job_description = job_description&.dup || {}
 
-        filter = get_filter(@job_description[:filtering])
+        filtering = @job_description[:filtering] || {}
 
-        @rules = Utility::Common.return_if_present(filter[:rules], [])
-        @advanced_filter_config = Utility::Common.return_if_present(filter[:advanced_config], {})
+        @rules = filtering[:rules] || []
+        @advanced_filter_config = filtering[:advanced_snippet] || {}
       end
 
       def yield_documents; end
@@ -68,15 +72,6 @@ module Connectors
 
       def filtering_present?
         @advanced_filter_config.present? || @rules.present?
-      end
-
-      private
-
-      def get_filter(filtering)
-        # assume for now, that first object in filtering array or a filter object itself is the only filtering object
-        filter = filtering.is_a?(Array) ? filtering[0] : filtering
-
-        filter.present? ? filter : {}
       end
     end
   end

@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'core/filtering/validation_status'
 require 'mongo'
 require 'utility'
 
@@ -49,6 +50,13 @@ module Connectors
         }
       end
 
+      def self.validate_filtering(filtering = {})
+        # TODO: real filtering validation will follow later
+        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => ['Filtering not implemented yet for MongoDB'] } if filtering.present?
+
+        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+      end
+
       def initialize(configuration: {}, job_description: {})
         super
 
@@ -61,8 +69,6 @@ module Connectors
       end
 
       def yield_documents
-        check_filtering
-
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
@@ -118,12 +124,6 @@ module Connectors
         return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
 
         collection.find
-      end
-
-      def check_filtering
-        return unless filtering_present?
-
-        check_find_and_aggregate
       end
 
       def check_find_and_aggregate

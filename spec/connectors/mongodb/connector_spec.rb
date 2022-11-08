@@ -96,7 +96,7 @@ describe Connectors::MongoDB::Connector do
   let(:filtering) {
     {
       :rules => rules,
-      :advanced_config => advanced_config
+      :advanced_snippet => advanced_config
     }
   }
 
@@ -193,6 +193,45 @@ describe Connectors::MongoDB::Connector do
       expect(Mongo::Client).to receive(:new).with(mongodb_host, hash_including(:database => mongodb_database))
 
       subject.is_healthy?
+    end
+  end
+
+  context '#validate_filtering' do
+    shared_examples_for 'filtering is valid' do
+      it 'returns validation result with state \'valid\' and no errors' do
+        validation_result = described_class.validate_filtering(filtering)
+
+        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
+        expect(validation_result[:errors]).to be_empty
+      end
+    end
+
+    shared_examples_for 'filtering is invalid' do
+      it 'returns validation result with state \'invalid\' and no errors' do
+        validation_result = described_class.validate_filtering(filtering)
+
+        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
+        expect(validation_result[:errors]).to_not be_empty
+      end
+    end
+
+    context 'filtering is not present' do
+      let(:filtering) {
+        {}
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'filtering is present' do
+      let(:filtering) {
+        {
+          :advanced_config => advanced_config
+        }
+      }
+
+      # TODO: will be replaced with MongoDB specific filtering validation
+      it_behaves_like 'filtering is invalid'
     end
   end
 
@@ -452,25 +491,6 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find and aggregate exist' do
-      let(:advanced_config) {
-        {
-          :find => {
-            :filter => filter,
-            :options => options
-          },
-          :aggregate => {
-            :pipeline => pipeline,
-            :options => options
-          }
-        }
-      }
-
-      it 'raises an InvalidFilterConfigError' do
-        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
-      end
-    end
-
     context 'find field exists (with filter and empty options) in an active advanced filtering config' do
       let(:options) {
         {}
@@ -614,20 +634,6 @@ describe Connectors::MongoDB::Connector do
         expect(Utility::Logger).to receive(:warn).with('\'Aggregate\' was specified with an empty pipeline and empty options.')
 
         subject.yield_documents
-      end
-    end
-
-    context 'wrong top level keys exist' do
-      let(:advanced_config) {
-        {
-          :wrong_key_one => {},
-          :wrong_key_two => {},
-          :wrong_key_three => {}
-        }
-      }
-
-      it 'raises an InvalidFilterConfigError, when only wrong keys are present' do
-        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
   end
