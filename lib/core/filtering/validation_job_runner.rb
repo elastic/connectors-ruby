@@ -24,9 +24,8 @@ module Core
 
         validation_result = @connector_class.validate_filtering(@connector_settings.filtering)
 
-        # for now only used for connectors -> DEFAULT domain can be assumed (will be changed with the integration of crawler)
-        domain_validations = { 'DEFAULT' => validation_result }
-        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, domain_validations)
+        # currently only used for connectors -> DEFAULT domain can be assumed (will be changed with the integration of crawler)
+        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { 'DEFAULT' => validation_result })
 
         @validation_finished = true
       rescue StandardError => e

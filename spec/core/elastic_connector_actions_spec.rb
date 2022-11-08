@@ -296,7 +296,7 @@ describe Core::ElasticConnectorActions do
     }
 
     let(:new_validation_states) {
-      []
+      {}
     }
 
     let(:expected_filtering_update) {
@@ -372,7 +372,7 @@ describe Core::ElasticConnectorActions do
         ]
       }
 
-      let(:new_filter_validation_states) {
+      let(:new_validation_states) {
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
