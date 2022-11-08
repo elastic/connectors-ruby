@@ -55,6 +55,7 @@ gem 'attr_extras', '~> 6.2.5'
 gem 'hashie', '~> 5.0.0'
 gem 'concurrent-ruby', '~> 1.1.9'
 gem 'elasticsearch', '~> 8.5.0'
+gem 'newrelic_rpm', '~> 8.12.0'
 
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'

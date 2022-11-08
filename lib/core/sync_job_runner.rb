@@ -9,6 +9,7 @@
 require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/output_sink'
+require 'newrelic_rpm'
 require 'utility'
 
 module Core
@@ -18,9 +19,17 @@ module Core
     end
   end
 
+  class PeakRssMemoryReached < Exception
+    def initialize(current_rss, max_rss)
+      super("Service used more peak memory [#{current_rss}/#{max_rss}] than allowed, terminating.")
+    end
+  end
+
   class SyncJobRunner
-    def initialize(connector_settings)
+    def initialize(connector_settings:, max_peak_rss:)
       @connector_settings = connector_settings
+      @max_peak_rss = max_peak_rss
+      @memory_sampler = NewRelic::Agent::Samplers::MemorySampler.new.sampler
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
@@ -66,6 +75,8 @@ module Core
           @sink.ingest(document)
           incoming_ids << document['id']
           @status[:indexed_document_count] += 1
+
+          verify_max_peak_rss_limits
         end
 
         ids_to_delete = existing_ids - incoming_ids.uniq
@@ -75,6 +86,8 @@ module Core
         ids_to_delete.each do |id|
           @sink.delete(id)
           @status[:deleted_document_count] += 1
+
+          verify_max_peak_rss_limits
         end
 
         @sink.flush
@@ -102,6 +115,18 @@ module Core
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end
+      end
+    end
+
+    def verify_max_peak_rss_limits
+      return unless @max_peak_rss > 0
+      current_rss = @memory_sampler.get_sample * 1024
+      @last_time_checked = Time.now unless @last_time_checked
+
+      return if Time.now - @last_time_checked < 3 # every 3 seconds
+
+      if current_rss > @max_peak_rss
+        raise PeakRssMemoryReached.new(current_rss, @max_peak_rss)
       end
     end
 

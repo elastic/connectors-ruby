@@ -54,6 +54,9 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:poll_interval).value(:integer)
     optional(:termination_timeout).value(:integer)
     optional(:heartbeat_interval).value(:integer)
+
+    optional(:max_rss).value(:integer)
+    optional(:max_peak_rss).value(:integer)
   end
 end
 

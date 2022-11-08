@@ -25,6 +25,11 @@ poll_interval: 3
 termination_timeout: 60
 heartbeat_interval: 1800
 
+# 300MB
+max_rss: 307200
+# 400MB
+max_peak_rss: 409600
+
 native_mode: true
 connector_id: CHANGEME
 service_type: CHANGEME

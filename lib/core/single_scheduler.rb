@@ -13,8 +13,13 @@ require 'utility/exception_tracking'
 
 module Core
   class SingleScheduler < Core::Scheduler
-    def initialize(connector_id, poll_interval, heartbeat_interval)
-      super(poll_interval, heartbeat_interval)
+    def initialize(connector_id:, poll_interval:, heartbeat_interval:, max_rss:)
+      super(
+        poll_interval: poll_interval,
+        heartbeat_interval: heartbeat_interval,
+        max_rss: max_rss
+      )
+
       @connector_id = connector_id
     end
 

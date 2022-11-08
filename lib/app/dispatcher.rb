@@ -22,6 +22,9 @@ module App
     MAX_THREADS = (App::Config.dig(:thread_pool, :max_threads) || 5).to_i
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
 
+    MAX_RSS = (App::Config.max_rss || -1).to_i
+    MAX_PEAK_RSS = (App::Config.max_peak_rss || -1).to_i
+
     @running = Concurrent::AtomicBoolean.new(false)
 
     class << self
@@ -29,14 +32,7 @@ module App
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
         start_polling_jobs!
-      end
-
-      def shutdown!
-        Utility::Logger.info("Shutting down connector service with pool [#{pool.class}]...")
-        running.make_false
-        scheduler.shutdown
-        pool.shutdown
-        pool.wait_for_termination(TERMINATION_TIMEOUT)
+        shutdown!
       end
 
       private
@@ -45,6 +41,14 @@ module App
 
       def running!
         raise 'connector service is already running!' unless running.make_true
+      end
+
+      def shutdown!
+        Utility::Logger.info("Shutting down connector service with pool [#{pool.class}]...")
+        running.make_false
+        scheduler.shutdown
+        pool.shutdown
+        pool.wait_for_termination(TERMINATION_TIMEOUT)
       end
 
       def pool
@@ -58,9 +62,18 @@ module App
 
       def scheduler
         @scheduler ||= if App::Config.native_mode
-                         Core::NativeScheduler.new(POLL_INTERVAL, HEARTBEAT_INTERVAL)
+                         Core::NativeScheduler.new(
+                           poll_interval: POLL_INTERVAL,
+                           heartbeat_interval: HEARTBEAT_INTERVAL,
+                           max_rss: MAX_RSS
+                         )
                        else
-                         Core::SingleScheduler.new(App::Config.connector_id, POLL_INTERVAL, HEARTBEAT_INTERVAL)
+                         Core::SingleScheduler.new(
+                           connector_id: App::Config.connector_id,
+                           poll_interval: POLL_INTERVAL,
+                           heartbeat_interval: HEARTBEAT_INTERVAL,
+                           max_rss: MAX_RSS
+                         )
                        end
       end
 
@@ -86,7 +99,7 @@ module App
         pool.post do
           Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
           Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-          job_runner = Core::SyncJobRunner.new(connector_settings)
+          job_runner = Core::SyncJobRunner.new(connector_settings: connector_settings, max_peak_rss: MAX_PEAK_RSS)
           job_runner.execute
         rescue Core::JobAlreadyRunningError
           Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")

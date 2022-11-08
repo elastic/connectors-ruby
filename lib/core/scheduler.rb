@@ -6,19 +6,22 @@
 
 # frozen_string_literal: true
 
-require 'time'
-require 'fugit'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
+require 'fugit'
+require 'newrelic_rpm'
+require 'time'
 require 'utility/cron'
-require 'utility/logger'
 require 'utility/exception_tracking'
+require 'utility/logger'
 
 module Core
   class Scheduler
-    def initialize(poll_interval, heartbeat_interval)
+    def initialize(poll_interval:, heartbeat_interval:, max_rss:)
       @poll_interval = poll_interval
       @heartbeat_interval = heartbeat_interval
+      @max_rss = max_rss
+      @memory_sampler = NewRelic::Agent::Samplers::MemorySampler.new.sampler
       @is_shutting_down = false
     end
 
@@ -28,6 +31,8 @@ module Core
 
     def when_triggered
       loop do
+        enforce_max_rss
+
         connector_settings.each do |cs|
           if sync_triggered?(cs)
             yield cs, :sync
@@ -60,6 +65,17 @@ module Core
     end
 
     private
+
+    def enforce_max_rss
+      return unless @max_rss > 0
+
+      current_rss = @memory_sampler.get_sample * 1024
+      if current_rss > @max_rss
+        Utility::Logger.info("Connectors exceeded maximum allowed rss [#{current_rss}/#{@max_rss}] and will shut down")
+        shutdown
+      end
+      Utility::Logger.debug("Rss usage: [#{current_rss}/#{@max_rss}]")
+    end
 
     def sync_triggered?(connector_settings)
       return false unless connector_registered?(connector_settings.service_type)
