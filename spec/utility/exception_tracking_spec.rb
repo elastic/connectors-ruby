@@ -13,7 +13,9 @@ RSpec.describe Utility::ExceptionTracking do
   let(:message) { 'this is a test message' }
   let(:exception) { StandardError.new(message) }
 
-  it 'can log an exception' do
-    expect { described_class.log_exception(exception) }.to output(/#{message}/).to_stdout_from_any_process
+  describe '.log_exception' do
+    it 'can log an exception' do
+      expect { described_class.log_exception(exception) }.to output(/#{message}/).to_stdout_from_any_process
+    end
   end
 end

@@ -75,13 +75,12 @@ This is our main communication index, used to communicate the connector's config
   index_name: string;   -> The name of the content index where data will be written to
   is_native: boolean;   -> Whether this is a native connector
   language: string;     -> the language used for the analyzer
-  last_seen: date;      -> Connector writes check-in date-time
-                           regularly (UTC)
+  last_deleted_document_count: number;    -> How many documents were deleted in the last job
+  last_indexed_document_count: number;    -> How many documents were indexed in the last job  
+  last_seen: date;      -> Connector writes check-in date-time regularly (UTC)
   last_sync_error: string;   -> Optional last job error message
   last_sync_status: string;  -> Status of the last job, or null if no job has been executed
   last_synced: date;    -> Date/time of last job (UTC)
-  last_indexed_document_count: number;    -> How many documents were indexed in the last job
-  last_deleted_document_count: number;    -> How many documents were deleted in the last job
   name: string; -> the name to use for the connector
   pipeline: {
     extract_binary_content: boolean; -> Whether the `request_pipeline` should handle binary data
@@ -204,12 +203,12 @@ This is our main communication index, used to communicate the connector's config
     "index_name" : { "type" : "keyword" },
     "is_native" : { "type" : "boolean" },
     "language" : { "type" : "keyword" },
+    "last_deleted_document_count" : { "type" : "long" },
+    "last_indexed_document_count" : { "type" : "long" },
     "last_seen" : { "type" : "date" },
     "last_sync_error" : { "type" : "keyword" },
     "last_sync_status" : { "type" : "keyword" },
     "last_synced" : { "type" : "date" },
-    "last_indexed_document_count" : { "type" : "long" },
-    "last_deleted_document_count" : { "type" : "long" },
     "name" : { "type" : "keyword" },
     "pipeline" : {
       "properties" : {
@@ -236,8 +235,13 @@ This is our main communication index, used to communicate the connector's config
 In addition to the connector index `.elastic-connectors`, we have an additional index to log all jobs run by connectors. This is the `.elastic-connectors-sync-jobs` index. Each JSON document will have the following structure:
 ```
 {
+  cancelation_requested_at: date; -> The date/time when the cancelation of the job is requested
+  canceled_at: date; -> The date/time when the job is canceled
+  completed_at: date; -> The data/time when the job is completed
+  configuration: object; -> Connector configuration
   connector_id: string; -> ID of the connector document in .elastic-connectors
-  status: string; -> Job status Enum, see below
+  created_at: date; -> The date/time when the job is created
+  deleted_document_count: number; -> Number of documents deleted in the job
   error: string; -> Optional error message
   filtering: {          -> Filtering rules
     domain: string,     -> what data domain these rules apply to
@@ -262,11 +266,21 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     }
   };
   index_name: string; -> The name of the content index
-  worker_hostname: string; -> The hostname of the worker to run the job
   indexed_document_count: number; -> Number of documents indexed in the job
-  deleted_document_count: number; -> Number of documents deleted in the job
-  created_at: date; -> The date/time when the job is created
-  completed_at: date; -> The data/time when the job is completed
+  indexed_document_volume: number; -> The volume (in bytes) of documents indexed in the job
+  last_seen: date; -> Connector writes check-in date-time regularly (UTC)
+  metadata: object; -> Connector-specific metadata
+  pipeline: { -> Connector pipeline
+    extract_binary_content: boolean;
+    name: string;
+    reduce_whitespace: boolean;
+    run_ml_inference: boolean;
+  },
+  started_at: date; -> The date/time when the job is started
+  status: string; -> Job status Enum, see below
+  total_document_count: number; -> Number of documents in the index after the job completes
+  trigger_method: string; -> How the job is triggered. Possible values are on-demand, scheduled.
+  worker_hostname: string; -> The hostname of the worker to run the job
 }
 ```
 
@@ -286,7 +300,10 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "version" : 1
   },
   "properties" : {
+    "cancelation_requested_at" : { "type" : "date" },
+    "canceled_at" : { "type" : "date" },
     "completed_at" : { "type" : "date" },
+    "configuration" : { "type" : "object" },
     "connector_id" : { "type" : "keyword" },
     "created_at" : { "type" : "date" },
     "deleted_document_count" : { "type" : "integer" },
@@ -321,8 +338,23 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
         }
       }
     },
+    "index_name" : { "type" : "keyword" },
     "indexed_document_count" : { "type" : "integer" },
+    "indexed_document_volume" : { "type" : "integer" },
+    "last_seen" : { "type" : "date" },
+    "metadata" : { "type" : "object" },
+    "pipeline" : {
+      "properties" : {
+        "extract_binary_content" : { "type" : "boolean" },
+        "name" : { "type" : "keyword" },
+        "reduce_whitespace" : { "type" : "boolean" },
+        "run_ml_inference" : { "type" : "boolean" }
+      }
+    },
+    "started_at" : { "type" : "date" },
     "status" : { "type" : "keyword" },
+    "total_document_count" : { "type" : "integer" },
+    "trigger_method" : { "type" : "keyword" },
     "worker_hostname" : { "type" : "keyword" }
   }
 }

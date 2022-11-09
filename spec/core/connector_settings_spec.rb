@@ -62,7 +62,7 @@ describe Core::ConnectorSettings do
     end
   end
 
-  context '.filtering' do
+  describe '#filtering' do
     context 'filtering is present' do
       let(:elasticsearch_response) {
         {
@@ -98,7 +98,7 @@ describe Core::ConnectorSettings do
     end
   end
 
-  context '.fetch_native_connectors' do
+  describe '#fetch_native_connectors' do
     let(:connectors_meta) {
       {
         :pipeline => {

@@ -28,23 +28,35 @@ describe Core::Configuration do
       allow(connector_class).to receive(:kibana_features).and_return(Connectors::Base::Connector.kibana_features)
     end
 
-    (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|
-      context "when connector status is #{status}" do
-        let(:connector_status) { status }
+    describe '.update' do
+      (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|
+        context "when connector status is #{status}" do
+          let(:connector_status) { status }
+          it 'updates nothing' do
+            expect(Core::ElasticConnectorActions).to_not receive(:update_connector_fields)
+
+            described_class.update(connector_settings, param_service_type)
+          end
+        end
+      end
+
+      context 'when connector class is not supported' do
+        let(:connector_class) { nil }
         it 'updates nothing' do
           expect(Core::ElasticConnectorActions).to_not receive(:update_connector_fields)
 
           described_class.update(connector_settings, param_service_type)
         end
       end
-    end
 
-    context 'when connector class is not supported' do
-      let(:connector_class) { nil }
-      it 'updates nothing' do
-        expect(Core::ElasticConnectorActions).to_not receive(:update_connector_fields)
+      it 'updates configuration and status' do
+        expect(Core::ElasticConnectorActions)
+          .to receive(:update_connector_fields)
+          .with(connector_id,
+                hash_including(:configuration => configuration,
+                               :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
 
-        described_class.update(connector_settings, param_service_type)
+        described_class.update(connector_settings)
       end
     end
 
@@ -59,96 +71,96 @@ describe Core::Configuration do
                   Utility::Constants::FILTERING_RULES_FEATURE => true,
                   Utility::Constants::FILTERING_ADVANCED_FEATURE => true
                 }
-              ))
-
-      described_class.update(connector_settings)
-    end
-
-    context 'when all configurable fields are set with symbols' do
-      let(:configuration) { { :foo => { :value => 'bar' } } }
-
-      it 'updates status to configured' do
-        expect(Core::ElasticConnectorActions)
-          .to receive(:update_connector_fields)
-          .with(connector_id,
-                hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
-
-        described_class.update(connector_settings, param_service_type)
+              )
+          )
       end
-    end
 
-    context 'when all configurable fields are set with strings' do
-      let(:configuration) { { 'foo' => { 'value' => 'bar' } } }
+      context 'when all configurable fields are set with symbols' do
+        let(:configuration) { { :foo => { :value => 'bar' } } }
 
-      it 'updates status to configured' do
-        expect(Core::ElasticConnectorActions)
-          .to receive(:update_connector_fields)
-          .with(connector_id,
-                hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
+        it 'updates status to configured' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id,
+                  hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
 
-        described_class.update(connector_settings, param_service_type)
+          described_class.update(connector_settings, param_service_type)
+        end
       end
-    end
 
-    context 'when all configurable fields are set with a mix of strings and symbols' do
-      let(:configuration) {
-        {
-          'foo' => {
-            'value' => 'Foo'
-          },
-          :bar => {
-            :value => 'Bar'
+      context 'when all configurable fields are set with strings' do
+        let(:configuration) { { 'foo' => { 'value' => 'bar' } } }
+
+        it 'updates status to configured' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id,
+                  hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
+
+          described_class.update(connector_settings, param_service_type)
+        end
+      end
+
+      context 'when all configurable fields are set with a mix of strings and symbols' do
+        let(:configuration) {
+          {
+            'foo' => {
+              'value' => 'Foo'
+            },
+            :bar => {
+              :value => 'Bar'
+            }
           }
         }
-      }
 
-      it 'updates status to configured' do
-        expect(Core::ElasticConnectorActions)
-          .to receive(:update_connector_fields)
-          .with(connector_id,
-                hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
+        it 'updates status to configured' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id,
+                  hash_including(:status => Connectors::ConnectorStatus::CONFIGURED))
 
-        described_class.update(connector_settings, param_service_type)
+          described_class.update(connector_settings, param_service_type)
+        end
       end
-    end
 
-    context 'when not all configurable fields are set (with strings)' do
-      let(:configuration) { { 'foo' => { 'value' => nil } } }
+      context 'when not all configurable fields are set (with strings)' do
+        let(:configuration) { { 'foo' => { 'value' => nil } } }
 
-      it 'updates status to configured' do
-        expect(Core::ElasticConnectorActions)
-          .to receive(:update_connector_fields)
-          .with(connector_id,
-                hash_including(:status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
+        it 'updates status to configured' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id,
+                  hash_including(:status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
 
-        described_class.update(connector_settings, param_service_type)
+          described_class.update(connector_settings, param_service_type)
+        end
       end
-    end
 
-    context 'when not all configurable fields are set (with symbols)' do
-      let(:configuration) { { :foo => { :value => nil } } }
+      context 'when not all configurable fields are set (with symbols)' do
+        let(:configuration) { { :foo => { :value => nil } } }
 
-      it 'updates status to configured' do
-        expect(Core::ElasticConnectorActions)
-          .to receive(:update_connector_fields)
-          .with(connector_id,
-                hash_including(:status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
+        it 'updates status to configured' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id,
+                  hash_including(:status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
 
-        described_class.update(connector_settings, param_service_type)
+          described_class.update(connector_settings, param_service_type)
+        end
       end
-    end
 
-    context 'when in non-native mode' do
-      let(:service_type) { nil }
-      let(:param_service_type) { 'mongo' }
-      let(:needs_service_type) { true }
+      context 'when in non-native mode' do
+        let(:service_type) { nil }
+        let(:param_service_type) { 'mongo' }
+        let(:needs_service_type) { true }
 
-      it 'updates service type' do
-        expect(Core::ElasticConnectorActions)
-          .to receive(:update_connector_fields)
-          .with(connector_id, hash_including(:service_type => param_service_type))
+        it 'updates service type' do
+          expect(Core::ElasticConnectorActions)
+            .to receive(:update_connector_fields)
+            .with(connector_id, hash_including(:service_type => param_service_type))
 
-        described_class.update(connector_settings, param_service_type)
+          described_class.update(connector_settings, param_service_type)
+        end
       end
     end
   end

@@ -6,12 +6,12 @@
 
 # frozen_string_literal: true
 
-shared_examples 'implements all methods of base class' do
+shared_examples 'implements all private methods of base class' do
   it '' do
-    base_class_public_methods = get_class_specific_public_methods(base_class_instance)
-    specific_class_public_methods = get_class_specific_public_methods(concrete_class_instance)
+    base_class_private_methods = get_class_specific_private_methods(base_class_instance)
+    specific_class_private_methods = get_class_specific_private_methods(concrete_class_instance)
 
-    expect(specific_class_public_methods).to eq(base_class_public_methods)
+    expect(specific_class_private_methods).to include(*base_class_private_methods)
   end
 end
 

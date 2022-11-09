@@ -29,7 +29,7 @@ describe Connectors::GitLab::Extractor do
     Connectors::GitLab::Extractor.new(:base_url => base_url)
   end
 
-  context '#yield_projects_page' do
+  describe '#yield_projects_page' do
     it 'correctly produces one page of documents' do
       stub_request(:get, "#{base_url}/projects?order_by=id&owned=true&pagination=keyset&per_page=100&sort=desc")
         .to_return(:status => 200, :body => projects_json)
@@ -203,7 +203,7 @@ describe Connectors::GitLab::Extractor do
     end
   end
 
-  context '#deleted' do
+  describe '#deleted' do
     let(:existing_id) { 36029109 }
     let(:non_existing_ids) { [123, 234, 345] }
 
@@ -221,7 +221,7 @@ describe Connectors::GitLab::Extractor do
     end
   end
 
-  context '#permissions' do
+  describe '#permissions' do
     let(:user_id) { 1 }
     let(:user_name) { 'sytses' }
     let(:external_user_id) { 11422639 }

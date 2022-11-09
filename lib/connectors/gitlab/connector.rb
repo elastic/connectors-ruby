@@ -11,7 +11,7 @@ require 'connectors/base/connector'
 require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
-require 'core/output_sink'
+require 'core/ingestion'
 
 module Connectors
   module GitLab

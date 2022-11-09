@@ -20,7 +20,7 @@ describe Connectors::GitLab::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#is_healthy?' do
+  describe '#is_healthy?' do
     it 'correctly returns true on 200' do
       stub_request(:get, "#{base_url}/user")
         .to_return(:status => 200, :body => user_json)
@@ -46,7 +46,7 @@ describe Connectors::GitLab::Connector do
     end
   end
 
-  context '#yield_documents' do
+  describe '#yield_documents' do
     let(:page_count) { 3 }
     let(:page_size) { 100 }
 
