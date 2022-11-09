@@ -10,4 +10,11 @@ require 'core/filtering/post_process_engine'
 require 'core/filtering/post_process_result'
 require 'core/filtering/simple_rule'
 
-module Core::Filtering; end
+module Core::Filtering
+  DOMAIN = 'domain'
+  ACTIVE = 'active'
+  DRAFT = 'draft'
+  RULES = 'rules'
+  ADVANCED_SNIPPET = 'advanced_snippet'
+  DEFAULT_DOMAIN = 'DEFAULT'
+end

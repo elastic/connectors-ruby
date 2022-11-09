@@ -1,6 +1,7 @@
 require 'connectors/connector_status'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
+require 'core/filtering'
 require 'core/sync_job_runner'
 
 describe Core::SyncJobRunner do
@@ -28,9 +29,20 @@ describe Core::SyncJobRunner do
   end
 
   let(:connector_settings) { double }
-  let(:filtering) {
-    {}
-  }
+
+  let(:filtering) do
+    [
+      {
+        Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
+        Core::Filtering::RULES => [
+          Core::Filtering::SimpleRule::DEFAULT_RULE.to_h
+        ],
+        Core::Filtering::ADVANCED_SNIPPET => {
+          'value' => {}
+        }
+      }
+    ]
+  end
 
   let(:connector_class) { double }
   let(:connector_instance) { double }

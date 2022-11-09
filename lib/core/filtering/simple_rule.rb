@@ -40,6 +40,7 @@ module Core
         @rule = rule_hash.fetch(RULE)
         @value = rule_hash.fetch(VALUE)
         @id = rule_hash.fetch(ID)
+        @rule_hash = rule_hash
       rescue KeyError => e
         raise "#{e.key} is required"
       end
@@ -80,6 +81,9 @@ module Core
 
       def is_exclude?
         policy == Policy::EXCLUDE
+      end
+      def to_h
+        @rule_hash
       end
     end
   end
