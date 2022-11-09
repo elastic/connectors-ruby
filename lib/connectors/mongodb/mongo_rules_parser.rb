@@ -8,29 +8,30 @@
 
 require 'active_support/core_ext/object'
 require 'connectors/base/simple_rules_parser'
+require 'core/filtering/simple_rule'
 
 module Connectors
   module MongoDB
     class MongoRulesParser < Connectors::Base::SimpleRulesParser
       def parse_rule(rule)
-        field = rule[:field]
-        value = rule[:value]
+        field = rule.field
+        value = rule.value
         unless value.present?
           raise "Value is required for field: #{field}"
         end
         unless field.present?
           raise "Field is required for rule: #{rule}"
         end
-        op = rule[:rule]&.to_s
+        op = rule.rule
         case op
-        when 'Equals'
-          parse_equals(rule, field, value)
-        when '>'
-          parse_greater_than(rule, field, value)
-        when '<'
-          parse_less_than(rule, field, value)
-        when 'regex'
-          parse_regex(rule, field, value)
+        when Core::Filtering::SimpleRule::Rule::EQUALS
+          parse_equals(rule)
+        when Core::Filtering::SimpleRule::Rule::GREATER_THAN
+          parse_greater_than(rule)
+        when Core::Filtering::SimpleRule::Rule::LESS_THAN
+          parse_less_than(rule)
+        when Core::Filtering::SimpleRule::Rule::REGEX
+          parse_regex(rule)
         else
           raise "Unknown operator: #{op}"
         end
@@ -44,35 +45,35 @@ module Connectors
 
       private
 
-      def parse_equals(rule, field, value)
-        if is_include?(rule)
-          { field => value }
+      def parse_equals(rule)
+        if rule.is_include?
+          { rule.field => rule.value }
         else
-          { field => { '$ne' => value } }
+          { rule.field => { '$ne' => rule.value } }
         end
       end
 
-      def parse_greater_than(rule, field, value)
-        if is_include?(rule)
-          { field => { '$gt' => value } }
+      def parse_greater_than(rule)
+        if rule.is_include?
+          { rule.field => { '$gt' => rule.value } }
         else
-          { field => { '$lte' => value } }
+          { rule.field => { '$lte' => rule.value } }
         end
       end
 
-      def parse_less_than(rule, field, value)
-        if is_include?(rule)
-          { field => { '$lt' => value } }
+      def parse_less_than(rule)
+        if rule.is_include?
+          { rule.field => { '$lt' => rule.value } }
         else
-          { field => { '$gte' => value } }
+          { rule.field => { '$gte' => rule.value } }
         end
       end
 
-      def parse_regex(rule, field, value)
-        if is_include?(rule)
-          { field => /#{value}/ }
+      def parse_regex(rule)
+        if rule.is_include?
+          { rule.field => /#{rule.value}/ }
         else
-          { field => { '$not' => /#{value}/ } }
+          { rule.field => { '$not' => /#{rule.value}/ } }
         end
       end
     end

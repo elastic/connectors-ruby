@@ -6,6 +6,7 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/hash/indifferent_access'
+require 'core/filtering/simple_rule'
 
 module Connectors
   module Base
@@ -15,10 +16,10 @@ module Connectors
       end
 
       def parse
-        merge_rules(@rules.map do |rule|
-          rule = rule.with_indifferent_access
-          unless is_include?(rule) || is_exclude?(rule)
-            raise "Unknown policy: #{rule[:policy]}"
+        merge_rules(@rules.map do |rule_hash|
+          rule = Core::Filtering::SimpleRule.new(rule_hash)
+          unless rule.is_include? || rule.is_exclude?
+            raise "Unknown policy: #{rule.policy}"
           end
           parse_rule(rule)
         end)
@@ -34,14 +35,6 @@ module Connectors
 
       def parse_rule(_rule)
         raise 'Not implemented'
-      end
-
-      def is_include?(rule)
-        rule['policy'] == 'include'
-      end
-
-      def is_exclude?(rule)
-        rule['policy'] == 'exclude'
       end
     end
   end

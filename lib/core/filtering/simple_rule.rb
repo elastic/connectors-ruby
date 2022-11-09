@@ -26,6 +26,21 @@ module Core
         }
       )
 
+      class Policy
+        INCLUDE = 'include'
+        EXCLUDE = 'exclude'
+      end
+
+      class Rule
+        REGEX = 'regex'
+        EQUALS = 'equals'
+        STARTS_WITH = 'starts_with'
+        ENDS_WITH = 'ends_with'
+        CONTAINS = 'contains'
+        LESS_THAN = '<'
+        GREATER_THAN = '>'
+      end
+
       attr_reader :policy, :field, :rule, :value, :id
 
       def initialize(rule_hash)
@@ -40,25 +55,31 @@ module Core
         return true if id == DEFAULT_RULE_ID
         doc_value = document[field]
         case rule
-        when 'equals'
+        when Rule::EQUALS
           doc_value == value
-        when 'starts_with'
+        when Rule::STARTS_WITH
           doc_value.starts_with?(value)
-        when 'ends_with'
+        when Rule::ENDS_WITH
           doc_value.ends_with?(value)
-        when 'contains'
+        when Rule::CONTAINS
           doc_value.include?(value)
-        when 'regex'
+        when Rule::REGEX
           doc_value.match(/#{value}/)
-        when '<'
+        when Rule::LESS_THAN
           doc_value < value
-        when '>'
+        when Rule::GREATER_THAN
           doc_value > value
         else
           false
         end
       end
+      def is_include?
+        policy == Policy::INCLUDE
+      end
+
+      def is_exclude?
+        policy == Policy::EXCLUDE
+      end
     end
   end
 end
-

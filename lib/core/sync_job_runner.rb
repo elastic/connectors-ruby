@@ -73,7 +73,7 @@ module Core
         connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           post_process_result = post_processing_engine.process(document)
-          if post_process_result.include?
+          if post_process_result.is_include?
             @ingester.ingest(document)
             incoming_ids << document['id']
           end

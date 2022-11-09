@@ -16,16 +16,8 @@ module Core
         @matching_rule = matching_rule
       end
 
-      def policy
-        matching_rule.policy
-      end
-
-      def include?
-        policy == 'include'
-      end
-
-      def exclude?
-        policy == 'exclude'
+      def is_include?
+        matching_rule.is_include?
       end
     end
   end
