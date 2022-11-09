@@ -10,7 +10,6 @@ require 'connectors/connector_status'
 require 'connectors/registry'
 require 'core/ingestion'
 require 'core/filtering/validation_status'
-require 'core/output_sink'
 require 'utility'
 
 module Core
