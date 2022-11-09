@@ -223,14 +223,71 @@ describe Connectors::MongoDB::Connector do
       it_behaves_like 'filtering is valid'
     end
 
-    context 'filtering is present' do
-      let(:filtering) {
+    context 'find is present' do
+      let(:advanced_config) {
         {
-          :advanced_config => advanced_config
+          :find => {}
         }
       }
 
-      # TODO: will be replaced with MongoDB specific filtering validation
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'aggregate is present' do
+      let(:advanced_config) {
+        {
+          :aggregate => {}
+        }
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'advanced config is empty' do
+      let(:advanced_config) {
+        {}
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'advanced config is nil' do
+      let(:advanced_config) {
+        nil
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'aggregate and find are present' do
+      let(:advanced_config) {
+        {
+            :aggregate => {},
+            :find => {}
+        }
+      }
+
+      it_behaves_like 'filtering is invalid'
+    end
+
+    context 'aggregate and one wrong key are present' do
+      let(:advanced_config) {
+        {
+          :aggregate => {},
+          :wrong_key => {}
+        }
+      }
+
+      it_behaves_like 'filtering is invalid'
+    end
+
+    context 'wrong key is present' do
+      let(:advanced_config) {
+        {
+          :wrong_key_one => {}
+        }
+      }
+
       it_behaves_like 'filtering is invalid'
     end
   end

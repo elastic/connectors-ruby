@@ -51,10 +51,20 @@ module Connectors
       end
 
       def self.validate_filtering(filtering = {})
-        # TODO: real filtering validation will follow later
-        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => ['Filtering not implemented yet for MongoDB'] } if filtering.present?
+        valid_filtering = { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
 
-        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+        return valid_filtering unless filtering.present?
+
+        advanced_filter_config = filtering[:advanced_snippet] || {}
+        filter_keys = advanced_filter_config&.keys
+
+        if !filter_keys&.empty? && (filter_keys.size != 1 || !ALLOWED_TOP_LEVEL_FILTER_KEYS.include?(filter_keys[0]&.to_s))
+          return { :state => Core::Filtering::ValidationStatus::INVALID,
+                   :errors => [{ :ids => ['wrong-keys'],
+                                 :messages => ["Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{filter_keys}'."] }] }
+        end
+
+        valid_filtering
       end
 
       def initialize(configuration: {}, job_description: {})
@@ -124,13 +134,6 @@ module Connectors
         return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
 
         collection.find
-      end
-
-      def check_find_and_aggregate
-        if @advanced_filter_config.keys.size != 1
-          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
-          raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
-        end
       end
 
       def create_aggregate_cursor(collection)
