@@ -280,6 +280,7 @@ module Core
               :properties => {
                 :filtering_advanced_config => { :type => :boolean },
                 :filtering_rules => { :type => :boolean }
+              }
             },
             :filtering => {
               :properties => {

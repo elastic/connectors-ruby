@@ -53,26 +53,16 @@ describe Core::Configuration do
         expect(Core::ElasticConnectorActions)
           .to receive(:update_connector_fields)
           .with(connector_id,
-                hash_including(:configuration => configuration,
-                               :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION))
+                hash_including(
+                  :configuration => configuration,
+                  :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION,
+                  :features => {
+                    Utility::Constants::FILTERING_RULES_FEATURE => true,
+                    Utility::Constants::FILTERING_ADVANCED_FEATURE => true
+                  }
+                ))
 
         described_class.update(connector_settings)
-      end
-    end
-
-    it 'updates configuration and status' do
-      expect(Core::ElasticConnectorActions)
-        .to receive(:update_connector_fields)
-        .with(connector_id,
-              hash_including(
-                :configuration => configuration,
-                :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION,
-                :features => {
-                  Utility::Constants::FILTERING_RULES_FEATURE => true,
-                  Utility::Constants::FILTERING_ADVANCED_FEATURE => true
-                }
-              )
-          )
       end
 
       context 'when all configurable fields are set with symbols' do
