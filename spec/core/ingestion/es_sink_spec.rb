@@ -1,4 +1,4 @@
-require 'core/output_sink/es_strategy'
+require 'core/ingestion/es_sink'
 require 'core/connector_settings'
 require 'utility/es_client'
 
@@ -8,7 +8,7 @@ RSpec::Matchers.define :array_of_size do |x|
   match { |actual| actual.size == x }
 end
 
-describe Core::OutputSink::EsStrategy do
+describe Core::Ingestion::EsSink do
   subject { described_class.new(index_name, request_pipeline, bulk_queue) }
   let(:index_name) { 'some-index-name' }
   let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }

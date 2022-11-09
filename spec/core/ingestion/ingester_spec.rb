@@ -1,18 +1,18 @@
-require 'core/output_sink'
+require 'core/ingestion'
 require 'utility/logger'
 
-describe Core::OutputSink::Sink do
-  subject { described_class.new(sink_strategy) }
-  let(:sink_strategy) { double }
+describe Core::Ingestion::Ingester do
+  subject { described_class.new(sink) }
+  let(:sink) { double }
   let(:document) { { :id => 15 } }
   let(:deleted_id) { 25 }
 
   context 'when all private methods are implemented' do
     before(:each) do
-      allow(sink_strategy).to receive(:ingest)
-      allow(sink_strategy).to receive(:delete)
-      allow(sink_strategy).to receive(:flush)
-      allow(sink_strategy).to receive(:serialize)
+      allow(sink).to receive(:ingest)
+      allow(sink).to receive(:delete)
+      allow(sink).to receive(:flush)
+      allow(sink).to receive(:serialize)
     end
 
     context '#ingest' do
@@ -20,7 +20,7 @@ describe Core::OutputSink::Sink do
         let(:document) { {} }
 
         it 'does not call ingest for strategy' do
-          expect(sink_strategy).to_not receive(:ingest)
+          expect(sink).to_not receive(:ingest)
 
           subject.ingest(document)
         end
@@ -36,7 +36,7 @@ describe Core::OutputSink::Sink do
         let(:document) { {} }
 
         it 'does not call ingest for strategy' do
-          expect(sink_strategy).to_not receive(:ingest)
+          expect(sink).to_not receive(:ingest)
 
           subject.ingest(document)
         end
@@ -54,11 +54,11 @@ describe Core::OutputSink::Sink do
         let(:serialized_document) { 'id: 15, something: something' }
 
         before(:each) do
-          allow(sink_strategy).to receive(:serialize).with(document).and_return(serialized_document)
+          allow(sink).to receive(:serialize).with(document).and_return(serialized_document)
         end
 
         it 'calls strategy ingest on serialized document' do
-          expect(sink_strategy).to receive(:ingest).with(document_id, serialized_document)
+          expect(sink).to receive(:ingest).with(document_id, serialized_document)
 
           subject.ingest(document)
         end
@@ -84,7 +84,7 @@ describe Core::OutputSink::Sink do
         let(:deleted_id) { nil }
 
         it 'does not call delete for strategy' do
-          expect(sink_strategy).to_not receive(:delete)
+          expect(sink).to_not receive(:delete)
 
           subject.delete(deleted_id)
         end
@@ -94,7 +94,7 @@ describe Core::OutputSink::Sink do
         let(:deleted_id) { 'something-nice!' }
 
         it 'calls delete for strategy with expected id' do
-          expect(sink_strategy).to receive(:delete).with(deleted_id)
+          expect(sink).to receive(:delete).with(deleted_id)
 
           subject.delete(deleted_id)
         end
@@ -117,7 +117,7 @@ describe Core::OutputSink::Sink do
 
     context '#flush' do
       it 'calls flush for strategy' do
-        expect(sink_strategy).to receive(:flush)
+        expect(sink).to receive(:flush)
 
         subject.flush
       end
@@ -139,7 +139,7 @@ describe Core::OutputSink::Sink do
         let(:serialized_object) { 'doesnt matter' }
 
         before(:each) do
-          allow(sink_strategy).to receive(:serialize).and_return(serialized_object)
+          allow(sink).to receive(:serialize).and_return(serialized_object)
 
           document_count.times.each do |id|
             subject.ingest({ :id => id })

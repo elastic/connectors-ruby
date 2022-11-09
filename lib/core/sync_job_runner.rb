@@ -8,7 +8,7 @@
 
 require 'connectors/connector_status'
 require 'connectors/registry'
-require 'core/output_sink'
+require 'core/ingestion'
 require 'utility'
 
 module Core
@@ -23,19 +23,16 @@ module Core
 
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @sink = Core::OutputSink::Sink.new(Core::OutputSink::EsStrategy.new(connector_settings.index_name, @connector_settings.request_pipeline))
+      @ingester = Core::Ingestion::Ingester.new(Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline))
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
-<<<<<<< HEAD
       @sync_error = nil
-=======
       @status = {
         :indexed_document_count => 0,
         :deleted_document_count => 0,
         :indexed_document_volume => 0,
         :error => nil
       }
->>>>>>> ccbef1d (Fix tests for SyncJobRunner)
     end
 
     def execute
@@ -73,7 +70,7 @@ module Core
         reporting_cycle_start = Time.now
         connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
-          @sink.ingest(document)
+          @ingester.ingest(document)
           incoming_ids << document['id']
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
@@ -87,7 +84,7 @@ module Core
         Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
 
         ids_to_delete.each do |id|
-          @sink.delete(id)
+          @ingester.delete(id)
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
             ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
@@ -95,7 +92,7 @@ module Core
           end
         end
 
-        @sink.flush
+        @ingester.flush
 
         # We use this mechanism for checking, whether an interrupt (or something else lead to the thread not finishing)
         # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
@@ -104,7 +101,7 @@ module Core
         @sync_error = e.message
         Utility::ExceptionTracking.log_exception(e)
       ensure
-        stats = @sink.ingestion_stats
+        stats = @ingester.ingestion_stats
 
         Utility::Logger.debug("Sync stats are: #{stats}")
 

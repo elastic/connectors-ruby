@@ -6,8 +6,6 @@
 
 # frozen_string_literal: true
 
-require 'core/output_sink/sink'
-require 'core/output_sink/es_strategy'
-require 'core/output_sink/console_strategy'
-
-module Core::OutputSink; end
+require 'core/ingestion/ingester'
+require 'core/ingestion/es_sink'
+require 'core/ingestion/console_sink'

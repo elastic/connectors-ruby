@@ -1,8 +1,8 @@
-require 'core/output_sink/console_strategy'
+require 'core/ingestion/console_sink'
 
 require 'spec_helper'
 
-describe Core::OutputSink::ConsoleStrategy do
+describe Core::Ingestion::ConsoleSink do
   subject { described_class.new }
 
   context '.ingest' do

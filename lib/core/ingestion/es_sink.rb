@@ -13,8 +13,8 @@ require 'utility/logger'
 require 'elasticsearch/api'
 
 module Core
-  module OutputSink
-    class EsStrategy
+  module Ingestion
+    class EsSink
       def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new)
         @client = Utility::EsClient.new(App::Config[:elasticsearch])
         @index_name = index_name

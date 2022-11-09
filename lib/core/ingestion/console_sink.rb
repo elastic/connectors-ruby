@@ -9,8 +9,8 @@
 require 'utility/logger'
 
 module Core
-  module OutputSink
-    class ConsoleStrategy
+  module Ingestion
+    class ConsoleSink
       def ingest(id, serialized_document)
         print_header "Got a single document[id=#{id}]"
         puts serialized_document

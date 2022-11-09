@@ -9,8 +9,8 @@
 require 'utility/logger'
 
 module Core
-  module OutputSink
-    class Sink
+  module Ingestion
+    class Ingester
       def initialize(sink_strategy)
         @sink_strategy = sink_strategy
         @ingested_count = 0
