@@ -107,8 +107,10 @@ module Core
           @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.'
         end
 
-        metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
-        metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
+        unless connector_instance.nil?
+          metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
+          metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
+        end
 
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, metadata, @sync_error)
 

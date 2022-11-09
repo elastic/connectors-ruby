@@ -110,10 +110,10 @@ describe Core::SyncJobRunner do
 
     shared_examples_for 'sync stops with error' do
       it 'stops with error' do
-        expect(Core::ElasticConnectorActions).to receive(:complete_sync) { |actual_connector_id, actual_job_id, actual_status|
+        expect(Core::ElasticConnectorActions).to receive(:complete_sync) { |actual_connector_id, actual_job_id, _ingestion_stats, actual_error|
           expect(actual_connector_id).to eq(connector_id)
           expect(actual_job_id).to eq(job_id)
-          expect(actual_status[:error]).to_not be_empty
+          expect(actual_error).to_not be_empty
         }
 
         subject.execute
@@ -270,7 +270,7 @@ describe Core::SyncJobRunner do
         expect { subject.execute }.to raise_exception
 
         expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
-        expect(subject.instance_variable_get(:@status)[:error]).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
+        expect(subject.instance_variable_get(:@sync_error)).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
       end
     end
 
