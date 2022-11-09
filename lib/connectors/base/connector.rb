@@ -7,7 +7,7 @@
 # frozen_string_literal: true
 
 require 'bson'
-require 'core/output_sink'
+require 'core/ingestion'
 require 'utility'
 require 'app/config'
 require 'active_support/core_ext/hash/indifferent_access'
