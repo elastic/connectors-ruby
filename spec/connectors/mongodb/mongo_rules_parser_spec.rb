@@ -141,5 +141,4 @@ describe Connectors::MongoDB::MongoRulesParser do
       expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
     end
   end
-
 end

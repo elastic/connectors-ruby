@@ -5,6 +5,7 @@ require 'utility'
 
 describe Core::ElasticConnectorActions do
   let(:connector_id) { 'one-two-three' }
+  let(:job_id) { 'some-job-id' }
   let(:es_client) { double }
   let(:es_client_indices_api) { double }
   let(:connectors_index) { Utility::Constants::CONNECTORS_INDEX }
@@ -71,12 +72,12 @@ describe Core::ElasticConnectorActions do
     before(:each) do
       allow(es_client)
         .to receive(:index)
-        .with(:index => connectors_index, :body => anything)
-        .and_return(
-          {
-            '_id' => created_connector_id
-          }
-        )
+              .with(:index => connectors_index, :body => anything)
+              .and_return(
+                {
+                  '_id' => created_connector_id
+                }
+              )
     end
 
     it 'sends a index request with proper index_name and service_type' do
@@ -148,7 +149,7 @@ describe Core::ElasticConnectorActions do
     before(:each) do
       allow(es_client_indices_api)
         .to receive(:get_mapping)
-        .and_return({ "#{Utility::Constants::CONNECTORS_INDEX}-v1" => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
+              .and_return({ "#{Utility::Constants::CONNECTORS_INDEX}-v1" => { 'mappings' => { '_meta' => { 'version' => '1' }, 'properties' => { 'api_key_id' => { 'type' => 'keyword' }, 'configuration' => { 'type' => 'object' }, 'error' => { 'type' => 'keyword' }, 'index_name' => { 'type' => 'keyword' }, 'language' => { 'type' => 'keyword' }, 'last_seen' => { 'type' => 'date' }, 'last_sync_error' => { 'type' => 'keyword' }, 'last_sync_status' => { 'type' => 'keyword' }, 'last_synced' => { 'type' => 'date' }, 'name' => { 'type' => 'keyword' }, 'scheduling' => { 'properties' => { 'enabled' => { 'type' => 'boolean' }, 'interval' => { 'type' => 'text' } } }, 'service_type' => { 'type' => 'keyword' }, 'status' => { 'type' => 'keyword' }, 'sync_now' => { 'type' => 'boolean' } } } } })
     end
 
     it 'gets the meta' do
@@ -288,16 +289,34 @@ describe Core::ElasticConnectorActions do
     let(:seq_no) { 1 }
     let(:primary_term) { 1 }
     before(:each) do
-      allow(es_client).to receive(:index).with(:index => jobs_index, :body => anything).and_return({ '_id' => 'job-123' })
+      allow(es_client).to receive(:index)
+                            .with(:index => jobs_index, :body => anything, :refresh => true)
+                            .and_return(
+                              {
+                                '_id' => job_id,
+                                'result' => 'created'
+                              }
+                            )
       allow(es_client).to receive(:get)
-        .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
-        .and_return(
-          { '_seq_no' => seq_no,
-            '_primary_term' => primary_term,
-            '_source' => {
-              'last_sync_status' => nil
-            } }
-        )
+                            .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+                            .and_return(
+                              {
+                                '_seq_no' => seq_no,
+                                '_primary_term' => primary_term,
+                                '_source' => {
+                                  'last_sync_status' => nil
+                                }
+                              }
+                            )
+      allow(es_client).to receive(:get)
+                            .with(:index => jobs_index, :id => anything, :ignore => 404)
+                            .and_return(
+                              { '_id' => job_id,
+                                '_source' => {
+                                  'status' => Connectors::SyncStatus::IN_PROGRESS
+                                }
+                              }
+                            )
     end
 
     it 'updates connector status fields' do
@@ -323,11 +342,23 @@ describe Core::ElasticConnectorActions do
       expect(es_client).to receive(:index).with(
         :index => jobs_index,
         :body => hash_including(
-          :worker_hostname,
-          :created_at,
+          :worker_hostname => anything,
+          :created_at => anything,
           :connector_id => connector_id,
-          :status => Connectors::SyncStatus::IN_PROGRESS
-        )
+          :status => Connectors::SyncStatus::IN_PROGRESS,
+          :filtering => anything
+        ),
+        :refresh => true
+      )
+
+      described_class.claim_job(connector_id)
+    end
+
+    it 're-reads a record in jobs index' do
+      expect(es_client).to receive(:get).with(
+        :index => jobs_index,
+        :id => job_id,
+        :ignore => 404
       )
 
       described_class.claim_job(connector_id)
@@ -336,14 +367,14 @@ describe Core::ElasticConnectorActions do
     context 'when connector is already syncing' do
       before(:each) do
         allow(es_client).to receive(:get)
-          .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
-          .and_return(
-            { '_seq_no' => seq_no,
-              '_primary_term' => primary_term,
-              '_source' => {
-                'last_sync_status' => Connectors::SyncStatus::IN_PROGRESS
-              } }
-          )
+                              .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+                              .and_return(
+                                { '_seq_no' => seq_no,
+                                  '_primary_term' => primary_term,
+                                  '_source' => {
+                                    'last_sync_status' => Connectors::SyncStatus::IN_PROGRESS
+                                  } }
+                              )
       end
       it 'raises an error of specific type' do
         expect { described_class.claim_job(connector_id) }.to raise_error(Core::JobAlreadyRunningError)
@@ -353,8 +384,8 @@ describe Core::ElasticConnectorActions do
     context 'when connector has changed version' do
       before(:each) do
         allow(es_client).to receive(:update)
-          .with(anything)
-          .and_raise(Core::ConnectorVersionChangedError.new(connector_id, seq_no, primary_term))
+                              .with(anything)
+                              .and_raise(Core::ConnectorVersionChangedError.new(connector_id, seq_no, primary_term))
       end
       it 'raises an error of specific type' do
         expect { described_class.claim_job(connector_id) }
@@ -390,19 +421,24 @@ describe Core::ElasticConnectorActions do
 
       before(:each) do
         allow(es_client).to receive(:get)
-          .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
-          .and_return(
-            { '_seq_no' => seq_no,
-              '_primary_term' => primary_term,
-              '_source' => {
-                'last_sync_status' => nil,
-                'filtering' => connector_filtering
-              } }
-          )
+                              .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+                              .and_return(
+                                { '_seq_no' => seq_no,
+                                  '_primary_term' => primary_term,
+                                  '_source' => {
+                                    'last_sync_status' => nil,
+                                    'filtering' => connector_filtering
+                                  }
+                                }
+                              )
       end
 
       it 'has filtering rules' do
-        expect(es_client).to receive(:index).with(:index => jobs_index, :body => hash_including(:filtering => [job_filtering]))
+        expect(es_client).to receive(:index).with(
+          :index => jobs_index,
+          :body => hash_including(:filtering => [job_filtering]),
+          :refresh => true
+        )
         described_class.claim_job(connector_id)
       end
     end
@@ -781,10 +817,10 @@ describe Core::ElasticConnectorActions do
       before(:each) do
         expect(es_client)
           .to receive(:update)
-          .with(anything)
-          .and_raise(
-            Elastic::Transport::Transport::Errors::Conflict.new
-          )
+                .with(anything)
+                .and_raise(
+                  Elastic::Transport::Transport::Errors::Conflict.new
+                )
       end
       it 'raises a version changed error' do
         expect { described_class.update_connector_fields(connector_id, doc, seq_no, primary_term) }

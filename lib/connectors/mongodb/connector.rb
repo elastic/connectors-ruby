@@ -168,6 +168,7 @@ module Connectors
           parser = MongoRulesParser.new(@rules)
           filter = parser.parse
         end
+        Utility::Logger.info("Filtering with simple rules filter: #{filter}")
         collection.find(filter)
       end
 

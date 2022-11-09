@@ -43,7 +43,10 @@ describe Core::SyncJobRunner do
   let(:job_id) { 'job-123' }
   let(:job_definition) do
     {
-      '_id' => job_id
+      '_id' => job_id,
+      '_source' => {
+        'filtering' => filtering
+      }
     }
   end
 

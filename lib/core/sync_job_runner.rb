@@ -41,8 +41,10 @@ module Core
     def do_sync!
       Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
-      job_description = ElasticConnectorActions.claim_job(@connector_settings.id)
-      job_id = job_description['_id']
+      job_record = ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_description = job_record['_source']
+      job_id = job_record['_id']
+      job_description['_id'] = job_id
 
       unless job_id.present?
         Utility::Logger.error("Failed to claim the job for #{@connector_settings.id}. Please check the logs for the cause of this error.")
