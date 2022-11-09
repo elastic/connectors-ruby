@@ -2,10 +2,17 @@ require 'core'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
-require './spec/support/filter_validation_result_helper'
 
-RSpec.configure do |c|
-  c.include FilterValidationResultHelper
+def filter_validation_result(domain, state, errors)
+  {
+    :domain => domain,
+    :draft => {
+      :validation => {
+        :state => state,
+        :errors => errors
+      }
+    }
+  }
 end
 
 describe Core::ElasticConnectorActions do
@@ -505,8 +512,8 @@ describe Core::ElasticConnectorActions do
 
       it_behaves_like 'does not update any validation result'
 
-      it 'also logs an error' do
-        expect(Utility::Logger).to receive(:error).with(anything)
+      it 'also logs a warning' do
+        expect(Utility::Logger).to receive(:warn).with(anything)
 
         described_class.update_filtering_validation(connector_id, new_validation_states)
       end

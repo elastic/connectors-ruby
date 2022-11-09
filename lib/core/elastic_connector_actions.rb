@@ -84,7 +84,7 @@ module Core
         update_connector_configuration(connector_id, payload)
       end
 
-      def update_filtering_validation(connector_id, filter_validation_results = {})
+      def update_filtering_validation(connector_id, filter_validation_results)
         return if filter_validation_results.empty?
 
         filtering = get_connector(connector_id)[:filtering]
@@ -99,7 +99,7 @@ module Core
             update_filter_validation(filter, filter_validation_results)
           end
         else
-          Utility::Logger.error("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+          Utility::Logger.warn("ES returned invalid filtering format: #{filtering}. Skipping validation.")
           return
         end
 
@@ -338,7 +338,7 @@ module Core
       private
 
       def should_update_validations?(domain_validations, filtering)
-        domains_present = filtering.collect(&->(filter) { filter[:domain] })
+        domains_present = filtering.collect { |filter| filter[:domain] }
         domains_to_update = domain_validations.keys
 
         # non-empty intersection -> domains to update present
