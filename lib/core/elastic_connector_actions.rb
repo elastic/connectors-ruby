@@ -19,6 +19,12 @@ module Core
     end
   end
 
+  class JobNotCreatedError < StandardError
+    def initialize(connector_id, response)
+      super("Sync job for connector '#{connector_id}' could not be created. Response: #{response}")
+    end
+  end
+
   class ConnectorVersionChangedError < StandardError
     def initialize(connector_id, seq_no, primary_term)
       super("Version conflict: seq_no [#{seq_no}] and primary_term [#{primary_term}] do not match for connector '#{connector_id}'.")
@@ -120,17 +126,26 @@ module Core
           :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
 
-        client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
+        index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
+        if index_response['result'] == 'created'
+          return client.get(
+            :index => Utility::Constants::JOB_INDEX,
+            :id => index_response['_id'],
+            :ignore => 404
+          ).with_indifferent_access
+        end
+        raise JobNotCreatedError.new(connector_id, index_response)
       end
 
       def convert_connector_filtering_to_job_filtering(connector_filtering)
         return [] unless connector_filtering
         connector_filtering = [connector_filtering] unless connector_filtering.is_a?(Array)
         connector_filtering.each_with_object([]) do |filtering_domain, job_filtering|
+          snippet = filtering_domain.dig('active', 'advanced_snippet') || {}
           job_filtering << {
             'domain' => filtering_domain['domain'],
             'rules' => filtering_domain.dig('active', 'rules'),
-            'advanced_snippet' => filtering_domain.dig('active', 'advanced_snippet'),
+            'advanced_snippet' => snippet['value'] || snippet,
             'warnings' => [] # TODO: in https://github.com/elastic/enterprise-search-team/issues/3174
           }
         end

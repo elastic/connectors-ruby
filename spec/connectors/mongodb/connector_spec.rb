@@ -9,41 +9,39 @@ describe Connectors::MongoDB::Connector do
 
   let(:configuration) do
     {
-       :host => {
-         :label => 'Server Hostname',
-         :value => mongodb_host
-       },
-       :database => {
-         :label => 'Database',
-         :value => mongodb_database
-       },
-       :collection => {
-         :label => 'Collection',
-         :value => mongodb_collection
-       },
-       :user => {
-         :label => 'Username',
-         :value => mongodb_username
-       },
-       :password => {
-         :label => 'Password',
-         :value => mongodb_password
-       },
-       :direct_connection => {
-         :label => 'Direct connection? (true/false)',
-         :value => direct_connection
-       },
-       :filtering => {
-         :active => filtering
-       }
+      :host => {
+        :label => 'Server Hostname',
+        :value => mongodb_host
+      },
+      :database => {
+        :label => 'Database',
+        :value => mongodb_database
+      },
+      :collection => {
+        :label => 'Collection',
+        :value => mongodb_collection
+      },
+      :user => {
+        :label => 'Username',
+        :value => mongodb_username
+      },
+      :password => {
+        :label => 'Password',
+        :value => mongodb_password
+      },
+      :direct_connection => {
+        :label => 'Direct connection? (true/false)',
+        :value => direct_connection
+      },
+      :filtering => {
+        :active => filtering
+      }
     }
   end
 
-  let(:rules) {
-    [
-      # empty rules for now, replace, when rules are supported
-    ]
-  }
+  let(:rules) do
+    [{ 'field' => 'name', 'rule' => 'Equals', 'policy' => 'include', 'value' => 'apple' }]
+  end
 
   let(:pipeline) {
     [
@@ -447,6 +445,24 @@ describe Connectors::MongoDB::Connector do
 
       it 'calls find without arguments' do
         expect(actual_collection).to receive(:find).with(no_args)
+
+        subject.yield_documents
+      end
+    end
+
+    context 'rule is present and advanced filtering is empty' do
+      let(:advanced_snippet) { {} }
+
+      it 'applies the simple rule' do
+        expect(actual_collection).to receive(:find).with(match({ 'name' => 'apple' }))
+
+        subject.yield_documents
+      end
+    end
+
+    context 'both rules and advanced filtering are present' do
+      it 'does not apply the simple rule' do
+        expect(actual_collection).to receive(:find).with(filter, options)
 
         subject.yield_documents
       end
