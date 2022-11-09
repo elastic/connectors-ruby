@@ -38,7 +38,7 @@ module Core
         end
 
         if @status[:error]
-          Utility::Logger.info("Failed to validate filtering for connector #{@connector_settings.id} with error '#{@status[:error]}'.")
+          Utility::Logger.warn("Failed to validate filtering for connector #{@connector_settings.id} with error '#{@status[:error]}'.")
         else
           Utility::Logger.info("Successfully validated filtering for connector #{@connector_settings.id}.")
         end
