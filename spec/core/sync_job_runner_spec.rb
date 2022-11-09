@@ -34,6 +34,7 @@ describe Core::SyncJobRunner do
 
   let(:connector_class) { double }
   let(:connector_instance) { double }
+  let(:sink) { double }
   let(:ingester) { double }
 
   let(:output_index_name) { 'test-ingest-index' }
@@ -75,6 +76,7 @@ describe Core::SyncJobRunner do
     allow(Core::ElasticConnectorActions).to receive(:document_count).and_return(total_document_count)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
+    allow(Core::Ingestion::EsSink).to receive(:new).and_return(sink)
     allow(Core::Ingestion::Ingester).to receive(:new).with(anything).and_return(ingester)
     allow(ingester).to receive(:ingest)
     allow(ingester).to receive(:delete)
