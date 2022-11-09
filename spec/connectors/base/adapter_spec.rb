@@ -11,7 +11,7 @@ require 'active_support/core_ext/hash'
 require 'connectors/base/adapter'
 
 describe Connectors::Base::Adapter do
-  context '.generate_id_helpers' do
+  describe '.generate_id_helpers' do
     before do
       class Dummy < Connectors::Base::Adapter
         generate_id_helpers :dummy, 'dummy'
@@ -75,7 +75,7 @@ describe Connectors::Base::Adapter do
     end
   end
 
-  describe 'es_document_from_configured_object_base' do
+  describe '.es_document_from_configured_object_base' do
     let(:object_type) { 'animal' }
     let(:field_remote) { 'RemoteFieldName' }
     let(:field_target) { 'target_field_name' }

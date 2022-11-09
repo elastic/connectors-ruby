@@ -103,7 +103,7 @@ describe Core::SyncJobRunner do
     extracted_documents.each { |document| allow_statement.and_yield(document) }
   end
 
-  context '.execute' do
+  describe '#execute' do
     let(:ingestion_stats) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
     before(:each) do
       allow(ingester).to receive(:ingestion_stats).and_return(ingestion_stats)

@@ -21,46 +21,48 @@ describe Core::Heartbeat do
       allow(connector_instance).to receive(:is_healthy?).and_return(is_healthy)
     end
 
-    it 'updates last_seen' do
-      expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:last_seen => anything))
+    describe '.send' do
+      it 'updates last_seen' do
+        expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(connector_id, hash_including(:last_seen => anything))
 
-      described_class.send(connector_settings)
-    end
-
-    context 'when it is configured' do
-      let(:configured) { true }
-      context 'when remote source is up' do
-        let(:is_healthy) { true }
-
-        it 'updates status' do
-          expect(Core::ElasticConnectorActions)
-            .to receive(:update_connector_fields)
-            .with(
-              connector_id,
-              hash_including(
-                :status => Connectors::ConnectorStatus::CONNECTED
-              )
-            )
-
-          described_class.send(connector_settings)
-        end
+        described_class.send(connector_settings)
       end
 
-      context 'when remote source is down' do
-        let(:is_healthy) { false }
+      context 'when it is configured' do
+        let(:configured) { true }
+        context 'when remote source is up' do
+          let(:is_healthy) { true }
 
-        it 'updates status' do
-          expect(Core::ElasticConnectorActions)
-            .to receive(:update_connector_fields)
-            .with(
-              connector_id,
-              hash_including(
-                :status => Connectors::ConnectorStatus::ERROR,
-                :error => /Health check for 3d party service failed/
+          it 'updates status' do
+            expect(Core::ElasticConnectorActions)
+              .to receive(:update_connector_fields)
+              .with(
+                connector_id,
+                hash_including(
+                  :status => Connectors::ConnectorStatus::CONNECTED
+                )
               )
-            )
 
-          described_class.send(connector_settings)
+            described_class.send(connector_settings)
+          end
+        end
+
+        context 'when remote source is down' do
+          let(:is_healthy) { false }
+
+          it 'updates status' do
+            expect(Core::ElasticConnectorActions)
+              .to receive(:update_connector_fields)
+              .with(
+                connector_id,
+                hash_including(
+                  :status => Connectors::ConnectorStatus::ERROR,
+                  :error => /Health check for 3d party service failed/
+                )
+              )
+
+            described_class.send(connector_settings)
+          end
         end
       end
     end
