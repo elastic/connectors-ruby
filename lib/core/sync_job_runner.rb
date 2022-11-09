@@ -23,7 +23,7 @@ module Core
 
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
+      @sink = Core::OutputSink::Sink.new(Core::OutputSink::EsStrategy.new(connector_settings.index_name, @connector_settings.request_pipeline))
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
 <<<<<<< HEAD

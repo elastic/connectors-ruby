@@ -75,7 +75,7 @@ describe Core::SyncJobRunner do
     allow(Core::ElasticConnectorActions).to receive(:document_count).and_return(total_document_count)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
-    allow(Core::OutputSink::EsSink).to receive(:new).with(output_index_name, request_pipeline).and_return(sink)
+    allow(Core::OutputSink::Sink).to receive(:new).with(anything).and_return(sink)
     allow(sink).to receive(:ingest)
     allow(sink).to receive(:delete)
     allow(sink).to receive(:flush)

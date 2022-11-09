@@ -1,4 +1,4 @@
-require 'core/output_sink/es_sink'
+require 'core/output_sink/es_strategy'
 require 'core/connector_settings'
 require 'utility/es_client'
 
@@ -8,7 +8,7 @@ RSpec::Matchers.define :array_of_size do |x|
   match { |actual| actual.size == x }
 end
 
-describe Core::OutputSink::EsSink do
+describe Core::OutputSink::EsStrategy do
   subject { described_class.new(index_name, request_pipeline, bulk_queue) }
   let(:index_name) { 'some-index-name' }
   let(:request_pipeline) { Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE }
@@ -30,11 +30,6 @@ describe Core::OutputSink::EsSink do
     allow(serializer).to receive(:dump).and_return('')
   end
 
-  it_behaves_like 'implements all private methods of base class' do
-    let(:concrete_class_instance) { subject }
-    let(:base_class_instance) { Core::OutputSink::BaseSink.new }
-  end
-
   context '.ingest' do
     let(:document) do
       {
@@ -42,7 +37,7 @@ describe Core::OutputSink::EsSink do
         'text' => 'hoho, haha!'
       }
     end
-    let(:serialized_document) { 'id: 1, text: "hoho, haha!"' }
+    let(:serialized_document) { "id: #{document[:id]}, text: 'hoho, haha!'" }
 
     before(:each) do
       allow(serializer).to receive(:dump).with(document).and_return(serialized_document)
@@ -52,7 +47,7 @@ describe Core::OutputSink::EsSink do
       it 'does not immediately send the document into elasticsearch' do
         expect(es_client).to_not receive(:bulk)
 
-        subject.ingest(document)
+        subject.ingest(document[:id], serialized_document)
       end
     end
 
@@ -69,8 +64,8 @@ describe Core::OutputSink::EsSink do
           :text => 'work work!'
         }
       end
-      let(:serialized_document) { 'id: 1, text: "hoho, haha!"' }
-      let(:another_serialized_document) { 'id: 2, text: "work work!"' }
+      let(:serialized_document) { "id: #{document[:id]}, text: 'hoho, haha!'" }
+      let(:another_serialized_document) { "id: #{another_document[:id]}, text: 'work work!'" }
 
       before(:each) do
         # emulated behaviour is:
@@ -86,8 +81,8 @@ describe Core::OutputSink::EsSink do
         expect(es_client).to receive(:bulk)
           .once
 
-        subject.ingest(document)
-        subject.ingest(another_document)
+        subject.ingest(document[:id], serialized_document)
+        subject.ingest(another_document[:id], another_serialized_document)
       end
 
       it 'pops existing documents before adding a new one' do
@@ -102,8 +97,8 @@ describe Core::OutputSink::EsSink do
           .with(anything, another_serialized_document)
           .ordered
 
-        subject.ingest(document)
-        subject.ingest(another_document)
+        subject.ingest(document[:id], serialized_document)
+        subject.ingest(another_document[:id], another_serialized_document)
       end
     end
   end

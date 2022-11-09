@@ -10,8 +10,9 @@ require 'utility/logger'
 
 module Core
   module OutputSink
-    class BaseSink
-      def initialize
+    class Sink
+      def initialize(sink_strategy)
+        @sink_strategy = sink_strategy
         @ingested_count = 0
         @ingested_volume = 0
         @deleted_count = 0
@@ -23,8 +24,8 @@ module Core
           return
         end
 
-        serialized_document = do_serialize(document)
-        do_ingest(document['id'], serialized_document)
+        serialized_document = @sink_strategy.serialize(document)
+        @sink_strategy.ingest(document['id'], serialized_document)
 
         @ingested_count += 1
         @ingested_volume += serialized_document.bytesize
@@ -37,7 +38,7 @@ module Core
       def delete(id)
         return if id.nil?
 
-        do_delete(id)
+        @sink_strategy.delete(id)
 
         @deleted_count += 1
       end
@@ -47,7 +48,7 @@ module Core
       end
 
       def flush
-        do_flush
+        @sink_strategy.flush
       end
 
       def ingestion_stats
