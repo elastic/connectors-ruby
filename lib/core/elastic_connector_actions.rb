@@ -115,6 +115,8 @@ module Core
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now,
+          :started_at => Time.now,
+          :last_seen => Time.now,
           :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
 
@@ -145,22 +147,31 @@ module Core
         update_connector_fields(connector_id, body)
       end
 
-      def complete_sync(connector_id, job_id, status)
-        sync_status = status[:error] ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
+      def update_sync(job_id, metadata)
+        body = {
+          :doc => { :last_seen => Time.now }.merge(metadata)
+        }
+        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
+      end
+
+      def complete_sync(connector_id, job_id, metadata, error)
+        sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
-                                :last_sync_error => status[:error],
-                                :error => status[:error],
+                                :last_sync_error => error,
+                                :error => error,
                                 :last_synced => Time.now,
-                                :last_indexed_document_count => status[:indexed_document_count],
-                                :last_deleted_document_count => status[:deleted_document_count])
+                                :last_indexed_document_count => metadata[:indexed_document_count],
+                                :last_deleted_document_count => metadata[:deleted_document_count])
 
         body = {
           :doc => {
             :status => sync_status,
-            :completed_at => Time.now
-          }.merge(status)
+            :completed_at => Time.now,
+            :last_seen => Time.now,
+            :error => error
+          }.merge(metadata)
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
@@ -444,6 +455,10 @@ module Core
           # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
           raise ConnectorVersionChangedError.new(connector_id, seq_no, primary_term)
         end
+      end
+
+      def document_count(index_name)
+        client.count(:index => index_name)['count']
       end
 
       private
