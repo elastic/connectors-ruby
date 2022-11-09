@@ -250,7 +250,7 @@ describe Core::Scheduler do
           :active => {},
           :draft => {
             :rules => [],
-            :advanced_config => advanced_config,
+            :advanced_snippet => advanced_config,
             :validation => validation
           }
         }
@@ -309,15 +309,43 @@ describe Core::Scheduler do
             nil
           }
 
-          it_behaves_like 'does not trigger', :filter_validation
+          context 'validation state is \'valid\'' do
+            let(:state) {
+              Core::Filtering::ValidationStatus::VALID
+            }
+
+            it_behaves_like 'does not trigger', :filter_validation
+          end
+
+          context 'validation state is \'edited\'' do
+            let(:state) {
+              Core::Filtering::ValidationStatus::EDITED
+            }
+
+            it_behaves_like 'triggers', :filter_validation
+          end
         end
 
-        context 'advanced config is an empty hash' do
+        context 'advanced config is empty' do
           let(:advanced_config) {
             {}
           }
 
-          it_behaves_like 'does not trigger', :filter_validation
+          context 'validation state is \'valid\'' do
+            let(:state) {
+              Core::Filtering::ValidationStatus::VALID
+            }
+
+            it_behaves_like 'does not trigger', :filter_validation
+          end
+
+          context 'validation state is \'edited\'' do
+            let(:state) {
+              Core::Filtering::ValidationStatus::EDITED
+            }
+
+            it_behaves_like 'triggers', :filter_validation
+          end
         end
       end
 

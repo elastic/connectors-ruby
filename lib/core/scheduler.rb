@@ -161,7 +161,7 @@ module Core
       filtering = connector_settings.filtering
 
       unless filtering.present?
-        Utility::Logger.info("#{connector_settings.formatted} does not contain filtering to be validated.")
+        Utility::Logger.debug("#{connector_settings.formatted} does not contain filtering to be validated.")
 
         return false
       end
@@ -169,16 +169,7 @@ module Core
       draft_filters = filtering[:draft]
 
       unless draft_filters.present?
-        Utility::Logger.info("#{connector_settings.formatted} does not contain a draft filter to be validated.")
-
-        return false
-      end
-
-      advanced_filter_config = draft_filters[:advanced_config]
-
-      # rules checking will be added with future work
-      unless advanced_filter_config.present?
-        Utility::Logger.info("#{connector_settings.formatted} does not contain a draft advanced filter config to be validated.")
+        Utility::Logger.debug("#{connector_settings.formatted} does not contain a draft filter to be validated.")
 
         return false
       end
@@ -192,7 +183,7 @@ module Core
       end
 
       unless validation[:state] == Core::Filtering::ValidationStatus::EDITED
-        Utility::Logger.info("#{connector_settings.formatted} filtering validation needs to be in state #{Core::Filtering::ValidationStatus::EDITED} to be able to validate it.")
+        Utility::Logger.debug("#{connector_settings.formatted} filtering validation needs to be in state #{Core::Filtering::ValidationStatus::EDITED} to be able to validate it.")
 
         return false
       end
