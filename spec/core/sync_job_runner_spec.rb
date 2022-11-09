@@ -30,12 +30,6 @@ describe Core::SyncJobRunner do
   end
 
   let(:connector_settings) { double }
-  let(:job_description) {
-    {
-      :_id => job_id,
-      :filtering => filtering
-    }
-  }
   let(:filtering) {
     {}
   }
@@ -47,6 +41,7 @@ describe Core::SyncJobRunner do
   let(:output_index_name) { 'test-ingest-index' }
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
+  let(:connector_metadata) { { :foo => 'bar' } } # metadata returned from connectors
 
   let(:filtering_validation_result) {
     {
@@ -55,20 +50,30 @@ describe Core::SyncJobRunner do
     }
   }
   let(:job_id) { 'job-123' }
+  let(:job_definition) do
+    {
+      '_id' => job_id,
+      '_source' => {
+        'filtering' => filtering
+      }
+    }
+  end
 
   let(:extract_binary_content) { true }
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
+  let(:total_document_count) { 100 }
 
   subject { described_class.new(connector_settings) }
 
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
 
-    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_description)
+    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_definition)
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:complete_sync)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
+    allow(Core::ElasticConnectorActions).to receive(:document_count).and_return(total_document_count)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
     allow(Core::OutputSink::EsSink).to receive(:new).with(output_index_name, request_pipeline).and_return(sink)
@@ -84,18 +89,25 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
+    allow(connector_settings).to receive(:filtering).and_return(filtering)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
     allow(connector_class).to receive(:validate_filtering).and_return(filtering_validation_result)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
+    allow(connector_instance).to receive(:metadata).and_return(connector_metadata)
     allow(connector_instance).to receive(:do_health_check!)
     allow_statement = allow(connector_instance).to receive(:yield_documents)
     extracted_documents.each { |document| allow_statement.and_yield(document) }
   end
 
   context '.execute' do
+    let(:ingestion_stats) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
+    before(:each) do
+      allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
+    end
+
     shared_examples_for 'sync stops with error' do
       it 'stops with error' do
         expect(Core::ElasticConnectorActions).to receive(:complete_sync) { |actual_connector_id, actual_job_id, actual_status|
@@ -228,7 +240,22 @@ describe Core::SyncJobRunner do
         subject.execute
 
         expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
-        expect(subject.instance_variable_get(:@status)[:error]).to eq('error message')
+        expect(subject.instance_variable_get(:@sync_error)).to eq('error message')
+      end
+    end
+
+    context 'when validation thread did not finish execution' do
+      before(:each) do
+        # Exception, which is not rescued (treated like something, which stopped the sync thread)
+        allow(connector_instance).to receive(:do_health_check!).and_raise(Exception.new('Oh no!'))
+      end
+
+      it 'sets an error, that the validation thread was killed' do
+        # Check for exception thrown on purpose, so that the test is not marked as failed for the wrong reason
+        expect { subject.execute }.to raise_exception
+
+        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@sync_error)).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
       end
     end
 
@@ -285,7 +312,12 @@ describe Core::SyncJobRunner do
         end
 
         it 'marks the job as complete with job stats' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, { :indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => nil })
+          expect(Core::ElasticConnectorActions)
+            .to receive(:complete_sync)
+            .with(connector_id,
+                  job_id,
+                  ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
+                  nil)
 
           subject.execute
         end
@@ -295,16 +327,13 @@ describe Core::SyncJobRunner do
             allow(sink).to receive(:flush).and_raise('whoops')
           end
 
-          it 'changes connector status to error' do
-            expect(Core::ElasticConnectorActions)
-              .to receive(:update_connector_status)
-              .with(connector_id, Connectors::ConnectorStatus::ERROR, 'whoops')
-
-            subject.execute
-          end
-
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, { :indexed_document_count => extracted_documents.length, :deleted_document_count => existing_document_ids.length, :error => anything })
+            expect(Core::ElasticConnectorActions)
+              .to receive(:complete_sync)
+              .with(connector_id,
+                    job_id,
+                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
+                    'whoops')
 
             subject.execute
           end

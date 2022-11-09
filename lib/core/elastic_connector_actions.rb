@@ -19,6 +19,12 @@ module Core
     end
   end
 
+  class JobNotCreatedError < StandardError
+    def initialize(connector_id, response)
+      super("Sync job for connector '#{connector_id}' could not be created. Response: #{response}")
+    end
+  end
+
   class ConnectorVersionChangedError < StandardError
     def initialize(connector_id, seq_no, primary_term)
       super("Version conflict: seq_no [#{seq_no}] and primary_term [#{primary_term}] do not match for connector '#{connector_id}'.")
@@ -137,20 +143,31 @@ module Core
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now,
+          :started_at => Time.now,
+          :last_seen => Time.now,
           :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
         }
 
-        client.index(:index => Utility::Constants::JOB_INDEX, :body => body)
+        index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
+        if index_response['result'] == 'created'
+          return client.get(
+            :index => Utility::Constants::JOB_INDEX,
+            :id => index_response['_id'],
+            :ignore => 404
+          ).with_indifferent_access
+        end
+        raise JobNotCreatedError.new(connector_id, index_response)
       end
 
       def convert_connector_filtering_to_job_filtering(connector_filtering)
         return [] unless connector_filtering
         connector_filtering = [connector_filtering] unless connector_filtering.is_a?(Array)
         connector_filtering.each_with_object([]) do |filtering_domain, job_filtering|
+          snippet = filtering_domain.dig('active', 'advanced_snippet') || {}
           job_filtering << {
             'domain' => filtering_domain['domain'],
             'rules' => filtering_domain.dig('active', 'rules'),
-            'advanced_snippet' => filtering_domain.dig('active', 'advanced_snippet'),
+            'advanced_snippet' => snippet['value'] || snippet,
             'warnings' => [] # TODO: in https://github.com/elastic/enterprise-search-team/issues/3174
           }
         end
@@ -167,22 +184,31 @@ module Core
         update_connector_fields(connector_id, body)
       end
 
-      def complete_sync(connector_id, job_id, status)
-        sync_status = status[:error] ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
+      def update_sync(job_id, metadata)
+        body = {
+          :doc => { :last_seen => Time.now }.merge(metadata)
+        }
+        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
+      end
+
+      def complete_sync(connector_id, job_id, metadata, error)
+        sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
-                                :last_sync_error => status[:error],
-                                :error => status[:error],
+                                :last_sync_error => error,
+                                :error => error,
                                 :last_synced => Time.now,
-                                :last_indexed_document_count => status[:indexed_document_count],
-                                :last_deleted_document_count => status[:deleted_document_count])
+                                :last_indexed_document_count => metadata[:indexed_document_count],
+                                :last_deleted_document_count => metadata[:deleted_document_count])
 
         body = {
           :doc => {
             :status => sync_status,
-            :completed_at => Time.now
-          }.merge(status)
+            :completed_at => Time.now,
+            :last_seen => Time.now,
+            :error => error
+          }.merge(metadata)
         }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
@@ -270,12 +296,99 @@ module Core
           :properties => {
             :api_key_id => { :type => :keyword },
             :configuration => { :type => :object },
-            :error => { :type => :text },
+            :description => { :type => :text },
+            :error => { :type => :keyword },
+            :filtering => {
+              :properties => {
+                :domain => { :type => :keyword },
+                :active => {
+                  :properties => {
+                    :rules => {
+                      :properties => {
+                        :id => { :type => :keyword },
+                        :policy => { :type => :keyword },
+                        :field => { :type => :keyword },
+                        :rule => { :type => :keyword },
+                        :value => { :type => :keyword },
+                        :order => { :type => :short },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :advanced_snippet => {
+                      :properties => {
+                        :value => { :type => :object },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                       }
+                    },
+                    :validation => {
+                      :properties => {
+                        :state => { :type => :keyword },
+                        :errors => {
+                          :properties => {
+                            :ids => { :type => :keyword },
+                            :messages => { :type => :text }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                :draft => {
+                  :properties => {
+                    :rules => {
+                      :properties => {
+                        :id => { :type => :keyword },
+                        :policy => { :type => :keyword },
+                        :field => { :type => :keyword },
+                        :rule => { :type => :keyword },
+                        :value => { :type => :keyword },
+                        :order => { :type => :short },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :advanced_snippet => {
+                      :properties => {
+                        :value => { :type => :object },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :validation => {
+                      :properties => {
+                        :state => { :type => :keyword },
+                        :errors => {
+                          :properties => {
+                            :ids => { :type => :keyword },
+                            :messages => { :type => :text }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             :index_name => { :type => :keyword },
+            :is_native => { :type => :boolean },
+            :language => { :type => :keyword },
             :last_seen => { :type => :date },
+            :last_sync_error => { :type => :keyword },
+            :last_sync_status => { :type => :keyword },
             :last_synced => { :type => :date },
-            :last_indexed_document_count => { :type => :integer },
-            :last_deleted_document_count => { :type => :integer },
+            :last_deleted_document_count => { :type => :long },
+            :last_indexed_document_count => { :type => :long },
+            :name => { :type => :keyword },
+            :pipeline => {
+              :properties => {
+                :extract_binary_content => { :type => :boolean },
+                :name => { :type => :keyword },
+                :reduce_whitespace => { :type => :boolean },
+                :run_ml_inference => { :type => :boolean }
+              }
+            },
             :scheduling => {
               :properties => {
                 :enabled => { :type => :boolean },
@@ -284,9 +397,7 @@ module Core
             },
             :service_type => { :type => :keyword },
             :status => { :type => :keyword },
-            :sync_error => { :type => :text },
-            :sync_now => { :type => :boolean },
-            :sync_status => { :type => :keyword }
+            :sync_now => { :type => :boolean }
           }
         }
         ensure_index_exists("#{Utility::Constants::CONNECTORS_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::CONNECTORS_INDEX, :mappings => mappings))
@@ -297,14 +408,62 @@ module Core
       def ensure_job_index_exists
         mappings = {
           :properties => {
+            :cancelation_requested_at => { :type => :date },
+            :canceled_at => { :type => :date },
+            :completed_at => { :type => :date },
+            :configuration => { :type => :object },
             :connector_id => { :type => :keyword },
-            :status => { :type => :keyword },
-            :error => { :type => :text },
-            :worker_hostname => { :type => :keyword },
-            :indexed_document_count => { :type => :integer },
-            :deleted_document_count => { :type => :integer },
             :created_at => { :type => :date },
-            :completed_at => { :type => :date }
+            :deleted_document_count => { :type => :integer },
+            :error => { :type => :text },
+            :filtering => {
+              :properties => {
+                :domain => { :type => :keyword },
+                :rules => {
+                  :properties => {
+                    :id => { :type => :keyword },
+                    :policy => { :type => :keyword },
+                    :field => { :type => :keyword },
+                    :rule => { :type => :keyword },
+                    :value => { :type => :keyword },
+                    :order => { :type => :short },
+                    :created_at => { :type => :date },
+                    :updated_at => { :type => :date }
+                  }
+                },
+                :advanced_snippet => {
+                  :properties => {
+                    :value => { :type => :object },
+                    :created_at => { :type => :date },
+                    :updated_at => { :type => :date }
+                  }
+                },
+                :warnings => {
+                  :properties => {
+                    :ids => { :type => :keyword },
+                    :messages => { :type => :text }
+                  }
+                }
+              }
+            },
+            :index_name => { :type => :keyword },
+            :indexed_document_count => { :type => :integer },
+            :indexed_document_volume => { :type => :integer },
+            :last_seen => { :type => :date },
+            :metadata => { :type => :object },
+            :pipeline => {
+              :properties => {
+                :extract_binary_content => { :type => :boolean },
+                :name => { :type => :keyword },
+                :reduce_whitespace => { :type => :boolean },
+                :run_ml_inference => { :type => :boolean }
+              }
+            },
+            :started_at => { :type => :date },
+            :status => { :type => :keyword },
+            :total_document_count => { :type => :integer },
+            :trigger_method => { :type => :keyword },
+            :worker_hostname => { :type => :keyword }
           }
         }
         ensure_index_exists("#{Utility::Constants::JOB_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::JOB_INDEX, :mappings => mappings))
@@ -333,6 +492,10 @@ module Core
           # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
           raise ConnectorVersionChangedError.new(connector_id, seq_no, primary_term)
         end
+      end
+
+      def document_count(index_name)
+        client.count(:index => index_name)['count']
       end
 
       private

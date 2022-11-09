@@ -11,7 +11,7 @@ require 'connectors/base/connector'
 describe Connectors::Base::Connector do
   subject { described_class.new(job_description: job_description) }
 
-  let(:advanced_config) {
+  let(:advanced_snippet) {
     {
       :find => {
         :filter => {
@@ -45,7 +45,7 @@ describe Connectors::Base::Connector do
 
   let(:filtering) {
     {
-      :advanced_snippet => advanced_config,
+      :advanced_snippet => advanced_snippet,
       :rules => rules
     }
   }
@@ -57,32 +57,32 @@ describe Connectors::Base::Connector do
   }
 
   context '.advanced_filter_config?' do
-    shared_examples_for 'advanced_config is not present' do
+    shared_examples_for 'advanced_filter_config is not present' do
       it 'returns empty object' do
         expect(subject.advanced_filter_config).to be_empty
       end
     end
 
-    context 'advanced config is present' do
+    context 'advanced filter config is present' do
       it 'returns advanced filter config' do
-        expect(subject.advanced_filter_config).to eq(advanced_config)
+        expect(subject.advanced_filter_config).to eq(advanced_snippet)
       end
     end
 
-    context 'advanced config is nil' do
-      let(:advanced_config) {
+    context 'advanced filter config is nil' do
+      let(:advanced_snippet) {
         nil
       }
 
-      it_behaves_like 'advanced_config is not present'
+      it_behaves_like 'advanced_filter_config is not present'
     end
 
-    context 'advanced config is empty' do
-      let(:advanced_config) {
+    context 'advanced filter config is empty' do
+      let(:advanced_snippet) {
         {}
       }
 
-      it_behaves_like 'advanced_config is not present'
+      it_behaves_like 'advanced_filter_config is not present'
     end
   end
 
@@ -129,7 +129,7 @@ describe Connectors::Base::Connector do
       end
     end
 
-    context 'rules and advanced_config are present' do
+    context 'rules and advanced filter config are present' do
       it_behaves_like 'filtering is present'
     end
 
@@ -149,40 +149,40 @@ describe Connectors::Base::Connector do
       it_behaves_like 'filtering is present'
     end
 
-    context 'only advanced_config is empty' do
-      let(:advanced_config) {
+    context 'only advanced filter config is empty' do
+      let(:advanced_snippet) {
         {}
       }
 
       it_behaves_like 'filtering is present'
     end
 
-    context 'only advanced_config is nil' do
-      let(:advanced_config) {
+    context 'only advanced filter config is nil' do
+      let(:advanced_snippet) {
         nil
       }
 
       it_behaves_like 'filtering is present'
     end
 
-    context 'rules are empty and advanced_config is empty' do
+    context 'rules are empty and advanced filter config is empty' do
       let(:rules) {
         []
       }
 
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {}
       }
 
       it_behaves_like 'filtering is not present'
     end
 
-    context 'rules are nil and advanced_config is nil' do
+    context 'rules are nil and advanced filter config is nil' do
       let(:rules) {
         nil
       }
 
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         nil
       }
 
@@ -256,7 +256,7 @@ describe Connectors::Base::Connector do
         it 'extracts the advanced filter config' do
           advanced_filter_config = subject.advanced_filter_config
 
-          expect(advanced_filter_config).to eq(advanced_config)
+          expect(advanced_filter_config).to eq(advanced_snippet)
         end
       end
 
@@ -270,7 +270,7 @@ describe Connectors::Base::Connector do
       end
 
       context 'filter config is nil' do
-        let(:advanced_config) {
+        let(:advanced_snippet) {
           nil
         }
 
@@ -278,7 +278,7 @@ describe Connectors::Base::Connector do
       end
 
       context 'filter config is empty' do
-        let(:advanced_config) {
+        let(:advanced_snippet) {
           {}
         }
 

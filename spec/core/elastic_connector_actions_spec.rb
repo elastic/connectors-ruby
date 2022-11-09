@@ -18,6 +18,7 @@ end
 describe Core::ElasticConnectorActions do
   let(:connector_id) { 'one-two-three' }
   let(:connector) { double }
+  let(:job_id) { 'some-job-id' }
   let(:es_client) { double }
   let(:es_client_indices_api) { double }
   let(:connectors_index) { Utility::Constants::CONNECTORS_INDEX }
@@ -541,14 +542,31 @@ describe Core::ElasticConnectorActions do
     let(:seq_no) { 1 }
     let(:primary_term) { 1 }
     before(:each) do
-      allow(es_client).to receive(:index).with(:index => jobs_index, :body => anything).and_return({ '_id' => 'job-123' })
+      allow(es_client).to receive(:index)
+        .with(:index => jobs_index, :body => anything, :refresh => true)
+        .and_return(
+          {
+            '_id' => job_id,
+            'result' => 'created'
+          }
+        )
       allow(es_client).to receive(:get)
         .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
         .and_return(
-          { '_seq_no' => seq_no,
+          {
+            '_seq_no' => seq_no,
             '_primary_term' => primary_term,
             '_source' => {
               'last_sync_status' => nil
+            }
+          }
+        )
+      allow(es_client).to receive(:get)
+        .with(:index => jobs_index, :id => anything, :ignore => 404)
+        .and_return(
+          { '_id' => job_id,
+            '_source' => {
+              'status' => Connectors::SyncStatus::IN_PROGRESS
             } }
         )
     end
@@ -578,9 +596,22 @@ describe Core::ElasticConnectorActions do
         :body => hash_including(
           :worker_hostname,
           :created_at,
+          :started_at,
           :connector_id => connector_id,
-          :status => Connectors::SyncStatus::IN_PROGRESS
-        )
+          :status => Connectors::SyncStatus::IN_PROGRESS,
+          :filtering => anything
+        ),
+        :refresh => true
+      )
+
+      described_class.claim_job(connector_id)
+    end
+
+    it 're-reads a record in jobs index' do
+      expect(es_client).to receive(:get).with(
+        :index => jobs_index,
+        :id => job_id,
+        :ignore => 404
       )
 
       described_class.claim_job(connector_id)
@@ -602,6 +633,7 @@ describe Core::ElasticConnectorActions do
         expect { described_class.claim_job(connector_id) }.to raise_error(Core::JobAlreadyRunningError)
       end
     end
+
     context 'when connector has changed version' do
       before(:each) do
         allow(es_client).to receive(:update)
@@ -611,6 +643,114 @@ describe Core::ElasticConnectorActions do
       it 'raises an error of specific type' do
         expect { described_class.claim_job(connector_id) }
           .to raise_error(Core::ConnectorVersionChangedError)
+      end
+    end
+
+    context 'filtering rules' do
+      let(:connector_filtering) do
+        {
+          'domain' => 'default',
+          'active' => {
+            'rules' => [],
+            'advanced_snippet' => {},
+            'validation' => {}
+          },
+          'draft' => {
+            'rules' => [],
+            'advanced_snippet' => {},
+            'validation' => {}
+          }
+        }
+      end
+
+      let(:job_filtering) do
+        {
+          'domain' => 'default',
+          'rules' => [],
+          'advanced_snippet' => {},
+          'warnings' => []
+        }
+      end
+
+      before(:each) do
+        allow(es_client).to receive(:get)
+          .with(:index => connectors_index, :id => connector_id, :refresh => true, :ignore => 404)
+          .and_return(
+            { '_seq_no' => seq_no,
+              '_primary_term' => primary_term,
+              '_source' => {
+                'last_sync_status' => nil,
+                'filtering' => connector_filtering
+              } }
+          )
+      end
+
+      it 'has filtering rules' do
+        expect(es_client).to receive(:index).with(
+          :index => jobs_index,
+          :body => hash_including(:filtering => [job_filtering]),
+          :refresh => true
+        )
+        described_class.claim_job(connector_id)
+      end
+    end
+  end
+
+  context '#convert_connector_filtering_to_job_filtering' do
+    shared_examples_for 'job filtering' do
+      it 'has the right filtering rules' do
+        expect(described_class.convert_connector_filtering_to_job_filtering(connector_filtering)).to eq(job_filtering)
+      end
+    end
+
+    context 'missing input filtering' do
+      let(:connector_filtering) { nil }
+      let(:job_filtering) { [] }
+      it_behaves_like 'job filtering'
+    end
+
+    context 'with active rules' do
+      let(:single_filtering) do
+        {
+          'domain' => 'default',
+          'active' => {
+            'rules' => ['active'],
+            'advanced_snippet' => { 'active' => 'true' },
+            'validation' => {}
+          },
+          'draft' => {
+            'rules' => ['draft'],
+            'advanced_snippet' => { 'draft' => 'true' },
+            'validation' => {}
+          }
+        }
+      end
+      let(:connector_filtering) { single_filtering }
+      let(:single_job) do
+        {
+          'domain' => 'default',
+          'rules' => ['active'],
+          'advanced_snippet' => { 'active' => 'true' },
+          'warnings' => []
+        }
+      end
+      let(:job_filtering) { [single_job] }
+      it_behaves_like 'job filtering'
+
+      context 'with multiples' do
+        let(:connector_filtering) do
+          [
+            single_filtering,
+            single_filtering.merge!('domain' => 'second')
+          ]
+        end
+        let(:job_filtering) do
+          [
+            single_job,
+            single_job.merge!('domain' => 'second')
+          ]
+        end
+        it_behaves_like 'job filtering'
       end
     end
   end
@@ -658,9 +798,32 @@ describe Core::ElasticConnectorActions do
     end
   end
 
+  context '#update_sync' do
+    let(:job_id) { 'update-job-1' }
+    let(:metadata) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
+
+    it 'updates the record in jobs index' do
+      expect(es_client).to receive(:update).with(
+        :index => jobs_index,
+        :id => job_id,
+        :body => {
+          :doc => hash_including(
+            :indexed_document_count,
+            :indexed_document_volume,
+            :deleted_document_count,
+            :last_seen
+          )
+        }
+      )
+
+      described_class.update_sync(job_id, metadata)
+    end
+  end
+
   context '#complete_sync' do
     let(:job_id) { 'completed-job-1' }
-    let(:status) { { :indexed_document_count => 1, :deleted_document_count => 0 } }
+    let(:metadata) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
+    let(:error) { nil }
 
     it 'updates last connector sync status, sync time and counts' do
       expect(es_client).to receive(:update).with(
@@ -678,7 +841,7 @@ describe Core::ElasticConnectorActions do
         :retry_on_conflict => 3
       )
 
-      described_class.complete_sync(connector_id, job_id, status)
+      described_class.complete_sync(connector_id, job_id, metadata, error)
     end
 
     it 'updates the record in jobs index' do
@@ -688,19 +851,20 @@ describe Core::ElasticConnectorActions do
         :body => {
           :doc => hash_including(
             :completed_at,
+            :last_seen,
             :indexed_document_count,
+            :indexed_document_volume,
             :deleted_document_count,
             :status => Connectors::SyncStatus::COMPLETED
           )
         }
       )
 
-      described_class.complete_sync(connector_id, job_id, status)
+      described_class.complete_sync(connector_id, job_id, metadata, error)
     end
 
     context 'when status contains an error' do
-      let(:error_message) { 'something really went wrong' }
-      let(:status) { super().merge(:error => error_message) }
+      let(:error) { 'something really went wrong' }
 
       it 'updates last connector sync status to error' do
         expect(es_client).to receive(:update).with(
@@ -712,15 +876,15 @@ describe Core::ElasticConnectorActions do
               :last_indexed_document_count,
               :last_deleted_document_count,
               :last_sync_status => Connectors::SyncStatus::ERROR,
-              :last_sync_error => status[:error],
-              :error => status[:error]
+              :last_sync_error => error,
+              :error => error
             )
           },
           :refresh => true,
           :retry_on_conflict => 3
         )
 
-        described_class.complete_sync(connector_id, job_id, status)
+        described_class.complete_sync(connector_id, job_id, metadata, error)
       end
     end
   end

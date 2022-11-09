@@ -9,41 +9,39 @@ describe Connectors::MongoDB::Connector do
 
   let(:configuration) do
     {
-       :host => {
-         :label => 'Server Hostname',
-         :value => mongodb_host
-       },
-       :database => {
-         :label => 'Database',
-         :value => mongodb_database
-       },
-       :collection => {
-         :label => 'Collection',
-         :value => mongodb_collection
-       },
-       :user => {
-         :label => 'Username',
-         :value => mongodb_username
-       },
-       :password => {
-         :label => 'Password',
-         :value => mongodb_password
-       },
-       :direct_connection => {
-         :label => 'Direct connection? (true/false)',
-         :value => direct_connection
-       },
-       :filtering => {
-         :active => filtering
-       }
+      :host => {
+        :label => 'Server Hostname',
+        :value => mongodb_host
+      },
+      :database => {
+        :label => 'Database',
+        :value => mongodb_database
+      },
+      :collection => {
+        :label => 'Collection',
+        :value => mongodb_collection
+      },
+      :user => {
+        :label => 'Username',
+        :value => mongodb_username
+      },
+      :password => {
+        :label => 'Password',
+        :value => mongodb_password
+      },
+      :direct_connection => {
+        :label => 'Direct connection? (true/false)',
+        :value => direct_connection
+      },
+      :filtering => {
+        :active => filtering
+      }
     }
   end
 
-  let(:rules) {
-    [
-      # empty rules for now, replace, when rules are supported
-    ]
-  }
+  let(:rules) do
+    [{ 'field' => 'name', 'rule' => 'Equals', 'policy' => 'include', 'value' => 'apple' }]
+  end
 
   let(:pipeline) {
     [
@@ -87,7 +85,7 @@ describe Connectors::MongoDB::Connector do
     }
   }
 
-  let(:advanced_config) {
+  let(:advanced_snippet) {
     {
       :find => find
     }
@@ -96,7 +94,7 @@ describe Connectors::MongoDB::Connector do
   let(:filtering) {
     {
       :rules => rules,
-      :advanced_snippet => advanced_config
+      :advanced_snippet => advanced_snippet
     }
   }
 
@@ -224,7 +222,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'find is present' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :find => {}
         }
@@ -234,7 +232,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'aggregate is present' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => {}
         }
@@ -244,7 +242,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'advanced config is empty' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {}
       }
 
@@ -252,7 +250,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'advanced config is nil' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         nil
       }
 
@@ -260,7 +258,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'aggregate and find are present' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
             :aggregate => {},
             :find => {}
@@ -271,7 +269,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'aggregate and one wrong key are present' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => {},
           :wrong_key => {}
@@ -282,7 +280,7 @@ describe Connectors::MongoDB::Connector do
     end
 
     context 'wrong key is present' do
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :wrong_key_one => {}
         }
@@ -388,7 +386,7 @@ describe Connectors::MongoDB::Connector do
             }
           }
 
-          let(:advanced_config) {
+          let(:advanced_snippet) {
             {
               :find => {
                 :options => options
@@ -412,7 +410,7 @@ describe Connectors::MongoDB::Connector do
             }
           }
 
-          let(:advanced_config) {
+          let(:advanced_snippet) {
             {
               :find => {
                 :options => options
@@ -539,12 +537,49 @@ describe Connectors::MongoDB::Connector do
 
     context 'rules and advanced filtering config are empty' do
       let(:rules) { [] }
-      let(:advanced_config) { {} }
+      let(:advanced_snippet) { {} }
 
       it 'calls find without arguments' do
         expect(actual_collection).to receive(:find).with(no_args)
 
         subject.yield_documents
+      end
+    end
+
+    context 'rule is present and advanced filtering is empty' do
+      let(:advanced_snippet) { {} }
+
+      it 'applies the simple rule' do
+        expect(actual_collection).to receive(:find).with(match({ 'name' => 'apple' }))
+
+        subject.yield_documents
+      end
+    end
+
+    context 'both rules and advanced filtering are present' do
+      it 'does not apply the simple rule' do
+        expect(actual_collection).to receive(:find).with(filter, options)
+
+        subject.yield_documents
+      end
+    end
+
+    context 'find and aggregate exist' do
+      let(:advanced_snippet) {
+        {
+          :find => {
+            :filter => filter,
+            :options => options
+          },
+          :aggregate => {
+            :pipeline => pipeline,
+            :options => options
+          }
+        }
+      }
+
+      it 'raises an InvalidFilterConfigError' do
+        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
 
@@ -614,7 +649,7 @@ describe Connectors::MongoDB::Connector do
 
     context 'aggregate field exists (with pipeline and options) in an active advanced filtering config' do
       # find should not exist
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -637,7 +672,7 @@ describe Connectors::MongoDB::Connector do
       }
 
       # find should not exist
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -660,7 +695,7 @@ describe Connectors::MongoDB::Connector do
       }
 
       # find should not exist
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
@@ -681,7 +716,7 @@ describe Connectors::MongoDB::Connector do
         }
       }
 
-      let(:advanced_config) {
+      let(:advanced_snippet) {
         {
           :aggregate => aggregate
         }
