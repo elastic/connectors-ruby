@@ -14,7 +14,7 @@ require 'elasticsearch/api'
 
 module Core
   module OutputSink
-    class EsStrategy 
+    class EsStrategy
       def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new)
         @client = Utility::EsClient.new(App::Config[:elasticsearch])
         @index_name = index_name
