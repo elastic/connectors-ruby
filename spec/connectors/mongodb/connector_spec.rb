@@ -182,7 +182,7 @@ describe Connectors::MongoDB::Connector do
     end
   end
 
-  context '#is_healthy?' do
+  describe '#is_healthy?' do
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.is_healthy? }
     end
@@ -194,7 +194,7 @@ describe Connectors::MongoDB::Connector do
     end
   end
 
-  context '#yield_documents' do
+  describe '#yield_documents' do
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.yield_documents { |doc|; } }
     end

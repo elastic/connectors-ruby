@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Core::Ingestion::ConsoleSink do
   subject { described_class.new }
 
-  context '.ingest' do
+  describe '#ingest' do
     let(:doc) { { :id => 1, :something => :else } }
 
     it 'outputs a doc into stdout' do
@@ -13,7 +13,7 @@ describe Core::Ingestion::ConsoleSink do
     end
   end
 
-  context '.delete' do
+  describe '#delete' do
     let(:id) { 15 }
 
     it 'outputs deleted id into stdout' do
@@ -21,7 +21,7 @@ describe Core::Ingestion::ConsoleSink do
     end
   end
 
-  context '.flush' do
+  describe '#flush' do
     it 'outputs flush fact into stdout' do
       expect { subject.flush }.to output(/Flush/).to_stdout
     end

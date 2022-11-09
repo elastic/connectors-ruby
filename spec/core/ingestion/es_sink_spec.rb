@@ -30,7 +30,7 @@ describe Core::Ingestion::EsSink do
     allow(serializer).to receive(:dump).and_return('')
   end
 
-  context '.ingest' do
+  describe '#ingest' do
     let(:document) do
       {
         :id => 1,
@@ -103,7 +103,7 @@ describe Core::Ingestion::EsSink do
     end
   end
 
-  context '.delete' do
+  describe '#delete' do
     context('when bulk queue still has capacity') do
       let(:id) { 15 }
 
@@ -162,7 +162,7 @@ describe Core::Ingestion::EsSink do
     end
   end
 
-  context '.flush' do
+  describe '#flush' do
     let(:operation) { 'bulk: delete something \n insert something else' }
 
     before(:each) do

@@ -22,35 +22,39 @@ RSpec.describe Utility::Logger do
     allow(described_class).to receive(:logger).and_return(logger)
   end
 
-  it 'can give the connectors logger' do
-    expect { described_class.info(message) }.to output(/#{message}/).to_stdout_from_any_process
+  describe '.info' do
+    it 'can give the connectors logger' do
+      expect { described_class.info(message) }.to output(/#{message}/).to_stdout_from_any_process
+    end
+
+    context 'with ecs logging' do
+      let(:logger) { EcsLogging::Logger.new(STDOUT) }
+
+      it 'outputs ecs fields' do
+        expect { described_class.info(message) }.to output(/@timestamp/).to_stdout_from_any_process
+        expect { described_class.info(message) }.to output(/ecs\.version/).to_stdout_from_any_process
+      end
+    end
   end
 
-  it 'can shorten a long message' do
-    expect(described_class.abbreviated_message(long_message).length).to eq(100)
-  end
+  describe '.abbreviated_message' do
+    it 'can shorten a long message' do
+      expect(described_class.abbreviated_message(long_message).length).to eq(100)
+    end
 
-  it 'can clean line breaks' do
-    expect(described_class.abbreviated_message(message_with_breaks).match(/\n/)).to be_falsey
-  end
+    it 'can clean line breaks' do
+      expect(described_class.abbreviated_message(message_with_breaks).match(/\n/)).to be_falsey
+    end
 
-  it 'can clean tabs' do
-    expect(described_class.abbreviated_message(message_with_tabs).match(/\t/)).to be_falsey
-  end
+    it 'can clean tabs' do
+      expect(described_class.abbreviated_message(message_with_tabs).match(/\t/)).to be_falsey
+    end
 
-  it 'can clean extra spaces' do
-    msg = described_class.abbreviated_message(message_with_many_spaces)
-    expect(msg.match(/\s{2,}/)).to be_falsey
-    expect(msg.match(/^\s/)).to be_falsey
-    expect(msg.match(/\s$/)).to be_falsey
-  end
-
-  context 'with ecs logging' do
-    let(:logger) { EcsLogging::Logger.new(STDOUT) }
-
-    it 'outputs ecs fields' do
-      expect { described_class.info(message) }.to output(/@timestamp/).to_stdout_from_any_process
-      expect { described_class.info(message) }.to output(/ecs\.version/).to_stdout_from_any_process
+    it 'can clean extra spaces' do
+      msg = described_class.abbreviated_message(message_with_many_spaces)
+      expect(msg.match(/\s{2,}/)).to be_falsey
+      expect(msg.match(/^\s/)).to be_falsey
+      expect(msg.match(/\s$/)).to be_falsey
     end
   end
 
