@@ -74,7 +74,7 @@ module Core
           incoming_ids << document['id']
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
+            ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
@@ -87,7 +87,7 @@ module Core
           @ingester.delete(id)
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
+            ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
@@ -117,7 +117,7 @@ module Core
           @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.'
         end
 
-        metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
+        metadata = @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata)
         metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
 
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, metadata, @sync_error)

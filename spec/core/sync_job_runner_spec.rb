@@ -104,7 +104,7 @@ describe Core::SyncJobRunner do
   context '.execute' do
     let(:ingestion_stats) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
     before(:each) do
-      allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
+      allow(ingester).to receive(:ingestion_stats).and_return(ingestion_stats)
     end
 
     context 'when job_id is not present' do
@@ -241,13 +241,15 @@ describe Core::SyncJobRunner do
         end
 
         it 'marks the job as complete' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(:error => nil))
+          expected_error = nil
+
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, anything, expected_error)
 
           subject.execute
         end
 
         it 'updates job stats' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats))
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats), nil)
 
           subject.execute
         end
@@ -259,13 +261,13 @@ describe Core::SyncJobRunner do
           end
 
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(:error => error_message))
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, anything, error_message)
 
             subject.execute
           end
 
           it 'updates job stats' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats))
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats), anything)
 
             subject.execute
           end
