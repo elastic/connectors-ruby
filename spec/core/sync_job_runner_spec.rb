@@ -404,18 +404,12 @@ describe Core::SyncJobRunner do
 
         it 'marks the job as complete with job stats' do
           expect(Core::ElasticConnectorActions)
-              .to receive(:complete_sync)
-                      .with(connector_id,
-                            job_id,
-                            Connectors::SyncStatus::COMPLETED,
-                            nil,
-                            ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata))
-          subject.execute
-        end
-
-        it 'updates job stats' do
-          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats), nil)
-
+            .to receive(:complete_sync)
+            .with(connector_id,
+                  job_id,
+                  Connectors::SyncStatus::COMPLETED,
+                  nil,
+                  ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata))
           subject.execute
         end
 
@@ -425,19 +419,14 @@ describe Core::SyncJobRunner do
             allow(sink).to receive(:flush).and_raise('whoops')
           end
 
-          it 'marks the job as complete with proper error' do
+          it 'marks the job as error with proper message' do
             expect(Core::ElasticConnectorActions)
               .to receive(:complete_sync)
               .with(connector_id,
                     job_id,
-                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
-                    error_message)
-
-            subject.execute
-          end
-
-          it 'updates job stats' do
-            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats), anything)
+                    Connectors::SyncStatus::ERROR,
+                    error_message,
+                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata))
 
             subject.execute
           end

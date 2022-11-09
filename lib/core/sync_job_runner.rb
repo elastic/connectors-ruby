@@ -118,7 +118,7 @@ module Core
             incoming_ids << document['id']
           end
 
-          validate_job(job_id, connector_instance)
+          check_job(job_id, connector_instance)
         end
 
         ids_to_delete = existing_ids - incoming_ids.uniq
@@ -128,7 +128,7 @@ module Core
         ids_to_delete.each do |id|
           @sink.delete(id)
 
-          validate_job(job_id, connector_instance)
+          check_job(job_id, connector_instance)
         end
 
         @sink.flush
@@ -153,20 +153,15 @@ module Core
         stats = @sink.ingestion_stats
 
         Utility::Logger.debug("Sync stats are: #{stats}")
-
-        @status[:indexed_document_count] = stats[:indexed_document_count]
-        @status[:deleted_document_count] = stats[:deleted_document_count]
-        @status[:indexed_document_volume] = stats[:indexed_document_volume]
-
-        Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
-        Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
+        Utility::Logger.info("Upserted #{stats[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
+        Utility::Logger.info("Deleted #{stats[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
 
         # Make sure to not override a previous error message
         @sync_status ||= Connectors::SyncStatus::ERROR
         @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.' if @sync_status == Connectors::SyncStatus::ERROR && @sync_error.nil?
 
         unless connector_instance.nil?
-          metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
+          metadata = stats.merge(:metadata => connector_instance.metadata)
           metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
         end
 
@@ -205,7 +200,7 @@ module Core
       raise errors_present_error if validation_result[:errors].present?
     end
 
-    def validate_job(job_id, connector_instance)
+    def check_job(job_id, connector_instance)
       return if Time.now - @reporting_cycle_start < JOB_REPORTING_INTERVAL
 
       # raise error if the connector is deleted
