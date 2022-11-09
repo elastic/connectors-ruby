@@ -96,8 +96,17 @@ describe Core::Filtering::ValidationJobRunner do
         allow(connector_class).to receive(:validate_filtering).with(filtering).and_raise(StandardError.new('Error occurred during validation'))
       end
 
-      it 'sets an error for the connector indicating, that an error during validation appeared' do
-        expect(Core::ElasticConnectorActions).to receive(:update_connector_status).with(connector_id, Connectors::ConnectorStatus::ERROR, anything)
+      it 'sets a filtering error and logs the exception' do
+        expect(Core::ElasticConnectorActions).to receive(:update_filtering_validation) { |actual_connector_id, validation_result|
+          expect(actual_connector_id).to eq(connector_id)
+
+          validation_result = validation_result['DEFAULT']
+
+          expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
+          expect(validation_result[:errors]).to_not be_empty
+        }
+
+        expect(Utility::ExceptionTracking).to receive(:log_exception)
 
         subject.execute
 

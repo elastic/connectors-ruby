@@ -11,6 +11,8 @@ require 'connectors/registry'
 
 module Core
   module Filtering
+    DEFAULT_DOMAIN = 'DEFAULT'
+
     class ValidationJobRunner
       def initialize(connector_settings)
         @connector_settings = connector_settings
@@ -25,13 +27,16 @@ module Core
         validation_result = @connector_class.validate_filtering(@connector_settings.filtering)
 
         # currently only used for connectors -> DEFAULT domain can be assumed (will be changed with the integration of crawler)
-        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { 'DEFAULT' => validation_result })
+        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { DEFAULT_DOMAIN => validation_result })
 
         @validation_finished = true
       rescue StandardError => e
-        @status[:error] = e.message
         Utility::ExceptionTracking.log_exception(e)
-        ElasticConnectorActions.update_connector_status(@connector_settings.id, Connectors::ConnectorStatus::ERROR, Utility::Logger.abbreviated_message(e.message))
+        validation_failed_result = { :state => Core::Filtering::ValidationStatus::INVALID,
+                                     :errors => [
+                                       { :ids => [], :messages => ['Unknown problem occurred while validating, see logs for details.'] }
+                                     ] }
+        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { DEFAULT_DOMAIN => validation_failed_result })
       ensure
         if !@validation_finished && !@status[:error].present?
           @status[:error] = 'Validation thread did not finish execution. Check connector logs for more details.'
