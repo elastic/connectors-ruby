@@ -5,6 +5,8 @@
 #
 
 # frozen_string_literal: true
+
+require 'active_support/core_ext/object'
 require 'connectors/base/simple_rules_parser'
 
 module Connectors
@@ -13,6 +15,12 @@ module Connectors
       def parse_rule(rule)
         field = rule[:field]
         value = rule[:value]
+        unless value.present?
+          raise "Value is required for field: #{field}"
+        end
+        unless field.present?
+          raise "Field is required for rule: #{rule}"
+        end
         op = rule[:rule]&.to_s
         case op
         when 'Equals'

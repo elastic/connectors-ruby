@@ -99,4 +99,47 @@ describe Connectors::MongoDB::MongoRulesParser do
       expect { subject.parse }.to raise_error(RuntimeError, /Unknown policy/)
     end
   end
+
+  context 'with empty string value' do
+    let(:rules) { [{ field: 'foo', value: '', policy: 'include', rule: 'Equals' }] }
+    it 'raises error' do
+      expect { subject.parse }.to raise_error(RuntimeError, /Value is required/)
+    end
+  end
+
+  context 'with empty string field' do
+    let(:rules) { [{ field: '', value: '123', policy: 'include', rule: 'Equals' }] }
+    it 'raises error' do
+      expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
+    end
+  end
+
+  context 'with nil value' do
+    let(:rules) { [{ field: 'foo', value: nil, policy: 'include', rule: 'Equals' }] }
+    it 'raises error' do
+      expect { subject.parse }.to raise_error(RuntimeError, /Value is required/)
+    end
+  end
+
+  context 'with nil field' do
+    let(:rules) { [{ field: nil, value: '123', policy: 'include', rule: 'Equals' }] }
+    it 'raises error' do
+      expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
+    end
+  end
+
+  context 'with non-existent value' do
+    let(:rules) { [{ field: 'foo', policy: 'include', rule: 'Equals' }] }
+    it 'raises error' do
+      expect { subject.parse }.to raise_error(RuntimeError, /Value is required/)
+    end
+  end
+
+  context 'with non-existent field' do
+    let(:rules) { [{ value: '123', policy: 'include', rule: 'Equals' }] }
+    it 'raises error' do
+      expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
+    end
+  end
+
 end
