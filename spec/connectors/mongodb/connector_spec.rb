@@ -564,25 +564,6 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find and aggregate exist' do
-      let(:advanced_snippet) {
-        {
-          :find => {
-            :filter => filter,
-            :options => options
-          },
-          :aggregate => {
-            :pipeline => pipeline,
-            :options => options
-          }
-        }
-      }
-
-      it 'raises an InvalidFilterConfigError' do
-        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
-      end
-    end
-
     context 'find field exists (with filter and empty options) in an active advanced filtering config' do
       let(:options) {
         {}
