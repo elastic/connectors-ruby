@@ -182,7 +182,7 @@ describe Connectors::MongoDB::Connector do
     end
   end
 
-  describe'#is_healthy?' do
+  describe '#is_healthy?' do
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.is_healthy? }
     end

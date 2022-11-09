@@ -25,7 +25,7 @@ describe Core::Configuration do
       allow(connector_class).to receive(:configurable_fields_indifferent_access).and_return(configuration.with_indifferent_access)
     end
 
-    describe ".update" do
+    describe '.update' do
       (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|
         context "when connector status is #{status}" do
           let(:connector_status) { status }

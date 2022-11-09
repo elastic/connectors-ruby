@@ -27,7 +27,7 @@ describe Core::Heartbeat do
 
         described_class.send(connector_settings)
       end
-    
+
       context 'when it is configured' do
         let(:configured) { true }
         context 'when remote source is up' do
