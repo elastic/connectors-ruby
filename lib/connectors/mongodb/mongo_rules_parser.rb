@@ -17,10 +17,10 @@ module Connectors
         field = rule.field
         value = rule.value
         unless value.present?
-          raise "Value is required for field: #{field}"
+          raise "value is required for field: #{field}"
         end
         unless field.present?
-          raise "Field is required for rule: #{rule}"
+          raise "field is required for rule: #{rule}"
         end
         op = rule.rule
         case op

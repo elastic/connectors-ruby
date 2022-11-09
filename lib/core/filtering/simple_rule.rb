@@ -16,15 +16,6 @@ module Core
       ID = 'id'
 
       DEFAULT_RULE_ID = 'DEFAULT'
-      DEFAULT_RULE = SimpleRule.new(
-        {
-          'policy' => 'include',
-          'field' => '_',
-          'rule' => 'regex',
-          'value' => '.*',
-          'id' => SimpleRule::DEFAULT_RULE_ID
-        }
-      )
 
       class Policy
         INCLUDE = 'include'
@@ -49,7 +40,17 @@ module Core
         @rule = rule_hash.fetch(RULE)
         @value = rule_hash.fetch(VALUE)
         @id = rule_hash.fetch(ID)
+      rescue KeyError => e
+        raise "#{e.key} is required"
       end
+
+      DEFAULT_RULE = SimpleRule.new(
+        'policy' => 'include',
+        'field' => '_',
+        'rule' => 'regex',
+        'value' => '.*',
+        'id' => SimpleRule::DEFAULT_RULE_ID
+      )
 
       def match?(document)
         return true if id == DEFAULT_RULE_ID
