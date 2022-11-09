@@ -33,8 +33,8 @@ def connectors_fixture_json(fixture_name)
   JSON.parse(connectors_fixture_raw(fixture_name))
 end
 
-def get_class_specific_public_methods(klass)
-  (klass.public_methods - Object.public_methods).sort
+def get_class_specific_private_methods(klass)
+  (klass.private_methods - Object.private_methods).sort
 end
 
 def random_string

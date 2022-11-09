@@ -37,6 +37,7 @@ describe Core::SyncJobRunner do
   let(:connector_class) { double }
   let(:connector_instance) { double }
   let(:sink) { double }
+  let(:ingester) { double }
 
   let(:output_index_name) { 'test-ingest-index' }
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
@@ -63,6 +64,13 @@ describe Core::SyncJobRunner do
   let(:reduce_whitespace) { true }
   let(:run_ml_inference) { true }
   let(:total_document_count) { 100 }
+  let(:ingestion_stats) do
+    {
+      :indexed_document_count => 0,
+      :deleted_document_count => 0,
+      :indexed_document_volume => 0
+    }
+  end
 
   subject { described_class.new(connector_settings) }
 
@@ -76,10 +84,12 @@ describe Core::SyncJobRunner do
     allow(Core::ElasticConnectorActions).to receive(:document_count).and_return(total_document_count)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
-    allow(Core::OutputSink::EsSink).to receive(:new).with(output_index_name, request_pipeline).and_return(sink)
-    allow(sink).to receive(:ingest)
-    allow(sink).to receive(:delete)
-    allow(sink).to receive(:flush)
+    allow(Core::Ingestion::EsSink).to receive(:new).and_return(sink)
+    allow(Core::Ingestion::Ingester).to receive(:new).with(anything).and_return(ingester)
+    allow(ingester).to receive(:ingest)
+    allow(ingester).to receive(:delete)
+    allow(ingester).to receive(:flush)
+    allow(ingester).to receive(:ingestion_stats).and_return(ingestion_stats)
 
     allow(connector_settings).to receive(:id).and_return(connector_id)
     allow(connector_settings).to receive(:service_type).and_return(service_type)
@@ -105,7 +115,7 @@ describe Core::SyncJobRunner do
   context '.execute' do
     let(:ingestion_stats) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
     before(:each) do
-      allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
+      allow(ingester).to receive(:ingestion_stats).and_return(ingestion_stats)
     end
 
     shared_examples_for 'sync stops with error' do
@@ -137,9 +147,9 @@ describe Core::SyncJobRunner do
         expect(Core::ElasticConnectorActions).to_not receive(:complete_sync)
         expect(Core::ElasticConnectorActions).to_not receive(:fetch_document_ids)
 
-        expect(sink).to_not receive(:ingest)
-        expect(sink).to_not receive(:delete)
-        expect(sink).to_not receive(:flush)
+        expect(ingester).to_not receive(:ingest)
+        expect(ingester).to_not receive(:delete)
+        expect(ingester).to_not receive(:flush)
 
         expect(connector_instance).to_not receive(:yield_documents)
 
@@ -221,10 +231,10 @@ describe Core::SyncJobRunner do
       subject.execute
     end
 
-    it 'flushes the sink' do
+    it 'flushes the ingester' do
       # We don't ingest anything, but flush still happens just in case.
-      # This is done so that the last batch of documents is always ingested into the sink
-      expect(sink).to receive(:flush)
+      # This is done so that the last batch of documents is always ingested into the ingester
+      expect(ingester).to receive(:flush)
 
       subject.execute
     end
@@ -293,47 +303,59 @@ describe Core::SyncJobRunner do
 
       let(:extracted_documents) { [doc1, doc2] } # documents returned from 3rd-party system
 
-      it 'ingests returned documents into the sink' do
-        expect(sink).to receive(:ingest).with(doc1)
-        expect(sink).to receive(:ingest).with(doc2)
+      it 'ingests returned documents into the ingester' do
+        expect(ingester).to receive(:ingest).with(doc1)
+        expect(ingester).to receive(:ingest).with(doc2)
 
         subject.execute
       end
 
       context 'when some documents were present before' do
         let(:existing_document_ids) { [3, 4, 'lala', 'some other id'] }
+        let(:ingestion_stats) do
+          {
+            :indexed_document_count => 15,
+            :deleted_document_count => 10,
+            :indexed_document_volume => 1241251
+          }
+        end
 
         it 'attempts to remove existing documents' do
           existing_document_ids.each do |id|
-            expect(sink).to receive(:delete).with(id)
+            expect(ingester).to receive(:delete).with(id)
           end
 
           subject.execute
         end
 
-        it 'marks the job as complete with job stats' do
-          expect(Core::ElasticConnectorActions)
-            .to receive(:complete_sync)
-            .with(connector_id,
-                  job_id,
-                  ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
-                  nil)
+        it 'marks the job as complete' do
+          expected_error = nil
+
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, anything, expected_error)
+
+          subject.execute
+        end
+
+        it 'updates job stats' do
+          expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats), nil)
 
           subject.execute
         end
 
         context 'when an error happens during sync' do
+          let(:error_message) { 'whoops' }
           before(:each) do
-            allow(sink).to receive(:flush).and_raise('whoops')
+            allow(ingester).to receive(:flush).and_raise('whoops')
           end
 
           it 'marks the job as complete with proper error' do
-            expect(Core::ElasticConnectorActions)
-              .to receive(:complete_sync)
-              .with(connector_id,
-                    job_id,
-                    ingestion_stats.merge(:total_document_count => total_document_count, :metadata => connector_metadata),
-                    'whoops')
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, anything, error_message)
+
+            subject.execute
+          end
+
+          it 'updates job stats' do
+            expect(Core::ElasticConnectorActions).to receive(:complete_sync).with(connector_id, job_id, hash_including(ingestion_stats), anything)
 
             subject.execute
           end
