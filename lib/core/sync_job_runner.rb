@@ -108,7 +108,7 @@ module Core
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
         post_processing_engine = Core::Filtering::PostProcessEngine.new(job_description)
-        reporting_cycle_start = Time.now
+        @reporting_cycle_start = Time.now
         Utility::Logger.info('Yielding documents...')
         connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
@@ -118,11 +118,7 @@ module Core
             incoming_ids << document['id']
           end
 
-          if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            validate_job(job_id)
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
-            reporting_cycle_start = Time.now
-          end
+          validate_job(job_id, connector_instance)
         end
 
         ids_to_delete = existing_ids - incoming_ids.uniq
@@ -132,11 +128,7 @@ module Core
         ids_to_delete.each do |id|
           @sink.delete(id)
 
-          if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            validate_job(job_id)
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
-            reporting_cycle_start = Time.now
-          end
+          validate_job(job_id, connector_instance)
         end
 
         @sink.flush
@@ -213,7 +205,9 @@ module Core
       raise errors_present_error if validation_result[:errors].present?
     end
 
-    def validate_job(job_id)
+    def validate_job(job_id, connector_instance)
+      return if Time.now - @reporting_cycle_start < JOB_REPORTING_INTERVAL
+
       # raise error if the connector is deleted
       if ElasticConnectorActions.get_connector(@connector_settings.id).nil?
         raise ConnectorNotFoundError.new(@connector_settings.id)
@@ -228,6 +222,9 @@ module Core
 
       # raise error if the job is not in the status in_progress
       raise InvalidConnectorJobStatusError.new(job_id, job[:_source][:status]) if job[:_source][:status] != Connectors::SyncStatus::IN_PROGRESS
+
+      ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
+      @reporting_cycle_start = Time.now
     end
   end
 end
