@@ -9,6 +9,7 @@
 require 'bson'
 require 'core/ingestion'
 require 'utility'
+require 'utility/filtering'
 require 'app/config'
 require 'active_support/core_ext/hash/indifferent_access'
 
@@ -49,7 +50,7 @@ module Connectors
         @configuration = configuration.dup || {}
         @job_description = job_description&.dup || {}
 
-        filtering = @job_description[:filtering] || {}
+        filtering = Utility::Filtering.extract_filter(@job_description[:filtering])
 
         @rules = filtering[:rules] || []
         @advanced_filter_config = filtering[:advanced_snippet] || {}

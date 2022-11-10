@@ -86,9 +86,7 @@ module Core
       # assume for now, that first object in filtering array or a filter object itself is the only filtering object
       filtering = @elasticsearch_response[:filtering]
 
-      filter = filtering.is_a?(Array) ? filtering[0] : filtering
-
-      filter.present? ? filter : DEFAULT_FILTERING
+      Utility::Filtering.extract_filter(filtering)
     end
 
     def request_pipeline
