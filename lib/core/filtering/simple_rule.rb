@@ -93,17 +93,17 @@ module Core
 
       def coerce(doc_value)
         coerced_val = case doc_value
-        when String
-          value.to_s
-        when Integer
-          value.to_i
-        when DateTime, Time
-          to_date(value)
-        when TrueClass, FalseClass # Ruby doesn't have a Boolean type, TIL
-          to_bool(value)
-        else
-          value
-        end
+                      when String
+                        value.to_s
+                      when Integer
+                        value.to_i
+                      when DateTime, Time
+                        to_date(value)
+                      when TrueClass, FalseClass # Ruby doesn't have a Boolean type, TIL
+                        to_bool(value)
+                      else
+                        value
+                      end
         coerced_val.to_s
       rescue StandardError => e
         # TODO: log error/warning?

@@ -8,7 +8,6 @@
 require 'core/filtering/simple_rule'
 
 describe Core::Filtering::SimpleRule do
-
   subject {
     Core::Filtering::SimpleRule.new(
       {
