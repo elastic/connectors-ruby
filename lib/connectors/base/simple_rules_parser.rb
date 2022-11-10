@@ -6,17 +6,17 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/object/blank'
 
 module Connectors
   module Base
     class SimpleRulesParser
       def initialize(rules)
-        @rules = (rules || []).sort_by { |r| r[:order] }
+        @rules = (rules || []).map(&:with_indifferent_access).filter { |r| r[:id] != 'DEFAULT' }.sort_by { |r| r[:order] }
       end
 
       def parse
         merge_rules(@rules.map do |rule|
-          rule = rule.with_indifferent_access
           unless is_include?(rule) || is_exclude?(rule)
             raise "Unknown policy: #{rule[:policy]}"
           end

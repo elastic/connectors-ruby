@@ -172,7 +172,7 @@ module Connectors
           filter = parser.parse
         end
         Utility::Logger.info("Filtering with simple rules filter: #{filter}")
-        collection.find(filter)
+        filter.present? ? collection.find(filter) : collection.find
       end
 
       def extract_options(mongodb_function)
