@@ -262,7 +262,7 @@ describe Core::Scheduler do
         allow(subject).to receive(:configuration_triggered?).with(connector_settings).and_return(false)
 
         allow(connector_settings).to receive(:filtering).and_return(filtering)
-        allow(connector_settings).to receive(:formatted).and_return('')
+        allow(connector_settings).to receive(:formatted).and_return('MOCKED_VALUE')
       end
 
       context 'filtering is not present' do
