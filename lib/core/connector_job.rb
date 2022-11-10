@@ -107,6 +107,7 @@ module Core
       es_response = ElasticConnectorActions.get_job(id)
       raise ConnectorJobNotFoundError.new("Connector job with id=#{id} was not found.") unless es_response[:found]
       @elasticsearch_response = es_response.with_indifferent_access
+      @connector = nil
     end
 
     private
