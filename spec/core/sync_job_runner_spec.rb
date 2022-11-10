@@ -236,6 +236,24 @@ describe Core::SyncJobRunner do
         subject.execute
       end
 
+      context 'with filtering rules' do
+        let(:additional_rules) do
+          [
+            Core::Filtering::SimpleRule.from_args('1', 'exclude', 'title', 'equals', 'Hello').to_h
+          ]
+        end
+        before(:each) do
+          filtering[0]['rules'].unshift(*additional_rules)
+        end
+
+        it 'does not ingest the excluded document' do
+          expect(ingester).to_not receive(:ingest).with(doc1)
+          expect(ingester).to receive(:ingest).with(doc2)
+
+          subject.execute
+        end
+      end
+
       context 'when some documents were present before' do
         let(:existing_document_ids) { [3, 4, 'lala', 'some other id'] }
         let(:ingestion_stats) do

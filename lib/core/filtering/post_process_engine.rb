@@ -17,7 +17,7 @@ module Core
 
       def process(document)
         @ordered_rules.each do |rule|
-          if rule.match?(document)
+          if rule.match?(document.stringify_keys)
             return PostProcessResult.new(document, rule)
           end
         end

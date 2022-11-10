@@ -33,7 +33,6 @@ module Core
       end
 
       attr_reader :policy, :field, :rule, :value, :id
-
       def initialize(rule_hash)
         @policy = rule_hash.fetch(POLICY)
         @field = rule_hash.fetch(FIELD)
@@ -43,6 +42,17 @@ module Core
         @rule_hash = rule_hash
       rescue KeyError => e
         raise "#{e.key} is required"
+      end
+      def self.from_args(id, policy, field, rule, value)
+        SimpleRule.new(
+          {
+            ID => id,
+            POLICY => policy,
+            FIELD => field,
+            RULE => rule,
+            VALUE => value
+          }
+        )
       end
 
       DEFAULT_RULE = SimpleRule.new(
