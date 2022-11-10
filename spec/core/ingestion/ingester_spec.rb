@@ -63,6 +63,24 @@ describe Core::Ingestion::Ingester do
           subject.ingest(document)
         end
       end
+
+      context 'when ingested document is too big' do
+        let(:document_id) { 15 }
+        let(:document) { { 'id' => document_id, 'something' => 'something' } }
+        let(:serialized_document) { 'id: 15, something: something' }
+        let(:max_allowed_document_size) { 5 } # 5 bytes
+        subject { described_class.new(sink, max_allowed_document_size) }
+
+        before(:each) do
+          allow(sink).to receive(:serialize).with(document).and_return(serialized_document)
+        end
+
+        it 'does not ingest the document' do
+          expect(sink).to_not receive(:ingest)
+
+          subject.ingest(document)
+        end
+      end
     end
 
     context '#ingest_multiple' do
