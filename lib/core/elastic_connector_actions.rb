@@ -159,7 +159,6 @@ module Core
         )
 
         body = {
-          :connector_id => connector_id,
           :status => Connectors::SyncStatus::IN_PROGRESS,
           :worker_hostname => Socket.gethostname,
           :created_at => Time.now,
