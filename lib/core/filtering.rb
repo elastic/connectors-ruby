@@ -11,10 +11,13 @@ require 'core/filtering/post_process_result'
 require 'core/filtering/simple_rule'
 
 module Core::Filtering
+  FILTERING = 'filtering'
   DOMAIN = 'domain'
   ACTIVE = 'active'
   DRAFT = 'draft'
   RULES = 'rules'
   ADVANCED_SNIPPET = 'advanced_snippet'
   DEFAULT_DOMAIN = 'DEFAULT'
+  VALIDATION = 'validation'
+  WARNINGS = 'warnings'
 end

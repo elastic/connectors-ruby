@@ -338,6 +338,21 @@ describe Core::SyncJobRunner do
 
           subject.execute
         end
+
+        context 'with non-matching rule' do
+          let(:additional_rules) do
+            [
+              Core::Filtering::SimpleRule.from_args('1', 'exclude', 'foo', 'equals', 'Hello').to_h
+            ]
+          end
+
+          it 'indexes all docs' do
+            expect(ingester).to receive(:ingest).with(doc1)
+            expect(ingester).to receive(:ingest).with(doc2)
+
+            subject.execute
+          end
+        end
       end
 
       context 'when some documents were present before' do
