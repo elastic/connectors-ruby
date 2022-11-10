@@ -287,7 +287,7 @@ describe Connectors::Base::Connector do
     end
   end
 
-  context '.validate_filtering' do
+  describe '.validate_filtering' do
     it 'raises an exception, that filtering is not implemented' do
       expect { described_class.validate_filtering }.to raise_error(RuntimeError, 'Not implemented for this connector')
     end
