@@ -308,54 +308,55 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "canceled_at" : { "type" : "date" },
     "completed_at" : { "type" : "date" },
     "connector" : {
-      "configuration" : { "type" : "object" },
-      "filtering" : {
-        "properties" : {
-          "domain" : { "type" : "keyword" },
-          "rules" : {
-            "properties" : {
-              "id" : { "type" : "keyword" },
-              "policy" : { "type" : "keyword" },
-              "field" : { "type" : "keyword" },
-              "rule" : { "type" : "keyword" },
-              "value" : { "type" : "keyword" },
-              "order" : { "type" : "short" },
-              "created_at" : { "type" : "date" },
-              "updated_at" : { "type" : "date" }
-            }
-          },
-          "advanced_snippet" : {
-            "properties" : {
-              "value" : { "type" : "object" },
-              "created_at" : { "type" : "date" },
-              "updated_at" : { "type" : "date" }
-            }
-          },
-          "warnings" : {
-            "properties" : {
-              "ids" : { "type" : "keyword" },
-              "messages" : { "type" : "text" }
+      "properties" : {
+        "configuration" : { "type" : "object" },
+        "filtering" : {
+          "properties" : {
+            "domain" : { "type" : "keyword" },
+            "rules" : {
+              "properties" : {
+                "id" : { "type" : "keyword" },
+                "policy" : { "type" : "keyword" },
+                "field" : { "type" : "keyword" },
+                "rule" : { "type" : "keyword" },
+                "value" : { "type" : "keyword" },
+                "order" : { "type" : "short" },
+                "created_at" : { "type" : "date" },
+                "updated_at" : { "type" : "date" }
+              }
+            },
+            "advanced_snippet" : {
+              "properties" : {
+                "value" : { "type" : "object" },
+                "created_at" : { "type" : "date" },
+                "updated_at" : { "type" : "date" }
+              }
+            },
+            "warnings" : {
+              "properties" : {
+                "ids" : { "type" : "keyword" },
+                "messages" : { "type" : "text" }
+              }
             }
           }
-        }
-      },
-      "id" : { "type" : "keyword" },
-      "index_name" : { "type" : "keyword" },
-      "language" : { "type" : "keyword" },
-      "pipeline" : {
-        "properties" : {
-          "extract_binary_content" : { "type" : "boolean" },
-          "name" : { "type" : "keyword" },
-          "reduce_whitespace" : { "type" : "boolean" },
-          "run_ml_inference" : { "type" : "boolean" }
-        }
-      },
-      "service_type" : { "type" : "keyword" },
+        },
+        "id" : { "type" : "keyword" },
+        "index_name" : { "type" : "keyword" },
+        "language" : { "type" : "keyword" },
+        "pipeline" : {
+          "properties" : {
+            "extract_binary_content" : { "type" : "boolean" },
+            "name" : { "type" : "keyword" },
+            "reduce_whitespace" : { "type" : "boolean" },
+            "run_ml_inference" : { "type" : "boolean" }
+          }
+        },
+        "service_type" : { "type" : "keyword" }
+      }
     },
     "created_at" : { "type" : "date" },
     "deleted_document_count" : { "type" : "integer" },
     "error" : { "type" : "keyword" },
-    
     "indexed_document_count" : { "type" : "integer" },
     "indexed_document_volume" : { "type" : "integer" },
     "last_seen" : { "type" : "date" },
