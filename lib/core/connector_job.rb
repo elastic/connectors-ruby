@@ -113,6 +113,7 @@ module Core
     private
 
     def initialize(es_response)
+      # TODO: remove the usage of with_indifferent_access. The initialize method should expect a hash argument
       @elasticsearch_response = es_response.with_indifferent_access
     end
 
