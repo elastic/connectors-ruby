@@ -194,6 +194,8 @@ module Core
       def complete_sync(connector_id, job_id, metadata, error)
         sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
+        metadata ||= {}
+
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
                                 :last_sync_error => error,
