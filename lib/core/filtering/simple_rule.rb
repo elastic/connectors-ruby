@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'utility/exception_tracking'
+
 module Core
   module Filtering
     class SimpleRule
@@ -67,24 +69,44 @@ module Core
       def match?(document)
         return true if id == DEFAULT_RULE_ID
         doc_value = document[field]
+        coerced_value = coerce(doc_value)
         case rule
         when Rule::EQUALS
-          doc_value == value
+          doc_value == coerced_value
         when Rule::STARTS_WITH
-          doc_value.starts_with?(value)
+          doc_value.start_with?(coerced_value)
         when Rule::ENDS_WITH
-          doc_value.ends_with?(value)
+          doc_value.end_with?(coerced_value)
         when Rule::CONTAINS
-          doc_value.include?(value)
+          doc_value.include?(coerced_value)
         when Rule::REGEX
-          doc_value.match(/#{value}/)
+          doc_value.match(/#{coerced_value}/)
         when Rule::LESS_THAN
-          doc_value < value
+          doc_value < coerced_value
         when Rule::GREATER_THAN
-          doc_value > value
+          doc_value > coerced_value
         else
           false
         end
+      end
+
+      def coerce(doc_value)
+        case doc_value
+        when String
+          value.to_s
+        when Integer
+          value.to_i
+        when DateTime, Time
+          to_date(value)
+        when TrueClass, FalseClass # Ruby doesn't have a Boolean type, TIL
+          to_bool(value)
+        else
+          value
+        end
+      rescue StandardError => e
+        # TODO: log error/warning?
+        Utility::ExceptionTracking.log_exception(e)
+        value
       end
       def is_include?
         policy == Policy::INCLUDE
@@ -95,6 +117,21 @@ module Core
       end
       def to_h
         @rule_hash
+      end
+
+      private
+
+      # TODO: move to utils?
+      def to_bool(str)
+        return true if str == true || str =~ (/^(true|t|yes|y|on|1)$/i)
+        return false if str == false || str.blank? || str =~ (/^(false|f|no|n|off|0)$/i)
+        raise ArgumentError.new("invalid value for Boolean: \"#{str}\"")
+      end
+
+      def to_date(str)
+        DateTime.parse(str)
+      rescue ArgumentError
+        Time.at(str.to_i) # try with it as an int string of millis
       end
     end
   end
