@@ -70,6 +70,26 @@ describe Core::Ingestion::EsSink do
         end
       end
 
+      context 'when ingested document is too big' do
+        let(:document_id) { 15 }
+        let(:document) { { 'id' => document_id, 'something' => 'something' } }
+        let(:serialized_document) { 'id: 15, something: something' }
+        let(:max_allowed_document_size) { 5 } # 5 bytes
+        subject { described_class.new(index_name, request_pipeline, bulk_queue, max_allowed_document_size) }
+
+        it 'does not add the document to the queue' do
+          expect(bulk_queue).to_not receive(:add)
+
+          subject.ingest(document)
+        end
+
+        it 'produces a warn statement' do
+          expect(Utility::Logger).to receive(:warn).with(/#{document_id}/)
+
+          subject.ingest(document)
+        end
+      end
+
       context 'when ingested document is not empty' do
         context('when bulk queue still has capacity') do
           it 'does not immediately send the document into elasticsearch' do

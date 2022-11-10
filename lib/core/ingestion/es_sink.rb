@@ -21,11 +21,13 @@ require 'elasticsearch/api'
 module Core
   module Ingestion
     class EsSink
-      def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new)
+      def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new, max_allowed_document_size = 5 * 1024 * 1024)
         @client = Utility::EsClient.new(App::Config[:elasticsearch])
         @index_name = index_name
         @request_pipeline = request_pipeline
         @operation_queue = bulk_queue
+
+        @max_allowed_document_size = max_allowed_document_size
 
         @queued = {
           :indexed_document_count => 0,
@@ -48,6 +50,14 @@ module Core
 
         id = document['id']
         serialized_document = serialize(document)
+
+        document_size = serialized_document.bytesize
+
+        if @max_allowed_document_size > 0 && document_size > @max_allowed_document_size
+          Utility::Logger.warn("Connector attempted to ingest too large document with id=#{document['id']} [#{document_size}/#{@max_allowed_document_size}], skipping the document.")
+          return
+        end
+
         index_op = serialize({ 'index' => { '_index' => @index_name, '_id' => id } })
 
         flush unless @operation_queue.will_fit?(index_op, serialized_document)
@@ -56,8 +66,9 @@ module Core
           index_op,
           serialized_document
         )
+
         @queued[:indexed_document_count] += 1
-        @queued[:indexed_document_volume] += serialized_document.bytesize
+        @queued[:indexed_document_volume] += document_size
       end
 
       def ingest_multiple(documents)
