@@ -106,6 +106,7 @@ module Core
     def reload
       es_response = ElasticConnectorActions.get_job(id)
       raise ConnectorJobNotFoundError.new("Connector job with id=#{id} was not found.") unless es_response[:found]
+      # TODO: remove the usage of with_indifferent_access. get_id method is expected to return a hash
       @elasticsearch_response = es_response.with_indifferent_access
       @connector = nil
     end
