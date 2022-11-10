@@ -25,7 +25,7 @@ module Core
 
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @ingester = Core::Ingestion::Ingester.new(Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline))
+      @ingester = Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
       @sync_error = nil

@@ -49,7 +49,6 @@ describe Core::SyncJobRunner do
   let(:connector_class) { double }
   let(:connector_instance) { double }
   let(:sink) { double }
-  let(:ingester) { double }
 
   let(:output_index_name) { 'test-ingest-index' }
   let(:existing_document_ids) { [] } # ids of documents that are already in the index
@@ -97,11 +96,10 @@ describe Core::SyncJobRunner do
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
     allow(Core::Ingestion::EsSink).to receive(:new).and_return(sink)
-    allow(Core::Ingestion::Ingester).to receive(:new).with(anything).and_return(ingester)
-    allow(ingester).to receive(:ingest)
-    allow(ingester).to receive(:delete)
-    allow(ingester).to receive(:flush)
-    allow(ingester).to receive(:ingestion_stats).and_return(ingestion_stats)
+    allow(sink).to receive(:ingest)
+    allow(sink).to receive(:delete)
+    allow(sink).to receive(:flush)
+    allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
 
     allow(connector_settings).to receive(:id).and_return(connector_id)
     allow(connector_settings).to receive(:service_type).and_return(service_type)
@@ -127,7 +125,7 @@ describe Core::SyncJobRunner do
   describe '#execute' do
     let(:ingestion_stats) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
     before(:each) do
-      allow(ingester).to receive(:ingestion_stats).and_return(ingestion_stats)
+      allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
     end
 
     shared_examples_for 'sync stops with error' do
@@ -159,9 +157,9 @@ describe Core::SyncJobRunner do
         expect(Core::ElasticConnectorActions).to_not receive(:complete_sync)
         expect(Core::ElasticConnectorActions).to_not receive(:fetch_document_ids)
 
-        expect(ingester).to_not receive(:ingest)
-        expect(ingester).to_not receive(:delete)
-        expect(ingester).to_not receive(:flush)
+        expect(sink).to_not receive(:ingest)
+        expect(sink).to_not receive(:delete)
+        expect(sink).to_not receive(:flush)
 
         expect(connector_instance).to_not receive(:yield_documents)
 
@@ -243,10 +241,10 @@ describe Core::SyncJobRunner do
       subject.execute
     end
 
-    it 'flushes the ingester' do
+    it 'flushes the sink' do
       # We don't ingest anything, but flush still happens just in case.
-      # This is done so that the last batch of documents is always ingested into the ingester
-      expect(ingester).to receive(:flush)
+      # This is done so that the last batch of documents is always ingested into the sink
+      expect(sink).to receive(:flush)
 
       subject.execute
     end
@@ -315,9 +313,9 @@ describe Core::SyncJobRunner do
 
       let(:extracted_documents) { [doc1, doc2] } # documents returned from 3rd-party system
 
-      it 'ingests returned documents into the ingester' do
-        expect(ingester).to receive(:ingest).with(doc1)
-        expect(ingester).to receive(:ingest).with(doc2)
+      it 'ingests returned documents into the sink' do
+        expect(sink).to receive(:ingest).with(doc1)
+        expect(sink).to receive(:ingest).with(doc2)
 
         subject.execute
       end
@@ -367,7 +365,7 @@ describe Core::SyncJobRunner do
 
         it 'attempts to remove existing documents' do
           existing_document_ids.each do |id|
-            expect(ingester).to receive(:delete).with(id)
+            expect(sink).to receive(:delete).with(id)
           end
 
           subject.execute
@@ -390,7 +388,7 @@ describe Core::SyncJobRunner do
         context 'when an error happens during sync' do
           let(:error_message) { 'whoops' }
           before(:each) do
-            allow(ingester).to receive(:flush).and_raise('whoops')
+            allow(sink).to receive(:flush).and_raise('whoops')
           end
 
           it 'marks the job as complete with proper error' do
