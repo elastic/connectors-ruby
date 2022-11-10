@@ -56,6 +56,10 @@ module Connectors
 
         return valid_filtering unless filtering.present?
 
+        if filtering.is_a?(Array)
+          filtering = filtering.first
+        end
+
         advanced_filter_config = filtering[:advanced_snippet] || {}
         filter_keys = advanced_filter_config&.keys
 
@@ -172,7 +176,7 @@ module Connectors
           filter = parser.parse
         end
         Utility::Logger.info("Filtering with simple rules filter: #{filter}")
-        collection.find(filter)
+        filter.present? ? collection.find(filter) : collection.find
       end
 
       def extract_options(mongodb_function)

@@ -15,8 +15,8 @@ describe Connectors::MongoDB::MongoRulesParser do
   subject { described_class.new(rules) }
 
   describe '#parse' do
-    context 'with one rule' do
-      let(:rules) { [{ field: 'foo', value: 'bar', policy: policy, rule: operator }] }
+    context 'with one non-default rule' do
+      let(:rules) { [{ id: '123', field: 'foo', value: 'bar', policy: policy, rule: operator }] }
       context 'on include rule' do
         let(:policy) { 'include' }
         context 'equals' do
@@ -70,13 +70,38 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with multiple rules' do
       let(:rules) do
         [
-          { field: 'foo', value: 'bar1', policy: 'include', rule: 'Equals' },
-          { field: 'foo', value: 'bar2', policy: 'exclude', rule: '>' }
+          { id: '123', field: 'foo', value: 'bar1', policy: 'include', rule: 'Equals' },
+          { id: '456', field: 'foo', value: 'bar2', policy: 'exclude', rule: '>' }
         ]
       end
       it 'parses rules as and' do
         result = subject.parse
         expect(result).to match({ '$and' => [{ 'foo' => 'bar1' }, { 'foo' => { '$lte' => 'bar2' } }] })
+      end
+    end
+
+    context 'with one default rule' do
+      let(:rules) do
+        [
+          { id: 'DEFAULT', field: 'foo', value: '*.', policy: 'include', rule: 'regex' }
+        ]
+      end
+      it 'parses rules as empty' do
+        result = subject.parse
+        expect(result).to match({})
+      end
+    end
+
+    context 'with one default rule and one non-default' do
+      let(:rules) do
+        [
+          { id: 'DEFAULT', field: 'foo', value: '*.', policy: 'include', rule: 'regex' },
+          { id: '123', field: 'foo', value: 'bla', policy: 'include', rule: 'Equals' }
+        ]
+      end
+      it 'parses rules as just non-default' do
+        result = subject.parse
+        expect(result).to match({ 'foo' => 'bla' })
       end
     end
 
