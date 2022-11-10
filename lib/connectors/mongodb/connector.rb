@@ -56,7 +56,9 @@ module Connectors
 
         return valid_filtering unless filtering.present?
 
-        advanced_filter_config = filtering[:advanced_snippet] || {}
+        filter = Utility::Filtering.extract_filter(filtering)
+
+        advanced_filter_config = filter[:advanced_snippet] || {}
         filter_keys = advanced_filter_config&.keys
 
         if !filter_keys&.empty? && (filter_keys.size != 1 || !ALLOWED_TOP_LEVEL_FILTER_KEYS.include?(filter_keys[0]&.to_s))
@@ -172,7 +174,7 @@ module Connectors
           filter = parser.parse
         end
         Utility::Logger.info("Filtering with simple rules filter: #{filter}")
-        collection.find(filter)
+        filter.present? ? collection.find(filter) : collection.find
       end
 
       def extract_options(mongodb_function)

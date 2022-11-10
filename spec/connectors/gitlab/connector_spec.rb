@@ -31,7 +31,7 @@ describe Connectors::GitLab::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#validate_filtering' do
+  describe '.validate_filtering' do
     shared_examples_for 'filtering is valid' do
       it 'returns validation result with state \'valid\' and no errors' do
         validation_result = described_class.validate_filtering(filtering)

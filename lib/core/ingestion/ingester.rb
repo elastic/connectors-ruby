@@ -11,8 +11,10 @@ require 'utility/logger'
 module Core
   module Ingestion
     class Ingester
-      def initialize(sink_strategy)
+      def initialize(sink_strategy, max_allowed_document_size = 5 * 1024 * 1024)
         @sink_strategy = sink_strategy
+        @max_allowed_document_size = max_allowed_document_size
+
         @ingested_count = 0
         @ingested_volume = 0
         @deleted_count = 0
@@ -25,10 +27,17 @@ module Core
         end
 
         serialized_document = @sink_strategy.serialize(document)
+        document_size = serialized_document.bytesize
+
+        if @max_allowed_document_size > 0 && document_size > @max_allowed_document_size
+          Utility::Logger.warn("Connector attempted to ingest too large document with id=#{document['id']} [#{document_size}/#{@max_allowed_document_size}], skipping the document.")
+          return
+        end
+
         @sink_strategy.ingest(document['id'], serialized_document)
 
         @ingested_count += 1
-        @ingested_volume += serialized_document.bytesize
+        @ingested_volume += document_size
       end
 
       def ingest_multiple(documents)

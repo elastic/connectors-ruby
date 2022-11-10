@@ -34,11 +34,6 @@ module Core
       new(es_response, connectors_meta)
     end
 
-    def initialize(es_response, connectors_meta)
-      @elasticsearch_response = es_response.with_indifferent_access
-      @connectors_meta = connectors_meta.with_indifferent_access
-    end
-
     def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
       query = { term: { is_native: true } }
       fetch_connectors_by_query(query, page_size)
@@ -117,6 +112,13 @@ module Core
 
     def valid_index_name?
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
+    end
+
+    private
+
+    def initialize(es_response, connectors_meta)
+      @elasticsearch_response = es_response.with_indifferent_access
+      @connectors_meta = connectors_meta.with_indifferent_access
     end
 
     def self.fetch_connectors_by_query(query, page_size)

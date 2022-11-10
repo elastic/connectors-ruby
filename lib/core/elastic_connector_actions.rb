@@ -49,10 +49,17 @@ module Core
       end
 
       def get_connector(connector_id)
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
         client.get(:index => Utility::Constants::CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
+      def get_job(job_id)
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
+        client.get(:index => Utility::Constants::JOB_INDEX, :id => job_id, :ignore => 404).with_indifferent_access
+      end
+
       def connectors_meta
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta') || {}
@@ -67,6 +74,19 @@ module Core
             :from => offset,
             :query => query,
             :sort => ['name']
+          }
+        )
+      end
+
+      def search_jobs(query, page_size, offset)
+        client.search(
+          :index => Utility::Constants::JOB_INDEX,
+          :ignore => 404,
+          :body => {
+              :size => page_size,
+              :from => offset,
+              :query => query,
+              :sort => ['created_at']
           }
         )
       end
@@ -150,6 +170,7 @@ module Core
 
         index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
         if index_response['result'] == 'created'
+          # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
           return client.get(
             :index => Utility::Constants::JOB_INDEX,
             :id => index_response['_id'],
