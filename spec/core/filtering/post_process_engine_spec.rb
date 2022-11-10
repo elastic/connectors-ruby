@@ -12,7 +12,7 @@ describe Core::Filtering::PostProcessEngine do
   let(:job_description) do
     {
       Core::Filtering::FILTERING => [
-          {
+        {
           Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
           Core::Filtering::RULES => rules,
           Core::Filtering::ADVANCED_SNIPPET => snippet,
@@ -23,7 +23,19 @@ describe Core::Filtering::PostProcessEngine do
   end
   let(:rules) { [] }
   let(:snippet) { {} }
-  let(:document) { {'foo' => 'bar'} }
+  let(:document) { { 'foo' => 'bar' } }
+  let(:test_field) { 'foo' }
+  let(:test_value) { 'bar' }
+  let(:test_rule) do
+    {
+      Core::Filtering::SimpleRule::ID => 'test',
+      Core::Filtering::SimpleRule::FIELD => test_field,
+      Core::Filtering::SimpleRule::VALUE => test_value,
+      Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
+      Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::EQUALS
+    }
+  end
+
   subject { described_class.new(job_description) }
 
   shared_examples_for 'included' do
@@ -32,26 +44,51 @@ describe Core::Filtering::PostProcessEngine do
     end
   end
 
+  shared_examples_for 'excluded' do
+    it 'is excluded' do
+      processed = subject.process(document)
+      expect(processed.is_include?).to be_falsey
+    end
+  end
+
   context 'empty rules' do
     it_behaves_like 'included'
   end
 
-
   context 'simple rule' do
+    let(:rules) { [test_rule] }
 
     context 'no matches' do
-
+      let(:document) { { 'foo' => 'baz' } }
+      it_behaves_like 'excluded'
     end
 
     context 'document with symbol keys' do
-
+      let(:document) { { :foo => 'bar' } }
+      it_behaves_like 'included'
     end
 
     context 'document with nested field values' do
-
+      let(:document) { { 'foo' => { 'bar' => 'baz' } } }
+      context 'when the rule is not nested' do
+        it_behaves_like 'excluded'
+      end
+      context 'when the rule has nested field' do
+        let(:test_field) { 'foo.bar' }
+        let(:test_value) { 'baz' }
+        it_behaves_like 'included'
+      end
     end
 
     context 'document with int values' do
+      let(:document) { { 'foo' => 123 } }
+
+      it_behaves_like 'excluded'
+
+      context 'when the rule has the same value' do
+        let(:test_value) { 123 }
+        it_behaves_like 'included'
+      end
 
     end
 
