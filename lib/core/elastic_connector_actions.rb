@@ -90,6 +90,28 @@ module Core
         update_connector_configuration(connector_id, payload)
       end
 
+      def update_filtering_validation(connector_id, filter_validation_results)
+        return if filter_validation_results.empty?
+
+        filtering = get_connector(connector_id)[:filtering]
+
+        case filtering
+        when Hash
+          update_filter_validation(filtering, filter_validation_results)
+        when Array
+          return unless should_update_validations?(filter_validation_results, filtering)
+
+          filtering.each do |filter|
+            update_filter_validation(filter, filter_validation_results)
+          end
+        else
+          Utility::Logger.warn("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+          return
+        end
+
+        update_connector_fields(connector_id, { :filtering => filtering })
+      end
+
       def claim_job(connector_id)
         seq_no = nil
         primary_term = nil
@@ -171,6 +193,8 @@ module Core
 
       def complete_sync(connector_id, job_id, metadata, error)
         sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
+
+        metadata ||= {}
 
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
@@ -484,6 +508,14 @@ module Core
 
       private
 
+      def should_update_validations?(domain_validations, filtering)
+        domains_present = filtering.collect { |filter| filter[:domain] }
+        domains_to_update = domain_validations.keys
+
+        # non-empty intersection -> domains to update present
+        !(domains_present & domains_to_update).empty?
+      end
+
       def client
         @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
       end
@@ -492,6 +524,15 @@ module Core
         index_versions = indicies.map { |index| index.gsub("#{alias_name}-v", '').to_i }
         index_version = index_versions.max # gets the largest suffix number
         "#{alias_name}-v#{index_version}"
+      end
+
+      def update_filter_validation(filter, domain_validations)
+        domain = filter[:domain]
+
+        if domain_validations.key?(domain)
+          new_validation_state = { :draft => { :validation => domain_validations[domain] } }
+          filter.deep_merge!(new_validation_state)
+        end
       end
     end
   end

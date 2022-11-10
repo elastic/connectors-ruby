@@ -10,6 +10,7 @@ require 'time'
 require 'fugit'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
+require 'core/filtering/validation_status'
 require 'utility/cron'
 require 'utility/logger'
 require 'utility/exception_tracking'
@@ -37,6 +38,9 @@ module Core
           end
           if configuration_triggered?(cs)
             yield cs, :configuration
+          end
+          if filtering_validation_triggered?(cs)
+            yield cs, :filter_validation
           end
         end
       rescue *Utility::AUTHORIZATION_ERRORS => e
@@ -149,6 +153,42 @@ module Core
       end
 
       false
+    end
+
+    def filtering_validation_triggered?(connector_settings)
+      return false unless connector_registered?(connector_settings.service_type)
+
+      filtering = connector_settings.filtering
+
+      unless filtering.present?
+        Utility::Logger.debug("#{connector_settings.formatted} does not contain filtering to be validated.")
+
+        return false
+      end
+
+      draft_filters = filtering[:draft]
+
+      unless draft_filters.present?
+        Utility::Logger.debug("#{connector_settings.formatted} does not contain a draft filter to be validated.")
+
+        return false
+      end
+
+      validation = draft_filters[:validation]
+
+      unless validation.present?
+        Utility::Logger.warn("#{connector_settings.formatted} does not contain a validation object inside draft filtering. Check connectors index.")
+
+        return false
+      end
+
+      unless validation[:state] == Core::Filtering::ValidationStatus::EDITED
+        Utility::Logger.debug("#{connector_settings.formatted} filtering validation needs to be in state #{Core::Filtering::ValidationStatus::EDITED} to be able to validate it.")
+
+        return false
+      end
+
+      true
     end
 
     def connector_registered?(service_type)

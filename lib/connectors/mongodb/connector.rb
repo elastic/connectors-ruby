@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'core/filtering/validation_status'
 require 'connectors/mongodb/mongo_rules_parser'
 require 'mongo'
 require 'utility'
@@ -50,6 +51,23 @@ module Connectors
         }
       end
 
+      def self.validate_filtering(filtering = {})
+        valid_filtering = { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+
+        return valid_filtering unless filtering.present?
+
+        advanced_filter_config = filtering[:advanced_snippet] || {}
+        filter_keys = advanced_filter_config&.keys
+
+        if !filter_keys&.empty? && (filter_keys.size != 1 || !ALLOWED_TOP_LEVEL_FILTER_KEYS.include?(filter_keys[0]&.to_s))
+          return { :state => Core::Filtering::ValidationStatus::INVALID,
+                   :errors => [{ :ids => ['wrong-keys'],
+                                 :messages => ["Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{filter_keys}'."] }] }
+        end
+
+        valid_filtering
+      end
+
       def initialize(configuration: {}, job_description: {})
         super
 
@@ -62,8 +80,6 @@ module Connectors
       end
 
       def yield_documents
-        check_filtering
-
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
@@ -121,19 +137,6 @@ module Connectors
         return create_simple_rules_cursor(collection) if @rules.present?
 
         collection.find
-      end
-
-      def check_filtering
-        return unless filtering_present?
-
-        check_find_and_aggregate
-      end
-
-      def check_find_and_aggregate
-        if !@advanced_filter_config&.empty? && @advanced_filter_config&.keys&.size != 1
-          invalid_keys_msg = "Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{@advanced_filter_config.keys}'."
-          raise Utility::InvalidFilterConfigError.new(invalid_keys_msg)
-        end
       end
 
       def create_aggregate_cursor(collection)

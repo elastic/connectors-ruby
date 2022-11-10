@@ -286,4 +286,10 @@ describe Connectors::Base::Connector do
       it_behaves_like 'has default filter config value'
     end
   end
+
+  context '.validate_filtering' do
+    it 'raises an exception, that filtering is not implemented' do
+      expect { described_class.validate_filtering }.to raise_error(RuntimeError, 'Not implemented for this connector')
+    end
+  end
 end

@@ -34,6 +34,10 @@ shared_examples 'a connector' do
     expect(described_class.configurable_fields).to_not be_nil
   end
 
+  it 'implements validate filtering class method' do
+    expect(described_class.validate_filtering).to_not be_nil
+  end
+
   it 'configurable_fields class method returns valid configuration' do
     # expected configurable fields format:
     # {

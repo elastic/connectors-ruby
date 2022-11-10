@@ -83,7 +83,10 @@ module Core
     end
 
     def filtering
-      Utility::Common.return_if_present(@elasticsearch_response[:filtering], DEFAULT_FILTERING)
+      # assume for now, that first object in filtering array or a filter object itself is the only filtering object
+      filtering = @elasticsearch_response[:filtering]
+
+      Utility::Filtering.extract_filter(filtering)
     end
 
     def request_pipeline
