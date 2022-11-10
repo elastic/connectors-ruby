@@ -52,6 +52,10 @@ module Core
         client.get(:index => Utility::Constants::CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
+      def get_job(job_id)
+        client.get(:index => Utility::Constants::JOB_INDEX, :id => job_id, :ignore => 404).with_indifferent_access
+      end
+
       def connectors_meta
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
@@ -67,6 +71,19 @@ module Core
             :from => offset,
             :query => query,
             :sort => ['name']
+          }
+        )
+      end
+
+      def search_jobs(query, page_size, offset)
+        client.search(
+          :index => Utility::Constants::JOB_INDEX,
+          :ignore => 404,
+          :body => {
+              :size => page_size,
+              :from => offset,
+              :query => query,
+              :sort => ['created_at']
           }
         )
       end
