@@ -122,7 +122,7 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           { id: 'DEFAULT', field: 'foo', value: '*.', policy: 'include', rule: 'regex' },
-          { id: '123', field: 'foo', value: 'bla', policy: 'include', rule: 'Equals' }
+          { id: '123', field: 'foo', value: 'bla', policy: 'include', rule: 'equals' }
         ]
       end
       it 'parses rules as just non-default' do

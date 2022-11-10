@@ -33,6 +33,7 @@ module Core
       end
 
       attr_reader :policy, :field, :rule, :value, :id
+
       def initialize(rule_hash)
         @policy = rule_hash.fetch(POLICY)
         @field = rule_hash.fetch(FIELD)
