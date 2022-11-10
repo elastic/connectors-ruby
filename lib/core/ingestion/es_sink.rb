@@ -11,7 +11,13 @@ require 'utility/bulk_queue'
 require 'utility/es_client'
 require 'utility/logger'
 require 'elasticsearch/api'
-
+#
+# This class is responsible for sending the data to the data storage.
+# While we don't actually allow to output our data anywhere except
+# Elasticsearch, we still want to be able to do so sometime in future.
+#
+# This class should stay simple and any change to the class should be careful
+# with the thought of introducing other sinks in future.
 module Core
   module Ingestion
     class EsSink
