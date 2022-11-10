@@ -187,7 +187,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#update_connector_configuration' do
+  describe '.update_connector_configuration' do
     let(:doc) do
       {
         :schedule => { :enabled => false },

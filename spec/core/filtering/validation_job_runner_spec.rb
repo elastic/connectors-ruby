@@ -60,7 +60,7 @@ describe Core::Filtering::ValidationJobRunner do
     end
   end
 
-  context '.execute' do
+  describe '#execute' do
     context 'when validation state is \'valid\' and no errors are present' do
       let(:validation_state) {
         Core::Filtering::ValidationStatus::VALID
