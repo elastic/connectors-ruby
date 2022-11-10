@@ -238,44 +238,48 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   cancelation_requested_at: date; -> The date/time when the cancelation of the job is requested
   canceled_at: date; -> The date/time when the job is canceled
   completed_at: date; -> The data/time when the job is completed
-  configuration: object; -> Connector configuration
-  connector_id: string; -> ID of the connector document in .elastic-connectors
+  connector: {              -> Connector snapshot
+    configuration: object;  -> Connector configuration
+    filtering: {            -> Filtering rules
+      domain: string,       -> what data domain these rules apply to
+      rules: {
+        id: string,         -> rule identifier
+        policy: string,     -> one of ["include", "exclude"]
+        field: string,      -> the field on the document this rule applies to
+        rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
+        value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
+        order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
+        created_at: string, -> when the rule was added
+        updated_at: string  -> when the rule was last edited
+      },
+      advanced_snippet: {   -> used for filtering data from the 3rd party at query time
+        value: object,      -> this JSON object is passed directly to the connector
+        created_at: string, -> when this JSON object was created
+        updated_at: string  -> when this JSON object was last edited
+      },
+      warnings: {
+        ids: string,        -> the id(s) of any rules that cannot be used for query-time filtering
+        messages: string    -> the reason(s) those rules cannot be used for query-time filtering
+      }
+    };
+    connector_id: string;   -> ID of the connector
+    index_name: string;     -> The name of the content index
+    language: string        -> The language used for the analyzer
+    pipeline: {             -> Connector pipeline
+      extract_binary_content: boolean;
+      name: string;
+      reduce_whitespace: boolean;
+      run_ml_inference: boolean;
+    };
+    service_type: string;   -> Service type of the connector
+  };
   created_at: date; -> The date/time when the job is created
   deleted_document_count: number; -> Number of documents deleted in the job
   error: string; -> Optional error message
-  filtering: {          -> Filtering rules
-    domain: string,     -> what data domain these rules apply to
-    rules: {
-      id: string,         -> rule identifier
-      policy: string,     -> one of ["include", "exclude"]
-      field: string,      -> the field on the document this rule applies to
-      rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
-      value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
-      order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
-      created_at: string, -> when the rule was added
-      updated_at: string  -> when the rule was last edited
-    },
-    advanced_snippet: {   -> used for filtering data from the 3rd party at query time
-      value: object,      -> this JSON object is passed directly to the connector
-      created_at: string, -> when this JSON object was created
-      updated_at: string  -> when this JSON object was last edited
-    },
-    warnings: {
-      ids: string,      -> the id(s) of any rules that cannot be used for query-time filtering
-      messages: string  -> the reason(s) those rules cannot be used for query-time filtering
-    }
-  };
-  index_name: string; -> The name of the content index
   indexed_document_count: number; -> Number of documents indexed in the job
   indexed_document_volume: number; -> The volume (in bytes) of documents indexed in the job
   last_seen: date; -> Connector writes check-in date-time regularly (UTC)
   metadata: object; -> Connector-specific metadata
-  pipeline: { -> Connector pipeline
-    extract_binary_content: boolean;
-    name: string;
-    reduce_whitespace: boolean;
-    run_ml_inference: boolean;
-  },
   started_at: date; -> The date/time when the job is started
   status: string; -> Job status Enum, see below
   total_document_count: number; -> Number of documents in the index after the job completes
@@ -303,54 +307,59 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     "cancelation_requested_at" : { "type" : "date" },
     "canceled_at" : { "type" : "date" },
     "completed_at" : { "type" : "date" },
-    "configuration" : { "type" : "object" },
-    "connector_id" : { "type" : "keyword" },
+    "connector" : {
+      "configuration" : { "type" : "object" },
+      "filtering" : {
+        "properties" : {
+          "domain" : { "type" : "keyword" },
+          "rules" : {
+            "properties" : {
+              "id" : { "type" : "keyword" },
+              "policy" : { "type" : "keyword" },
+              "field" : { "type" : "keyword" },
+              "rule" : { "type" : "keyword" },
+              "value" : { "type" : "keyword" },
+              "order" : { "type" : "short" },
+              "created_at" : { "type" : "date" },
+              "updated_at" : { "type" : "date" }
+            }
+          },
+          "advanced_snippet" : {
+            "properties" : {
+              "value" : { "type" : "object" },
+              "created_at" : { "type" : "date" },
+              "updated_at" : { "type" : "date" }
+            }
+          },
+          "warnings" : {
+            "properties" : {
+              "ids" : { "type" : "keyword" },
+              "messages" : { "type" : "text" }
+            }
+          }
+        }
+      },
+      "id" : { "type" : "keyword" },
+      "index_name" : { "type" : "keyword" },
+      "language" : { "type" : "keyword" },
+      "pipeline" : {
+        "properties" : {
+          "extract_binary_content" : { "type" : "boolean" },
+          "name" : { "type" : "keyword" },
+          "reduce_whitespace" : { "type" : "boolean" },
+          "run_ml_inference" : { "type" : "boolean" }
+        }
+      },
+      "service_type" : { "type" : "keyword" },
+    },
     "created_at" : { "type" : "date" },
     "deleted_document_count" : { "type" : "integer" },
     "error" : { "type" : "keyword" },
-    "filtering" : {
-      "properties" : {
-        "domain" : { "type" : "keyword" },
-        "rules" : {
-          "properties" : {
-            "id" : { "type" : "keyword" },
-            "policy" : { "type" : "keyword" },
-            "field" : { "type" : "keyword" },
-            "rule" : { "type" : "keyword" },
-            "value" : { "type" : "keyword" },
-            "order" : { "type" : "short" },
-            "created_at" : { "type" : "date" },
-            "updated_at" : { "type" : "date" }
-          }
-        },
-        "advanced_snippet" : {
-          "properties" : {
-            "value" : { "type" : "object" },
-            "created_at" : { "type" : "date" },
-            "updated_at" : { "type" : "date" }
-          }
-        },
-        "warnings" : {
-          "properties" : {
-            "ids" : { "type" : "keyword" },
-            "messages" : { "type" : "text" }
-          }
-        }
-      }
-    },
-    "index_name" : { "type" : "keyword" },
+    
     "indexed_document_count" : { "type" : "integer" },
     "indexed_document_volume" : { "type" : "integer" },
     "last_seen" : { "type" : "date" },
     "metadata" : { "type" : "object" },
-    "pipeline" : {
-      "properties" : {
-        "extract_binary_content" : { "type" : "boolean" },
-        "name" : { "type" : "keyword" },
-        "reduce_whitespace" : { "type" : "boolean" },
-        "run_ml_inference" : { "type" : "boolean" }
-      }
-    },
     "started_at" : { "type" : "date" },
     "status" : { "type" : "keyword" },
     "total_document_count" : { "type" : "integer" },
