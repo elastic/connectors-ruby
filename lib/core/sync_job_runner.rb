@@ -49,6 +49,9 @@ module Core
       job_record = ElasticConnectorActions.claim_job(@connector_settings.id)
       job_description = job_record['_source']
       job_id = job_record['_id']
+
+      # ES can return an array or an object
+      job_description['filtering'] = Utility::Filtering.extract_filter(job_description['filtering'])
       job_description['_id'] = job_id
 
       unless job_id.present?
@@ -60,7 +63,7 @@ module Core
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
         Utility::Logger.info("Checking active filtering for sync job #{job_id} for connector #{@connector_settings.id}.")
-        validate_filtering(job_description[:filtering])
+        validate_filtering(job_description['filtering'])
         Utility::Logger.debug("Active filtering for sync job #{job_id} for connector #{@connector_settings.id} is valid.")
 
         connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: job_description)

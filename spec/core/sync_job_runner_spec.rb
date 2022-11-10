@@ -157,6 +157,80 @@ describe Core::SyncJobRunner do
       end
     end
 
+    context 'when filtering is nil' do
+      before(:each) do
+        allow(Utility::Filtering).to receive(:extract_filter).with(filtering).and_return({})
+      end
+
+      let(:filtering) {
+        nil
+      }
+
+      it_behaves_like 'runs a full sync'
+    end
+
+    context 'when filtering is an empty array' do
+      before(:each) do
+        allow(Utility::Filtering).to receive(:extract_filter).with(filtering).and_return({})
+      end
+
+      let(:filtering) {
+        []
+      }
+
+      it_behaves_like 'runs a full sync'
+    end
+
+    context 'when filtering is an empty hash' do
+      before(:each) do
+        allow(Utility::Filtering).to receive(:extract_filter).with(filtering).and_return({})
+      end
+
+      let(:filtering) {
+        {}
+      }
+
+      it_behaves_like 'runs a full sync'
+    end
+
+    context 'when filtering is an array' do
+      before(:each) do
+        allow(Utility::Filtering).to receive(:extract_filter).with(filtering).and_return({
+                                                                                            :rules => [],
+                                                                                            :advanced_snippet => {}
+                                                                                          })
+      end
+
+      let(:filtering) {
+        [
+          {
+            :rules => [],
+            :advanced_snippet => {}
+          }
+        ]
+      }
+
+      it_behaves_like 'runs a full sync'
+    end
+
+    context 'when filtering is an object' do
+      before(:each) do
+        allow(Utility::Filtering).to receive(:extract_filter).with(filtering).and_return({
+                                                                                            :rules => [],
+                                                                                            :advanced_snippet => {}
+                                                                                          })
+      end
+
+      let(:filtering) {
+        {
+          :rules => [],
+          :advanced_snippet => {}
+        }
+      }
+
+      it_behaves_like 'runs a full sync'
+    end
+
     context 'when filtering is in state invalid' do
       let(:filtering_validation_result) {
         {
