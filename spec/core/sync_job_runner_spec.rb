@@ -305,7 +305,7 @@ describe Core::SyncJobRunner do
         # Check for exception thrown on purpose, so that the test is not marked as failed for the wrong reason
         expect { subject.execute }.to raise_exception
 
-        expect(subject.instance_variable_get(:@sync_finished)).to eq(false)
+        expect(subject.instance_variable_get(:@sync_status)).to eq(Connectors::SyncStatus::ERROR)
         expect(subject.instance_variable_get(:@sync_error)).to eq('Sync thread didn\'t finish execution. Check connector logs for more details.')
       end
     end
