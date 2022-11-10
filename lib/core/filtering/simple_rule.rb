@@ -70,17 +70,18 @@ module Core
         return true if id == DEFAULT_RULE_ID
         doc_value = document[field]
         coerced_value = coerce(doc_value)
+        doc_value = doc_value.to_s
         case rule
         when Rule::EQUALS
-          doc_value == coerced_value
+          doc_value.to_s == coerced_value.to_s
         when Rule::STARTS_WITH
-          doc_value.start_with?(coerced_value)
+          doc_value.to_s.start_with?(coerced_value.to_s)
         when Rule::ENDS_WITH
           doc_value.end_with?(coerced_value)
         when Rule::CONTAINS
           doc_value.include?(coerced_value)
         when Rule::REGEX
-          doc_value.match(/#{coerced_value}/)
+          doc_value.to_s.match(/#{value}/)
         when Rule::LESS_THAN
           doc_value < coerced_value
         when Rule::GREATER_THAN
@@ -91,7 +92,7 @@ module Core
       end
 
       def coerce(doc_value)
-        case doc_value
+        coerced_val = case doc_value
         when String
           value.to_s
         when Integer
@@ -103,10 +104,11 @@ module Core
         else
           value
         end
+        coerced_val.to_s
       rescue StandardError => e
         # TODO: log error/warning?
         Utility::ExceptionTracking.log_exception(e)
-        value
+        value.to_s
       end
       def is_include?
         policy == Policy::INCLUDE
