@@ -56,11 +56,9 @@ module Connectors
 
         return valid_filtering unless filtering.present?
 
-        if filtering.is_a?(Array)
-          filtering = filtering.first
-        end
+        filter = Utility::Filtering.extract_filter(filtering)
 
-        advanced_filter_config = filtering[:advanced_snippet] || {}
+        advanced_filter_config = filter[:advanced_snippet] || {}
         filter_keys = advanced_filter_config&.keys
 
         if !filter_keys&.empty? && (filter_keys.size != 1 || !ALLOWED_TOP_LEVEL_FILTER_KEYS.include?(filter_keys[0]&.to_s))
