@@ -98,7 +98,7 @@ module Core
       @connector ||= ConnectorSettings.fetch_by_id(connector_id)
     end
 
-    def connector!
+    def reload_connector!
       @connector = nil
       connector
     end
