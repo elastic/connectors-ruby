@@ -80,6 +80,12 @@ describe Core::Ingestion::Ingester do
 
           subject.ingest(document)
         end
+
+        it 'produces a warn statement' do
+          expect(Utility::Logger).to receive(:warn).with(/#{document_id}/)
+
+          subject.ingest(document)
+        end
       end
     end
 
