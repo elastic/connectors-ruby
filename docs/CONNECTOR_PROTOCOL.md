@@ -40,6 +40,10 @@ This is our main communication index, used to communicate the connector's config
                            fields
   description: string;  -> the description of the connector
   error: string;        -> Optional error message
+  features: {
+    filtering_advanced_config: boolean, -> Whether to display filtering advanced config in the Kibana UI
+    filtering_rules: boolean            -> Whether to display filtering rules in the Kibana UI
+  },
   filtering: {          -> Filtering rules
     domain: string,     -> what data domain these rules apply to
     active: {           -> "active" rules are run in jobs. 
@@ -117,6 +121,12 @@ This is our main communication index, used to communicate the connector's config
     "configuration" : { "type" : "object" },
     "description" : { "type" : "text" },
     "error" : { "type" : "keyword" },
+    "features": {
+      "properties": {
+        "filtering_advanced_config": { "type": "boolean" },
+        "filtering_rules": { "type": "boolean" }
+      }
+    },
     "filtering" : {
       "properties" : {
         "domain" : { "type" : "keyword" },

@@ -11,7 +11,7 @@ describe Utility::BulkQueue do
   let(:count_threshold) { 50 }
   let(:size_threshold) { 999999999 } # super high default
 
-  context '.add' do
+  describe '#add' do
     before(:each) do
       allow(subject).to receive(:will_fit?)
         .and_return(true)
@@ -53,7 +53,7 @@ describe Utility::BulkQueue do
     end
   end
 
-  context '.will_fit?' do
+  describe '#will_fit?' do
     let(:op) { 'hello: world' }
 
     context 'when thresholds are not reached' do
@@ -99,7 +99,7 @@ describe Utility::BulkQueue do
     end
   end
 
-  context '.pop_all' do
+  describe '#pop_all' do
     context 'when queue is empty' do
       it 'returns empty string' do
         expect(subject.pop_all).to eq('')
@@ -121,7 +121,7 @@ describe Utility::BulkQueue do
     end
   end
 
-  context '.current_stats' do
+  describe '#current_stats' do
     let(:op_count) { 15 }
     let(:big_operation) { 'this_is: a big operation' }
     let(:big_operation_bytesize) { 300 }

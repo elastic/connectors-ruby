@@ -32,6 +32,13 @@ module Connectors
         raise 'Not implemented for this connector'
       end
 
+      def self.kibana_features
+        [
+          Utility::Constants::FILTERING_RULES_FEATURE,
+          Utility::Constants::FILTERING_ADVANCED_FEATURE
+        ]
+      end
+
       def self.validate_filtering(_filtering = {})
         raise 'Not implemented for this connector'
       end

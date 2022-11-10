@@ -16,13 +16,13 @@ describe Connectors::Example::Connector do
 
   it_behaves_like 'a connector'
 
-  context '#is_healthy?' do
+  describe '#is_healthy?' do
     it 'returns ok' do
       expect(subject.is_healthy?).to eq(true)
     end
   end
 
-  context '#yield_documents' do
+  describe '#yield_documents' do
     before do
       @documents = []
 

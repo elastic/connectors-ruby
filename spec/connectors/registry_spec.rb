@@ -13,15 +13,17 @@ describe Connectors::Factory do
     described_class.new
   end
 
-  it 'let us register a connector under a name' do
-    class MyConnector
-      def works
-        'works'
+  describe '#connector_class' do
+    it 'let us register a connector under a name' do
+      class MyConnector
+        def works
+          'works'
+        end
       end
-    end
 
-    factory.register('sharepoint', MyConnector)
-    connector_class = factory.connector_class('sharepoint')
-    expect(connector_class.new.works).to eq 'works'
+      factory.register('sharepoint', MyConnector)
+      connector_class = factory.connector_class('sharepoint')
+      expect(connector_class.new.works).to eq 'works'
+    end
   end
 end

@@ -137,6 +137,14 @@ describe Core::Scheduler do
 
         it_behaves_like 'does not trigger', :sync
       end
+
+      context 'when an error is thrown' do
+        before(:each) do
+          allow(subject).to receive(:sync_triggered?).and_raise(StandardError.new('Oh no!'))
+        end
+
+        it_behaves_like 'does not trigger', :sync
+      end
     end
 
     context 'with heartbeat task' do

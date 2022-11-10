@@ -43,7 +43,7 @@ describe Core::ElasticConnectorActions do
     Core::ElasticConnectorActions.instance_variable_set(:@client, nil)
   end
 
-  context '#force_sync' do
+  describe '#force_sync' do
     it 'updates sync_now flag' do
       # { :body => { :doc => { :sync_now => true } } }
       expect(es_client).to receive(:update).with(
@@ -77,7 +77,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#create_connector' do
+  describe '#create_connector' do
     let(:data_index_name) { 'some-data-index-v1-23' }
     let(:service_type) { 'some-service-type' }
     let(:created_connector_id) { 'just-created-this-connector-id-1' }
@@ -124,7 +124,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#get_connector' do
+  describe '#get_connector' do
     before(:each) do
       allow(es_client).to receive(:get).and_return({ '_id' => '123', 'something' => 'something' })
     end
@@ -158,7 +158,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#connectors_meta' do
+  describe '#connectors_meta' do
     before(:each) do
       allow(es_client_indices_api)
         .to receive(:get_mapping)
@@ -170,7 +170,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#search_connectors' do
+  describe '#search_connectors' do
     let(:connector_one) { { '_id' => '123', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
     let(:connector_two) { { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access }
     let(:query) { { :term => { :is_native => true } } }
@@ -208,7 +208,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#enable_connector_scheduling' do
+  describe '#enable_connector_scheduling' do
     let(:cron_expression) { '0 * * * * *' }
 
     it 'updates connector scheduling.enabled to true' do
@@ -250,7 +250,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#disable_connector_scheduling' do
+  describe '#disable_connector_scheduling' do
     it 'updates connector scheduling.enabled to false' do
       # { :body => { :doc => { :scheduling => { :enabled => true, :something => something} } } }
       expect(es_client).to receive(:update).with(
@@ -271,7 +271,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#set_configurable_field' do
+  describe '#set_configurable_field' do
     let(:field_name) { 'api_key' }
     let(:field_label) { 'API Key' }
     let(:field_value) { 'super secret one!' }
@@ -298,7 +298,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#update_filtering_validation' do
+  describe '#update_filtering_validation' do
     let(:current_filtering) {
       []
     }
@@ -601,7 +601,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#claim_job' do
+  describe '#claim_job' do
     let(:seq_no) { 1 }
     let(:primary_term) { 1 }
     before(:each) do
@@ -759,7 +759,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#convert_connector_filtering_to_job_filtering' do
+  describe '#convert_connector_filtering_to_job_filtering' do
     shared_examples_for 'job filtering' do
       it 'has the right filtering rules' do
         expect(described_class.convert_connector_filtering_to_job_filtering(connector_filtering)).to eq(job_filtering)
@@ -818,7 +818,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#update_connector_status' do
+  describe '#update_connector_status' do
     let(:expected_payload) do
       {
         :index => connectors_index,
@@ -861,7 +861,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#update_sync' do
+  describe '#update_sync' do
     let(:job_id) { 'update-job-1' }
     let(:metadata) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
 
@@ -883,7 +883,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#complete_sync' do
+  describe '#complete_sync' do
     let(:job_id) { 'completed-job-1' }
     let(:metadata) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
     let(:error) { nil }
@@ -952,7 +952,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#fetch_document_ids' do
+  describe '#fetch_document_ids' do
     let(:data_index_name) { 'some-data-index' }
     let(:pit_id) { 'bottomless-pit' }
     let(:first_page_ids) { (1..1000).to_a }
@@ -1038,7 +1038,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#ensure_index_exists' do
+  describe '#ensure_index_exists' do
     let(:data_index_name) { 'was-i-created-or-not' }
     let(:index_mappings) { {} }
     let(:index_exists) { false }
@@ -1102,7 +1102,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#ensure_content_index_exists' do
+  describe '#ensure_content_index_exists' do
     let(:index_name) { 'some-cool-index' }
     let(:use_icu_locale) { true }
     let(:language_code) { 'it-IT' }
@@ -1122,7 +1122,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#update_connector_fields' do
+  describe '#update_connector_fields' do
     let(:doc) { {} }
 
     context 'when no doc is passed' do
@@ -1168,7 +1168,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context 'get latest index in alias' do
+  describe '.get_latest_index_in_alias' do
     let(:alias_name) { '.ent-search-connectors' }
     let(:indices) { 11.times.collect { |i| ".ent-search-connectors-v#{i}" }.to_a }
 

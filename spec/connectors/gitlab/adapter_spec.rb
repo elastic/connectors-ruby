@@ -6,7 +6,7 @@ require 'connectors/gitlab/adapter'
 describe Connectors::GitLab::Adapter do
   let(:project_hash) { Hashie::Mash.new(JSON.parse(connectors_fixture_raw('gitlab/simple_project.json'))) }
 
-  context '#to_es_document' do
+  describe '#to_es_document' do
     it 'correctly produced the Enterprise Search ID' do
       new_id = described_class.gitlab_id_to_es_id(project_hash.id)
       expect(new_id).to include(project_hash.id.to_s)

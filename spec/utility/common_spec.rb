@@ -9,7 +9,7 @@
 require 'utility/common'
 
 RSpec.describe Utility::Common do
-  context '.return_if_present' do
+  describe '.return_if_present' do
     context 'no argument is present' do
       it 'returns nil' do
         expect(Utility::Common.return_if_present).to be_nil

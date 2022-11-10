@@ -298,6 +298,12 @@ module Core
             :configuration => { :type => :object },
             :description => { :type => :text },
             :error => { :type => :keyword },
+            :features => {
+              :properties => {
+                :filtering_advanced_config => { :type => :boolean },
+                :filtering_rules => { :type => :boolean }
+              }
+            },
             :filtering => {
               :properties => {
                 :domain => { :type => :keyword },
