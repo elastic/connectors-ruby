@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'core/configuration'
+require 'core/connector_job'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'core/heartbeat'

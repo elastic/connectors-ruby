@@ -34,11 +34,6 @@ module Core
       new(es_response, connectors_meta)
     end
 
-    def initialize(es_response, connectors_meta)
-      @elasticsearch_response = es_response.with_indifferent_access
-      @connectors_meta = connectors_meta.with_indifferent_access
-    end
-
     def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
       query = { term: { is_native: true } }
       fetch_connectors_by_query(query, page_size)
@@ -83,7 +78,10 @@ module Core
     end
 
     def filtering
-      Utility::Common.return_if_present(@elasticsearch_response[:filtering], DEFAULT_FILTERING)
+      # assume for now, that first object in filtering array or a filter object itself is the only filtering object
+      filtering = @elasticsearch_response[:filtering]
+
+      Utility::Filtering.extract_filter(filtering)
     end
 
     def request_pipeline
@@ -114,6 +112,13 @@ module Core
 
     def valid_index_name?
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
+    end
+
+    private
+
+    def initialize(es_response, connectors_meta)
+      @elasticsearch_response = es_response.with_indifferent_access
+      @connectors_meta = connectors_meta.with_indifferent_access
     end
 
     def self.fetch_connectors_by_query(query, page_size)

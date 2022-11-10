@@ -49,10 +49,17 @@ module Core
       end
 
       def get_connector(connector_id)
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
         client.get(:index => Utility::Constants::CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
+      def get_job(job_id)
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
+        client.get(:index => Utility::Constants::JOB_INDEX, :id => job_id, :ignore => 404).with_indifferent_access
+      end
+
       def connectors_meta
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta') || {}
@@ -67,6 +74,19 @@ module Core
             :from => offset,
             :query => query,
             :sort => ['name']
+          }
+        )
+      end
+
+      def search_jobs(query, page_size, offset)
+        client.search(
+          :index => Utility::Constants::JOB_INDEX,
+          :ignore => 404,
+          :body => {
+              :size => page_size,
+              :from => offset,
+              :query => query,
+              :sort => ['created_at']
           }
         )
       end
@@ -88,6 +108,28 @@ module Core
       def set_configurable_field(connector_id, field_name, label, value)
         payload = { field_name => { :value => value, :label => label } }
         update_connector_configuration(connector_id, payload)
+      end
+
+      def update_filtering_validation(connector_id, filter_validation_results)
+        return if filter_validation_results.empty?
+
+        filtering = get_connector(connector_id)[:filtering]
+
+        case filtering
+        when Hash
+          update_filter_validation(filtering, filter_validation_results)
+        when Array
+          return unless should_update_validations?(filter_validation_results, filtering)
+
+          filtering.each do |filter|
+            update_filter_validation(filter, filter_validation_results)
+          end
+        else
+          Utility::Logger.warn("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+          return
+        end
+
+        update_connector_fields(connector_id, { :filtering => filtering })
       end
 
       def claim_job(connector_id)
@@ -128,6 +170,7 @@ module Core
 
         index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
         if index_response['result'] == 'created'
+          # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
           return client.get(
             :index => Utility::Constants::JOB_INDEX,
             :id => index_response['_id'],
@@ -171,6 +214,8 @@ module Core
 
       def complete_sync(connector_id, job_id, metadata, error)
         sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
+
+        metadata ||= {}
 
         update_connector_fields(connector_id,
                                 :last_sync_status => sync_status,
@@ -276,6 +321,12 @@ module Core
             :configuration => { :type => :object },
             :description => { :type => :text },
             :error => { :type => :keyword },
+            :features => {
+              :properties => {
+                :filtering_advanced_config => { :type => :boolean },
+                :filtering_rules => { :type => :boolean }
+              }
+            },
             :filtering => {
               :properties => {
                 :domain => { :type => :keyword },
@@ -389,54 +440,60 @@ module Core
             :cancelation_requested_at => { :type => :date },
             :canceled_at => { :type => :date },
             :completed_at => { :type => :date },
-            :configuration => { :type => :object },
-            :connector_id => { :type => :keyword },
+            :connector => {
+              :properties => {
+                :configuration => { :type => :object },
+                :filtering => {
+                  :properties => {
+                    :domain => { :type => :keyword },
+                    :rules => {
+                      :properties => {
+                        :id => { :type => :keyword },
+                        :policy => { :type => :keyword },
+                        :field => { :type => :keyword },
+                        :rule => { :type => :keyword },
+                        :value => { :type => :keyword },
+                        :order => { :type => :short },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :advanced_snippet => {
+                      :properties => {
+                        :value => { :type => :object },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :warnings => {
+                      :properties => {
+                        :ids => { :type => :keyword },
+                        :messages => { :type => :text }
+                      }
+                    }
+                  }
+                },
+                :id => { :type => :keyword },
+                :index_name => { :type => :keyword },
+                :language => { :type => :keyword },
+                :pipeline => {
+                  :properties => {
+                    :extract_binary_content => { :type => :boolean },
+                    :name => { :type => :keyword },
+                    :reduce_whitespace => { :type => :boolean },
+                    :run_ml_inference => { :type => :boolean }
+                  }
+                },
+                :service_type => { :type => :keyword }
+              }
+            },
             :created_at => { :type => :date },
             :deleted_document_count => { :type => :integer },
             :error => { :type => :text },
-            :filtering => {
-              :properties => {
-                :domain => { :type => :keyword },
-                :rules => {
-                  :properties => {
-                    :id => { :type => :keyword },
-                    :policy => { :type => :keyword },
-                    :field => { :type => :keyword },
-                    :rule => { :type => :keyword },
-                    :value => { :type => :keyword },
-                    :order => { :type => :short },
-                    :created_at => { :type => :date },
-                    :updated_at => { :type => :date }
-                  }
-                },
-                :advanced_snippet => {
-                  :properties => {
-                    :value => { :type => :object },
-                    :created_at => { :type => :date },
-                    :updated_at => { :type => :date }
-                  }
-                },
-                :warnings => {
-                  :properties => {
-                    :ids => { :type => :keyword },
-                    :messages => { :type => :text }
-                  }
-                }
-              }
-            },
-            :index_name => { :type => :keyword },
             :indexed_document_count => { :type => :integer },
             :indexed_document_volume => { :type => :integer },
             :last_seen => { :type => :date },
             :metadata => { :type => :object },
-            :pipeline => {
-              :properties => {
-                :extract_binary_content => { :type => :boolean },
-                :name => { :type => :keyword },
-                :reduce_whitespace => { :type => :boolean },
-                :run_ml_inference => { :type => :boolean }
-              }
-            },
             :started_at => { :type => :date },
             :status => { :type => :keyword },
             :total_document_count => { :type => :integer },
@@ -478,6 +535,14 @@ module Core
 
       private
 
+      def should_update_validations?(domain_validations, filtering)
+        domains_present = filtering.collect { |filter| filter[:domain] }
+        domains_to_update = domain_validations.keys
+
+        # non-empty intersection -> domains to update present
+        !(domains_present & domains_to_update).empty?
+      end
+
       def client
         @client ||= Utility::EsClient.new(App::Config[:elasticsearch])
       end
@@ -486,6 +551,15 @@ module Core
         index_versions = indicies.map { |index| index.gsub("#{alias_name}-v", '').to_i }
         index_version = index_versions.max # gets the largest suffix number
         "#{alias_name}-v#{index_version}"
+      end
+
+      def update_filter_validation(filter, domain_validations)
+        domain = filter[:domain]
+
+        if domain_validations.key?(domain)
+          new_validation_state = { :draft => { :validation => domain_validations[domain] } }
+          filter.deep_merge!(new_validation_state)
+        end
       end
     end
   end

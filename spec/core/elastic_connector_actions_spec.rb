@@ -3,8 +3,21 @@ require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
 
+def filter_validation_result(domain, state, errors)
+  {
+    :domain => domain,
+    :draft => {
+      :validation => {
+        :state => state,
+        :errors => errors
+      }
+    }
+  }
+end
+
 describe Core::ElasticConnectorActions do
   let(:connector_id) { 'one-two-three' }
+  let(:connector) { double }
   let(:job_id) { 'some-job-id' }
   let(:es_client) { double }
   let(:es_client_indices_api) { double }
@@ -174,7 +187,7 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  context '#update_connector_configuration' do
+  describe '.update_connector_configuration' do
     let(:doc) do
       {
         :schedule => { :enabled => false },
@@ -282,6 +295,309 @@ describe Core::ElasticConnectorActions do
       )
 
       described_class.set_configurable_field(connector_id, field_name, field_label, field_value)
+    end
+  end
+
+  describe '#update_filtering_validation' do
+    let(:current_filtering) {
+      []
+    }
+
+    let(:new_validation_states) {
+      {}
+    }
+
+    let(:expected_filtering_update) {
+      []
+    }
+
+    before(:each) do
+      allow(connector).to receive(:[]).with(:filtering).and_return(current_filtering)
+      allow(described_class).to receive(:get_connector).with(connector_id).and_return(connector)
+    end
+
+    shared_examples_for 'does not update any validation result' do
+      it 'does not update' do
+        expect(es_client).to_not receive(:update).with(anything)
+
+        described_class.update_filtering_validation(connector_id, new_validation_states)
+      end
+    end
+
+    shared_examples_for 'updates domain validation results' do
+      it 'updates result' do
+        expect(es_client).to receive(:update).with(
+          :index => connectors_index,
+          :id => connector_id,
+          :body => {
+            :doc => hash_including(
+              :filtering => expected_filtering_update
+            )
+          },
+          :refresh => true,
+          :retry_on_conflict => 3
+        )
+
+        described_class.update_filtering_validation(connector_id, new_validation_states)
+      end
+    end
+
+    context 'filtering contains an array with multiple domains, only one should be updated' do
+      let(:current_filtering) {
+        [
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+        ]
+      }
+
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::VALID,
+            :errors => []
+          }
+        }
+      }
+
+      let(:expected_filtering_update) {
+        [
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::VALID, []),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+        ]
+      }
+
+      it_behaves_like 'updates domain validation results'
+    end
+
+    context 'filtering contains an array with multiple domains, two should be updated' do
+      let(:current_filtering) {
+        [
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::EDITED, []),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+        ]
+      }
+
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['some error']
+              }
+            ]
+          },
+          'domain-two' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['another-error-id'],
+                :messages => ['another error']
+              },
+              {
+                :ids => ['and-another-error-id'],
+                :messages => ['and another error']
+              }
+            ]
+          }
+        }
+      }
+
+      let(:expected_filtering_update) {
+        [
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, [
+            {
+              :ids => ['error-id'],
+              :messages => ['some error']
+            }
+          ]),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::INVALID, [
+            {
+              :ids => ['another-error-id'],
+              :messages => ['another error']
+            },
+            {
+              :ids => ['and-another-error-id'],
+              :messages => ['and another error']
+            }
+          ]),
+          filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
+        ]
+      }
+
+      it_behaves_like 'updates domain validation results'
+    end
+
+    context 'filtering is an object' do
+      let(:current_filtering) {
+        filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, [])
+      }
+
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::VALID,
+            :errors => []
+          }
+        }
+      }
+
+      let(:expected_filtering_update) {
+        filter_validation_result('domain-one', Core::Filtering::ValidationStatus::VALID, [])
+      }
+
+      it_behaves_like 'updates domain validation results'
+    end
+
+    context 'filtering contains an array with only one object' do
+      let(:current_filtering) {
+        [
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::EDITED, [])
+        ]
+      }
+
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
+          }
+        }
+      }
+
+      let(:expected_filtering_update) {
+        [
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, [
+            {
+              :ids => ['error-id'],
+              :messages => ['error']
+            }
+          ])
+        ]
+      }
+
+      it_behaves_like 'updates domain validation results'
+    end
+
+    context 'filtering contains an array with multiple domains, but not the one to update' do
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
+          }
+        }
+      }
+
+      it_behaves_like 'does not update any validation result'
+    end
+
+    context 'filtering contains an empty array' do
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
+          }
+        }
+      }
+
+      it_behaves_like 'does not update any validation result'
+    end
+
+    context 'filtering contains an empty object' do
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
+          }
+        }
+      }
+
+      it_behaves_like 'does not update any validation result'
+    end
+
+    context 'new validations states are empty' do
+      let(:new_validation_states) {
+        {}
+      }
+
+      it_behaves_like 'does not update any validation result'
+    end
+
+    context 'ES filtering mapping is incorrect' do
+      let(:current_filtering) {
+        'wrong format'
+      }
+
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
+          }
+        }
+      }
+
+      it_behaves_like 'does not update any validation result'
+
+      it 'also logs a warning' do
+        expect(Utility::Logger).to receive(:warn).with(anything)
+
+        described_class.update_filtering_validation(connector_id, new_validation_states)
+      end
+    end
+
+    context 'connector not present' do
+      let(:connector) {
+        nil
+      }
+
+      let(:new_validation_states) {
+        {
+          'domain-one' => {
+            :state => Core::Filtering::ValidationStatus::INVALID,
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
+          }
+        }
+      }
+
+      it_behaves_like 'does not update any validation result'
     end
   end
 

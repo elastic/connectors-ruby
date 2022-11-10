@@ -6,13 +6,14 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/hash/indifferent_access'
+require 'active_support/core_ext/object/blank'
 require 'core/filtering/simple_rule'
 
 module Connectors
   module Base
     class SimpleRulesParser
       def initialize(rules)
-        @rules = (rules || []).sort_by { |r| r[:order] }
+        @rules = (rules || []).map(&:with_indifferent_access).filter { |r| r[:id] != 'DEFAULT' }.sort_by { |r| r[:order] }
       end
 
       def parse

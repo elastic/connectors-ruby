@@ -73,6 +73,8 @@ module App
             start_heartbeat_task(connector_settings)
           when :configuration
             start_configuration_task(connector_settings)
+          when :filter_validation
+            start_filter_validation_task(connector_settings)
           else
             Utility::Logger.error("Unknown task type: #{task}. Skipping...")
           end
@@ -118,6 +120,16 @@ module App
           Core::Configuration.update(connector_settings, service_type)
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Configuration task for #{connector_settings.formatted} failed due to unexpected error.")
+        end
+      end
+
+      def start_filter_validation_task(connector_settings)
+        pool.post do
+          Utility::Logger.info("Validating filters for #{connector_settings.formatted}...")
+          validation_job_runner = Core::Filtering::ValidationJobRunner.new(connector_settings)
+          validation_job_runner.execute
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, "Filter validation task for #{connector_settings.formatted} failed due to unexpected error.")
         end
       end
     end

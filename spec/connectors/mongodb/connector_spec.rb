@@ -203,6 +203,102 @@ describe Connectors::MongoDB::Connector do
     end
   end
 
+  describe '#validate_filtering' do
+    shared_examples_for 'filtering is valid' do
+      it 'returns validation result with state \'valid\' and no errors' do
+        validation_result = described_class.validate_filtering(filtering)
+
+        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
+        expect(validation_result[:errors]).to be_empty
+      end
+    end
+
+    shared_examples_for 'filtering is invalid' do
+      it 'returns validation result with state \'invalid\' and no errors' do
+        validation_result = described_class.validate_filtering(filtering)
+
+        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
+        expect(validation_result[:errors]).to_not be_empty
+      end
+    end
+
+    context 'filtering is not present' do
+      let(:filtering) {
+        {}
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'find is present' do
+      let(:advanced_snippet) {
+        {
+          :find => {}
+        }
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'aggregate is present' do
+      let(:advanced_snippet) {
+        {
+          :aggregate => {}
+        }
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'advanced config is empty' do
+      let(:advanced_snippet) {
+        {}
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'advanced config is nil' do
+      let(:advanced_snippet) {
+        nil
+      }
+
+      it_behaves_like 'filtering is valid'
+    end
+
+    context 'aggregate and find are present' do
+      let(:advanced_snippet) {
+        {
+            :aggregate => {},
+            :find => {}
+        }
+      }
+
+      it_behaves_like 'filtering is invalid'
+    end
+
+    context 'aggregate and one wrong key are present' do
+      let(:advanced_snippet) {
+        {
+          :aggregate => {},
+          :wrong_key => {}
+        }
+      }
+
+      it_behaves_like 'filtering is invalid'
+    end
+
+    context 'wrong key is present' do
+      let(:advanced_snippet) {
+        {
+          :wrong_key_one => {}
+        }
+      }
+
+      it_behaves_like 'filtering is invalid'
+    end
+  end
+
   describe '#yield_documents' do
     it_behaves_like 'handles auth' do
       let(:do_test) { subject.yield_documents { |doc|; } }
@@ -477,25 +573,6 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'find and aggregate exist' do
-      let(:advanced_snippet) {
-        {
-          :find => {
-            :filter => filter,
-            :options => options
-          },
-          :aggregate => {
-            :pipeline => pipeline,
-            :options => options
-          }
-        }
-      }
-
-      it 'raises an InvalidFilterConfigError' do
-        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
-      end
-    end
-
     context 'find field exists (with filter and empty options) in an active advanced filtering config' do
       let(:options) {
         {}
@@ -639,20 +716,6 @@ describe Connectors::MongoDB::Connector do
         expect(Utility::Logger).to receive(:warn).with('\'Aggregate\' was specified with an empty pipeline and empty options.')
 
         subject.yield_documents
-      end
-    end
-
-    context 'wrong top level keys exist' do
-      let(:advanced_snippet) {
-        {
-          :wrong_key_one => {},
-          :wrong_key_two => {},
-          :wrong_key_three => {}
-        }
-      }
-
-      it 'raises an InvalidFilterConfigError, when only wrong keys are present' do
-        expect { subject.yield_documents }.to raise_error(Utility::InvalidFilterConfigError)
       end
     end
   end
