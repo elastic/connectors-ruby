@@ -384,19 +384,47 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['some error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['some error']
+              }
+            ]
           },
           'domain-two' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['another error', 'and another one']
+            :errors => [
+              {
+                :ids => ['another-error-id'],
+                :messages => ['another error']
+              },
+              {
+                :ids => ['and-another-error-id'],
+                :messages => ['and another error']
+              }
+            ]
           }
         }
       }
 
       let(:expected_filtering_update) {
         [
-          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, ['some error']),
-          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::INVALID, ['another error', 'and another one']),
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, [
+            {
+              :ids => ['error-id'],
+              :messages => ['some error']
+            }
+          ]),
+          filter_validation_result('domain-two', Core::Filtering::ValidationStatus::INVALID, [
+            {
+              :ids => ['another-error-id'],
+              :messages => ['another error']
+            },
+            {
+              :ids => ['and-another-error-id'],
+              :messages => ['and another error']
+            }
+          ]),
           filter_validation_result('domain-three', Core::Filtering::ValidationStatus::EDITED, []),
         ]
       }
@@ -436,14 +464,24 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
           }
         }
       }
 
       let(:expected_filtering_update) {
         [
-          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, ['error'])
+          filter_validation_result('domain-one', Core::Filtering::ValidationStatus::INVALID, [
+            {
+              :ids => ['error-id'],
+              :messages => ['error']
+            }
+          ])
         ]
       }
 
@@ -455,7 +493,12 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
           }
         }
       }
@@ -468,7 +511,12 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
           }
         }
       }
@@ -481,7 +529,12 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
           }
         }
       }
@@ -506,7 +559,12 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
           }
         }
       }
@@ -529,7 +587,12 @@ describe Core::ElasticConnectorActions do
         {
           'domain-one' => {
             :state => Core::Filtering::ValidationStatus::INVALID,
-            :errors => ['error']
+            :errors => [
+              {
+                :ids => ['error-id'],
+                :messages => ['error']
+              }
+            ]
           }
         }
       }
