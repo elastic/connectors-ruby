@@ -62,12 +62,12 @@ module Core
       status == Connectors::SyncStatus::CANCELING
     end
 
-    def connector_id
-      self[:connector_id]
-    end
-
     def connector_snapshot
       self[:connector]
+    end
+
+    def connector_id
+      connector_snapshot[:id]
     end
 
     def index_name
