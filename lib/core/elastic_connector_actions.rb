@@ -165,7 +165,10 @@ module Core
           :created_at => Time.now,
           :started_at => Time.now,
           :last_seen => Time.now,
-          :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
+          :connector => {
+            :id => connector_id,
+            :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
+          }
         }
 
         index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)

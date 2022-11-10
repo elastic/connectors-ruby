@@ -660,9 +660,11 @@ describe Core::ElasticConnectorActions do
           :worker_hostname,
           :created_at,
           :started_at,
-          :connector_id => connector_id,
           :status => Connectors::SyncStatus::IN_PROGRESS,
-          :filtering => anything
+          :connector => {
+            :id => connector_id,
+            :filtering => anything
+          }
         ),
         :refresh => true
       )
@@ -751,7 +753,7 @@ describe Core::ElasticConnectorActions do
       it 'has filtering rules' do
         expect(es_client).to receive(:index).with(
           :index => jobs_index,
-          :body => hash_including(:filtering => [job_filtering]),
+          :body => hash_including(:connector => hash_including(:filtering => [job_filtering])),
           :refresh => true
         )
         described_class.claim_job(connector_id)
