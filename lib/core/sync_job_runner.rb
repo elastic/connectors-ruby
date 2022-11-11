@@ -75,6 +75,7 @@ module Core
 
         post_processing_engine = Core::Filtering::PostProcessEngine.new(job_description)
         reporting_cycle_start = Time.now
+        Utility::Logger.info('Yielding documents...')
         connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           post_process_result = post_processing_engine.process(document)
