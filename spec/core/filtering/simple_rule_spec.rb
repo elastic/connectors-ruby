@@ -5,6 +5,7 @@
 #
 
 # frozen_string_literal: true
+require 'active_support/time'
 require 'core/filtering/simple_rule'
 
 describe Core::Filtering::SimpleRule do
@@ -33,7 +34,7 @@ describe Core::Filtering::SimpleRule do
       'bool' => false
     }
   end
-  let(:date_now) { DateTime.now }
+  let(:date_now) { DateTime.now.new_offset(0) }
   let(:time_now) { Time.now }
 
   shared_examples_for 'a match' do
@@ -86,21 +87,106 @@ describe Core::Filtering::SimpleRule do
       it_behaves_like 'a match'
     end
   end
-  context 'start_with' do; end
-  context 'ends_with' do; end
+  context 'start_with' do
+    let(:rule) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
+    context 'date' do
+      let(:field) { 'datetime' }
+      let(:value) { date_now.year.to_s }
+      it_behaves_like 'a match'
+    end
+    context 'int' do
+      let(:field) { 'int' }
+      let(:value) { '1' }
+      it_behaves_like 'a match'
+    end
+    context 'str' do
+      let(:value) { 'f' }
+      it_behaves_like 'a match'
+    end
+    context 'bool' do
+      let(:field) { 'bool' }
+      let(:value) { 'f' }
+      it_behaves_like 'a match'
+    end
+  end
+  context 'ends_with' do
+    let(:rule) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
+    context 'date' do
+      let(:field) { 'datetime' }
+      let(:value) { '00:00' }
+      it_behaves_like 'a match'
+    end
+    context 'int' do
+      let(:field) { 'int' }
+      let(:value) { '3' }
+      it_behaves_like 'a match'
+    end
+    context 'str' do
+      let(:value) { 'o' }
+      it_behaves_like 'a match'
+    end
+    context 'bool' do
+      let(:field) { 'bool' }
+      let(:value) { 'alse' }
+      it_behaves_like 'a match'
+    end
+  end
   context '<' do
-    context 'date' do; end
-    context 'int' do; end
-    context 'str' do; end
-    context 'bool' do; end
+    let(:rule) { Core::Filtering::SimpleRule::Rule::LESS_THAN }
+    context 'date' do
+      let(:field) { 'datetime' }
+      let(:value) { (date_now + 1.day).to_s }
+      it_behaves_like 'a match'
+    end
+    context 'int' do
+      let(:field) { 'int' }
+      let(:value) { '1111' }
+      it_behaves_like 'a match'
+    end
+    context 'str' do
+      let(:value) { 'goo' }
+      it_behaves_like 'a match'
+    end
+    xcontext 'bool' do; end
   end
-
   context '>' do
-    context 'date' do; end
-    context 'int' do; end
-    context 'str' do; end
-    context 'bool' do; end
+    let(:rule) { Core::Filtering::SimpleRule::Rule::GREATER_THAN }
+    context 'date' do
+      let(:field) { 'datetime' }
+      let(:value) { (date_now - 1.day).to_s }
+      it_behaves_like 'a match'
+    end
+    context 'int' do
+      let(:field) { 'int' }
+      let(:value) { '44' }
+      it_behaves_like 'a match'
+    end
+    context 'str' do
+      let(:value) { 'ew' }
+      it_behaves_like 'a match'
+    end
+    xcontext 'bool' do; end
   end
-  context 'contains' do; end
-  context 'coercion' do; end
+  context 'contains' do
+    let(:rule) { Core::Filtering::SimpleRule::Rule::CONTAINS }
+    context 'date' do
+      let(:field) { 'datetime' }
+      let(:value) { date_now.month.to_s }
+      it_behaves_like 'a match'
+    end
+    context 'int' do
+      let(:field) { 'int' }
+      let(:value) { '2' }
+      it_behaves_like 'a match'
+    end
+    context 'str' do
+      let(:value) { 'o' }
+      it_behaves_like 'a match'
+    end
+    context 'bool' do
+      let(:field) { 'bool' }
+      let(:value) { 'als' }
+      it_behaves_like 'a match'
+    end
+  end
 end

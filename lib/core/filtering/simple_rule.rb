@@ -70,16 +70,22 @@ module Core
         return true if id == DEFAULT_RULE_ID
         doc_value = document[field]
         coerced_value = coerce(doc_value)
-        doc_value = doc_value.to_s
         case rule
         when Rule::EQUALS
-          doc_value.to_s == coerced_value.to_s
+          case coerced_value
+          when Integer
+            doc_value == coerced_value
+          when DateTime, Time
+            doc_value.to_s == coerced_value.to_s
+          else
+            doc_value.to_s == coerced_value
+          end
         when Rule::STARTS_WITH
-          doc_value.to_s.start_with?(coerced_value.to_s)
+          doc_value.to_s.start_with?(value)
         when Rule::ENDS_WITH
-          doc_value.end_with?(coerced_value)
+          doc_value.to_s.end_with?(value)
         when Rule::CONTAINS
-          doc_value.include?(coerced_value)
+          doc_value.to_s.include?(value)
         when Rule::REGEX
           doc_value.to_s.match(/#{value}/)
         when Rule::LESS_THAN
@@ -92,19 +98,18 @@ module Core
       end
 
       def coerce(doc_value)
-        coerced_val = case doc_value
-                      when String
-                        value.to_s
-                      when Integer
-                        value.to_i
-                      when DateTime, Time
-                        to_date(value)
-                      when TrueClass, FalseClass # Ruby doesn't have a Boolean type, TIL
-                        to_bool(value)
-                      else
-                        value
-                      end
-        coerced_val.to_s
+        case doc_value
+        when String
+          value.to_s
+        when Integer
+          value.to_i
+        when DateTime, Time
+          to_date(value)
+        when TrueClass, FalseClass # Ruby doesn't have a Boolean type, TIL
+          to_bool(value).to_s
+        else
+          value.to_s
+        end
       rescue StandardError => e
         # TODO: log error/warning?
         Utility::ExceptionTracking.log_exception(e)
