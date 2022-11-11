@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 
-require 'utility/exception_tracking'
+require 'utility/logger'
 
 module Core
   module Filtering
@@ -111,8 +111,7 @@ module Core
           value.to_s
         end
       rescue StandardError => e
-        # TODO: log error/warning?
-        Utility::ExceptionTracking.log_exception(e)
+        Utility::Logger.debug("Failed to coerce value '#{value}' (#{value.class}) based on document value '#{doc_value}' (#{doc_value.class}) due to error: #{e.class}: #{e.message}")
         value.to_s
       end
       def is_include?
@@ -128,7 +127,6 @@ module Core
 
       private
 
-      # TODO: move to utils?
       def to_bool(str)
         return true if str == true || str =~ (/^(true|t|yes|y|on|1)$/i)
         return false if str == false || str.blank? || str =~ (/^(false|f|no|n|off|0)$/i)

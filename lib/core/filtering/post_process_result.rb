@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'utility/logger'
+
 module Core
   module Filtering
     class PostProcessResult
@@ -14,6 +16,7 @@ module Core
       def initialize(document, matching_rule)
         @document = document
         @matching_rule = matching_rule
+        Utility::Logger.debug("Document '#{document['id']}' matched filtering rule: #{matching_rule.id}. It will be #{matching_rule.policy}ed")
       end
 
       def is_include?
