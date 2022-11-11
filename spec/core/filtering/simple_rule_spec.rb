@@ -189,4 +189,11 @@ describe Core::Filtering::SimpleRule do
       it_behaves_like 'a match'
     end
   end
+
+  context 'nil' do
+    let(:field) { 'floopdoop' }
+    it 'does not match' do
+      expect(subject.match?(document)).to be_falsey
+    end
+  end
 end

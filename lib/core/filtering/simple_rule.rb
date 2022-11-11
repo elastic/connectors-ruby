@@ -69,6 +69,7 @@ module Core
       def match?(document)
         return true if id == DEFAULT_RULE_ID
         doc_value = document[field]
+        return false if doc_value.nil?
         coerced_value = coerce(doc_value)
         case rule
         when Rule::EQUALS
