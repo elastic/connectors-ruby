@@ -28,6 +28,13 @@ module App
       def start!
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
+
+        # set exit hook
+        Kernel.at_exit { shutdown! }
+
+        # start sync jobs consumers
+        start_consumers!
+
         start_polling_jobs!
       end
 
@@ -37,6 +44,8 @@ module App
         scheduler.shutdown
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
+
+        stop_consumers!
       end
 
       private
@@ -119,6 +128,18 @@ module App
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Filter validation task for #{connector_settings.formatted} failed due to unexpected error.")
         end
+      end
+
+      def start_consumers!
+        @consumer = Core::Jobs::Consumer.new
+        @consumer.subscribe!(index_name: Utility::Constants::JOB_INDEX)
+      end
+
+      def stop_consumers!
+        return if @consumer.nil?
+        return unless @consumer.running?
+
+        @consumer.shutdown!
       end
     end
   end

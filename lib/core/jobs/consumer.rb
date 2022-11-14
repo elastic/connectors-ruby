@@ -10,14 +10,14 @@
 module Core
   module Jobs
     class Consumer
-      POLL_INTERVAL = (App::Config.poll_interval || 3).to_i
-      TERMINATION_TIMEOUT = (App::Config.termination_timeout || 60).to_i
-      MIN_THREADS = (App::Config.dig(:thread_pool, :min_threads) || 0).to_i
-      MAX_THREADS = (App::Config.dig(:thread_pool, :max_threads) || 5).to_i
-      MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
-      IDLE_TIME = (App::Config.dig(:thread_pool, :idle_time) || 5).to_i
+      def initialize(poll_interval: 3, termination_timeout: 60, min_threads: 1, max_threads: 5, max_queue: 100, idle_time: 5)
+        @poll_interval = poll_interval
+        @termination_timeout = termination_timeout
+        @min_threads = min_threads
+        @max_threads = max_threads
+        @max_queue = max_queue
+        @idle_time = idle_time
 
-      def initialize
         @running = Concurrent::AtomicBoolean.new(false)
 
         Kernel.at_exit { shutdown! }
@@ -35,20 +35,22 @@ module Core
       end
 
       def shutdown!
-        Utility::Logger.info("Shutting down the Consumer for #{@index_name} index")
+        Utility::Logger.info("Shutting down consumer for #{@index_name} index")
         @running.make_false
         pool.shutdown
-        pool.wait_for_termination(TERMINATION_TIMEOUT)
+        pool.wait_for_termination(@termination_timeout)
+        # reset pool
+        @pool = nil
       end
 
       private
 
       def start_loop!
-        Utility::Logger.info("Starting a Consumer for #{@index_name} index")
+        Utility::Logger.info("Starting a new consumer for #{@index_name} index")
 
         Thread.new do
           # assign a name to the thread
-          # see @TODO in #running?
+          # see @TODO in #self.running?
           Thread.current[:name] = "consumer-group-#{@index_name}"
 
           loop do
@@ -57,23 +59,23 @@ module Core
               break
             end
 
-            sleep(POLL_INTERVAL)
+            sleep(@poll_interval)
             Utility::Logger.info('Getting registered connectors')
 
-            # load active connectors settings
             connectors = ready_for_sync_connectors
-
             next unless connectors.any?
 
             Utility::Logger.info("Number of available connectors: #{connectors.size}")
-            pending_jobs = Core::ConnectorJob.pending_jobs(connectors_ids: connectors.keys)
 
-            # @TODO check if Connector is in_progress state
+            # @TODO It is assumed that @index_name is used to retrive pending jobs.
+            # This will be discussed after 8.6 release
+            pending_jobs = Core::ConnectorJob.pending_jobs(connectors_ids: connectors.keys)
             Utility::Logger.info("Number of available jobs: #{pending_jobs.size}")
 
             pending_jobs.each do |job|
               connector_settings = connectors[job.connector_id]
 
+              Utility::Logger.info("Start a sync job for #{connector_settings.formatted}...")
               pool.post do
                 Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
                 Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
@@ -97,11 +99,11 @@ module Core
 
       def pool
         @pool ||= Concurrent::ThreadPoolExecutor.new(
-          min_threads: MIN_THREADS,
-          max_threads: MAX_THREADS,
-          max_queue: MAX_QUEUE,
+          min_threads: @min_threads,
+          max_threads: @max_threads,
+          max_queue: @max_queue,
           fallback_policy: :abort,
-          idletime: IDLE_TIME
+          idletime: @idle_time
         )
       end
 
