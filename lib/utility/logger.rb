@@ -4,6 +4,7 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+require 'config'
 require 'logger'
 require 'active_support/core_ext/module'
 require 'active_support/core_ext/string/filters'
@@ -23,7 +24,7 @@ module Utility
       end
 
       def logger
-        @logger ||= Settings[:ecs_logging] ? EcsLogging::Logger.new(STDOUT) : ::Logger.new(STDOUT)
+        @logger ||= defined?(::Settings) && ::Settings[:ecs_logging] ? EcsLogging::Logger.new(STDOUT) : ::Logger.new(STDOUT)
       end
 
       SUPPORTED_LOG_LEVELS.each do |level|

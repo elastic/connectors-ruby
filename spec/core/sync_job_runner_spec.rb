@@ -1,6 +1,7 @@
 require 'connectors/connector_status'
 require 'core/connector_settings'
 require 'core/elastic_connector_actions'
+require 'core/filtering'
 require 'core/sync_job_runner'
 require 'core/filtering/validation_status'
 require 'utility'
@@ -30,9 +31,20 @@ describe Core::SyncJobRunner do
   end
 
   let(:connector_settings) { double }
-  let(:filtering) {
-    {}
-  }
+
+  let(:filtering) do
+    [
+      {
+        Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
+        Core::Filtering::RULES => [
+          Core::Filtering::SimpleRule::DEFAULT_RULE.to_h
+        ],
+        Core::Filtering::ADVANCED_SNIPPET => {
+          'value' => {}
+        }
+      }
+    ]
+  end
 
   let(:connector_class) { double }
   let(:connector_instance) { double }
@@ -308,6 +320,39 @@ describe Core::SyncJobRunner do
         expect(ingester).to receive(:ingest).with(doc2)
 
         subject.execute
+      end
+
+      context 'with filtering rules' do
+        let(:additional_rules) do
+          [
+            Core::Filtering::SimpleRule.from_args('1', 'exclude', 'title', 'equals', 'Hello').to_h
+          ]
+        end
+        before(:each) do
+          filtering[0]['rules'].unshift(*additional_rules)
+        end
+
+        it 'does not ingest the excluded document' do
+          expect(ingester).to_not receive(:ingest).with(doc1)
+          expect(ingester).to receive(:ingest).with(doc2)
+
+          subject.execute
+        end
+
+        context 'with non-matching rule' do
+          let(:additional_rules) do
+            [
+              Core::Filtering::SimpleRule.from_args('1', 'exclude', 'foo', 'equals', 'Hello').to_h
+            ]
+          end
+
+          it 'indexes all docs' do
+            expect(ingester).to receive(:ingest).with(doc1)
+            expect(ingester).to receive(:ingest).with(doc2)
+
+            subject.execute
+          end
+        end
       end
 
       context 'when some documents were present before' do
