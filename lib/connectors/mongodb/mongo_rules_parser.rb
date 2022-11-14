@@ -16,10 +16,10 @@ module Connectors
         field = rule[:field]
         value = rule[:value]
         unless value.present?
-          raise FilteringRulesValidationError.new("Value is required for field: #{field}")
+          raise Connectors::Base::FilteringRulesValidationError.new("Value is required for field: #{field}")
         end
         unless field.present?
-          raise FilteringRulesValidationError.new("Field is required for rule: #{rule}")
+          raise Connectors::Base::FilteringRulesValidationError.new("Field is required for rule: #{rule}")
         end
         op = rule[:rule]&.to_s
         case op
@@ -36,7 +36,7 @@ module Connectors
         when 'ends_with'
           parse_ends_with(rule, field, value)
         else
-          raise FilteringRulesValidationError.new("Unknown operator: #{op}")
+          raise Connectors::Base::FilteringRulesValidationError.new("Unknown operator: #{op}")
         end
       end
 
@@ -80,17 +80,17 @@ module Connectors
 
       def parse_starts_with(rule, field, value)
         if is_include?(rule)
-          { field => /^#{value}.*/i }
+          { field => /^#{value}/ }
         else
-          { field => { '$not' => /^#{value}.*/i } }
+          { field => { '$not' => /^#{value}/ } }
         end
       end
 
       def parse_ends_with(rule, field, value)
         if is_include?(rule)
-          { field => /.*#{value}$/i }
+          { field => /#{value}$/ }
         else
-          { field => { '$not' => /.*#{value}$/i } }
+          { field => { '$not' => /#{value}$/ } }
         end
       end
     end

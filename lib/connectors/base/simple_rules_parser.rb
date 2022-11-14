@@ -21,27 +21,26 @@ module Connectors
       def parse
         merge_rules(@rules.map do |rule|
           unless is_include?(rule) || is_exclude?(rule)
-            raise "Unknown policy: #{rule[:policy]}"
+            raise FilteringRulesValidationError.new("Unknown policy: #{rule[:policy]}")
           end
           parse_rule(rule)
         end)
       end
 
-      # in a base case, does not do anything
       def validate(rules)
         return rules if rules.empty?
         rules.each do |rule|
           validate_rule(rule)
         end
         field_acc = {}
-        rules.reduce(field_acc) do |acc, rule|
-          if acc[rule[:field]].present?
-            acc[rule[:field]] << rule
+        rules.each do |rule|
+          if field_acc[rule[:field]].present?
+            field_acc[rule[:field]] << rule
           else
-            acc[rule[:field]] = [rule]
+            field_acc[rule[:field]] = [rule]
           end
         end
-        field_acc.each do |field, field_rules|
+        field_acc.each_entry do |field, field_rules|
           validate_field_rules(field, field_rules)
         end
         rules
@@ -79,7 +78,7 @@ module Connectors
 
         # check for mutually exclusive end_with
         include_ends = field_rules.filter { |r| r[:rule] == 'ends_with' && is_include?(r) }.map { |r| r[:value] }
-        exclude_ends = field_rules.count { |r| r[:rule] == 'ends_with' && is_exclude?(r) }.map { |r| r[:value] }
+        exclude_ends = field_rules.filter { |r| r[:rule] == 'ends_with' && is_exclude?(r) }.map { |r| r[:value] }
         if include_ends.any? { |s| exclude_ends.any? { |e| s.end_with?(e) } }
           raise FilteringRulesValidationError.new("Contradicting [ends_with] rules for field: #{field}. Can't have mutually exclusive [ends_with] rules.")
         end
@@ -88,8 +87,8 @@ module Connectors
       def validate_rule(rule)
         op = rule[:rule]&.to_s
         case op
-        when 'Equals', '>', '<'
-          true
+        when 'Equals', '>', '<', 'starts_with', 'ends_with'
+          return
         when 'regex'
           # check validity of regex
           begin

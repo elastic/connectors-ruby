@@ -40,6 +40,20 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$lt' => 'bar' } })
           end
         end
+        context 'starts with' do
+          let(:operator) { 'starts_with' }
+          it 'parses rule as starts with' do
+            result = subject.parse
+            expect(result).to match({ 'foo' => /^bar/ })
+          end
+        end
+        context 'ends with' do
+          let(:operator) { 'ends_with' }
+          it 'parses rule as ends with' do
+            result = subject.parse
+            expect(result).to match({ 'foo' => /bar$/ })
+          end
+        end
       end
       context 'on exclude rule' do
         let(:policy) { 'exclude' }
@@ -62,6 +76,20 @@ describe Connectors::MongoDB::MongoRulesParser do
           it 'parses rule as less or equals' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$gte' => 'bar' } })
+          end
+        end
+        context 'starts with' do
+          let(:operator) { 'starts_with' }
+          it 'parses rule as not starts with' do
+            result = subject.parse
+            expect(result).to match({ 'foo' => { '$not' => /^bar/ } })
+          end
+        end
+        context 'ends with' do
+          let(:operator) { 'ends_with' }
+          it 'parses rule as not ends with' do
+            result = subject.parse
+            expect(result).to match({ 'foo' => { '$not' => /bar$/ } })
           end
         end
       end
@@ -115,56 +143,56 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with invalid operator' do
       let(:rules) { [{ field: 'foo', value: 'bar', policy: 'include', rule: 'invalid' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Unknown operator/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown operator/)
       end
     end
 
     context 'with invalid policy' do
       let(:rules) { [{ field: 'foo', value: 'bar', policy: 'invalid', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Unknown policy/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown policy/)
       end
     end
 
     context 'with empty string value' do
       let(:rules) { [{ field: 'foo', value: '', policy: 'include', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Value is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Value is required/)
       end
     end
 
     context 'with empty string field' do
       let(:rules) { [{ field: '', value: '123', policy: 'include', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Field is required/)
       end
     end
 
     context 'with nil value' do
       let(:rules) { [{ field: 'foo', value: nil, policy: 'include', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Value is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Value is required/)
       end
     end
 
     context 'with nil field' do
       let(:rules) { [{ field: nil, value: '123', policy: 'include', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Field is required/)
       end
     end
 
     context 'with non-existent value' do
       let(:rules) { [{ field: 'foo', policy: 'include', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Value is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Value is required/)
       end
     end
 
     context 'with non-existent field' do
       let(:rules) { [{ value: '123', policy: 'include', rule: 'Equals' }] }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Field is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Field is required/)
       end
     end
   end
