@@ -312,7 +312,7 @@ describe Core::ElasticConnectorActions do
     }
 
     before(:each) do
-      allow(connector).to receive(:[]).with(:filtering).and_return(current_filtering)
+      allow(connector).to receive(:dig).with(:_source, :filtering).and_return(current_filtering)
       allow(described_class).to receive(:get_connector).with(connector_id).and_return(connector)
     end
 

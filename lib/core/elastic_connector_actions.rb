@@ -113,7 +113,7 @@ module Core
       def update_filtering_validation(connector_id, filter_validation_results)
         return if filter_validation_results.empty?
 
-        filtering = get_connector(connector_id)[:filtering]
+        filtering = get_connector(connector_id).dig(:_source, :filtering)
 
         case filtering
         when Hash
@@ -125,7 +125,7 @@ module Core
             update_filter_validation(filter, filter_validation_results)
           end
         else
-          Utility::Logger.warn("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+          Utility::Logger.warn("Elasticsearch returned invalid filtering format: #{filtering}. Skipping validation.")
           return
         end
 
