@@ -39,7 +39,7 @@ describe Core::Ingestion::EsSink do
 
     context '#ingest' do
       context 'when ingested document is nil' do
-        let(:document) { {} }
+        let(:document) { nil }
 
         it 'does not add document to the queue' do
           expect(bulk_queue).to_not receive(:add)
