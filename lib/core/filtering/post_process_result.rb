@@ -16,7 +16,7 @@ module Core
       def initialize(document, matching_rule)
         @document = document
         @matching_rule = matching_rule
-        Utility::Logger.debug("Document '#{document['id']}' matched filtering rule: #{matching_rule.id}. It will be #{matching_rule.policy}ed")
+        Utility::Logger.debug("Document '#{document['id']}' matched filtering rule: #{matching_rule.id}. It will be #{matching_rule.policy}d")
       end
 
       def is_include?
