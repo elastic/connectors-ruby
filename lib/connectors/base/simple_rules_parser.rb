@@ -88,7 +88,7 @@ module Connectors
         op = rule[:rule]&.to_s
         case op
         when 'Equals', '>', '<', 'starts_with', 'ends_with'
-          return
+          nil
         when 'regex'
           # check validity of regex
           begin
