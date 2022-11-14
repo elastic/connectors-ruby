@@ -11,14 +11,16 @@ require 'core/filtering'
 describe Core::Filtering::PostProcessEngine do
   let(:job_description) do
     {
-      'filtering' => [
-        {
-          'domain' => Core::Filtering::DEFAULT_DOMAIN,
-          'rules' => rules,
-          'advanced_snippet' => snippet,
-          'warnings' => []
-        }
-      ]
+      'connector' => {
+        'filtering' => [
+          {
+            'domain' => Core::Filtering::DEFAULT_DOMAIN,
+            'rules' => rules,
+            'advanced_snippet' => snippet,
+            'warnings' => []
+          }
+        ]
+      }
     }
   end
   let(:rules) { [] }

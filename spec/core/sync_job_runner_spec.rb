@@ -67,7 +67,9 @@ describe Core::SyncJobRunner do
     {
       '_id' => job_id,
       '_source' => {
-        'filtering' => filtering
+        'connector' => {
+          'filtering' => filtering
+        }
       }
     }
   end

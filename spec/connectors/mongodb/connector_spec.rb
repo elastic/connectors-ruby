@@ -109,7 +109,9 @@ describe Connectors::MongoDB::Connector do
 
   let(:job_description) {
     {
-      :filtering => filtering
+      :connector => {
+        :filtering => filtering
+      }
     }
   }
 

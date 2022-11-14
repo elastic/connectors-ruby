@@ -52,7 +52,9 @@ describe Connectors::Base::Connector do
 
   let(:job_description) {
     {
-      :filtering => filtering
+      :connector => {
+        :filtering => filtering
+      }
     }
   }
 
