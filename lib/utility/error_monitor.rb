@@ -11,6 +11,15 @@ require 'utility/exception_tracking'
 
 module Utility
   class ErrorMonitor
+    class MonitoringError < StandardError
+      attr_accessor :tripped_by
+
+      def initialize(message = nil, tripped_by: nil)
+        super("#{message}#{tripped_by.present? ? " Tripped by - #{tripped_by.class}: #{tripped_by.message}" : ''}")
+        @tripped_by = tripped_by
+      end
+    end
+
     class MaxSuccessiveErrorsExceededError < MonitoringError; end
     class MaxErrorsExceededError < MonitoringError; end
     class MaxErrorsInWindowExceededError < MonitoringError; end
@@ -18,14 +27,12 @@ module Utility
     attr_reader :total_error_count, :success_count, :consecutive_error_count, :error_queue
 
     def initialize(
-      connector:,
       max_errors: 1000,
       max_consecutive_errors: 10,
       max_error_ratio: 0.15,
       window_size: 100,
       error_queue_size: 20
     )
-      @connector = connector
       @max_errors = max_errors
       @max_consecutive_errors = max_consecutive_errors
       @max_error_ratio = max_error_ratio
@@ -49,7 +56,7 @@ module Utility
     def note_error(error, id: Time.now.to_i)
       stack_trace = Utility::ExceptionTracking.generate_stack_trace(error)
       error_message = Utility::ExceptionTracking.generate_error_message(error, nil, nil)
-      @connector.log_debug("Message id: #{id} - #{error_message}\n#{stack_trace}")
+      Utility::Logger.debug("Message id: #{id} - #{error_message}\n#{stack_trace}")
       @total_error_count += 1
       @consecutive_error_count += 1
       @window_errors[@window_index] = true
