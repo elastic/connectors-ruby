@@ -66,8 +66,6 @@ module Core
     private
 
     def sync_triggered?(connector_settings)
-      return false unless connector_registered?(connector_settings.service_type)
-
       unless connector_settings.valid_index_name?
         Utility::Logger.warn("The index name of #{connector_settings.formatted} is invalid.")
         return false
@@ -133,8 +131,6 @@ module Core
     end
 
     def heartbeat_triggered?(connector_settings)
-      return false unless connector_registered?(connector_settings.service_type)
-
       last_seen = connector_settings[:last_seen]
       return true if last_seen.nil? || last_seen.empty?
       last_seen = begin
@@ -148,16 +144,10 @@ module Core
     end
 
     def configuration_triggered?(connector_settings)
-      if connector_settings.needs_service_type? || connector_registered?(connector_settings.service_type)
-        return connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
-      end
-
-      false
+      connector_settings.needs_service_type? || connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
     end
 
     def filtering_validation_triggered?(connector_settings)
-      return false unless connector_registered?(connector_settings.service_type)
-
       filtering = connector_settings.filtering
 
       unless filtering.present?
