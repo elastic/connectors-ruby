@@ -24,14 +24,11 @@ module Core
 
     DEFAULT_PAGE_SIZE = 100
 
-    # Error Classes
-    class ConnectorNotFoundError < StandardError; end
-
     def self.fetch_by_id(connector_id)
       es_response = ElasticConnectorActions.get_connector(connector_id)
-      connectors_meta = ElasticConnectorActions.connectors_meta
+      return nil unless es_response[:found]
 
-      raise ConnectorNotFoundError.new("Connector with id=#{connector_id} was not found.") unless es_response[:found]
+      connectors_meta = ElasticConnectorActions.connectors_meta
       new(es_response, connectors_meta)
     end
 
