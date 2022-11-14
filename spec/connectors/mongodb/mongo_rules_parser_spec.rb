@@ -31,7 +31,6 @@ describe Connectors::MongoDB::MongoRulesParser do
   let(:operator) { Core::Filtering::SimpleRule::Rule::EQUALS }
 
   describe '#parse' do
-
     context 'with one rule' do
       context 'on include rule' do
         context Core::Filtering::SimpleRule::Rule::EQUALS do
