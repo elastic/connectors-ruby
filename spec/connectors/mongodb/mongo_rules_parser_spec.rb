@@ -196,4 +196,76 @@ describe Connectors::MongoDB::MongoRulesParser do
       end
     end
   end
+
+  describe '#validate' do
+    subject { described_class.new(rules) }
+
+    shared_examples_for 'keeps a valid rule' do
+      it 'does not raise error' do
+        expect { subject }.not_to raise_error
+      end
+      it 'keeps the rule' do
+        expect(subject.rules).to match(rules)
+      end
+    end
+
+    shared_examples_for 'filters invalid rules' do
+      it 'does not raise error' do
+        expect { subject }.not_to raise_error
+      end
+      it 'drops the rule' do
+        expect(subject.rules).to eq([])
+      end
+    end
+
+    shared_examples_for 'raises_validation_error' do |message|
+      it 'raises specific validation error' do
+        expect { subject }.to raise_error(Connectors::Base::FilteringRulesValidationError, message)
+      end
+    end
+
+    context 'with no id on the rule' do
+      let(:rules) { [{ field: 'foo', value: 'bar', policy: 'include', rule: 'Equals' }] }
+      it_behaves_like 'raises_validation_error', /Rule id is required/
+    end
+
+    context 'with invalid operator' do
+      let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'invalid' }] }
+      it 'raises an error' do
+        expect { subject.validate(rules) }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown operator/)
+      end
+    end
+
+    context 'regex' do
+      context 'with valid regex' do
+        let(:rules) { [{ id: '1', field: 'foo', value: '^123$', policy: 'include', rule: 'regex' }] }
+        it 'contains valid rule' do
+          expect(subject.validate(rules)).to contain_exactly(rules[0])
+        end
+      end
+
+      context 'with invalid regex' do
+        let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'regex' }] }
+        it 'raises an error' do
+          expect { subject.validate(rules) }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Invalid regex/)
+        end
+      end
+    end
+
+    context 'equality' do
+      context 'with valid equals rule' do
+        let(:rules) { [{ id: '1', field: 'foo', value: '123', policy: 'include', rule: 'Equals' }] }
+        it_behaves_like 'keeps a valid rule'
+      end
+      context 'with two equals rules' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: 'Equals' },
+            { id: '2', field: 'foo', value: '456', policy: 'include', rule: 'Equals' }
+          ]
+        end
+        it_behaves_like 'filters invalid rules'
+      end
+    end
+  end
 end
