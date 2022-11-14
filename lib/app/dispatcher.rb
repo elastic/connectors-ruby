@@ -68,7 +68,11 @@ module App
         scheduler.when_triggered do |connector_settings, task|
           case task
           when :sync
-            start_sync_task(connector_settings)
+            # update connector metadata
+            # @TODO rename #claim_job because it doesn't claim a job
+            Core::ElasticConnectorActions.claim_job(connector_settings.id)
+
+            Core::Jobs::Producer.enqueue_job(job_type: :sync, connector_settings: connector_settings)
           when :heartbeat
             start_heartbeat_task(connector_settings)
           when :configuration
@@ -81,22 +85,6 @@ module App
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'The connector service failed due to unexpected error.')
-      end
-
-      def start_sync_task(connector_settings)
-        start_heartbeat_task(connector_settings)
-        pool.post do
-          Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
-          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-          job_runner = Core::SyncJobRunner.new(connector_settings)
-          job_runner.execute
-        rescue Core::JobAlreadyRunningError
-          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
-        rescue Core::ConnectorVersionChangedError => e
-          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
-        end
       end
 
       def start_heartbeat_task(connector_settings)
