@@ -68,9 +68,6 @@ module Utility
       @tripped_by = tripped_by
     end
   end
-  class MaxSuccessiveErrorsExceededError < MonitoringError; end
-  class MaxErrorsExceededError < MonitoringError; end
-  class MaxErrorsInWindowExceededError < MonitoringError; end
 
   class JobSyncNotPossibleYetError < StandardError
     attr_accessor :sync_will_be_possible_at
