@@ -23,7 +23,7 @@ module Core
   class SyncJobRunner
     JOB_REPORTING_INTERVAL = 10
 
-    def initialize(connector_settings)
+    def initialize(connector_settings, job)
       @connector_settings = connector_settings
       @sink = Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
@@ -35,6 +35,7 @@ module Core
         :indexed_document_volume => 0,
         :error => nil
       }
+      @job = job
     end
 
     def execute
@@ -47,9 +48,14 @@ module Core
     def do_sync!
       Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
-      job_record = ElasticConnectorActions.claim_job(@connector_settings.id)
-      job_description = job_record['_source']
-      job_id = job_record['_id']
+      # connector service doesn't support multiple jobs running simultaneously
+      raise Core::JobAlreadyRunningError.new(@connector_settings.id) if @connector_settings.running?
+
+      # claim the job
+      @job.process!
+
+      job_description = @job.es_source
+      job_id = @job.id
       job_description['_id'] = job_id
 
       unless job_id.present?

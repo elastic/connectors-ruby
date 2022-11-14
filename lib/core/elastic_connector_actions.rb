@@ -136,7 +136,7 @@ module Core
         seq_no = nil
         primary_term = nil
         sync_in_progress = false
-        connector_record = client.get(
+        _connector_record = client.get(
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :ignore => 404,
@@ -157,28 +157,25 @@ module Core
           seq_no,
           primary_term
         )
+      end
 
+      def create_job(connector_settings:)
         body = {
-          :status => Connectors::SyncStatus::IN_PROGRESS,
-          :worker_hostname => Socket.gethostname,
-          :created_at => Time.now,
-          :started_at => Time.now,
-          :last_seen => Time.now,
-          :connector => {
-            :id => connector_id,
-            :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
+          status: Connectors::SyncStatus::PENDING,
+          worker_hostname: Socket.gethostname,
+          created_at: Time.now,
+          started_at: Time.now,
+          last_seen: Time.now,
+          connector: {
+            id: connector_id,
+            filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering)
           }
         }
 
-        index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
-        if index_response['result'] == 'created'
-          # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
-          return client.get(
-            :index => Utility::Constants::JOB_INDEX,
-            :id => index_response['_id'],
-            :ignore => 404
-          ).with_indifferent_access
-        end
+        index_response = client.index(index: Utility::Constants::JOB_INDEX, body: body, refresh: true)
+
+        return index_response if index_response['result'] == 'created'
+
         raise JobNotCreatedError.new(connector_id, index_response)
       end
 
@@ -512,6 +509,31 @@ module Core
 
       def update_job_fields(job_id, doc = {}, seq_no = nil, primary_term = nil)
         update_doc_fields(Utility::Constants::JOB_INDEX, job_id, doc, seq_no, primary_term)
+      end
+
+      def update_job_fields(job_id, doc = {}, seq_no = nil, primary_term = nil)
+        return if doc.empty?
+        update_args = {
+          :index => Utility::Constants::JOB_INDEX,
+          :id => job_id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        }
+
+        if seq_no && primary_term
+          update_args[:if_seq_no] = seq_no
+          update_args[:if_primary_term] = primary_term
+          update_args.delete(:retry_on_conflict)
+        end
+
+        begin
+          client.update(update_args)
+        rescue Elastic::Transport::Transport::Errors::Conflict
+          # VersionConflictException
+          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
+          raise ConnectorVersionChangedError.new(job_id, seq_no, primary_term)
+        end
       end
 
       def document_count(index_name)
