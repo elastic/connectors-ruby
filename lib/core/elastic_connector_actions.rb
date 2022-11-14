@@ -167,7 +167,7 @@ module Core
           started_at: Time.now,
           last_seen: Time.now,
           connector: {
-            id: connector_id,
+            id: connector_settings.id,
             filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering)
           }
         }
@@ -176,7 +176,7 @@ module Core
 
         return index_response if index_response['result'] == 'created'
 
-        raise JobNotCreatedError.new(connector_id, index_response)
+        raise JobNotCreatedError.new(connector_settings.id, index_response)
       end
 
       def convert_connector_filtering_to_job_filtering(connector_filtering)

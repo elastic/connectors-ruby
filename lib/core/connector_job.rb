@@ -29,7 +29,7 @@ module Core
 
       return fetch_jobs_by_query(query, page_size) if connectors_ids.empty?
 
-      query[:bool][:must] << { terms: { connector_id: connectors_ids } }
+      query[:bool][:must] << { terms: { 'connector.id' => connectors_ids } }
 
       fetch_jobs_by_query(query, page_size)
     end
@@ -95,7 +95,7 @@ module Core
     end
 
     def connector_id
-      @elasticsearch_response[:_source][:connector_id]
+      @elasticsearch_response[:_source][:connector][:id]
     end
 
     def index_name
