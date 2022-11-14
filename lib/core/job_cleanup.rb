@@ -31,25 +31,29 @@ module Core
         # mark stuck jobs as error
         Utility::Logger.info("Start cleaning up stuck jobs for #{connector_id ? "connector #{connector_id}" : 'native connectors'}...")
         stuck_jobs = ConnectorJob.stuck_jobs(connector_id)
-        if stuck_jobs.empty?
-          Utility::Logger.info('No stuck jobs found. Skipping...')
-        else
-          stuck_jobs.each do |job|
-            job.error!('The job has not seen any update for some time.')
-            Utility::Logger.info("Successfully marked job #{job.id} as error.")
-          end
+        Utility::Logger.info('No stuck jobs found. Skipping...') if stuck_jobs.empty?
+
+        stuck_jobs.each do |job|
+          job.error!('The job has not seen any update for some time.')
+          Utility::Logger.info("Successfully marked job #{job.id} as error.")
+
+          job_id = job.id
+          job = Core::ConnectorJob.fetch_by_id(job_id)
+          Utility::Logger.warn("Could not found job by id #{job_id}") if job.nil?
+          Utility::Logger.warn("Could not found connector by id #{job.connector_id}") if job && job.connector.nil?
+
+          job&.connector&.update_connector_by_job(job)
         end
       end
 
       private
 
       def orphaned_jobs_for_single_connector(connector_id)
-        connector = begin
-          ConnectorSettings.fetch_by_id(connector_id)
-        rescue ConnectorSettings::ConnectorNotFoundError
-          nil
+        if ConnectorSettings.fetch_by_id(connector_id)
+          []
+        else
+          ConnectorJob.fetch_by_connector_id(connector_id)
         end
-        connector ? [] : ConnectorJob.fetch_by_connector_id(connector_id)
       end
 
       def orphaned_jobs_for_native_connectors
