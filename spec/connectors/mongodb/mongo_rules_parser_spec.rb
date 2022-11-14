@@ -17,11 +17,11 @@ describe Connectors::MongoDB::MongoRulesParser do
   let(:rules) do
     [
       {
-        Core::Filtering::SimpleRule::ID => 'test',
-        Core::Filtering::SimpleRule::FIELD => field,
-        Core::Filtering::SimpleRule::VALUE => value,
-        Core::Filtering::SimpleRule::POLICY => policy,
-        Core::Filtering::SimpleRule::RULE => operator
+        'id' => 'test',
+        'field' => field,
+        'value' => value,
+        'policy' => policy,
+        'rule' => operator
       }
     ]
   end
@@ -83,18 +83,18 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           {
-            Core::Filtering::SimpleRule::ID => 'test1',
-            Core::Filtering::SimpleRule::FIELD => 'foo',
-            Core::Filtering::SimpleRule::VALUE => 'bar1',
-            Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
-            Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::EQUALS
+            'id' => 'test1',
+            'field' => 'foo',
+            'value' => 'bar1',
+            'policy' => Core::Filtering::SimpleRule::Policy::INCLUDE,
+            'rule' => Core::Filtering::SimpleRule::Rule::EQUALS
           },
           {
-            Core::Filtering::SimpleRule::ID => 'test2',
-            Core::Filtering::SimpleRule::FIELD => 'foo',
-            Core::Filtering::SimpleRule::VALUE => 'bar2',
-            Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::EXCLUDE,
-            Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::GREATER_THAN
+            'id' => 'test2',
+            'field' => 'foo',
+            'value' => 'bar2',
+            'policy' => Core::Filtering::SimpleRule::Policy::EXCLUDE,
+            'rule' => Core::Filtering::SimpleRule::Rule::GREATER_THAN
           }
         ]
       end
@@ -184,10 +184,10 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           {
-            Core::Filtering::SimpleRule::ID => 'test',
-            Core::Filtering::SimpleRule::FIELD => field,
-            Core::Filtering::SimpleRule::POLICY => policy,
-            Core::Filtering::SimpleRule::RULE => operator
+            'id' => 'test',
+            'field' => field,
+            'policy' => policy,
+            'rule' => operator
           }
         ]
       end
@@ -200,10 +200,10 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           {
-            Core::Filtering::SimpleRule::ID => 'test',
-            Core::Filtering::SimpleRule::VALUE => value,
-            Core::Filtering::SimpleRule::POLICY => policy,
-            Core::Filtering::SimpleRule::RULE => operator
+            'id' => 'test',
+            'value' => value,
+            'policy' => policy,
+            'rule' => operator
           }
         ]
       end

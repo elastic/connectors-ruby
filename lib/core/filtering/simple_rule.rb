@@ -11,12 +11,6 @@ require 'utility/logger'
 module Core
   module Filtering
     class SimpleRule
-      POLICY = 'policy'
-      FIELD = 'field'
-      RULE = 'rule'
-      VALUE = 'value'
-      ID = 'id'
-
       DEFAULT_RULE_ID = 'DEFAULT'
 
       class Policy
@@ -37,11 +31,11 @@ module Core
       attr_reader :policy, :field, :rule, :value, :id
 
       def initialize(rule_hash)
-        @policy = rule_hash.fetch(POLICY)
-        @field = rule_hash.fetch(FIELD)
-        @rule = rule_hash.fetch(RULE)
-        @value = rule_hash.fetch(VALUE)
-        @id = rule_hash.fetch(ID)
+        @policy = rule_hash.fetch('policy')
+        @field = rule_hash.fetch('field')
+        @rule = rule_hash.fetch('rule')
+        @value = rule_hash.fetch('value')
+        @id = rule_hash.fetch('id')
         @rule_hash = rule_hash
       rescue KeyError => e
         raise "#{e.key} is required"
@@ -50,11 +44,11 @@ module Core
       def self.from_args(id, policy, field, rule, value)
         SimpleRule.new(
           {
-            ID => id,
-            POLICY => policy,
-            FIELD => field,
-            RULE => rule,
-            VALUE => value
+            'id' => id,
+            'policy' => policy,
+            'field' => field,
+            'rule' => rule,
+            'value' => value
           }
         )
       end

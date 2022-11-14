@@ -43,11 +43,11 @@ describe Connectors::MongoDB::Connector do
   let(:rules) do
     [
       {
-        Core::Filtering::SimpleRule::ID => 'test',
-        Core::Filtering::SimpleRule::FIELD => 'name',
-        Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::EQUALS,
-        Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
-        Core::Filtering::SimpleRule::VALUE => 'apple'
+        'id' => 'test',
+        'field' => 'name',
+        'rule' => Core::Filtering::SimpleRule::Rule::EQUALS,
+        'policy' => Core::Filtering::SimpleRule::Policy::INCLUDE,
+        'value' => 'apple'
       }
     ]
   end

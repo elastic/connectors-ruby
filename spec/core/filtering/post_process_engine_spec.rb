@@ -11,12 +11,12 @@ require 'core/filtering'
 describe Core::Filtering::PostProcessEngine do
   let(:job_description) do
     {
-      Core::Filtering::FILTERING => [
+      'filtering' => [
         {
-          Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
-          Core::Filtering::RULES => rules,
-          Core::Filtering::ADVANCED_SNIPPET => snippet,
-          Core::Filtering::WARNINGS => []
+          'domain' => Core::Filtering::DEFAULT_DOMAIN,
+          'rules' => rules,
+          'advanced_snippet' => snippet,
+          'warnings' => []
         }
       ]
     }
@@ -30,11 +30,11 @@ describe Core::Filtering::PostProcessEngine do
   let(:test_operator) { Core::Filtering::SimpleRule::Rule::EQUALS }
   let(:test_rule) do
     {
-      Core::Filtering::SimpleRule::ID => test_rule_id,
-      Core::Filtering::SimpleRule::FIELD => test_field,
-      Core::Filtering::SimpleRule::VALUE => test_value,
-      Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::EXCLUDE,
-      Core::Filtering::SimpleRule::RULE => test_operator
+      'id' => test_rule_id,
+      'field' => test_field,
+      'value' => test_value,
+      'policy' => Core::Filtering::SimpleRule::Policy::EXCLUDE,
+      'rule' => test_operator
     }
   end
 
@@ -149,18 +149,18 @@ describe Core::Filtering::PostProcessEngine do
     let(:rules) do
       [
         {
-          Core::Filtering::SimpleRule::ID => 'test1',
-          Core::Filtering::SimpleRule::FIELD => test_field,
-          Core::Filtering::SimpleRule::VALUE => 'bar/baz',
-          Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
-          Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::STARTS_WITH
+          'id' => 'test1',
+          'field' => test_field,
+          'value' => 'bar/baz',
+          'policy' => Core::Filtering::SimpleRule::Policy::INCLUDE,
+          'rule' => Core::Filtering::SimpleRule::Rule::STARTS_WITH
         },
         {
-          Core::Filtering::SimpleRule::ID => 'test2',
-          Core::Filtering::SimpleRule::FIELD => test_field,
-          Core::Filtering::SimpleRule::VALUE => 'bar',
-          Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::EXCLUDE,
-          Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::STARTS_WITH
+          'id' => 'test2',
+          'field' => test_field,
+          'value' => 'bar',
+          'policy' => Core::Filtering::SimpleRule::Policy::EXCLUDE,
+          'rule' => Core::Filtering::SimpleRule::Rule::STARTS_WITH
         }
       ]
     end

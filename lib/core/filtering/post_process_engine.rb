@@ -30,7 +30,7 @@ module Core
       private
 
       def ordered_rules(job_filtering)
-        job_rules = Utility::Filtering.extract_filter(job_filtering)[Core::Filtering::RULES]
+        job_rules = Utility::Filtering.extract_filter(job_filtering)['rules']
         sorted_rules = job_rules.sort_by { |rule| rule['order'] }.reject { |rule| rule['id'] == Core::Filtering::SimpleRule::DEFAULT_RULE_ID }
         sorted_rules.each_with_object([]) { |rule, output| output << SimpleRule.new(rule) }
       end

@@ -12,11 +12,11 @@ describe Core::Filtering::SimpleRule do
   subject {
     Core::Filtering::SimpleRule.new(
       {
-        Core::Filtering::SimpleRule::ID => id,
-        Core::Filtering::SimpleRule::FIELD => field,
-        Core::Filtering::SimpleRule::VALUE => value,
-        Core::Filtering::SimpleRule::POLICY => policy,
-        Core::Filtering::SimpleRule::RULE => rule
+        'id' => id,
+        'field' => field,
+        'value' => value,
+        'policy' => policy,
+        'rule' => rule
       }
     )
   }
