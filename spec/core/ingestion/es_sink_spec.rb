@@ -40,6 +40,7 @@ describe Core::Ingestion::EsSink do
     context '#ingest' do
       context 'when ingested document is nil' do
         let(:document) { nil }
+        let(:serialized_document) { '' }
 
         it 'does not add document to the queue' do
           expect(bulk_queue).to_not receive(:add)
@@ -91,7 +92,7 @@ describe Core::Ingestion::EsSink do
       end
 
       context 'when ingested document is not empty' do
-        context('when bulk queue still has capacity') do
+        context 'when bulk queue still has capacity' do
           it 'does not immediately send the document into elasticsearch' do
             expect(es_client).to_not receive(:bulk)
 
