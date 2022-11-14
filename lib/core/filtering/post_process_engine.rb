@@ -15,7 +15,7 @@ module Core
       attr_reader :rules
 
       def initialize(job_description)
-        @rules = ordered_rules(job_description['filtering'])
+        @rules = ordered_rules(job_description.dig('connector', 'filtering'))
       end
 
       def process(document)

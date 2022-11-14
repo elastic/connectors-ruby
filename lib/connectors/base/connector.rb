@@ -50,7 +50,7 @@ module Connectors
         @configuration = configuration.dup || {}
         @job_description = job_description&.dup || {}
 
-        filtering = Utility::Filtering.extract_filter(@job_description[:filtering])
+        filtering = Utility::Filtering.extract_filter(@job_description.dig(:connector, :filtering))
 
         @rules = filtering[:rules] || []
         @advanced_filter_config = filtering[:advanced_snippet] || {}

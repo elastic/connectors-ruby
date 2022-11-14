@@ -87,7 +87,7 @@ module Core
     end
 
     def filtering
-      connector_snapshot[:filtering]
+      Utility::Filtering.extract_filter(connector_snapshot[:filtering])
     end
 
     def pipeline
