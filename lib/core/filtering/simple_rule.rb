@@ -46,6 +46,7 @@ module Core
       rescue KeyError => e
         raise "#{e.key} is required"
       end
+
       def self.from_args(id, policy, field, rule, value)
         SimpleRule.new(
           {
@@ -115,6 +116,7 @@ module Core
         Utility::Logger.debug("Failed to coerce value '#{value}' (#{value.class}) based on document value '#{doc_value}' (#{doc_value.class}) due to error: #{e.class}: #{e.message}")
         value.to_s
       end
+
       def is_include?
         policy == Policy::INCLUDE
       end
@@ -122,6 +124,7 @@ module Core
       def is_exclude?
         policy == Policy::EXCLUDE
       end
+
       def to_h
         @rule_hash
       end
