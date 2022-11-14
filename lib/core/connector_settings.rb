@@ -119,6 +119,16 @@ module Core
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
     end
 
+    def ready_for_sync?
+      Connectors::REGISTRY.registered?(service_type) &&
+        valid_index_name? &&
+        connector_status_allows_sync?
+    end
+
+    def running?
+      @elasticsearch_response[:_source][:last_sync_status] == Connectors::SyncStatus::IN_PROGRESS
+    end
+
     def update_last_sync!(job)
       doc = {
         :last_sync_status => job.status,
@@ -126,10 +136,12 @@ module Core
         :last_sync_error => job.error,
         :error => job.error
       }
+
       if job.terminated?
         doc[:last_indexed_document_count] = job[:indexed_document_count]
         doc[:last_deleted_document_count] = job[:deleted_document_count]
       end
+
       Core::ElasticConnectorActions.update_connector_fields(job.connector_id, doc)
     end
 
