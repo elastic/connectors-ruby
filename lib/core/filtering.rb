@@ -9,6 +9,8 @@
 require 'core/filtering/post_process_engine'
 require 'core/filtering/post_process_result'
 require 'core/filtering/simple_rule'
+require 'core/filtering/validation_job_runner'
+require 'core/filtering/validation_status'
 
 module Core::Filtering
   DEFAULT_DOMAIN = 'DEFAULT'
