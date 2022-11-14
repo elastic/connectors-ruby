@@ -238,12 +238,6 @@ module Core
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
 
-      # TODO: ideally we should have a list of editable fields and this method should only update those fields
-      def update_job(job_id, arguments = {})
-        body = { :doc => arguments.dup }
-        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
-      end
-
       def complete_sync(connector_id, job_id, metadata, error)
         sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
 
