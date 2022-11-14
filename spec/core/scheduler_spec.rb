@@ -10,11 +10,9 @@ describe Core::Scheduler do
   let(:poll_interval) { 999 }
   let(:heartbeat_interval) { 999 }
   let(:connector_settings) { double }
-  let(:connector_registered) { true }
 
   before(:each) do
     allow(connector_settings).to receive(:service_type).and_return('mongodb')
-    allow(Connectors::REGISTRY).to receive(:registered?).and_return(connector_registered)
   end
 
   shared_examples_for 'triggers' do |task|
@@ -75,12 +73,6 @@ describe Core::Scheduler do
       end
 
       it_behaves_like 'triggers', :sync
-
-      context 'when connector is not registered' do
-        let(:connector_registered) { false }
-
-        it_behaves_like 'does not trigger', :sync
-      end
 
       context 'when index name is invalid' do
         let(:valid_index_name) { false }
@@ -158,12 +150,6 @@ describe Core::Scheduler do
 
       it_behaves_like 'triggers', :heartbeat
 
-      context 'when connector is not registered' do
-        let(:connector_registered) { false }
-
-        it_behaves_like 'does not trigger', :heartbeat
-      end
-
       context 'when there\'s no last_seen' do
         let(:last_seen) { nil }
 
@@ -187,12 +173,13 @@ describe Core::Scheduler do
 
     context 'with configuration task' do
       let(:connector_status) { Connectors::ConnectorStatus::CREATED }
+      let(:needs_service_type) { false }
       before(:each) do
         allow(subject).to receive(:sync_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:filtering_validation_triggered?).with(connector_settings).and_return(false)
         allow(connector_settings).to receive(:connector_status).and_return(connector_status)
-        allow(connector_settings).to receive(:needs_service_type?).and_return(false)
+        allow(connector_settings).to receive(:needs_service_type?).and_return(needs_service_type)
       end
 
       it_behaves_like 'triggers', :configuration
@@ -201,17 +188,9 @@ describe Core::Scheduler do
       # We need to trigger configuration for the connector that was created with no service_type.
       # Otherwise on-prem connectors won't be able to start the flow at all.
       context 'when connector has no service_type' do
-        before(:each) do
-          allow(connector_settings).to receive(:needs_service_type?).and_return(true)
-        end
+        let(:needs_service_type) { true }
 
         it_behaves_like 'triggers', :configuration
-      end
-
-      context 'when connector is not registered' do
-        let(:connector_registered) { false }
-
-        it_behaves_like 'does not trigger', :configuration
       end
 
       (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|

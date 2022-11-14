@@ -8,6 +8,7 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/connector_status'
+require 'connectors/registry'
 require 'core/elastic_connector_actions'
 require 'utility'
 
@@ -35,7 +36,14 @@ module Core
     end
 
     def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
-      query = { term: { is_native: true } }
+      query = {
+        bool: {
+          filter: [
+            { term: { is_native: true } },
+            { terms: { service_type: Connectors::REGISTRY.registered_connectors } }
+          ]
+        }
+      }
       fetch_connectors_by_query(query, page_size)
     end
 
