@@ -61,7 +61,7 @@ module Core
         bool: {
           filter: [
               { terms: { 'connector.id': connector_ids } },
-              { terms: { status: Connectors::SyncStatus::ACTIVE_STATUES } },
+              { terms: { status: Connectors::SyncStatus::ACTIVE_STATUSES } },
               { range: { last_seen: { lte: "now-#{STUCK_THRESHOLD}s" } } }
           ]
         }
