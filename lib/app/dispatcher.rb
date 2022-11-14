@@ -21,6 +21,7 @@ module App
     MIN_THREADS = (App::Config.dig(:thread_pool, :min_threads) || 0).to_i
     MAX_THREADS = (App::Config.dig(:thread_pool, :max_threads) || 5).to_i
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
+    JOB_CLEANUP_INTERVAL = 60 * 5
 
     @running = Concurrent::AtomicBoolean.new(false)
 
@@ -28,6 +29,7 @@ module App
       def start!
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
+        start_job_cleanup_task!
 
         # start sync jobs consumer
         start_consumer!
@@ -38,6 +40,7 @@ module App
       def shutdown!
         Utility::Logger.info("Shutting down connector service with pool [#{pool.class}]...")
         running.make_false
+        job_cleanup_timer.shutdown
         scheduler.shutdown
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
@@ -68,6 +71,17 @@ module App
                        else
                          Core::SingleScheduler.new(App::Config.connector_id, POLL_INTERVAL, HEARTBEAT_INTERVAL)
                        end
+      end
+
+      def job_cleanup_timer
+        @job_cleanup_timer ||= Concurrent::TimerTask.new(:execution_interval => JOB_CLEANUP_INTERVAL) do
+          connector_id = App::Config.native_mode ? nil : App::Config.connector_id
+          Core::JobCleanUp.execute(connector_id)
+        end
+      end
+
+      def start_job_cleanup_task!
+        job_cleanup_timer.execute
       end
 
       def start_polling_jobs!

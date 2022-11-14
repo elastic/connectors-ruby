@@ -91,6 +91,17 @@ module Core
         )
       end
 
+      def delete_jobs_by_query(query)
+        client.delete_by_query(
+          :index => Utility::Constants::JOB_INDEX,
+          :body => { :query => query }
+        )
+      end
+
+      def delete_indices(indices)
+        client.indices.delete(:index => indices, :ignore_unavailable => true)
+      end
+
       def update_connector_configuration(connector_id, configuration)
         update_connector_fields(connector_id, :configuration => configuration)
       end
@@ -224,6 +235,12 @@ module Core
         body = {
           :doc => { :last_seen => Time.now }.merge(metadata)
         }
+        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
+      end
+
+      # TODO: ideally we should have a list of editable fields and this method should only update those fields
+      def update_job(job_id, arguments = {})
+        body = { :doc => arguments.dup }
         client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
       end
 
