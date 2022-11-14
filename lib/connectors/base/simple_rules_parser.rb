@@ -10,9 +10,12 @@ require 'active_support/core_ext/object/blank'
 
 module Connectors
   module Base
+    class FilteringRulesValidationError < StandardError; end
+
     class SimpleRulesParser
       def initialize(rules)
-        @rules = (rules || []).map(&:with_indifferent_access).filter { |r| r[:id] != 'DEFAULT' }.sort_by { |r| r[:order] }
+        sorted = (rules || []).map(&:with_indifferent_access).filter { |r| r[:id] != 'DEFAULT' }.sort_by { |r| r[:order] }
+        @rules = validate(sorted)
       end
 
       def parse
@@ -24,7 +27,80 @@ module Connectors
         end)
       end
 
+      # in a base case, does not do anything
+      def validate(rules)
+        return rules if rules.empty?
+        rules.each do |rule|
+          validate_rule(rule)
+        end
+        field_acc = {}
+        rules.reduce(field_acc) do |acc, rule|
+          if acc[rule[:field]].present?
+            acc[rule[:field]] << rule
+          else
+            acc[rule[:field]] = [rule]
+          end
+        end
+        field_acc.each do |field, field_rules|
+          validate_field_rules(field, field_rules)
+        end
+        rules
+      end
+
       private
+
+      def validate_field_rules(field, field_rules)
+        if field_rules.size <= 1
+          return
+        end
+
+        # check for contradicting equality rules
+        equal_count = field_rules.count { |r| r[:rule] == 'Equals' }
+        if equal_count > 1
+          raise FilteringRulesValidationError.new("Contradicting rules for field: #{field}. Can't have more than one equality clause.")
+        end
+
+        # check for overlapping ranges
+        ranges = field_rules.filter { |r| r[:rule] == '>' || r[:rule] == '<' }
+        ranges.each_with_index do |r, i|
+          next if i == ranges.size - 1
+          next_r = ranges[i + 1]
+          if r[:value] == next_r[:value]
+            raise FilteringRulesValidationError.new("Contradicting rules for field: #{field}. Can't have overlapping ranges.")
+          end
+        end
+
+        # check for mutually exclusive start_with
+        include_starts = field_rules.filter { |r| r[:rule] == 'starts_with' && is_include?(r) }.map { |r| r[:value] }
+        exclude_starts = field_rules.filter { |r| r[:rule] == 'starts_with' && is_exclude?(r) }.map { |r| r[:value] }
+        if include_starts.any? { |s| exclude_starts.any? { |e| s.start_with?(e) } }
+          raise FilteringRulesValidationError.new("Contradicting [starts_with] rules for field: #{field}. Can't have mutually exclusive [starts_with] rules.")
+        end
+
+        # check for mutually exclusive end_with
+        include_ends = field_rules.filter { |r| r[:rule] == 'ends_with' && is_include?(r) }.map { |r| r[:value] }
+        exclude_ends = field_rules.count { |r| r[:rule] == 'ends_with' && is_exclude?(r) }.map { |r| r[:value] }
+        if include_ends.any? { |s| exclude_ends.any? { |e| s.end_with?(e) } }
+          raise FilteringRulesValidationError.new("Contradicting [ends_with] rules for field: #{field}. Can't have mutually exclusive [ends_with] rules.")
+        end
+      end
+
+      def validate_rule(rule)
+        op = rule[:rule]&.to_s
+        case op
+        when 'Equals', '>', '<'
+          true
+        when 'regex'
+          # check validity of regex
+          begin
+            Regexp.new(value)
+          rescue RegexpError => e
+            raise FilteringRulesValidationError.new("Invalid regex rule: #{rule} : (#{e.message})")
+          end
+        else
+          raise FilteringRulesValidationError.new("Unknown operator: #{op}")
+        end
+      end
 
       # merge all rules into a filter object or array
       # in a base case, does no transformations

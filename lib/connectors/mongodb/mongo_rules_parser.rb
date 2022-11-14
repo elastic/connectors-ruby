@@ -16,10 +16,10 @@ module Connectors
         field = rule[:field]
         value = rule[:value]
         unless value.present?
-          raise "Value is required for field: #{field}"
+          raise FilteringRulesValidationError.new("Value is required for field: #{field}")
         end
         unless field.present?
-          raise "Field is required for rule: #{rule}"
+          raise FilteringRulesValidationError.new("Field is required for rule: #{rule}")
         end
         op = rule[:rule]&.to_s
         case op
@@ -31,8 +31,12 @@ module Connectors
           parse_less_than(rule, field, value)
         when 'regex'
           parse_regex(rule, field, value)
+        when 'starts_with'
+          parse_starts_with(rule, field, value)
+        when 'ends_with'
+          parse_ends_with(rule, field, value)
         else
-          raise "Unknown operator: #{op}"
+          raise FilteringRulesValidationError.new("Unknown operator: #{op}")
         end
       end
 
@@ -41,8 +45,6 @@ module Connectors
         return rules[0] if rules.size == 1
         { '$and' => rules }
       end
-
-      private
 
       def parse_equals(rule, field, value)
         if is_include?(rule)
@@ -73,6 +75,22 @@ module Connectors
           { field => /#{value}/ }
         else
           { field => { '$not' => /#{value}/ } }
+        end
+      end
+
+      def parse_starts_with(rule, field, value)
+        if is_include?(rule)
+          { field => /^#{value}.*/i }
+        else
+          { field => { '$not' => /^#{value}.*/i } }
+        end
+      end
+
+      def parse_ends_with(rule, field, value)
+        if is_include?(rule)
+          { field => /.*#{value}$/i }
+        else
+          { field => { '$not' => /.*#{value}$/i } }
         end
       end
     end
