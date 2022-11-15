@@ -4,6 +4,8 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
+# !!!!!!!!
+# IF YOU EDIT THIS FILE, YOU MUST EDIT THE `connectors_utility.gemspec`
 require 'utility/bulk_queue'
 require 'utility/common'
 require 'utility/constants'
@@ -18,3 +20,5 @@ require 'utility/es_client'
 require 'utility/exception_tracking'
 require 'utility/extension_mapping_util'
 require 'utility/logger'
+# IF YOU EDIT THIS FILE, YOU MUST EDIT THE `connectors_utility.gemspec`
+# !!!!!!!!

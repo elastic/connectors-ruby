@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'time'
 require 'utility/errors'
 require 'utility/exception_tracking'
 
