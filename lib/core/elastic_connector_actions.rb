@@ -132,11 +132,35 @@ module Core
         update_connector_fields(connector_id, { :filtering => filtering })
       end
 
-      def claim_job(connector_id)
+      def update_connector_sync_now(connector_id, sync_now)
+        doc = connector_with_concurrency_control(connector_id)
+
+        body = { sync_now: sync_now, last_synced: Time.now }
+
+        update_connector_fields(
+          connector_id,
+          body,
+          doc[:seq_no],
+          doc[:primary_term]
+        )
+      end
+
+      def update_connector_last_sync_status(connector_id, last_sync_status)
+        doc = connector_with_concurrency_control(connector_id)
+
+        update_connector_fields(
+          connector_id,
+          { last_sync_status: last_sync_status },
+          doc[:seq_no],
+          doc[:primary_term]
+        )
+      end
+
+      def connector_with_concurrency_control(connector_id)
         seq_no = nil
         primary_term = nil
-        sync_in_progress = false
-        connector_record = client.get(
+
+        doc = client.get(
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :ignore => 404,
@@ -144,42 +168,31 @@ module Core
         ).tap do |response|
           seq_no = response['_seq_no']
           primary_term = response['_primary_term']
-          sync_in_progress = response.dig('_source', 'last_sync_status') == Connectors::SyncStatus::IN_PROGRESS
         end
-        if sync_in_progress
-          raise JobAlreadyRunningError.new(connector_id)
-        end
-        update_connector_fields(
-          connector_id,
-          { :sync_now => false,
-            :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now },
-          seq_no,
-          primary_term
-        )
 
+        { doc: doc, seq_no: seq_no, primary_term: primary_term }
+      end
+
+      def create_job(connector_settings:)
         body = {
-          :status => Connectors::SyncStatus::IN_PROGRESS,
-          :worker_hostname => Socket.gethostname,
-          :created_at => Time.now,
-          :started_at => Time.now,
-          :last_seen => Time.now,
-          :connector => {
-            :id => connector_id,
-            :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
+          status: Connectors::SyncStatus::PENDING,
+          created_at: Time.now,
+          last_seen: Time.now,
+          connector: {
+            id: connector_settings.id,
+            filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering),
+            index_name: connector_settings.index_name,
+            language: connector_settings[:language],
+            pipeline: connector_settings[:pipeline],
+            service_type: connector_settings.service_type
           }
         }
 
-        index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
-        if index_response['result'] == 'created'
-          # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
-          return client.get(
-            :index => Utility::Constants::JOB_INDEX,
-            :id => index_response['_id'],
-            :ignore => 404
-          ).with_indifferent_access
-        end
-        raise JobNotCreatedError.new(connector_id, index_response)
+        index_response = client.index(index: Utility::Constants::JOB_INDEX, body: body, refresh: true)
+
+        return index_response if index_response['result'] == 'created'
+
+        raise JobNotCreatedError.new(connector_settings.id, index_response)
       end
 
       def convert_connector_filtering_to_job_filtering(connector_filtering)

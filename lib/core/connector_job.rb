@@ -22,8 +22,15 @@ module Core
       new(es_response)
     end
 
-    def self.pending_jobs(page_size = DEFAULT_PAGE_SIZE)
-      query = { terms: { status: Connectors::SyncStatus::PENDING_STATUSES } }
+    def self.pending_jobs(connectors_ids: [], page_size: DEFAULT_PAGE_SIZE)
+      status_term = { status: Connectors::SyncStatus::PENDING_STATUSES }
+
+      query = { bool: { must: [{ terms: status_term }] } }
+
+      return fetch_jobs_by_query(query, page_size) if connectors_ids.empty?
+
+      query[:bool][:must] << { terms: { 'connector.id' => connectors_ids } }
+
       fetch_jobs_by_query(query, page_size)
     end
 
@@ -88,7 +95,7 @@ module Core
     end
 
     def connector_id
-      connector_snapshot[:id]
+      @elasticsearch_response[:_source][:connector][:id]
     end
 
     def index_name
@@ -112,7 +119,7 @@ module Core
     end
 
     def pipeline
-      connector_snapshot[:pipeline]
+      @elasticsearch_response[:_source][:pipeline]
     end
 
     def connector
@@ -129,6 +136,30 @@ module Core
 
     def cancel!(ingestion_stats = {}, connector_metadata = {})
       terminate!(Connectors::SyncStatus::CANCELED, nil, ingestion_stats, connector_metadata)
+    end
+
+    def with_concurrency_control
+      response = ElasticConnectorActions.get_job(id)
+
+      yield response, response['_seq_no'], response['_primary_term']
+    end
+
+    def make_running!
+      with_concurrency_control do |es_doc, seq_no, primary_term|
+        now = Time.now
+        doc = {
+          status: Connectors::SyncStatus::IN_PROGRESS,
+          started_at: now,
+          last_seen: now,
+          worker_hostname: Socket.gethostname
+        }
+
+        ElasticConnectorActions.update_job_fields(es_doc[:_id], doc, seq_no, primary_term)
+      end
+    end
+
+    def es_source
+      @elasticsearch_response[:_source]
     end
 
     private
@@ -166,6 +197,14 @@ module Core
       doc[:canceled_at] = Time.now if status == Connectors::SyncStatus::CANCELED
       doc[:metadata] = connector_metadata if connector_metadata&.any?
       ElasticConnectorActions.update_job_fields(id, doc)
+    end
+
+    def seq_no
+      @elasticsearch_response[:_seq_no]
+    end
+
+    def primary_term
+      @elasticsearch_response[:_primary_term]
     end
   end
 end
