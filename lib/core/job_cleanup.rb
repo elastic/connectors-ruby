@@ -38,11 +38,11 @@ module Core
           Utility::Logger.info("Successfully marked job #{job.id} as error.")
 
           job_id = job.id
-          job = Core::ConnectorJob.fetch_by_id(job_id)
+          job = ConnectorJob.fetch_by_id(job_id)
           Utility::Logger.warn("Could not found job by id #{job_id}") if job.nil?
           Utility::Logger.warn("Could not found connector by id #{job.connector_id}") if job && job.connector.nil?
 
-          job&.connector&.update_connector_by_job(job)
+          job&.connector&.update_last_sync!(job)
         end
       end
 
