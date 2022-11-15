@@ -331,8 +331,8 @@ describe Core::SyncJobRunner do
         end
 
         it 'does not ingest the excluded document' do
-          expect(ingester).to_not receive(:ingest).with(doc1)
-          expect(ingester).to receive(:ingest).with(doc2)
+          expect(sink).to_not receive(:ingest).with(doc1)
+          expect(sink).to receive(:ingest).with(doc2)
 
           subject.execute
         end
@@ -345,8 +345,8 @@ describe Core::SyncJobRunner do
           end
 
           it 'indexes all docs' do
-            expect(ingester).to receive(:ingest).with(doc1)
-            expect(ingester).to receive(:ingest).with(doc2)
+            expect(sink).to receive(:ingest).with(doc1)
+            expect(sink).to receive(:ingest).with(doc2)
 
             subject.execute
           end
