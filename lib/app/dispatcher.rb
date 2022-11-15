@@ -29,8 +29,8 @@ module App
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
 
-        # start sync jobs consumers
-        start_consumers!
+        # start sync jobs consumer
+        start_consumer!
 
         start_polling_jobs!
       end
@@ -42,7 +42,7 @@ module App
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
 
-        stop_consumers!
+        stop_consumer!
       end
 
       private
@@ -126,7 +126,7 @@ module App
         end
       end
 
-      def start_consumers!
+      def start_consumer!
         @consumer = Core::Jobs::Consumer.new(
           poll_interval: POLL_INTERVAL,
           termination_timeout: TERMINATION_TIMEOUT,
@@ -139,7 +139,7 @@ module App
         @consumer.subscribe!(index_name: Utility::Constants::JOB_INDEX)
       end
 
-      def stop_consumers!
+      def stop_consumer!
         return if @consumer.nil?
         return unless @consumer.running?
 
