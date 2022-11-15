@@ -9,7 +9,35 @@
 require 'core'
 
 describe Core::ConnectorJob do
-  describe '#pending_jobs' do
+  describe '.fetch_by_id' do
+    let(:job_id) { '123' }
+    let(:es_response) do
+      {
+          :found => found
+      }
+    end
+    before(:each) do
+      allow(Core::ElasticConnectorActions).to receive(:get_job).and_return(es_response)
+    end
+
+    context 'when the job does not exist' do
+      let(:found) { false }
+
+      it 'returns nil' do
+        expect(described_class.fetch_by_id(job_id)).to be_nil
+      end
+    end
+
+    context 'when the job exists' do
+      let(:found) { true }
+
+      it 'returns a job entity' do
+        expect(described_class.fetch_by_id(job_id)).to be_kind_of(described_class)
+      end
+    end
+  end
+
+  describe '.pending_jobs' do
     let(:jobs) do
       [
          { '_id' => '123', '_source' => { 'something' => 'something', 'status' => Connectors::SyncStatus::PENDING } }.with_indifferent_access,

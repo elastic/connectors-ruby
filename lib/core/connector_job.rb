@@ -47,6 +47,10 @@ module Core
       @elasticsearch_response[:_source][property_name]
     end
 
+    def error
+      self[:error]
+    end
+
     def status
       self[:status]
     end
@@ -57,6 +61,26 @@ module Core
 
     def canceling?
       status == Connectors::SyncStatus::CANCELING
+    end
+
+    def suspended?
+      status == Connectors::SyncStatus::SUSPENDED
+    end
+
+    def canceled?
+      status == Connectors::SyncStatus::CANCELED
+    end
+
+    def pending?
+      Connectors::SyncStatus::PENDING_STATUSES.include?(status)
+    end
+
+    def active?
+      Connectors::SyncStatus::ACTIVE_STATUSES.include?(status)
+    end
+
+    def terminated?
+      Connectors::SyncStatus::TERMINAL_STATUSES.include?(status)
     end
 
     def connector_snapshot
