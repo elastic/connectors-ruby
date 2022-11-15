@@ -126,6 +126,13 @@ module Core
       @connector ||= ConnectorSettings.fetch_by_id(connector_id)
     end
 
+    def heartbeat!(ingestion_stats = {}, connector_metadata = {})
+      ingestion_stats ||= {}
+      doc = { :last_seen => Time.now }.merge(ingestion_stats)
+      doc[:metadata] = connector_metadata if connector_metadata&.any?
+      ElasticConnectorActions.update_job_fields(id, doc)
+    end
+
     def done!(ingestion_stats = {}, connector_metadata = {})
       terminate!(Connectors::SyncStatus::COMPLETED, nil, ingestion_stats, connector_metadata)
     end

@@ -68,12 +68,6 @@ module Connectors
       end
 
       def yield_documents
-        60.times do |index|
-          data = { id: (index + 1).to_s, name: "example document #{index + 1}" }
-          yield data
-          sleep(1)
-        end
-        return
         with_client do |client|
           # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).

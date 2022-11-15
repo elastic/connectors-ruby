@@ -4,7 +4,8 @@ require 'connectors/example/connector'
 require 'spec_helper'
 
 describe Connectors::Example::Connector do
-  subject { described_class.new(configuration: configuration) }
+  subject { described_class.new(job_description: job_description, configuration: configuration) }
+  let(:job_description) { double }
   let(:configuration) do
     {
        :foo => {
@@ -12,6 +13,11 @@ describe Connectors::Example::Connector do
          :value => 'something'
        }
     }
+  end
+
+  before(:each) do
+    allow(job_description).to receive(:dup).and_return(job_description)
+    allow(job_description).to receive(:filtering).and_return({})
   end
 
   it_behaves_like 'a connector'

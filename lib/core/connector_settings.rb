@@ -130,19 +130,21 @@ module Core
     end
 
     def update_last_sync!(job)
+      # if job is nil, connector still needs to be updated, to avoid it stuck at in_progress
+      job_status = job&.status || Connectors::SyncStatus::ERROR
+      job_error = job&.error
+      job_error ||= 'unknown error' if job_status == Connectors::SyncStatus::ERROR
       doc = {
-        :last_sync_status => job.status,
+        :last_sync_status => job_status,
         :last_synced => Time.now,
-        :last_sync_error => job.error,
-        :error => job.error
+        :last_sync_error => job_error,
+        :error => job_error
       }
-
-      if job.terminated?
+      if job&.terminated?
         doc[:last_indexed_document_count] = job[:indexed_document_count]
         doc[:last_deleted_document_count] = job[:deleted_document_count]
       end
-
-      Core::ElasticConnectorActions.update_connector_fields(job.connector_id, doc)
+      Core::ElasticConnectorActions.update_connector_fields(id, doc)
     end
 
     private

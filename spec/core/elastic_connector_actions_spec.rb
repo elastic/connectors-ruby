@@ -863,28 +863,6 @@ describe Core::ElasticConnectorActions do
     end
   end
 
-  describe '#update_sync' do
-    let(:job_id) { 'update-job-1' }
-    let(:metadata) { { :indexed_document_count => 1, :indexed_document_volume => 233, :deleted_document_count => 0 } }
-
-    it 'updates the record in jobs index' do
-      expect(es_client).to receive(:update).with(
-        :index => jobs_index,
-        :id => job_id,
-        :body => {
-          :doc => hash_including(
-            :indexed_document_count,
-            :indexed_document_volume,
-            :deleted_document_count,
-            :last_seen
-          )
-        }
-      )
-
-      described_class.update_sync(job_id, metadata)
-    end
-  end
-
   describe '#complete_sync' do
     let(:job_id) { 'completed-job-1' }
     let(:sync_status) { Connectors::SyncStatus::COMPLETED }

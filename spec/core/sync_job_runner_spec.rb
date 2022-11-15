@@ -63,16 +63,7 @@ describe Core::SyncJobRunner do
     }
   }
   let(:job_id) { 'job-123' }
-  let(:job_definition) do
-    {
-      '_id' => job_id,
-      '_source' => {
-        'connector' => {
-          'filtering' => filtering
-        }
-      }
-    }
-  end
+  let(:job_definition) { double }
 
   let(:extract_binary_content) { true }
   let(:reduce_whitespace) { true }
@@ -92,9 +83,16 @@ describe Core::SyncJobRunner do
   subject { described_class.new(connector_settings, job, max_ingestion_queue_size, max_ingestion_queue_bytes) }
 
   before(:each) do
-    allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
+    allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id).and_return(connector_settings)
 
-    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_definition)
+    allow(Core::ConnectorJob).to receive(:fetch_by_id).with(job_id).and_return(job_definition)
+    allow(job_definition).to receive(:filtering).and_return(:filtering)
+    allow(job_definition).to receive(:heartbeat!)
+    allow(job_definition).to receive(:done!)
+    allow(job_definition).to receive(:cancel!)
+    allow(job_definition).to receive(:error!)
+
+    allow(Core::ElasticConnectorActions).to receive(:claim_job).and_return(job_id)
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:complete_sync)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
@@ -118,6 +116,7 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
     allow(connector_settings).to receive(:filtering).and_return(filtering)
     allow(connector_settings).to receive(:running?).and_return(false)
+    allow(connector_settings).to receive(:update_last_sync!)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
