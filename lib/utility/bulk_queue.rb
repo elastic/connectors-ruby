@@ -6,12 +6,14 @@
 
 require 'json'
 
+require 'utility/constants'
+
 module Utility
   class BulkQueue
     class QueueOverflowError < StandardError; end
 
     # 500 items or 5MB
-    def initialize(operation_count_threshold = 500, size_threshold = 5 * 1024 * 1024)
+    def initialize(operation_count_threshold = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_LENGTH, size_threshold = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES)
       @operation_count_threshold = operation_count_threshold.freeze
       @size_threshold = size_threshold.freeze
 

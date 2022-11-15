@@ -86,7 +86,10 @@ describe Core::SyncJobRunner do
     }
   end
 
-  subject { described_class.new(connector_settings, job) }
+  let(:max_ingestion_queue_size) { 123 }
+  let(:max_ingestion_queue_volume) { 123456789 }
+
+  subject { described_class.new(connector_settings, job, max_ingestion_queue_size, max_ingestion_queue_volume) }
 
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)

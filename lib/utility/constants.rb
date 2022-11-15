@@ -18,5 +18,10 @@ module Utility
     CRAWLER_SERVICE_TYPE = 'elastic-crawler'
     FILTERING_RULES_FEATURE = 'filtering_rules'
     FILTERING_ADVANCED_FEATURE = 'filtering_advanced_config'
+
+    # Maximum number of operations in BULK Elasticsearch operation that will ingest the data
+    DEFAULT_MAX_INGESTION_QUEUE_SIZE = 500
+    # Maximum size of either whole BULK Elasticsearch operation or one document in it
+    DEFAULT_MAX_INGESTION_QUEUE_BYTES = 5 * 1024 * 1024
   end
 end

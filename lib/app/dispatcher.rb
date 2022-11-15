@@ -21,6 +21,8 @@ module App
     MIN_THREADS = (App::Config.dig(:thread_pool, :min_threads) || 0).to_i
     MAX_THREADS = (App::Config.dig(:thread_pool, :max_threads) || 5).to_i
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
+    MAX_INGESTION_QUEUE_SIZE = (App::Config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i 
+    MAX_INGESTION_QUEUE_BYTES = (App::Config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
 
@@ -90,6 +92,26 @@ module App
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'The connector service failed due to unexpected error.')
+      end
+
+      def start_sync_task(connector_settings)
+        start_heartbeat_task(connector_settings)
+        pool.post do
+          Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
+          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
+          job_runner = Core::SyncJobRunner.new(
+            connector_settings,
+            MAX_INGESTION_QUEUE_SIZE,
+            MAX_INGESTION_QUEUE_BYTES
+          )
+          job_runner.execute
+        rescue Core::JobAlreadyRunningError
+          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
+        rescue Core::ConnectorVersionChangedError => e
+          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
+        end
       end
 
       def start_heartbeat_task(connector_settings)

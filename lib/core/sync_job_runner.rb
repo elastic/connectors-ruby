@@ -23,9 +23,17 @@ module Core
   class SyncJobRunner
     JOB_REPORTING_INTERVAL = 10
 
-    def initialize(connector_settings, job)
+    def initialize(connector_settings, job, max_ingestion_queue_size, max_ingestion_queue_bytes)
       @connector_settings = connector_settings
-      @sink = Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
+      @sink = Core::Ingestion::EsSink.new(
+        connector_settings.index_name,
+        @connector_settings.request_pipeline,
+        Utility::BulkQueue.new(
+          max_ingestion_queue_size, 
+          max_ingestion_queue_bytes
+        ),
+        max_ingestion_queue_bytes
+      )
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
       @sync_error = nil
