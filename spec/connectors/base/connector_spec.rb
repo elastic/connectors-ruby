@@ -11,6 +11,10 @@ require 'connectors/base/connector'
 describe Connectors::Base::Connector do
   subject { described_class.new(job_description: job_description) }
 
+  let(:advanced_snippet_validator_class) { double }
+
+  let(:advanced_snippet_validator_instance) { double }
+
   let(:advanced_snippet) {
     {
       :find => {
@@ -290,8 +294,41 @@ describe Connectors::Base::Connector do
   end
 
   describe '.validate_filtering' do
-    it 'raises an exception, that filtering is not implemented' do
-      expect { described_class.validate_filtering }.to raise_error(RuntimeError, 'Not implemented for this connector')
+    context 'filtering is not present' do
+      # We don't validate filtering, if it's not present -> just return valid
+
+      context 'filtering is nil' do
+        let(:filtering) {
+          nil
+        }
+
+        it_behaves_like 'filtering is valid'
+      end
+
+      context 'filtering is an empty array' do
+        let(:filtering) {
+          []
+        }
+
+        it_behaves_like 'filtering is valid'
+      end
+
+      context 'filtering is an empty hash' do
+        let(:filtering) {
+          {}
+        }
+
+        it_behaves_like 'filtering is valid'
+      end
     end
+
+    before(:each) {
+      allow(advanced_snippet_validator_class).to receive(:new).and_return(advanced_snippet_validator_instance)
+      allow(advanced_snippet_validator_instance).to receive(:is_snippet_valid?).and_return({ :state => Core::Filtering::ValidationStatus::VALID, :errors => [] })
+
+      allow(described_class).to receive(:advanced_snippet_validator).and_return(advanced_snippet_validator_class)
+    }
+
+    it_behaves_like 'filtering is valid'
   end
 end
