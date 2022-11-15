@@ -16,25 +16,25 @@ module Connectors
       def parse_rule(rule)
         field = rule.field
         value = rule.value
-        unless value.present?
-          raise Connectors::Base::FilteringRulesValidationError.new("Value is required for field: #{field}")
-        end
-        unless field.present?
-          raise Connectors::Base::FilteringRulesValidationError.new("Field is required for rule: #{rule}")
-        end
+        # unless value.present?
+        #   raise Connectors::Base::FilteringRulesValidationError.new("Value is required for field: #{field}")
+        # end
+        # unless field.present?
+        #   raise Connectors::Base::FilteringRulesValidationError.new("Field is required for rule: #{rule}")
+        # end
         op = rule.rule
         case op
-        when Core::Filtering::SimpleRule::Rule::EQUALS
+        when SimpleRule::Rule::EQUALS
           parse_equals(rule)
-        when Core::Filtering::SimpleRule::Rule::GREATER_THAN
+        when SimpleRule::Rule::GREATER_THAN
           parse_greater_than(rule)
-        when Core::Filtering::SimpleRule::Rule::LESS_THAN
+        when SimpleRule::Rule::LESS_THAN
           parse_less_than(rule)
-        when Core::Filtering::SimpleRule::Rule::REGEX
+        when SimpleRule::Rule::REGEX
           parse_regex(rule)
-        when 'starts_with'
+        when SimpleRule::Rule::STARTS_WITH
           parse_starts_with(rule, field, value)
-        when 'ends_with'
+        when SimpleRule::Rule::ENDS_WITH
           parse_ends_with(rule, field, value)
         else
           raise Connectors::Base::FilteringRulesValidationError.new("Unknown operator: #{op}")
@@ -82,7 +82,7 @@ module Connectors
       end
 
       def parse_starts_with(rule, field, value)
-        if is_include?(rule)
+        if rule.is_include?
           { field => /^#{value}/ }
         else
           { field => { '$not' => /^#{value}/ } }
@@ -90,7 +90,7 @@ module Connectors
       end
 
       def parse_ends_with(rule, field, value)
-        if is_include?(rule)
+        if rule.is_include?
           { field => /#{value}$/ }
         else
           { field => { '$not' => /#{value}$/ } }

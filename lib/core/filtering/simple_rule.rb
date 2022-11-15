@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'utility/logger'
+require 'active_support/core_ext/object/blank'
 
 module Core
   module Filtering
@@ -16,6 +17,7 @@ module Core
       RULE = 'rule'
       VALUE = 'value'
       ID = 'id'
+      ORDER = 'order'
 
       DEFAULT_RULE_ID = 'DEFAULT'
 
@@ -34,26 +36,44 @@ module Core
         GREATER_THAN = '>'
       end
 
-      attr_reader :policy, :field, :rule, :value, :id
+      attr_reader :policy, :field, :rule, :value, :id, :order
 
       def initialize(rule_hash)
-        @policy = rule_hash.fetch(POLICY)
-        @field = rule_hash.fetch(FIELD)
-        @rule = rule_hash.fetch(RULE)
-        @value = rule_hash.fetch(VALUE)
-        @id = rule_hash.fetch(ID)
+        @policy = SimpleRule.flex_fetch(rule_hash, POLICY)
+        unless @policy == Policy::INCLUDE || @policy == Policy::EXCLUDE
+          raise "Invalid policy '#{policy}' for rule '#{rule_hash}'"
+        end
+        @field = SimpleRule.flex_fetch(rule_hash, FIELD)
+        @rule = SimpleRule.flex_fetch(rule_hash, RULE)
+        @value = SimpleRule.flex_fetch(rule_hash, VALUE)
+        @id = SimpleRule.flex_fetch(rule_hash, ID)
+        @order = SimpleRule.flex_fetch(rule_hash, ORDER, 0)
         @rule_hash = rule_hash
       rescue KeyError => e
         raise "#{e.key} is required"
       end
-      def self.from_args(id, policy, field, rule, value)
+
+      def self.flex_fetch(hash, key, default_value = nil)
+        if default_value.present?
+          hash.fetch(key, nil) || hash.fetch(key.to_s, nil) || hash.fetch(key.to_sym, default_value)
+        else
+          result = hash.fetch(key, nil) || hash.fetch(key.to_s, nil) || hash.fetch(key.to_sym)
+          unless result.present?
+            raise KeyError.new("'#{key}' is required", key: key)
+          end
+          result
+        end
+      end
+
+      def self.from_args(id, policy, field, rule, value, order = 0)
         SimpleRule.new(
           {
             ID => id,
             POLICY => policy,
             FIELD => field,
             RULE => rule,
-            VALUE => value
+            VALUE => value,
+            ORDER => order
           }
         )
       end
@@ -63,7 +83,8 @@ module Core
         'field' => '_',
         'rule' => 'regex',
         'value' => '.*',
-        'id' => SimpleRule::DEFAULT_RULE_ID
+        'id' => SimpleRule::DEFAULT_RULE_ID,
+        'order' => 0
       )
 
       def match?(document)
@@ -115,6 +136,7 @@ module Core
         Utility::Logger.debug("Failed to coerce value '#{value}' (#{value.class}) based on document value '#{doc_value}' (#{doc_value.class}) due to error: #{e.class}: #{e.message}")
         value.to_s
       end
+
       def is_include?
         policy == Policy::INCLUDE
       end
@@ -122,8 +144,13 @@ module Core
       def is_exclude?
         policy == Policy::EXCLUDE
       end
+
       def to_h
         @rule_hash
+      end
+
+      def ==(other)
+        other.is_a?(SimpleRule) && other.to_h == to_h
       end
 
       private

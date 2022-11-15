@@ -15,19 +15,21 @@ module Connectors
 
     class SimpleRulesParser
 
+      include Core::Filtering
+
       attr_reader :rules
 
       def initialize(rules)
-        sorted = (rules || []).map(&:with_indifferent_access).filter { |r| r[:id] != 'DEFAULT' }.sort_by { |r| r[:order] }
+        begin
+          sorted = (rules || []).map { |r| SimpleRule.new(r) }.filter { |r| r.id != 'DEFAULT' }.sort_by(&:order)
+        rescue StandardError => e
+          raise FilteringRulesValidationError, "Invalid rule: #{e.message}"
+        end
         @rules = validate(sorted)
       end
 
       def parse
-        merge_rules(@rules.map do |rule_hash|
-          rule = Core::Filtering::SimpleRule.new(rule_hash)
-          unless rule.is_include? || rule.is_exclude?
-            raise FilteringRulesValidationError.new("Unknown policy: #{rule[:policy]}")
-          end
+        merge_rules(@rules.map do |rule|
           parse_rule(rule)
         end)
       end
@@ -39,10 +41,10 @@ module Connectors
         end
         field_acc = {}
         rules.each do |rule|
-          if field_acc[rule[:field]].present?
-            field_acc[rule[:field]] << rule
+          if field_acc[rule.field].present?
+            field_acc[rule.field] << rule
           else
-            field_acc[rule[:field]] = [rule]
+            field_acc[rule.field] = [rule]
           end
         end
         result = []
@@ -94,10 +96,10 @@ module Connectors
         if (field_rules || []).size <= 1
           return field_rules
         end
-        equality_ids = field_rules.filter { |r| r[:rule] == 'Equals' }.map { |r| r[:id] }
+        equality_ids = field_rules.filter { |r| r.rule == SimpleRule::Rule::EQUALS }.map(&:id)
         if equality_ids.size > 1
           # more than one equality rule on the same field, drop all equality rules on the field
-          return field_rules.filter { |r| !equality_ids.include?(r[:id]) }
+          return field_rules.filter { |r| !equality_ids.include?(r.id) }
         end
         field_rules
       end
@@ -105,28 +107,33 @@ module Connectors
       def drop_invalid_starts_with_rules(field_rules)
         result = field_rules.dup
         # check for mutually exclusive start_with
-        include_starts = field_rules.filter { |r| r[:rule] == 'starts_with' && is_include?(r) }
-        exclude_starts = field_rules.filter { |r| r[:rule] == 'starts_with' && is_exclude?(r) }
+        include_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::STARTS_WITH && r.is_include? }
+        exclude_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::STARTS_WITH && r.is_exclude? }
         include_starts.each do |include_start|
-          invalid_excludes = exclude_starts.filter { |exclude_start| include_start[:value].start_with?(exclude_start[:value]) }
-          result = result.delete_if { |r| r[:id] == include_start[:id] || invalid_excludes.any? { |e| e[:id] == r[:id] } }
+          invalid_excludes = exclude_starts.filter { |exclude_start| include_start.value.start_with?(exclude_start.value) }
+          result = result.delete_if { |r| r.id == include_start.id || invalid_excludes.any? { |e| e.id == r.id } }
         end
         result
       end
 
       def validate_rule(rule)
-        op = rule[:rule]&.to_s
-        id = rule[:id]&.to_s
+        op = rule.rule&.to_s
+        id = rule.id&.to_s
         if id.blank?
           raise FilteringRulesValidationError.new('Rule id is required')
         end
         case op
-        when 'Equals', '>', '<', 'starts_with', 'ends_with'
+        when SimpleRule::Rule::EQUALS,
+          SimpleRule::Rule::GREATER_THAN,
+          SimpleRule::Rule::LESS_THAN,
+          SimpleRule::Rule::STARTS_WITH,
+          SimpleRule::Rule::ENDS_WITH,
+          SimpleRule::Rule::CONTAINS
           nil
-        when 'regex'
+        when SimpleRule::Rule::REGEX
           # check validity of regex
           begin
-            Regexp.new(rule[:value])
+            Regexp.new(rule.value)
           rescue RegexpError => e
             raise FilteringRulesValidationError.new("Invalid regex rule: #{rule} : (#{e.message})")
           end

@@ -11,9 +11,17 @@ require 'core/filtering/simple_rule'
 describe Connectors::MongoDB::MongoRulesParser do
   let(:policy) { '' }
   let(:operator) { '' }
+  let(:ops) do
+    {
+      :equals => Core::Filtering::SimpleRule::Rule::EQUALS,
+      :regex => Core::Filtering::SimpleRule::Rule::REGEX
+    }
+  end
 
-  subject { described_class.new(rules) }
-
+  let(:field) { 'foo' }
+  let(:value) { 'bar' }
+  let(:policy) { Core::Filtering::SimpleRule::Policy::INCLUDE }
+  let(:operator) { Core::Filtering::SimpleRule::Rule::EQUALS }
   let(:rules) do
     [
       {
@@ -21,18 +29,18 @@ describe Connectors::MongoDB::MongoRulesParser do
         Core::Filtering::SimpleRule::FIELD => field,
         Core::Filtering::SimpleRule::VALUE => value,
         Core::Filtering::SimpleRule::POLICY => policy,
-        Core::Filtering::SimpleRule::RULE => operator
+        Core::Filtering::SimpleRule::RULE => operator,
+        Core::Filtering::SimpleRule::ORDER => 0
       }
     ]
   end
-  let(:field) { 'foo' }
-  let(:value) { 'bar' }
-  let(:policy) { Core::Filtering::SimpleRule::Policy::INCLUDE }
-  let(:operator) { Core::Filtering::SimpleRule::Rule::EQUALS }
+
+  subject do
+    described_class.new(rules)
+  end
 
   describe '#parse' do
     context 'with one non-default rule' do
-      let(:rules) { [{ id: '123', field: 'foo', value: 'bar', policy: policy, rule: operator }] }
       context 'on include rule' do
         context Core::Filtering::SimpleRule::Rule::EQUALS do
           it 'parses rule as equals' do
@@ -55,14 +63,14 @@ describe Connectors::MongoDB::MongoRulesParser do
           end
         end
         context 'starts with' do
-          let(:operator) { 'starts_with' }
+          let(:operator) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
           it 'parses rule as starts with' do
             result = subject.parse
             expect(result).to match({ 'foo' => /^bar/ })
           end
         end
         context 'ends with' do
-          let(:operator) { 'ends_with' }
+          let(:operator) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
           it 'parses rule as ends with' do
             result = subject.parse
             expect(result).to match({ 'foo' => /bar$/ })
@@ -174,41 +182,6 @@ describe Connectors::MongoDB::MongoRulesParser do
       end
     end
 
-    context 'with invalid policy' do
-      let(:policy) { 'invalid' }
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown policy/)
-      end
-    end
-
-    context 'with empty string value' do
-      let(:value) { '' }
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Value is required/)
-      end
-    end
-
-    context 'with empty string field' do
-      let(:field) { '' }
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Field is required/)
-      end
-    end
-
-    context 'with nil value' do
-      let(:value) { nil }
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Value is required/)
-      end
-    end
-
-    context 'with nil field' do
-      let(:field) { nil }
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Field is required/)
-      end
-    end
-
     context 'with non-existent value' do
       let(:rules) do
         [
@@ -221,7 +194,7 @@ describe Connectors::MongoDB::MongoRulesParser do
         ]
       end
       it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Value is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /value is required/)
       end
     end
 
@@ -237,7 +210,7 @@ describe Connectors::MongoDB::MongoRulesParser do
         ]
       end
       it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Field is required/)
+        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /field is required/)
       end
     end
   end
@@ -250,7 +223,7 @@ describe Connectors::MongoDB::MongoRulesParser do
         expect { subject }.not_to raise_error
       end
       it 'keeps the rule' do
-        expect(subject.rules).to match(rules)
+        expect(subject.rules).to match_array(rules.map { |r| Core::Filtering::SimpleRule.new(r) })
       end
     end
 
@@ -270,47 +243,66 @@ describe Connectors::MongoDB::MongoRulesParser do
     end
 
     context 'with no id on the rule' do
-      let(:rules) { [{ field: 'foo', value: 'bar', policy: 'include', rule: 'Equals' }] }
-      it_behaves_like 'raises_validation_error', /Rule id is required/
+      let(:rules) { [{ field: 'foo', value: 'bar', policy: 'include', rule: ops[:equals] }] }
+      it_behaves_like 'raises_validation_error', /id is required/
     end
 
     context 'with invalid operator' do
       let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'invalid' }] }
-      it 'raises an error' do
-        expect { subject.validate(rules) }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown operator/)
-      end
+      it_behaves_like 'raises_validation_error', /Unknown operator/
     end
 
     context 'regex' do
       context 'with valid regex' do
-        let(:rules) { [{ id: '1', field: 'foo', value: '^123$', policy: 'include', rule: 'regex' }] }
-        it 'contains valid rule' do
-          expect(subject.validate(rules)).to contain_exactly(rules[0])
-        end
+        let(:rules) { [{ id: '1', field: 'foo', value: '^123$', policy: 'include', rule: ops[:regex] }] }
+        it_behaves_like 'keeps a valid rule'
       end
 
       context 'with invalid regex' do
         let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'regex' }] }
-        it 'raises an error' do
-          expect { subject.validate(rules) }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Invalid regex/)
-        end
+        it_behaves_like 'raises_validation_error', /Invalid regex/
       end
     end
 
     context 'equality' do
       context 'with valid equals rule' do
-        let(:rules) { [{ id: '1', field: 'foo', value: '123', policy: 'include', rule: 'Equals' }] }
+        let(:rules) { [{ id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:equals] }] }
         it_behaves_like 'keeps a valid rule'
       end
       context 'with two equals rules' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: 'Equals' },
-            { id: '2', field: 'foo', value: '456', policy: 'include', rule: 'Equals' }
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:equals] },
+            { id: '2', field: 'foo', value: '456', policy: 'include', rule: ops[:equals] }
           ]
         end
         it_behaves_like 'filters invalid rules'
       end
+    end
+
+    context 'with invalid policy' do
+      let(:policy) { 'invalid' }
+      it_behaves_like 'raises_validation_error', /Invalid policy/
+    end
+
+    context 'with empty string value' do
+      let(:value) { '' }
+      it_behaves_like 'raises_validation_error', /value is required/
+    end
+
+    context 'with empty string field' do
+      let(:field) { '' }
+      it_behaves_like 'raises_validation_error', /field is required/
+    end
+
+    context 'with nil value' do
+      let(:value) { nil }
+      it_behaves_like 'raises_validation_error', /value is required/
+    end
+
+    context 'with nil field' do
+      let(:field) { nil }
+      it_behaves_like 'raises_validation_error', /field is required/
     end
   end
 end
