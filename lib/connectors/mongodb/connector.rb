@@ -9,6 +9,7 @@
 require 'connectors/base/connector'
 require 'core/filtering/validation_status'
 require 'connectors/mongodb/mongo_rules_parser'
+require 'connectors/mongodb/mongo_advanced_snippet_against_schema_validator'
 require 'mongo'
 require 'utility'
 
@@ -51,23 +52,8 @@ module Connectors
         }
       end
 
-      def self.validate_filtering(filtering = {})
-        valid_filtering = { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
-
-        return valid_filtering unless filtering.present?
-
-        filter = Utility::Filtering.extract_filter(filtering)
-
-        advanced_filter_config = filter[:advanced_snippet] || {}
-        filter_keys = advanced_filter_config&.keys
-
-        if !filter_keys&.empty? && (filter_keys.size != 1 || !ALLOWED_TOP_LEVEL_FILTER_KEYS.include?(filter_keys[0]&.to_s))
-          return { :state => Core::Filtering::ValidationStatus::INVALID,
-                   :errors => [{ :ids => ['wrong-keys'],
-                                 :messages => ["Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{filter_keys}'."] }] }
-        end
-
-        valid_filtering
+      def self.advanced_snippet_validator
+        MongoAdvancedSnippetAgainstSchemaValidator
       end
 
       def initialize(configuration: {}, job_description: {})
