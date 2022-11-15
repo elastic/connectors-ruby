@@ -24,6 +24,7 @@ ecs_logging: true
 poll_interval: 3
 termination_timeout: 60
 heartbeat_interval: 1800
+job_cleanup_interval: 300
 
 native_mode: true
 connector_id: CHANGEME

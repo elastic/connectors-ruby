@@ -21,7 +21,7 @@ module App
     MIN_THREADS = (App::Config.dig(:thread_pool, :min_threads) || 0).to_i
     MAX_THREADS = (App::Config.dig(:thread_pool, :max_threads) || 5).to_i
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
-    JOB_CLEANUP_INTERVAL = 60 * 5
+    JOB_CLEANUP_INTERVAL = (App::Config.job_cleanup_interval || 60 * 5).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
 
