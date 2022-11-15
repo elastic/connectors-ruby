@@ -60,25 +60,12 @@ module Connectors
         if field_rules.size <= 1
           return field_rules
         end
-        # drop contradicting equality rules
+        # drop contradicting rules
         result = drop_invalid_equality_rules(field_rules)
-        if result.size > 1
-          result = drop_invalid_starts_with_rules(result)
-        end
-        if result.size > 1
-          result = drop_invalid_ends_with_rules(result)
-        end
-
-        # # check for overlapping ranges
-        # ranges = field_rules.filter { |r| r[:rule] == '>' || r[:rule] == '<' }
-        # ranges.each_with_index do |r, i|
-        #   next if i == ranges.size - 1
-        #   next_r = ranges[i + 1]
-        #   if r[:value] == next_r[:value]
-        #     raise FilteringRulesValidationError.new("Contradicting rules for field: #{field}. Can't have overlapping ranges.")
-        #   end
-        # end
-        result
+        result = drop_invalid_starts_with_rules(result)
+        result = drop_invalid_ends_with_rules(result)
+        result = collapse_range_rules(result)
+        drop_invalid_range_rules(result)
       end
 
       def drop_invalid_equality_rules(field_rules)
@@ -94,6 +81,9 @@ module Connectors
       end
 
       def drop_invalid_starts_with_rules(field_rules)
+        if (field_rules || []).size <= 1
+          return field_rules
+        end
         result = field_rules.dup
         # check for exclude and include with the same or overlapping start_with
         include_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::STARTS_WITH && r.is_include? }
@@ -109,6 +99,9 @@ module Connectors
       end
 
       def drop_invalid_ends_with_rules(field_rules)
+        if (field_rules || []).size <= 1
+          return field_rules
+        end
         result = field_rules.dup
         # check for exclude and include with the same or overlapping ends_with
         include_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::ENDS_WITH && r.is_include? }
@@ -118,6 +111,46 @@ module Connectors
           if invalid_excludes.present?
             result -= invalid_excludes
             result -= [include_start]
+          end
+        end
+        result
+      end
+
+      def collapse_range_rules(field_rules)
+        if (field_rules || []).size <= 1
+          return field_rules
+        end
+        result = field_rules.dup
+        greater_ranges = field_rules.filter { |r| r.rule == SimpleRule::Rule::GREATER_THAN }
+        greater_ranges.each do |range|
+          result -= greater_ranges.filter { |r| r.id != range.id && r.policy == range.policy && r.value >= range.value }
+        end
+        lesser_ranges = field_rules.filter { |r| r.rule == SimpleRule::Rule::LESS_THAN }
+        lesser_ranges.each do |range|
+          result -= lesser_ranges.filter { |r| r.id != range.id && r.policy == range.policy && r.value <= range.value }
+        end
+        result
+      end
+
+      def drop_invalid_range_rules(field_rules)
+        if (field_rules || []).size <= 1
+          return field_rules
+        end
+        result = field_rules.dup
+        greater_ranges = field_rules.filter { |r| r.rule == SimpleRule::Rule::GREATER_THAN }
+        greater_ranges.each do |range|
+          conflicts = field_rules.filter { |r| r.id != range.id && r.policy == range.policy && r.rule == SimpleRule::Rule::LESS_THAN && r.value <= range.value }
+          if conflicts.present?
+            result -= conflicts
+            result -= [range]
+          end
+        end
+        lesser_ranges = field_rules.filter { |r| r.rule == SimpleRule::Rule::LESS_THAN }
+        lesser_ranges.each do |range|
+          conflicts = field_rules.filter { |r| r.id != range.id && r.policy == range.policy && r.rule == SimpleRule::Rule::GREATER_THAN && r.value >= range.value }
+          if conflicts.present?
+            result -= conflicts
+            result -= [range]
           end
         end
         result

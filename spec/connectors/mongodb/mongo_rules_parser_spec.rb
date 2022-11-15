@@ -16,7 +16,9 @@ describe Connectors::MongoDB::MongoRulesParser do
       :equals => Core::Filtering::SimpleRule::Rule::EQUALS,
       :regex => Core::Filtering::SimpleRule::Rule::REGEX,
       :starts_with => Core::Filtering::SimpleRule::Rule::STARTS_WITH,
-      :ends_with => Core::Filtering::SimpleRule::Rule::ENDS_WITH
+      :ends_with => Core::Filtering::SimpleRule::Rule::ENDS_WITH,
+      :greater_then => Core::Filtering::SimpleRule::Rule::GREATER_THAN,
+      :less_then => Core::Filtering::SimpleRule::Rule::LESS_THAN
     }
   end
 
@@ -179,12 +181,22 @@ describe Connectors::MongoDB::MongoRulesParser do
   end
 
   describe '#validate' do
+    let(:expected_rules) { [] }
     shared_examples_for 'keeps valid rules' do
       it 'does not raise error' do
         expect { subject }.not_to raise_error
       end
       it 'keeps the rule' do
         expect(subject.rules).to match_array(rules.map { |r| Core::Filtering::SimpleRule.new(r) })
+      end
+    end
+
+    shared_examples_for 'keeps specific rules' do
+      it 'does not raise error' do
+        expect { subject }.not_to raise_error
+      end
+      it 'matches expected rules' do
+        expect(subject.rules).to match_array(expected_rules.map { |r| Core::Filtering::SimpleRule.new(r) })
       end
     end
 
@@ -396,6 +408,47 @@ describe Connectors::MongoDB::MongoRulesParser do
           [
             { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
             { id: '2', field: 'foo', value: '0123', policy: 'exclude', rule: ops[:ends_with] }
+          ]
+        end
+        it_behaves_like 'keeps valid rules'
+      end
+    end
+
+    context 'ranges' do
+      context 'collapses include greater_then' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:greater_then] },
+            { id: '2', field: 'foo', value: '30', policy: 'include', rule: ops[:greater_then] }
+          ]
+        end
+        let(:expected_rules) { [rules[0]] }
+        it_behaves_like 'keeps specific rules'
+      end
+      context 'does not collapse include/exclude greater_then' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:greater_then] },
+            { id: '2', field: 'foo', value: '30', policy: 'exclude', rule: ops[:greater_then] }
+          ]
+        end
+        it_behaves_like 'keeps valid rules'
+      end
+      context 'collapses include less_then' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:less_then] },
+            { id: '2', field: 'foo', value: '30', policy: 'include', rule: ops[:less_then] }
+          ]
+        end
+        let(:expected_rules) { [rules[1]] }
+        it_behaves_like 'keeps specific rules'
+      end
+      context 'does not collapse include/exclude less_then' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:less_then] },
+            { id: '2', field: 'foo', value: '30', policy: 'exclude', rule: ops[:less_then] }
           ]
         end
         it_behaves_like 'keeps valid rules'
