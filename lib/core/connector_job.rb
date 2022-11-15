@@ -23,7 +23,7 @@ module Core
     end
 
     def self.pending_jobs(page_size = DEFAULT_PAGE_SIZE)
-      query = { terms: { status: Connectors::SyncStatus::PENDING_STATUES } }
+      query = { terms: { status: Connectors::SyncStatus::PENDING_STATUSES } }
       fetch_jobs_by_query(query, page_size)
     end
 
@@ -60,7 +60,7 @@ module Core
     end
 
     def connector_snapshot
-      self[:connector]
+      self[:connector] || {}
     end
 
     def connector_id
@@ -68,7 +68,7 @@ module Core
     end
 
     def index_name
-      connector_snapshot[:configuration]
+      connector_snapshot[:index_name]
     end
 
     def language
@@ -89,6 +89,36 @@ module Core
 
     def pipeline
       connector_snapshot[:pipeline]
+    end
+
+    def connector
+      @connector ||= ConnectorSettings.fetch_by_id(connector_id)
+    end
+
+    def done!(ingestion_stats = {}, connector_metadata = {})
+      ingestion_stats ||= {}
+      ingestion_stats[:total_document_count] = ElasticConnectorActions.document_count(index_name)
+      doc = {
+        :last_seen => Time.now,
+        :completed_at => Time.now,
+        :status => Connectors::SyncStatus::COMPLETED,
+        :error => nil
+      }.merge(ingestion_stats)
+      doc[:metadata] = connector_metadata if connector_metadata&.any?
+      ElasticConnectorActions.update_job_fields(id, doc)
+    end
+
+    def error!(message, ingestion_stats = {}, connector_metadata = {})
+      ingestion_stats ||= {}
+      ingestion_stats[:total_document_count] = ElasticConnectorActions.document_count(index_name)
+      doc = {
+        :last_seen => Time.now,
+        :completed_at => Time.now,
+        :status => Connectors::SyncStatus::ERROR,
+        :error => message
+      }.merge(ingestion_stats)
+      doc[:metadata] = connector_metadata if connector_metadata&.any?
+      ElasticConnectorActions.update_job_fields(id, doc)
     end
 
     private

@@ -507,31 +507,15 @@ module Core
       end
 
       def update_connector_fields(connector_id, doc = {}, seq_no = nil, primary_term = nil)
-        return if doc.empty?
-        update_args = {
-          :index => Utility::Constants::CONNECTORS_INDEX,
-          :id => connector_id,
-          :body => { :doc => doc },
-          :refresh => true,
-          :retry_on_conflict => 3
-        }
-        # seq_no and primary_term are used for optimistic concurrency control
-        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html
-        if seq_no && primary_term
-          update_args[:if_seq_no] = seq_no
-          update_args[:if_primary_term] = primary_term
-          update_args.delete(:retry_on_conflict)
-        end
-        begin
-          client.update(update_args)
-        rescue Elastic::Transport::Transport::Errors::Conflict
-          # VersionConflictException
-          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
-          raise ConnectorVersionChangedError.new(connector_id, seq_no, primary_term)
-        end
+        update_doc_fields(Utility::Constants::CONNECTORS_INDEX, connector_id, doc, seq_no, primary_term)
+      end
+
+      def update_job_fields(job_id, doc = {}, seq_no = nil, primary_term = nil)
+        update_doc_fields(Utility::Constants::JOB_INDEX, job_id, doc, seq_no, primary_term)
       end
 
       def document_count(index_name)
+        client.indices.refresh(:index => index_name)
         client.count(:index => index_name)['count']
       end
 
@@ -561,6 +545,31 @@ module Core
         if domain_validations.key?(domain)
           new_validation_state = { :draft => { :validation => domain_validations[domain] } }
           filter.deep_merge!(new_validation_state)
+        end
+      end
+
+      def update_doc_fields(index, id, doc = {}, seq_no = nil, primary_term = nil)
+        return if doc.empty?
+        update_args = {
+          :index => index,
+          :id => id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        }
+
+        if seq_no && primary_term
+          update_args[:if_seq_no] = seq_no
+          update_args[:if_primary_term] = primary_term
+          update_args.delete(:retry_on_conflict)
+        end
+
+        begin
+          client.update(update_args)
+        rescue Elastic::Transport::Transport::Errors::Conflict
+          # VersionConflictException
+          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
+          raise ConnectorVersionChangedError.new(id, seq_no, primary_term)
         end
       end
     end

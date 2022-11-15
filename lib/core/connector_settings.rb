@@ -119,6 +119,20 @@ module Core
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
     end
 
+    def update_last_sync!(job)
+      doc = {
+        :last_sync_status => job.status,
+        :last_synced => Time.now,
+        :last_sync_error => job.error,
+        :error => job.error
+      }
+      if job.terminated?
+        doc[:last_indexed_document_count] = job[:indexed_document_count]
+        doc[:last_deleted_document_count] = job[:deleted_document_count]
+      end
+      Core::ElasticConnectorActions.update_connector_fields(job.connector_id, doc)
+    end
+
     private
 
     def initialize(es_response, connectors_meta)
