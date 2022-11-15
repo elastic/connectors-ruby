@@ -61,7 +61,7 @@ module Core
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
         Utility::Logger.info("Checking active filtering for sync job #{job_id} for connector #{@connector_settings.id}.")
-        validate_filtering(job_description[:filtering])
+        validate_filtering(job_description.dig(:connector, :filtering))
         Utility::Logger.debug("Active filtering for sync job #{job_id} for connector #{@connector_settings.id} is valid.")
 
         connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: job_description)

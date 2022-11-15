@@ -75,11 +75,13 @@ describe Core::ConnectorSettings do
       context 'index specific values are present' do
         let(:elasticsearch_response) {
           {
-            :pipeline => {
-              :name => 'bar',
-              :extract_binary_content => true,
-              :reduce_whitespace => false,
-              :run_ml_inference => true
+            :_source => {
+              :pipeline => {
+                :name => 'bar',
+                :extract_binary_content => true,
+                :reduce_whitespace => false,
+                :run_ml_inference => true
+              }
             }
           }
         }
@@ -98,15 +100,17 @@ describe Core::ConnectorSettings do
     context 'filtering is present' do
       let(:elasticsearch_response) {
         {
-          :filtering => [
-            {
-              :domain => 'DEFAULT',
-              :active => {
-                :rules => [],
-                :advanced_snippet => {},
+          :_source => {
+            :filtering => [
+              {
+                :domain => 'DEFAULT',
+                :active => {
+                  :rules => [],
+                  :advanced_snippet => {},
+                }
               }
-            }
-          ]
+            ]
+          }
         }
       }
 

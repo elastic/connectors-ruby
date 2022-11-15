@@ -8,7 +8,6 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/connector_status'
-require 'connectors/registry'
 require 'core/elastic_connector_actions'
 require 'utility'
 
@@ -33,6 +32,7 @@ module Core
     end
 
     def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
+      require 'connectors/registry' unless defined?(Connectors::REGISTRY)
       query = {
         bool: {
           filter: [
@@ -84,25 +84,25 @@ module Core
 
     def filtering
       # assume for now, that first object in filtering array or a filter object itself is the only filtering object
-      filtering = @elasticsearch_response[:filtering]
+      filtering = @elasticsearch_response.dig(:_source, :filtering)
 
       Utility::Filtering.extract_filter(filtering)
     end
 
     def request_pipeline
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
     end
 
     def extract_binary_content?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
     end
 
     def reduce_whitespace?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
     end
 
     def run_ml_inference?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
     end
 
     def formatted

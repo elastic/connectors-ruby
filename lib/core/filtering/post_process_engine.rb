@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'core/filtering'
+require 'utility/filtering'
 
 module Core
   module Filtering
@@ -14,7 +15,7 @@ module Core
       attr_reader :rules
 
       def initialize(job_description)
-        @rules = ordered_rules(job_description['filtering'])
+        @rules = ordered_rules(job_description.dig('connector', 'filtering'))
       end
 
       def process(document)
@@ -28,8 +29,8 @@ module Core
 
       private
 
-      def ordered_rules(job_filtering, domain = Core::Filtering::DEFAULT_DOMAIN)
-        job_rules = job_filtering.find { |filtering_domain| filtering_domain[Core::Filtering::DOMAIN] == domain }[Core::Filtering::RULES]
+      def ordered_rules(job_filtering)
+        job_rules = Utility::Filtering.extract_filter(job_filtering)['rules']
         sorted_rules = job_rules.sort_by { |rule| rule['order'] }.reject { |rule| rule['id'] == Core::Filtering::SimpleRule::DEFAULT_RULE_ID }
         sorted_rules.each_with_object([]) { |rule, output| output << SimpleRule.new(rule) }
       end

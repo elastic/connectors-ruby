@@ -35,11 +35,11 @@ describe Core::SyncJobRunner do
   let(:filtering) do
     [
       {
-        Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
-        Core::Filtering::RULES => [
+        'domain' => Core::Filtering::DEFAULT_DOMAIN,
+        'rules' => [
           Core::Filtering::SimpleRule::DEFAULT_RULE.to_h
         ],
-        Core::Filtering::ADVANCED_SNIPPET => {
+        'advanced_snippet' => {
           'value' => {}
         }
       }
@@ -66,7 +66,9 @@ describe Core::SyncJobRunner do
     {
       '_id' => job_id,
       '_source' => {
-        'filtering' => filtering
+        'connector' => {
+          'filtering' => filtering
+        }
       }
     }
   end

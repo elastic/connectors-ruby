@@ -108,6 +108,7 @@ module Connectors
           loop do
             found_in_page = 0
 
+            Utility::Logger.info("Requesting #{PAGE_SIZE} documents from MongoDB (Starting at #{skip})")
             view = cursor.skip(skip).limit(PAGE_SIZE)
             view.each do |document|
               yield serialize(document)

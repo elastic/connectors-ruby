@@ -11,12 +11,6 @@ require 'utility/logger'
 module Core
   module Filtering
     class SimpleRule
-      POLICY = 'policy'
-      FIELD = 'field'
-      RULE = 'rule'
-      VALUE = 'value'
-      ID = 'id'
-
       DEFAULT_RULE_ID = 'DEFAULT'
 
       class Policy
@@ -37,23 +31,24 @@ module Core
       attr_reader :policy, :field, :rule, :value, :id
 
       def initialize(rule_hash)
-        @policy = rule_hash.fetch(POLICY)
-        @field = rule_hash.fetch(FIELD)
-        @rule = rule_hash.fetch(RULE)
-        @value = rule_hash.fetch(VALUE)
-        @id = rule_hash.fetch(ID)
+        @policy = rule_hash.fetch('policy')
+        @field = rule_hash.fetch('field')
+        @rule = rule_hash.fetch('rule')
+        @value = rule_hash.fetch('value')
+        @id = rule_hash.fetch('id')
         @rule_hash = rule_hash
       rescue KeyError => e
         raise "#{e.key} is required"
       end
+
       def self.from_args(id, policy, field, rule, value)
         SimpleRule.new(
           {
-            ID => id,
-            POLICY => policy,
-            FIELD => field,
-            RULE => rule,
-            VALUE => value
+            'id' => id,
+            'policy' => policy,
+            'field' => field,
+            'rule' => rule,
+            'value' => value
           }
         )
       end
@@ -115,6 +110,7 @@ module Core
         Utility::Logger.debug("Failed to coerce value '#{value}' (#{value.class}) based on document value '#{doc_value}' (#{doc_value.class}) due to error: #{e.class}: #{e.message}")
         value.to_s
       end
+
       def is_include?
         policy == Policy::INCLUDE
       end
@@ -122,6 +118,7 @@ module Core
       def is_exclude?
         policy == Policy::EXCLUDE
       end
+
       def to_h
         @rule_hash
       end
