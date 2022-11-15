@@ -15,6 +15,7 @@ module Connectors
     class AdvancedSnippetAgainstSchemaValidator < Connectors::Base::AdvancedSnippetValidator
 
       MAX_RECURSION_DEPTH = 50
+      ADVANCED_SNIPPET_ID = 'advanced_snippet'
 
       def initialize(advanced_snippet, schema)
         super(advanced_snippet)
@@ -111,50 +112,60 @@ module Connectors
       def unexpected_field(expected_fields, actual_fields)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
-          :errors => {
-            :ids => 'unexpected-fields',
-            :messages => "Encountered unexpected fields '#{actual_fields}'. Expected: '#{expected_fields}'."
-          }
+          :errors => [
+            {
+              :ids => [ADVANCED_SNIPPET_ID],
+              :messages => ["Encountered unexpected fields '#{actual_fields}'. Expected: '#{expected_fields}'."]
+            }
+          ]
         }
       end
 
       def wrong_type(field_name, expected_type, actual_type)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
-          :errors => {
-            :ids => "wrong-type-#{field_name}",
-            :messages => "Expected field type '#{expected_type.is_a?(Proc) ? 'custom matcher' : expected_type}' for field '#{field_name}', but got type '#{actual_type}'."
-          }
+          :errors => [
+            {
+              :ids => [ADVANCED_SNIPPET_ID],
+              :messages => ["Expected field type '#{expected_type.is_a?(Proc) ? 'custom matcher' : expected_type}' for field '#{field_name}', but got type '#{actual_type}'."]
+            }
+          ]
         }
       end
 
       def wrong_names(actual_field_names, expected_field_name)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
-          :errors => {
-            :ids => "wrong-name-#{expected_field_name}",
-            :messages => "Expected field name '#{expected_field_name}', but got #{actual_field_names}."
-          }
+          :errors => [
+            {
+              :ids => [ADVANCED_SNIPPET_ID],
+              :messages => ["Expected field name '#{expected_field_name}', but got #{actual_field_names}."]
+            }
+          ]
         }
       end
 
       def fields_constraint_violation
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
-          :errors => {
-            :ids => 'fields-constraint-violation',
-            :messages => 'A fields constraint was violated. Check advanced snippet field constraints.'
-          }
+          :errors => [
+            {
+              :ids => [ADVANCED_SNIPPET_ID],
+              :messages => ['A fields constraint was violated. Check advanced snippet field constraints.']
+            }
+          ]
         }
       end
 
       def unexpected_error
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
-          :errors => {
-            :ids => 'unexpected-error',
-            :messages => 'Unexpected error. Check logs for details.'
-          }
+          :errors => [
+            {
+              :ids => [ADVANCED_SNIPPET_ID],
+              :messages => ['Unexpected error. Check logs for details.']
+            }
+          ]
         }
       end
     end

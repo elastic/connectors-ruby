@@ -27,6 +27,7 @@ shared_examples_for 'filtering is invalid' do
 
     expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
     expect(validation_result[:errors]).to_not be_empty
+    expect(validation_result[:errors]).to be_an(Array)
   end
 end
 
@@ -39,17 +40,14 @@ shared_examples_for 'advanced snippet is valid' do
   end
 end
 
-shared_examples_for 'advanced snippet is invalid' do |expected_errors|
+shared_examples_for 'advanced snippet is invalid' do
   it '' do
     validation_result = subject.is_snippet_valid?
 
     expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
     expect(validation_result[:errors]).to_not be_empty
-
-    expected_errors ||= []
-
-    unless expected_errors.empty?
-      # TODO: validate errors
-    end
+    expect(validation_result[:errors]).to be_an(Array)
+    expect(validation_result[:errors][0][:ids]).to eq(['advanced_snippet'])
+    expect(validation_result[:errors][0][:messages]).to be_an(Array)
   end
 end
