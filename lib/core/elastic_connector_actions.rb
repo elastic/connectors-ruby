@@ -527,31 +527,6 @@ module Core
         update_doc_fields(Utility::Constants::JOB_INDEX, job_id, doc, seq_no, primary_term)
       end
 
-      def update_job_fields(job_id, doc = {}, seq_no = nil, primary_term = nil)
-        return if doc.empty?
-        update_args = {
-          :index => Utility::Constants::JOB_INDEX,
-          :id => job_id,
-          :body => { :doc => doc },
-          :refresh => true,
-          :retry_on_conflict => 3
-        }
-
-        if seq_no && primary_term
-          update_args[:if_seq_no] = seq_no
-          update_args[:if_primary_term] = primary_term
-          update_args.delete(:retry_on_conflict)
-        end
-
-        begin
-          client.update(update_args)
-        rescue Elastic::Transport::Transport::Errors::Conflict
-          # VersionConflictException
-          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
-          raise ConnectorVersionChangedError.new(job_id, seq_no, primary_term)
-        end
-      end
-
       def document_count(index_name)
         client.indices.refresh(:index => index_name)
         client.count(:index => index_name)['count']
