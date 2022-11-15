@@ -59,5 +59,7 @@ gem 'elasticsearch', '~> 8.5.0'
 # Dependencies for oauth
 gem 'signet', '~> 0.16.0'
 
+# Dependency for example connector
+gem 'faker'
 # Dependency for mongo connector
 gem 'mongo', '~> 2.18'
