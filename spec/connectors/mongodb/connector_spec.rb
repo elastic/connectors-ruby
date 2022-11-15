@@ -328,12 +328,12 @@ describe Connectors::MongoDB::Connector do
     context 'when collection is found' do
       context 'when data is distributed in multiple pages' do
         let(:page_size) { 3 }
-        let(:doc_2) { { '_id' => '2', 'more' => { 'nested' => 'data' } } }
+        let(:doc2) { { '_id' => '2', 'more' => { 'nested' => 'data' } } }
 
         let(:first_page_data) do
           [
             { '_id' => '1', 'some' => { 'nested' => 'data' } },
-            doc_2,
+            doc2,
             { '_id' => '167', 'nothing' => nil }
           ]
         end
@@ -395,7 +395,7 @@ describe Connectors::MongoDB::Connector do
           let(:tolerable_error) { 'mock serialization failure' }
           before(:each) do
             allow(subject).to receive(:serialize).and_call_original
-            allow(subject).to receive(:serialize).with(doc_2).and_raise(tolerable_error)
+            allow(subject).to receive(:serialize).with(doc2).and_raise(tolerable_error)
           end
 
           it 'does not crash' do
