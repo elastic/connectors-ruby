@@ -21,9 +21,13 @@ module Connectors
           }
         ]
 
-        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => errors } if @advanced_snippet.present? && !@advanced_snippet.empty?
-
-        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+        validation_result = if @advanced_snippet.present? && !@advanced_snippet.empty?
+                              { :state => Core::Filtering::ValidationStatus::INVALID, :errors => errors }
+                            else
+                              { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+                            end
+        log_validation_result(validation_result)
+        validation_result
       end
 
     end

@@ -23,7 +23,9 @@ module Connectors
       end
 
       def is_snippet_valid?
-        validate_against_schema(@schema, @advanced_snippet)
+        validation_result = validate_against_schema(@schema, @advanced_snippet)
+        log_validation_result(validation_result)
+        validation_result
       end
 
       private
@@ -81,9 +83,7 @@ module Connectors
       def type_error_present?(schema_type, snippet_value)
         return !schema_type.call(snippet_value) if schema_type.is_a?(Proc)
 
-        return true unless snippet_value.is_a?(schema_type)
-
-        false
+        !snippet_value.is_a?(schema_type)
       end
 
       def exceeded_recursion_depth?(recursion_depth)
@@ -121,13 +121,13 @@ module Connectors
         }
       end
 
-      def wrong_type(field_name, expected_type, actual_type)
+      def wrong_type(field_name, expected_type, actual_value)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
               :ids => [ADVANCED_SNIPPET_ID],
-              :messages => ["Expected field type '#{expected_type.is_a?(Proc) ? 'custom matcher' : expected_type}' for field '#{field_name}', but got type '#{actual_type}'."]
+              :messages => ["Expected field type '#{expected_type.is_a?(Proc) ? 'custom matcher' : expected_type}' for field '#{field_name}', but got value '#{actual_value.inspect}' of type '#{actual_value.class}'."]
             }
           ]
         }

@@ -117,6 +117,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
       end
 
       it 'stops logs warning' do
+        allow(Utility::Logger).to receive(:warn)
         expect(Utility::Logger).to receive(:warn).with(include('Recursion depth for filtering validation exceeded'))
 
         subject.is_snippet_valid?

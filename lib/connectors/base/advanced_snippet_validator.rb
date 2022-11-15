@@ -5,6 +5,8 @@
 #
 # frozen_string_literal: true
 
+require 'utility/logger'
+
 module Connectors
   module Base
     class AdvancedSnippetValidator
@@ -17,6 +19,16 @@ module Connectors
         raise 'Advanced Snippet validation not implemented'
       end
 
+      private
+
+      def log_validation_result(validation_result)
+        Utility::Logger.info("Filtering Advanced Configuration validation result: #{validation_result[:state]}")
+        if validation_result[:errors].present?
+          validation_result[:errors].each do |error|
+            Utility::Logger.warn("Validation error for: '#{error[:ids]}': '#{error[:messages]}'")
+          end
+        end
+      end
     end
   end
 end
