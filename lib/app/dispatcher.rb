@@ -92,26 +92,6 @@ module App
         Utility::ExceptionTracking.log_exception(e, 'The connector service failed due to unexpected error.')
       end
 
-      def start_sync_task(connector_settings)
-        start_heartbeat_task(connector_settings)
-        pool.post do
-          Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
-          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-          job_runner = Core::SyncJobRunner.new(
-            connector_settings,
-            (App::Config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i,
-            (App::Config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i
-          )
-          job_runner.execute
-        rescue Core::JobAlreadyRunningError
-          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
-        rescue Core::ConnectorVersionChangedError => e
-          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
-        end
-      end
-
       def start_heartbeat_task(connector_settings)
         pool.post do
           Utility::Logger.info("Sending heartbeat for #{connector_settings.formatted}...")
@@ -153,6 +133,7 @@ module App
           min_threads: MIN_THREADS,
           max_threads: MAX_THREADS,
           max_queue: MAX_QUEUE,
+          app_config: App::Config,
           scheduler: scheduler
         )
 

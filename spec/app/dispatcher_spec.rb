@@ -16,8 +16,6 @@ describe App::Dispatcher do
   let(:filter_validation_job_runner) { double }
   let(:connector_id) { 123 }
   let(:info_message) { nil }
-  let(:max_ingestion_queue_size) { 123 }
-  let(:max_ingestion_queue_bytes) { 123456789 }
 
   before(:each) do
     allow(described_class).to receive(:scheduler).and_return(scheduler)
@@ -42,9 +40,6 @@ describe App::Dispatcher do
     stub_const('App::Dispatcher::MIN_THREADS', 0)
     stub_const('App::Dispatcher::MAX_THREADS', 5)
     stub_const('App::Dispatcher::MAX_QUEUE', 100)
-
-    allow(App::Config).to receive(:max_ingestion_queue_size).and_return(max_ingestion_queue_size)
-    allow(App::Config).to receive(:max_ingestion_queue_bytes).and_return(max_ingestion_queue_bytes)
   end
 
   after(:each) do
@@ -113,33 +108,6 @@ describe App::Dispatcher do
           allow(connector_settings).to receive(:service_type).and_return('')
           allow(connector_settings).to receive(:index_name).and_return('')
           allow(connector_settings).to receive(:id).and_return('connector_id')
-        end
-
-        context 'when config has max_ingestion_* settings overridden' do
-          it 'creates sync job runner with settings from config' do
-            expect(Core::SyncJobRunner).to receive(:new).with(anything, max_ingestion_queue_size, max_ingestion_queue_bytes)
-
-            described_class.start!
-          end
-        end
-
-        context 'when config has not provided max_ingestion_* settings' do
-          let(:max_ingestion_queue_size) { nil }
-          let(:max_ingestion_queue_bytes) { nil }
-
-          let(:default_max_ingestion_queue_size) { 1 }
-          let(:default_max_ingestion_queue_bytes) { 10 }
-
-          before(:each) do
-            stub_const('Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE', default_max_ingestion_queue_size)
-            stub_const('Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES', default_max_ingestion_queue_bytes)
-          end
-
-          it 'creates sync job runner with settings from config' do
-            expect(Core::SyncJobRunner).to receive(:new).with(anything, default_max_ingestion_queue_size, default_max_ingestion_queue_bytes)
-
-            described_class.start!
-          end
         end
 
         shared_examples_for 'sync' do

@@ -6,11 +6,14 @@
 
 # frozen_string_literal: true
 
+require 'utility/constants'
+
 module Core
   module Jobs
     class Consumer
-      def initialize(scheduler:, poll_interval: 3, termination_timeout: 60, min_threads: 1, max_threads: 5, max_queue: 100, idle_time: 5)
+      def initialize(scheduler:, app_config:, poll_interval: 3, termination_timeout: 60, min_threads: 1, max_threads: 5, max_queue: 100, idle_time: 5)
         @scheduler = scheduler
+        @app_config = app_config
         @poll_interval = poll_interval
         @termination_timeout = termination_timeout
         @min_threads = min_threads
@@ -76,7 +79,12 @@ module Core
               pool.post do
                 Utility::Logger.info("Connector #{connector_settings.formatted} picked up the job #{job.id}")
                 Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-                job_runner = Core::SyncJobRunner.new(connector_settings, job)
+                job_runner = Core::SyncJobRunner.new(
+                  connector_settings,
+                  job,
+                  (@app_config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i,
+                  (@app_config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i
+                )
                 job_runner.execute
               rescue Core::JobAlreadyRunningError
                 Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
