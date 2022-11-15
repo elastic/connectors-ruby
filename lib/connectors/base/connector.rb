@@ -61,12 +61,12 @@ module Connectors
 
       attr_reader :rules, :advanced_filter_config
 
-      def initialize(configuration: {}, job_description: {})
+      def initialize(job_description:, configuration: {})
         error_monitor = Utility::ErrorMonitor.new
         @tolerable_error_helper = Connectors::TolerableErrorHelper.new(error_monitor)
 
         @configuration = configuration.dup || {}
-        @job_description = job_description&.dup || {}
+        @job_description = job_description&.dup
 
         filtering = Utility::Filtering.extract_filter(@job_description.dig(:connector, :filtering))
 

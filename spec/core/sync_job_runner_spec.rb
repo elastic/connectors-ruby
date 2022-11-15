@@ -132,6 +132,9 @@ describe Core::SyncJobRunner do
     allow(job).to receive(:make_running!)
     allow(job).to receive(:id).and_return(job_id)
     allow(job).to receive(:es_source).and_return(job_definition['_source'])
+
+    # set to a large number to skip job check
+    stub_const("#{described_class}::JOB_REPORTING_INTERVAL", 10000)
   end
 
   describe '#new' do
