@@ -100,14 +100,14 @@ describe Connectors::MongoDB::MongoRulesParser do
           end
         end
         context 'starts with' do
-          let(:operator) { 'starts_with' }
+          let(:operator) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
           it 'parses rule as not starts with' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$not' => /^bar/ } })
           end
         end
         context 'ends with' do
-          let(:operator) { 'ends_with' }
+          let(:operator) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
           it 'parses rule as not ends with' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$not' => /bar$/ } })
@@ -172,45 +172,6 @@ describe Connectors::MongoDB::MongoRulesParser do
       it 'parses rules as empty' do
         result = subject.parse
         expect(result).to match({})
-      end
-    end
-
-    context 'with invalid operator' do
-      let(:operator) { 'invalid' }
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown operator/)
-      end
-    end
-
-    context 'with non-existent value' do
-      let(:rules) do
-        [
-          {
-            Core::Filtering::SimpleRule::ID => 'test',
-            Core::Filtering::SimpleRule::FIELD => field,
-            Core::Filtering::SimpleRule::POLICY => policy,
-            Core::Filtering::SimpleRule::RULE => operator
-          }
-        ]
-      end
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /value is required/)
-      end
-    end
-
-    context 'with non-existent field' do
-      let(:rules) do
-        [
-          {
-            Core::Filtering::SimpleRule::ID => 'test',
-            Core::Filtering::SimpleRule::VALUE => value,
-            Core::Filtering::SimpleRule::POLICY => policy,
-            Core::Filtering::SimpleRule::RULE => operator
-          }
-        ]
-      end
-      it 'raises error' do
-        expect { subject.parse }.to raise_error(Connectors::Base::FilteringRulesValidationError, /field is required/)
       end
     end
   end
@@ -303,6 +264,45 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with nil field' do
       let(:field) { nil }
       it_behaves_like 'raises_validation_error', /field is required/
+    end
+
+    context 'with invalid operator' do
+      let(:operator) { 'invalid' }
+      it 'raises error' do
+        expect { subject }.to raise_error(Connectors::Base::FilteringRulesValidationError, /Unknown operator/)
+      end
+    end
+
+    context 'with non-existent value' do
+      let(:rules) do
+        [
+          {
+            Core::Filtering::SimpleRule::ID => 'test',
+            Core::Filtering::SimpleRule::FIELD => field,
+            Core::Filtering::SimpleRule::POLICY => policy,
+            Core::Filtering::SimpleRule::RULE => operator
+          }
+        ]
+      end
+      it 'raises error' do
+        expect { subject }.to raise_error(Connectors::Base::FilteringRulesValidationError, /value is required/)
+      end
+    end
+
+    context 'with non-existent field' do
+      let(:rules) do
+        [
+          {
+            Core::Filtering::SimpleRule::ID => 'test',
+            Core::Filtering::SimpleRule::VALUE => value,
+            Core::Filtering::SimpleRule::POLICY => policy,
+            Core::Filtering::SimpleRule::RULE => operator
+          }
+        ]
+      end
+      it 'raises error' do
+        expect { subject }.to raise_error(Connectors::Base::FilteringRulesValidationError, /field is required/)
+      end
     end
   end
 end

@@ -16,12 +16,6 @@ module Connectors
       def parse_rule(rule)
         field = rule.field
         value = rule.value
-        # unless value.present?
-        #   raise Connectors::Base::FilteringRulesValidationError.new("Value is required for field: #{field}")
-        # end
-        # unless field.present?
-        #   raise Connectors::Base::FilteringRulesValidationError.new("Field is required for rule: #{rule}")
-        # end
         op = rule.rule
         case op
         when SimpleRule::Rule::EQUALS

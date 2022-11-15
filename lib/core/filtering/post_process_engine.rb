@@ -30,7 +30,7 @@ module Core
 
       def ordered_rules(job_filtering, domain = Core::Filtering::DEFAULT_DOMAIN)
         job_rules = job_filtering.find { |filtering_domain| filtering_domain[Core::Filtering::DOMAIN] == domain }[Core::Filtering::RULES]
-        sorted_rules = job_rules.sort_by { |rule| rule['order'] }.reject { |rule| rule['id'] == Core::Filtering::SimpleRule::DEFAULT_RULE_ID }
+        sorted_rules = job_rules.sort_by { |rule| rule.fetch('order', 0) }.reject { |rule| rule['id'] == Core::Filtering::SimpleRule::DEFAULT_RULE_ID }
         sorted_rules.each_with_object([]) { |rule, output| output << SimpleRule.new(rule) }
       end
     end

@@ -50,19 +50,25 @@ module Core
         @order = SimpleRule.flex_fetch(rule_hash, ORDER, 0)
         @rule_hash = rule_hash
       rescue KeyError => e
-        raise "#{e.key} is required"
+        raise "#{e.key} is required: #{e.message}"
       end
 
       def self.flex_fetch(hash, key, default_value = nil)
-        if default_value.present?
-          hash.fetch(key, nil) || hash.fetch(key.to_s, nil) || hash.fetch(key.to_sym, default_value)
-        else
-          result = hash.fetch(key, nil) || hash.fetch(key.to_s, nil) || hash.fetch(key.to_sym)
-          unless result.present?
-            raise KeyError.new("'#{key}' is required", key: key)
-          end
-          result
+        result = hash[key]
+        if result.nil?
+          result = hash[key.to_sym]
         end
+        if result.nil?
+          result = hash[key.to_s]
+        end
+        if default_value.nil?
+          if result != false && result.blank?
+            raise KeyError.new("#{key} is required", key: key)
+          end
+        elsif result.nil?
+          result = default_value
+        end
+        result
       end
 
       def self.from_args(id, policy, field, rule, value, order = 0)
