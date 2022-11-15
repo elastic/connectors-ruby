@@ -105,4 +105,3 @@ module Utility
     end
   end
 end
-

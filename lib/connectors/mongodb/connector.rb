@@ -231,7 +231,6 @@ module Connectors
       end
 
       def serialize(mongodb_document)
-        raise 'lalala'
         # This is some lazy serialization here.
         # Problem: MongoDB has its own format of things - e.g. ids are Bson::ObjectId, which when serialized to JSON
         # will produce something like: 'id': { '$oid': '536268a06d2d7019ba000000' }, which is not good for us

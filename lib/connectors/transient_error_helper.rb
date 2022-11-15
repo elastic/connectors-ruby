@@ -1,10 +1,20 @@
+#
+# Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+# or more contributor license agreements. Licensed under the Elastic License;
+# you may not use this file except in compliance with the Elastic License.
+#
+
+require 'utility/logger'
+require 'utility/exception_tracking'
+require 'utility/error_monitor'
+
 module Connectors
   class TransientErrorHelper
     def initialize(error_monitor)
       @error_monitor = error_monitor
     end
 
-    def yield_single_document(identifier: nil, &block)
+    def yield_single_document(identifier: nil)
       Utility::Logger.debug("Extracting single document for #{identifier}") if identifier
       yield
       @error_monitor.note_success
@@ -19,6 +29,7 @@ module Connectors
     end
 
     private
+
     def identifying_error_message(identifier)
       identifier.present? ? " of '#{identifier}'" : ''
     end

@@ -9,14 +9,9 @@
 require 'utility/error_monitor'
 
 describe Utility::ErrorMonitor do
-  let(:connector) { double }
-
-  before(:each) do
-    allow(connector).to receive(:log_debug)
-  end
 
   it 'has expected default values' do
-    monitor = Utility::ErrorMonitor.new(:connector => connector)
+    monitor = Utility::ErrorMonitor.new
     expect(monitor.instance_variable_get('@max_errors')).to eq(1000)
     expect(monitor.instance_variable_get('@max_consecutive_errors')).to eq(10)
     expect(monitor.instance_variable_get('@max_error_ratio')).to eq(0.15)
@@ -24,7 +19,7 @@ describe Utility::ErrorMonitor do
   end
 
   it 'raises an error after too many failures in a row' do
-    monitor = Utility::ErrorMonitor.new(:connector => connector, :max_consecutive_errors => 3)
+    monitor = Utility::ErrorMonitor.new(:max_consecutive_errors => 3)
     expect { add_errors(monitor, 4) }.to raise_error do |e|
       expect(e).to be_a(Utility::ErrorMonitor::MaxSuccessiveErrorsExceededError)
       expect(e.cause.message).to eq('Error 4')
@@ -32,7 +27,7 @@ describe Utility::ErrorMonitor do
   end
 
   it 'raises an error after too many total failures' do
-    monitor = Utility::ErrorMonitor.new(:connector => connector, :max_errors => 5, :max_consecutive_errors => 2)
+    monitor = Utility::ErrorMonitor.new(:max_errors => 5, :max_consecutive_errors => 2)
     expect { add_errors(monitor, 6, :alternate_success => true) }.to raise_error do |e|
       expect(e).to be_a(Utility::ErrorMonitor::MaxErrorsExceededError)
       expect(e.cause.message).to eq('Error 6')
@@ -40,7 +35,7 @@ describe Utility::ErrorMonitor do
   end
 
   it 'raises an error after too many failures in a window' do
-    monitor = Utility::ErrorMonitor.new(:connector => connector, :max_consecutive_errors => 15)
+    monitor = Utility::ErrorMonitor.new(:max_consecutive_errors => 15)
     expect { add_errors(monitor, 15) }.to_not raise_error
     monitor.note_success
     expect { monitor.note_error(StandardError.new("The hair that broke the camel's back")) }.to raise_error do |e|
@@ -50,7 +45,7 @@ describe Utility::ErrorMonitor do
   end
 
   it 'raises an error when finalized even if the window is not full' do
-    monitor = Utility::ErrorMonitor.new(:connector => connector)
+    monitor = Utility::ErrorMonitor.new
     expect { add_errors(monitor, 10, :alternate_success => true) }.to_not raise_error
     expect { monitor.finalize }.to raise_error do |e|
       expect(e).to be_a(Utility::ErrorMonitor::MaxErrorsInWindowExceededError)
@@ -59,7 +54,7 @@ describe Utility::ErrorMonitor do
   end
 
   it 'stores up to :error_buffer_size last errors' do
-    monitor = Utility::ErrorMonitor.new(:connector => connector, :max_consecutive_errors => 15, :error_queue_size => 10)
+    monitor = Utility::ErrorMonitor.new(:max_consecutive_errors => 15, :error_queue_size => 10)
     expect { add_errors(monitor, 15) }.to change { monitor.error_queue.size }.from(0).to(10)
     expect(monitor.error_queue.first.error_message).to match(/Error 6/)
     expect(monitor.error_queue.last.error_message).to match(/Error 15/)
@@ -72,4 +67,3 @@ describe Utility::ErrorMonitor do
     end
   end
 end
-
