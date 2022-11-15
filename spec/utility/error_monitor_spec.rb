@@ -9,7 +9,6 @@
 require 'utility/error_monitor'
 
 describe Utility::ErrorMonitor do
-
   it 'has expected default values' do
     monitor = Utility::ErrorMonitor.new
     expect(monitor.instance_variable_get('@max_errors')).to eq(1000)
