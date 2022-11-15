@@ -8,6 +8,7 @@
 
 require 'connectors/connector_status'
 require 'connectors/registry'
+require 'core/filtering/post_process_engine'
 require 'core/ingestion'
 require 'core/filtering/validation_status'
 require 'utility'
@@ -72,11 +73,16 @@ module Core
 
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
 
+        post_processing_engine = Core::Filtering::PostProcessEngine.new(job_description)
         reporting_cycle_start = Time.now
+        Utility::Logger.info('Yielding documents...')
         connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
-          @ingester.ingest(document)
-          incoming_ids << document['id']
+          post_process_result = post_processing_engine.process(document)
+          if post_process_result.is_include?
+            @ingester.ingest(document)
+            incoming_ids << document['id']
+          end
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
             ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))

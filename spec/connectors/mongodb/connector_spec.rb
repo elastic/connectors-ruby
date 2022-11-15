@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'connectors/mongodb/connector'
+require 'core/filtering/simple_rule'
 require 'hashie/mash'
 require 'spec_helper'
 
@@ -40,7 +41,15 @@ describe Connectors::MongoDB::Connector do
   end
 
   let(:rules) do
-    [{ 'field' => 'name', 'rule' => 'Equals', 'policy' => 'include', 'value' => 'apple' }]
+    [
+      {
+        Core::Filtering::SimpleRule::ID => 'test',
+        Core::Filtering::SimpleRule::FIELD => 'name',
+        Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::EQUALS,
+        Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
+        Core::Filtering::SimpleRule::VALUE => 'apple'
+      }
+    ]
   end
 
   let(:pipeline) {

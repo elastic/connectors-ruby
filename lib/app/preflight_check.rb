@@ -23,6 +23,7 @@ module App
         check_es_connection!
         check_es_version!
         check_system_indices!
+        check_single_connector!
       end
 
       private
@@ -57,6 +58,16 @@ module App
           :retry_interval => STARTUP_RETRY_INTERVAL,
           :retry_timeout => STARTUP_RETRY_TIMEOUT
         )
+      end
+
+      #-------------------------------------------------------------------------------------------------
+      # Ensures the connector is supported when running in non-native mode
+      def check_single_connector!
+        if App::Config.native_mode
+          Utility::Logger.info('Skip single connector check for native mode.')
+        elsif !Connectors::REGISTRY.registered?(App::Config.service_type)
+          fail_check!("The service type #{App::Config.service_type} is not supported. Terminating...")
+        end
       end
 
       def check_es_connection_with_retries!(retry_interval:, retry_timeout:)
