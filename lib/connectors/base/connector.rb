@@ -8,6 +8,7 @@
 
 require 'bson'
 require 'core/ingestion'
+require 'connectors/tolerable_error_helper'
 require 'utility'
 require 'utility/filtering'
 require 'app/config'
@@ -47,6 +48,9 @@ module Connectors
       attr_reader :rules, :advanced_filter_config
 
       def initialize(configuration: {}, job_description: {})
+        error_monitor = Utility::ErrorMonitor.new
+        @tolerable_error_helper = Connectors::TolerableErrorHelper.new(error_monitor)
+
         @configuration = configuration.dup || {}
         @job_description = job_description&.dup || {}
 
@@ -57,6 +61,10 @@ module Connectors
       end
 
       def yield_documents; end
+
+      def yield_with_handling_tolerable_errors(identifier: nil, &block)
+        @tolerable_error_helper.yield_single_document(identifier: identifier, &block)
+      end
 
       def do_health_check
         raise 'Not implemented for this connector'

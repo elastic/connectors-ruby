@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
                     lib/utility/errors.rb
                     lib/utility/es_client.rb
                     lib/utility/environment.rb
+                    lib/utility/error_monitor.rb
                     lib/utility/exception_tracking.rb
                     lib/utility/extension_mapping_util.rb
                     lib/utility/filtering.rb

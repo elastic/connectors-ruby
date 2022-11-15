@@ -111,13 +111,12 @@ module Connectors
             Utility::Logger.info("Requesting #{PAGE_SIZE} documents from MongoDB (Starting at #{skip})")
             view = cursor.skip(skip).limit(PAGE_SIZE)
             view.each do |document|
-              yield serialize(document)
-
-              found_in_page += 1
-              found_overall += 1
-
-              overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
-
+              yield_with_handling_tolerable_errors do
+                yield serialize(document)
+                found_in_page += 1
+                found_overall += 1
+                overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
+              end
               break if overall_limit_reached
             end
 
