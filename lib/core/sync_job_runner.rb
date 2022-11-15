@@ -25,7 +25,7 @@ module Core
 
     def initialize(connector_settings)
       @connector_settings = connector_settings
-      @ingester = Core::Ingestion::Ingester.new(Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline))
+      @sink = Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
       @sync_error = nil
@@ -80,12 +80,12 @@ module Core
           document = add_ingest_metadata(document)
           post_process_result = post_processing_engine.process(document)
           if post_process_result.is_include?
-            @ingester.ingest(document)
+            @sink.ingest(document)
             incoming_ids << document['id']
           end
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))
+            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
@@ -95,15 +95,15 @@ module Core
         Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
 
         ids_to_delete.each do |id|
-          @ingester.delete(id)
+          @sink.delete(id)
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))
+            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
 
-        @ingester.flush
+        @sink.flush
 
         # We use this mechanism for checking, whether an interrupt (or something else lead to the thread not finishing)
         # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
@@ -112,7 +112,7 @@ module Core
         @sync_error = e.message
         Utility::ExceptionTracking.log_exception(e)
       ensure
-        stats = @ingester.ingestion_stats
+        stats = @sink.ingestion_stats
 
         Utility::Logger.debug("Sync stats are: #{stats}")
 
@@ -129,7 +129,7 @@ module Core
         end
 
         unless connector_instance.nil?
-          metadata = @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata)
+          metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
           metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
         end
 

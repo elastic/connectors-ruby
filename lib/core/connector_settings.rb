@@ -23,14 +23,11 @@ module Core
 
     DEFAULT_PAGE_SIZE = 100
 
-    # Error Classes
-    class ConnectorNotFoundError < StandardError; end
-
     def self.fetch_by_id(connector_id)
       es_response = ElasticConnectorActions.get_connector(connector_id)
-      connectors_meta = ElasticConnectorActions.connectors_meta
+      return nil unless es_response[:found]
 
-      raise ConnectorNotFoundError.new("Connector with id=#{connector_id} was not found.") unless es_response[:found]
+      connectors_meta = ElasticConnectorActions.connectors_meta
       new(es_response, connectors_meta)
     end
 
@@ -120,6 +117,20 @@ module Core
 
     def valid_index_name?
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
+    end
+
+    def update_last_sync!(job)
+      doc = {
+        :last_sync_status => job.status,
+        :last_synced => Time.now,
+        :last_sync_error => job.error,
+        :error => job.error
+      }
+      if job.terminated?
+        doc[:last_indexed_document_count] = job[:indexed_document_count]
+        doc[:last_deleted_document_count] = job[:deleted_document_count]
+      end
+      Core::ElasticConnectorActions.update_connector_fields(job.connector_id, doc)
     end
 
     private
