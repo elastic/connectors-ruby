@@ -87,7 +87,7 @@ describe Core::SyncJobRunner do
   end
 
   let(:max_ingestion_queue_size) { 123 }
-  let(:max_ingestion_queue_volume) { 123456789 }
+  let(:max_ingestion_queue_bytes) { 123456789 }
 
   subject { described_class.new(connector_settings, job, max_ingestion_queue_size, max_ingestion_queue_volume) }
 
@@ -132,6 +132,24 @@ describe Core::SyncJobRunner do
     allow(job).to receive(:make_running!)
     allow(job).to receive(:id).and_return(job_id)
     allow(job).to receive(:es_source).and_return(job_definition['_source'])
+  end
+
+  describe '#new' do
+    let(:bulk_queue) { double }
+
+    before(:each) do
+      allow(Utility::BulkQueue).to receive(:new).and_return(bulk_queue)
+    end
+
+    it 'passes max_ingestion_queue_size and max_ingestion_queue_bytes to ingestion classes' do
+      expect(Utility::BulkQueue).to receive(:new)
+        .with(max_ingestion_queue_size, max_ingestion_queue_bytes)
+
+      expect(Core::Ingestion::EsSink).to receive(:new)
+        .with(anything, anything, bulk_queue, max_ingestion_queue_bytes)
+
+      described_class.new(connector_settings, max_ingestion_queue_size, max_ingestion_queue_bytes)
+    end
   end
 
   describe '#execute' do

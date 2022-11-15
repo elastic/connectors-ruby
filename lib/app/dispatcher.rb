@@ -21,8 +21,6 @@ module App
     MIN_THREADS = (App::Config.dig(:thread_pool, :min_threads) || 0).to_i
     MAX_THREADS = (App::Config.dig(:thread_pool, :max_threads) || 5).to_i
     MAX_QUEUE = (App::Config.dig(:thread_pool, :max_queue) || 100).to_i
-    MAX_INGESTION_QUEUE_SIZE = (App::Config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i 
-    MAX_INGESTION_QUEUE_BYTES = (App::Config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i
 
     @running = Concurrent::AtomicBoolean.new(false)
 
@@ -101,8 +99,8 @@ module App
           Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
           job_runner = Core::SyncJobRunner.new(
             connector_settings,
-            MAX_INGESTION_QUEUE_SIZE,
-            MAX_INGESTION_QUEUE_BYTES
+            (App::Config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i,
+            (App::Config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i
           )
           job_runner.execute
         rescue Core::JobAlreadyRunningError
