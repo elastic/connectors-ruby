@@ -29,7 +29,7 @@ module Core
         connector_settings.index_name,
         @connector_settings.request_pipeline,
         Utility::BulkQueue.new(
-          max_ingestion_queue_size, 
+          max_ingestion_queue_size,
           max_ingestion_queue_bytes
         ),
         max_ingestion_queue_bytes
