@@ -77,8 +77,7 @@ module App
         scheduler.when_triggered do |connector_settings, task|
           case task
           when :sync
-            # update connector metadata
-            # @TODO rename #claim_job because it doesn't claim a job
+            # update connector sync_now flag
             Core::ElasticConnectorActions.update_connector_sync_now(connector_settings.id, false)
 
             Core::Jobs::Producer.enqueue_job(job_type: :sync, connector_settings: connector_settings)
