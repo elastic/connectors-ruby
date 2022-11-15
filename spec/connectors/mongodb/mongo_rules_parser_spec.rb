@@ -14,7 +14,9 @@ describe Connectors::MongoDB::MongoRulesParser do
   let(:ops) do
     {
       :equals => Core::Filtering::SimpleRule::Rule::EQUALS,
-      :regex => Core::Filtering::SimpleRule::Rule::REGEX
+      :regex => Core::Filtering::SimpleRule::Rule::REGEX,
+      :starts_with => Core::Filtering::SimpleRule::Rule::STARTS_WITH,
+      :ends_with => Core::Filtering::SimpleRule::Rule::ENDS_WITH
     }
   end
 
@@ -177,9 +179,7 @@ describe Connectors::MongoDB::MongoRulesParser do
   end
 
   describe '#validate' do
-    subject { described_class.new(rules) }
-
-    shared_examples_for 'keeps a valid rule' do
+    shared_examples_for 'keeps valid rules' do
       it 'does not raise error' do
         expect { subject }.not_to raise_error
       end
@@ -212,35 +212,6 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'invalid' }] }
       it_behaves_like 'raises_validation_error', /Unknown operator/
     end
-
-    context 'regex' do
-      context 'with valid regex' do
-        let(:rules) { [{ id: '1', field: 'foo', value: '^123$', policy: 'include', rule: ops[:regex] }] }
-        it_behaves_like 'keeps a valid rule'
-      end
-
-      context 'with invalid regex' do
-        let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'regex' }] }
-        it_behaves_like 'raises_validation_error', /Invalid regex/
-      end
-    end
-
-    context 'equality' do
-      context 'with valid equals rule' do
-        let(:rules) { [{ id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:equals] }] }
-        it_behaves_like 'keeps a valid rule'
-      end
-      context 'with two equals rules' do
-        let(:rules) do
-          [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:equals] },
-            { id: '2', field: 'foo', value: '456', policy: 'include', rule: ops[:equals] }
-          ]
-        end
-        it_behaves_like 'filters invalid rules'
-      end
-    end
-
     context 'with invalid policy' do
       let(:policy) { 'invalid' }
       it_behaves_like 'raises_validation_error', /Invalid policy/
@@ -302,6 +273,132 @@ describe Connectors::MongoDB::MongoRulesParser do
       end
       it 'raises error' do
         expect { subject }.to raise_error(Connectors::Base::FilteringRulesValidationError, /field is required/)
+      end
+    end
+
+    context 'regex' do
+      let(:operator) { ops[:regex] }
+      context 'with valid regex' do
+        let(:value) { '^123$' }
+        it_behaves_like 'keeps valid rules'
+      end
+
+      context 'with invalid regex' do
+        let(:value) { '(' }
+        it_behaves_like 'raises_validation_error', /Invalid regex/
+      end
+    end
+
+    context 'equality' do
+      let(:operator) { ops[:equals] }
+      context 'with valid equals rule' do
+        let(:value) { '123' }
+        it_behaves_like 'keeps valid rules'
+      end
+      context 'with two equals rules' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:equals] },
+            { id: '2', field: 'foo', value: '456', policy: 'include', rule: ops[:equals] }
+          ]
+        end
+        it_behaves_like 'filters invalid rules'
+      end
+    end
+
+    context 'starts_with' do
+      let(:operator) { ops[:starts_with] }
+      context 'with valid starts_with rule' do
+        let(:value) { 'abc' }
+        it_behaves_like 'keeps valid rules'
+      end
+
+      context 'with include and exclude the same starts_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:starts_with] },
+            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:starts_with] }
+          ]
+        end
+        it_behaves_like 'filters invalid rules'
+      end
+
+      context 'with include and exclude different starts_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:starts_with] },
+            { id: '2', field: 'foo', value: '456', policy: 'exclude', rule: ops[:starts_with] }
+          ]
+        end
+        it_behaves_like 'keeps valid rules'
+      end
+
+      context 'with include and exclude overlapping conflicting starts_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '1234', policy: 'include', rule: ops[:starts_with] },
+            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:starts_with] }
+          ]
+        end
+        it_behaves_like 'filters invalid rules'
+      end
+
+      context 'with include and exclude overlapping non-conflicting starts_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '12', policy: 'include', rule: ops[:starts_with] },
+            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:starts_with] }
+          ]
+        end
+        it_behaves_like 'keeps valid rules'
+      end
+    end
+
+    context 'ends_with' do
+      let(:operator) { ops[:ends_with] }
+      context 'with valid ends_with rule' do
+        let(:value) { 'abc' }
+        it_behaves_like 'keeps valid rules'
+      end
+
+      context 'with include and exclude the same ends_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
+            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:ends_with] }
+          ]
+        end
+        it_behaves_like 'filters invalid rules'
+      end
+
+      context 'with include and exclude different ends_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
+            { id: '2', field: 'foo', value: '456', policy: 'exclude', rule: ops[:ends_with] }
+          ]
+        end
+        it_behaves_like 'keeps valid rules'
+      end
+
+      context 'with include and exclude overlapping conflicting ends_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
+            { id: '2', field: 'foo', value: '23', policy: 'exclude', rule: ops[:ends_with] }
+          ]
+        end
+        it_behaves_like 'filters invalid rules'
+      end
+
+      context 'with include and exclude overlapping non-conflicting ends_with' do
+        let(:rules) do
+          [
+            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
+            { id: '2', field: 'foo', value: '0123', policy: 'exclude', rule: ops[:ends_with] }
+          ]
+        end
+        it_behaves_like 'keeps valid rules'
       end
     end
   end

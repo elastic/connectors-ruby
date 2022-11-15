@@ -61,10 +61,13 @@ module Connectors
           return field_rules
         end
         # drop contradicting equality rules
-        drop_invalid_equality_rules(field_rules)
-        # if result.size > 1
-        #   result = drop_invalid_range_rules(result)
-        # end
+        result = drop_invalid_equality_rules(field_rules)
+        if result.size > 1
+          result = drop_invalid_starts_with_rules(result)
+        end
+        if result.size > 1
+          result = drop_invalid_ends_with_rules(result)
+        end
 
         # # check for overlapping ranges
         # ranges = field_rules.filter { |r| r[:rule] == '>' || r[:rule] == '<' }
@@ -75,21 +78,7 @@ module Connectors
         #     raise FilteringRulesValidationError.new("Contradicting rules for field: #{field}. Can't have overlapping ranges.")
         #   end
         # end
-        #
-        # # check for mutually exclusive start_with
-        # include_starts = field_rules.filter { |r| r[:rule] == 'starts_with' && is_include?(r) }.map { |r| r[:value] }
-        # exclude_starts = field_rules.filter { |r| r[:rule] == 'starts_with' && is_exclude?(r) }.map { |r| r[:value] }
-        # if include_starts.any? { |s| exclude_starts.any? { |e| s.start_with?(e) } }
-        #   raise FilteringRulesValidationError.new("Contradicting [starts_with] rules for field: #{field}. Can't have mutually exclusive [starts_with] rules.")
-        # end
-        #
-        # # check for mutually exclusive end_with
-        # include_ends = field_rules.filter { |r| r[:rule] == 'ends_with' && is_include?(r) }.map { |r| r[:value] }
-        # exclude_ends = field_rules.filter { |r| r[:rule] == 'ends_with' && is_exclude?(r) }.map { |r| r[:value] }
-        # if include_ends.any? { |s| exclude_ends.any? { |e| s.end_with?(e) } }
-        #   raise FilteringRulesValidationError.new("Contradicting [ends_with] rules for field: #{field}. Can't have mutually exclusive [ends_with] rules.")
-        # end
-        # result
+        result
       end
 
       def drop_invalid_equality_rules(field_rules)
@@ -106,12 +95,30 @@ module Connectors
 
       def drop_invalid_starts_with_rules(field_rules)
         result = field_rules.dup
-        # check for mutually exclusive start_with
+        # check for exclude and include with the same or overlapping start_with
         include_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::STARTS_WITH && r.is_include? }
         exclude_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::STARTS_WITH && r.is_exclude? }
         include_starts.each do |include_start|
           invalid_excludes = exclude_starts.filter { |exclude_start| include_start.value.start_with?(exclude_start.value) }
-          result = result.delete_if { |r| r.id == include_start.id || invalid_excludes.any? { |e| e.id == r.id } }
+          if invalid_excludes.present?
+            result -= invalid_excludes
+            result -= [include_start]
+          end
+        end
+        result
+      end
+
+      def drop_invalid_ends_with_rules(field_rules)
+        result = field_rules.dup
+        # check for exclude and include with the same or overlapping ends_with
+        include_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::ENDS_WITH && r.is_include? }
+        exclude_starts = field_rules.filter { |r| r.rule == SimpleRule::Rule::ENDS_WITH && r.is_exclude? }
+        include_starts.each do |include_start|
+          invalid_excludes = exclude_starts.filter { |exclude_start| include_start.value.end_with?(exclude_start.value) }
+          if invalid_excludes.present?
+            result -= invalid_excludes
+            result -= [include_start]
+          end
         end
         result
       end
