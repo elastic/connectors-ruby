@@ -29,9 +29,6 @@ module App
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
 
-        # set exit hook
-        Kernel.at_exit { shutdown! }
-
         # start sync jobs consumers
         start_consumers!
 

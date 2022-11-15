@@ -19,8 +19,6 @@ module Core
         @idle_time = idle_time
 
         @running = Concurrent::AtomicBoolean.new(false)
-
-        Kernel.at_exit { shutdown! }
       end
 
       def subscribe!(index_name:)
