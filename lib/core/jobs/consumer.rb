@@ -60,24 +60,22 @@ module Core
             end
 
             sleep(@poll_interval)
-            Utility::Logger.info('Getting registered connectors')
+            Utility::Logger.debug('Getting registered connectors')
 
             connectors = ready_for_sync_connectors
             next unless connectors.any?
 
-            Utility::Logger.info("Number of available connectors: #{connectors.size}")
+            Utility::Logger.debug("Number of available connectors: #{connectors.size}")
 
             # @TODO It is assumed that @index_name is used to retrive pending jobs.
             # This will be discussed after 8.6 release
             pending_jobs = Core::ConnectorJob.pending_jobs(connectors_ids: connectors.keys)
-            Utility::Logger.info("Number of available jobs: #{pending_jobs.size}")
+            Utility::Logger.info("Number of pending jobs: #{pending_jobs.size}")
 
             pending_jobs.each do |job|
               connector_settings = connectors[job.connector_id]
 
-              Utility::Logger.info("Start a sync job for #{connector_settings.formatted}...")
               pool.post do
-                Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
                 Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
                 job_runner = Core::SyncJobRunner.new(connector_settings, job)
                 job_runner.execute

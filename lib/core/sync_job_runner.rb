@@ -51,6 +51,8 @@ module Core
       # connector service doesn't support multiple jobs running simultaneously
       raise Core::JobAlreadyRunningError.new(@connector_settings.id) if @connector_settings.running?
 
+      Core::ElasticConnectorActions.update_connector_last_sync_status(@connector_settings.id, Connectors::SyncStatus::IN_PROGRESS)
+
       # claim the job
       @job.process!
 

@@ -132,11 +132,35 @@ module Core
         update_connector_fields(connector_id, { :filtering => filtering })
       end
 
-      def claim_job(connector_id)
+      def update_connector_sync_now(connector_id, sync_now)
+        locked_doc = connector_with_lock(connector_id)
+
+        body = { sync_now: sync_now, last_synced: Time.now }
+
+        update_connector_fields(
+          connector_id,
+          body,
+          locked_doc[:seq_no],
+          locked_doc[:primary_term]
+        )
+      end
+
+      def update_connector_last_sync_status(connector_id, last_sync_status)
+        locked_doc = connector_with_lock(connector_id)
+
+        update_connector_fields(
+          connector_id,
+          { last_sync_status: last_sync_status },
+          locked_doc[:seq_no],
+          locked_doc[:primary_term]
+        )
+      end
+
+      def connector_with_lock(connector_id)
         seq_no = nil
         primary_term = nil
-        sync_in_progress = false
-        _connector_record = client.get(
+
+        doc = client.get(
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :ignore => 404,
@@ -144,31 +168,23 @@ module Core
         ).tap do |response|
           seq_no = response['_seq_no']
           primary_term = response['_primary_term']
-          sync_in_progress = response.dig('_source', 'last_sync_status') == Connectors::SyncStatus::IN_PROGRESS
         end
-        if sync_in_progress
-          raise JobAlreadyRunningError.new(connector_id)
-        end
-        update_connector_fields(
-          connector_id,
-          { :sync_now => false,
-            :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now },
-          seq_no,
-          primary_term
-        )
+
+        { doc: doc, seq_no: seq_no, primary_term: primary_term }
       end
 
       def create_job(connector_settings:)
         body = {
           status: Connectors::SyncStatus::PENDING,
-          worker_hostname: Socket.gethostname,
           created_at: Time.now,
-          started_at: Time.now,
           last_seen: Time.now,
           connector: {
             id: connector_settings.id,
-            filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering)
+            filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering),
+            index_name: connector_settings.index_name,
+            language: connector_settings[:language],
+            pipeline: connector_settings[:pipeline],
+            service_type: connector_settings.service_type
           }
         }
 

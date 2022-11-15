@@ -149,7 +149,14 @@ module Core
 
     def process!
       with_lock do |es_doc, seq_no, primary_term|
-        doc = { status: Connectors::SyncStatus::IN_PROGRESS }
+        now = Time.now
+        doc = {
+          status: Connectors::SyncStatus::IN_PROGRESS,
+          started_at: now,
+          last_seen: now,
+          worker_hostname: Socket.gethostname
+        }
+
         ElasticConnectorActions.update_job_fields(es_doc[:_id], doc, seq_no, primary_term)
       end
     end

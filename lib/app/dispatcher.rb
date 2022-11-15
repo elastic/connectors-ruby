@@ -79,7 +79,7 @@ module App
           when :sync
             # update connector metadata
             # @TODO rename #claim_job because it doesn't claim a job
-            Core::ElasticConnectorActions.claim_job(connector_settings.id)
+            Core::ElasticConnectorActions.update_connector_sync_now(connector_settings.id, false)
 
             Core::Jobs::Producer.enqueue_job(job_type: :sync, connector_settings: connector_settings)
           when :heartbeat
@@ -131,7 +131,14 @@ module App
       end
 
       def start_consumers!
-        @consumer = Core::Jobs::Consumer.new
+        @consumer = Core::Jobs::Consumer.new(
+          poll_interval: POLL_INTERVAL,
+          termination_timeout: TERMINATION_TIMEOUT,
+          min_threads: MIN_THREADS,
+          max_threads: MAX_THREADS,
+          max_queue: MAX_QUEUE
+        )
+
         @consumer.subscribe!(index_name: Utility::Constants::JOB_INDEX)
       end
 
