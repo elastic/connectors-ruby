@@ -74,6 +74,7 @@ module Core
               connector_settings = connectors[job.connector_id]
 
               pool.post do
+                Utility::Logger.info("Connector #{connector_settings.formatted} picked up the job #{job.id}")
                 Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
                 job_runner = Core::SyncJobRunner.new(connector_settings, job)
                 job_runner.execute
