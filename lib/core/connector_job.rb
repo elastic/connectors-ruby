@@ -120,37 +120,18 @@ module Core
     end
 
     def done!(ingestion_stats = {}, connector_metadata = {})
-      ingestion_stats ||= {}
-      ingestion_stats[:total_document_count] = ElasticConnectorActions.document_count(index_name)
-      doc = {
-        :last_seen => Time.now,
-        :completed_at => Time.now,
-        :status => Connectors::SyncStatus::COMPLETED,
-        :error => nil
-      }.merge(ingestion_stats)
-      doc[:metadata] = connector_metadata if connector_metadata&.any?
-      ElasticConnectorActions.update_job_fields(id, doc)
+      terminate!(Connectors::SyncStatus::COMPLETED, nil, ingestion_stats, connector_metadata)
     end
 
     def error!(message, ingestion_stats = {}, connector_metadata = {})
-      ingestion_stats ||= {}
-      ingestion_stats[:total_document_count] = ElasticConnectorActions.document_count(index_name)
-      doc = {
-        :last_seen => Time.now,
-        :completed_at => Time.now,
-        :status => Connectors::SyncStatus::ERROR,
-        :error => message
-      }.merge(ingestion_stats)
-      doc[:metadata] = connector_metadata if connector_metadata&.any?
-      ElasticConnectorActions.update_job_fields(id, doc)
+      terminate!(Connectors::SyncStatus::ERROR, message, ingestion_stats, connector_metadata)
+    end
+
+    def cancel!(ingestion_stats = {}, connector_metadata = {})
+      terminate!(Connectors::SyncStatus::CANCELED, nil, ingestion_stats, connector_metadata)
     end
 
     private
-
-    def initialize(es_response)
-      # TODO: remove the usage of with_indifferent_access. The initialize method should expect a hash argument
-      @elasticsearch_response = es_response.with_indifferent_access
-    end
 
     def self.fetch_jobs_by_query(query, page_size)
       results = []
@@ -166,6 +147,25 @@ module Core
       end
 
       results
+    end
+
+    def initialize(es_response)
+      # TODO: remove the usage of with_indifferent_access. The initialize method should expect a hash argument
+      @elasticsearch_response = es_response.with_indifferent_access
+    end
+
+    def terminate!(status, error = nil, ingestion_stats = {}, connector_metadata = {})
+      ingestion_stats ||= {}
+      ingestion_stats[:total_document_count] = ElasticConnectorActions.document_count(index_name)
+      doc = {
+        :last_seen => Time.now,
+        :completed_at => Time.now,
+        :status => status,
+        :error => error
+      }.merge(ingestion_stats)
+      doc[:canceled_at] = Time.now if status == Connectors::SyncStatus::CANCELED
+      doc[:metadata] = connector_metadata if connector_metadata&.any?
+      ElasticConnectorActions.update_job_fields(id, doc)
     end
   end
 end
