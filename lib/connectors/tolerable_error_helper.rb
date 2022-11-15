@@ -9,7 +9,7 @@ require 'utility/exception_tracking'
 require 'utility/error_monitor'
 
 module Connectors
-  class TransientErrorHelper
+  class TolerableErrorHelper
     def initialize(error_monitor)
       @error_monitor = error_monitor
     end

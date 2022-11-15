@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors/transient_error_helper'
+require 'connectors/tolerable_error_helper'
 
-describe Connectors::TransientErrorHelper do
+describe Connectors::TolerableErrorHelper do
   let(:error_monitor) { double }
   subject { described_class.new(error_monitor) }
 

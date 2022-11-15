@@ -8,7 +8,7 @@
 
 require 'bson'
 require 'core/ingestion'
-require 'connectors/transient_error_helper'
+require 'connectors/tolerable_error_helper'
 require 'utility'
 require 'utility/filtering'
 require 'app/config'
@@ -49,7 +49,7 @@ module Connectors
 
       def initialize(configuration: {}, job_description: {})
         error_monitor = Utility::ErrorMonitor.new
-        @transient_error_helper = Connectors::TransientErrorHelper.new(error_monitor)
+        @tolerable_error_helper = Connectors::TolerableErrorHelper.new(error_monitor)
 
         @configuration = configuration.dup || {}
         @job_description = job_description&.dup || {}
@@ -62,8 +62,8 @@ module Connectors
 
       def yield_documents; end
 
-      def yield_with_handling_transient_errors(identifier: nil, &block)
-        @transient_error_helper.yield_single_document(identifier: identifier, &block)
+      def yield_with_handling_tolerable_errors(identifier: nil, &block)
+        @tolerable_error_helper.yield_single_document(identifier: identifier, &block)
       end
 
       def do_health_check
