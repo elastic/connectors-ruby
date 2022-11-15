@@ -4,7 +4,6 @@
 # you may not use this file except in compliance with the Elastic License.
 #
 
-require 'config'
 require 'logger'
 require 'active_support/core_ext/module'
 require 'active_support/core_ext/string/filters'

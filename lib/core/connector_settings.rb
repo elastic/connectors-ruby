@@ -8,7 +8,6 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/connector_status'
-require 'connectors/registry'
 require 'core/elastic_connector_actions'
 require 'utility'
 
@@ -36,6 +35,7 @@ module Core
     end
 
     def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
+      require 'connectors/registry' unless defined?(Connectors::REGISTRY)
       query = {
         bool: {
           filter: [
