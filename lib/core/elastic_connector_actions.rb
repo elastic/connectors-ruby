@@ -133,30 +133,30 @@ module Core
       end
 
       def update_connector_sync_now(connector_id, sync_now)
-        locked_doc = connector_with_lock(connector_id)
+        doc = connector_with_concurrency_control(connector_id)
 
         body = { sync_now: sync_now, last_synced: Time.now }
 
         update_connector_fields(
           connector_id,
           body,
-          locked_doc[:seq_no],
-          locked_doc[:primary_term]
+          doc[:seq_no],
+          doc[:primary_term]
         )
       end
 
       def update_connector_last_sync_status(connector_id, last_sync_status)
-        locked_doc = connector_with_lock(connector_id)
+        doc = connector_with_concurrency_control(connector_id)
 
         update_connector_fields(
           connector_id,
           { last_sync_status: last_sync_status },
-          locked_doc[:seq_no],
-          locked_doc[:primary_term]
+          doc[:seq_no],
+          doc[:primary_term]
         )
       end
 
-      def connector_with_lock(connector_id)
+      def connector_with_concurrency_control(connector_id)
         seq_no = nil
         primary_term = nil
 

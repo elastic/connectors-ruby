@@ -54,7 +54,7 @@ module Core
       Core::ElasticConnectorActions.update_connector_last_sync_status(@connector_settings.id, Connectors::SyncStatus::IN_PROGRESS)
 
       # claim the job
-      @job.process!
+      @job.make_running!
 
       job_description = @job.es_source
       job_id = @job.id

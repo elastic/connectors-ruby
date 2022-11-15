@@ -138,17 +138,14 @@ module Core
       terminate!(Connectors::SyncStatus::CANCELED, nil, ingestion_stats, connector_metadata)
     end
 
-    def with_lock
-      seq_no = nil
-      primary_term = nil
-
+    def with_concurrency_control
       response = ElasticConnectorActions.get_job(id)
 
-      yield response, seq_no, primary_term
+      yield response, response['_seq_no'], response['_primary_term']
     end
 
-    def process!
-      with_lock do |es_doc, seq_no, primary_term|
+    def make_running!
+      with_concurrency_control do |es_doc, seq_no, primary_term|
         now = Time.now
         doc = {
           status: Connectors::SyncStatus::IN_PROGRESS,
