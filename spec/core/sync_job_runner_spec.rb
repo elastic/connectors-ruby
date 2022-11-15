@@ -6,9 +6,6 @@ require 'core/sync_job_runner'
 require 'core/filtering/validation_status'
 require 'utility'
 
-require 'pry'
-require 'pry-nav'
-
 describe Core::SyncJobRunner do
   let(:connector_id) { '123' }
   let(:service_type) { 'foo' }
