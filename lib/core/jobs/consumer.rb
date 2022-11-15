@@ -10,7 +10,8 @@
 module Core
   module Jobs
     class Consumer
-      def initialize(poll_interval: 3, termination_timeout: 60, min_threads: 1, max_threads: 5, max_queue: 100, idle_time: 5)
+      def initialize(scheduler:, poll_interval: 3, termination_timeout: 60, min_threads: 1, max_threads: 5, max_queue: 100, idle_time: 5)
+        @scheduler = scheduler
         @poll_interval = poll_interval
         @termination_timeout = termination_timeout
         @min_threads = min_threads
@@ -104,13 +105,8 @@ module Core
         )
       end
 
-      # @TODO replace it with the direct API call
-      def scheduler
-        App::Dispatcher.send(:scheduler)
-      end
-
       def ready_for_sync_connectors
-        scheduler.connector_settings
+        @scheduler.connector_settings
           .select(&:ready_for_sync?)
           .inject({}) { |memo, cs| memo.merge(cs.id => cs) }
       end

@@ -132,7 +132,8 @@ module App
           termination_timeout: TERMINATION_TIMEOUT,
           min_threads: MIN_THREADS,
           max_threads: MAX_THREADS,
-          max_queue: MAX_QUEUE
+          max_queue: MAX_QUEUE,
+          scheduler: scheduler
         )
 
         @consumer.subscribe!(index_name: Utility::Constants::JOB_INDEX)
