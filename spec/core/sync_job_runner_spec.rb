@@ -6,6 +6,9 @@ require 'core/sync_job_runner'
 require 'core/filtering/validation_status'
 require 'utility'
 
+require 'pry'
+require 'pry-nav'
+
 describe Core::SyncJobRunner do
   let(:connector_id) { '123' }
   let(:service_type) { 'foo' }
@@ -46,6 +49,7 @@ describe Core::SyncJobRunner do
     ]
   end
 
+  let(:job) { double }
   let(:connector_class) { double }
   let(:connector_instance) { double }
   let(:sink) { double }
@@ -85,7 +89,7 @@ describe Core::SyncJobRunner do
     }
   end
 
-  subject { described_class.new(connector_settings) }
+  subject { described_class.new(connector_settings, job) }
 
   before(:each) do
     allow(Core::ConnectorSettings).to receive(:fetch).with(connector_id).and_return(connector_settings)
@@ -95,6 +99,7 @@ describe Core::SyncJobRunner do
     allow(Core::ElasticConnectorActions).to receive(:complete_sync)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
     allow(Core::ElasticConnectorActions).to receive(:document_count).and_return(total_document_count)
+    allow(Core::ElasticConnectorActions).to receive(:update_connector_last_sync_status)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
     allow(Core::Ingestion::EsSink).to receive(:new).and_return(sink)
@@ -112,6 +117,7 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
     allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
     allow(connector_settings).to receive(:filtering).and_return(filtering)
+    allow(connector_settings).to receive(:running?).and_return(false)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:service_type).and_return(service_type)
@@ -122,6 +128,10 @@ describe Core::SyncJobRunner do
     allow(connector_instance).to receive(:do_health_check!)
     allow_statement = allow(connector_instance).to receive(:yield_documents)
     extracted_documents.each { |document| allow_statement.and_yield(document) }
+
+    allow(job).to receive(:make_running!)
+    allow(job).to receive(:id).and_return(job_id)
+    allow(job).to receive(:es_source).and_return(job_definition['_source'])
   end
 
   describe '#execute' do
@@ -238,7 +248,8 @@ describe Core::SyncJobRunner do
     end
 
     it 'claims the job when starting the run' do
-      expect(Core::ElasticConnectorActions).to receive(:claim_job).with(connector_id)
+      expect(Core::ElasticConnectorActions).to receive(:update_connector_last_sync_status).with(connector_id, Connectors::SyncStatus::IN_PROGRESS)
+      expect(job).to receive(:make_running!)
 
       subject.execute
     end
