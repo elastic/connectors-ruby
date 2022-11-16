@@ -133,6 +133,8 @@ module App
           min_threads: MIN_THREADS,
           max_threads: MAX_THREADS,
           max_queue: MAX_QUEUE,
+          max_ingestion_queue_size: (App::Config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i,
+          max_ingestion_queue_bytes: (App::Config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i,
           scheduler: scheduler
         )
 

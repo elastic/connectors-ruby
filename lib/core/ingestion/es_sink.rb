@@ -21,7 +21,7 @@ require 'elasticsearch/api'
 module Core
   module Ingestion
     class EsSink
-      def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new, max_allowed_document_size = 5 * 1024 * 1024)
+      def initialize(index_name, request_pipeline, bulk_queue = Utility::BulkQueue.new, max_allowed_document_size = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES)
         @client = Utility::EsClient.new(App::Config[:elasticsearch])
         @index_name = index_name
         @request_pipeline = request_pipeline
