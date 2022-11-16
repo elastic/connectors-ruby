@@ -89,7 +89,7 @@ describe Core::SyncJobRunner do
     allow(job).to receive(:id).and_return(job_id)
     allow(job).to receive(:make_running!)
     allow(job).to receive(:filtering).and_return(filtering)
-    allow(job).to receive(:heartbeat!)
+    allow(job).to receive(:update_metadata)
     allow(job).to receive(:done!)
     allow(job).to receive(:cancel!)
     allow(job).to receive(:error!)
@@ -400,7 +400,7 @@ describe Core::SyncJobRunner do
         end
 
         it 'reports metadata' do
-          expect(job).to receive(:heartbeat!).with(ingestion_stats, connector_metadata)
+          expect(job).to receive(:update_metadata).with(ingestion_stats, connector_metadata)
 
           subject.execute
         end

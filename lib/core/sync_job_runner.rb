@@ -105,7 +105,7 @@ module Core
 
           periodically do
             check_job
-            @job.heartbeat!(@sink.ingestion_stats, @connector_instance.metadata)
+            @job.update_metadata(@sink.ingestion_stats, @connector_instance.metadata)
           end
         end
 
@@ -118,7 +118,7 @@ module Core
 
           periodically do
             check_job
-            @job.heartbeat!(@sink.ingestion_stats, @connector_instance.metadata)
+            @job.update_metadata(@sink.ingestion_stats, @connector_instance.metadata)
           end
         end
 
