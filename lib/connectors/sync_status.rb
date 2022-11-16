@@ -26,14 +26,9 @@ module Connectors
       ERROR
     ]
 
-    PENDING_STATUSES = [
+    PENDING_STATUES = [
       PENDING,
       SUSPENDED
-    ]
-
-    ACTIVE_STATUSES = [
-      IN_PROGRESS,
-      CANCELING
     ]
 
     TERMINAL_STATUSES = [

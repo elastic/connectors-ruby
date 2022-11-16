@@ -11,7 +11,6 @@ require 'connectors/base/connector'
 require 'connectors/gitlab/extractor'
 require 'connectors/gitlab/custom_client'
 require 'connectors/gitlab/adapter'
-require 'connectors/gitlab/gitlab_advanced_snippet_validator'
 require 'core/ingestion'
 
 module Connectors
@@ -37,8 +36,18 @@ module Connectors
         }
       end
 
-      def self.advanced_snippet_validator
-        GitLabAdvancedSnippetValidator
+      def self.validate_filtering(filtering = {})
+        # TODO: real filtering validation will follow later
+        errors = [
+          {
+            :ids => ['missing-implementation'],
+            :messages => ['Filtering is not implemented yet for the GitLab connector']
+          }
+        ]
+
+        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => errors } if filtering.present?
+
+        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
       end
 
       def initialize(configuration: {}, job_description: {})

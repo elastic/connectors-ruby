@@ -11,17 +11,7 @@ require 'connectors/base/connector'
 describe Connectors::Base::Connector do
   subject { described_class.new(job_description: job_description) }
 
-  let(:advanced_snippet_validator_class) { double }
-
-  let(:advanced_snippet_validator_instance) { double }
-
   let(:advanced_snippet) {
-    {
-      :value => advanced_snippet_value
-    }
-  }
-
-  let(:advanced_snippet_value) {
     {
       :find => {
         :filter => {
@@ -62,9 +52,7 @@ describe Connectors::Base::Connector do
 
   let(:job_description) {
     {
-      :connector => {
-        :filtering => filtering
-      }
+      :filtering => filtering
     }
   }
 
@@ -77,12 +65,12 @@ describe Connectors::Base::Connector do
 
     context 'advanced filter config is present' do
       it 'returns advanced filter config' do
-        expect(subject.advanced_filter_config).to eq(advanced_snippet_value)
+        expect(subject.advanced_filter_config).to eq(advanced_snippet)
       end
     end
 
     context 'advanced filter config is nil' do
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         nil
       }
 
@@ -90,7 +78,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'advanced filter config is empty' do
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         {}
       }
 
@@ -162,7 +150,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'only advanced filter config is empty' do
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         {}
       }
 
@@ -170,7 +158,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'only advanced filter config is nil' do
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         nil
       }
 
@@ -182,7 +170,7 @@ describe Connectors::Base::Connector do
         []
       }
 
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         {}
       }
 
@@ -194,7 +182,7 @@ describe Connectors::Base::Connector do
         nil
       }
 
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         nil
       }
 
@@ -269,7 +257,7 @@ describe Connectors::Base::Connector do
       it 'extracts the advanced filter config' do
         advanced_filter_config = subject.advanced_filter_config
 
-        expect(advanced_filter_config).to eq(advanced_snippet_value)
+        expect(advanced_filter_config).to eq(advanced_snippet)
       end
     end
 
@@ -283,7 +271,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'filter config is nil' do
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         nil
       }
 
@@ -291,7 +279,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'filter config is empty' do
-      let(:advanced_snippet_value) {
+      let(:advanced_snippet) {
         {}
       }
 
@@ -300,41 +288,8 @@ describe Connectors::Base::Connector do
   end
 
   describe '.validate_filtering' do
-    context 'filtering is not present' do
-      # We don't validate filtering, if it's not present -> just return valid
-
-      context 'filtering is nil' do
-        let(:filtering) {
-          nil
-        }
-
-        it_behaves_like 'filtering is valid'
-      end
-
-      context 'filtering is an empty array' do
-        let(:filtering) {
-          []
-        }
-
-        it_behaves_like 'filtering is valid'
-      end
-
-      context 'filtering is an empty hash' do
-        let(:filtering) {
-          {}
-        }
-
-        it_behaves_like 'filtering is valid'
-      end
+    it 'raises an exception, that filtering is not implemented' do
+      expect { described_class.validate_filtering }.to raise_error(RuntimeError, 'Not implemented for this connector')
     end
-
-    before(:each) {
-      allow(advanced_snippet_validator_class).to receive(:new).and_return(advanced_snippet_validator_instance)
-      allow(advanced_snippet_validator_instance).to receive(:is_snippet_valid?).and_return({ :state => Core::Filtering::ValidationStatus::VALID, :errors => [] })
-
-      allow(described_class).to receive(:advanced_snippet_validator).and_return(advanced_snippet_validator_class)
-    }
-
-    it_behaves_like 'filtering is valid'
   end
 end

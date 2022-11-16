@@ -18,17 +18,14 @@ Gem::Specification.new do |s|
                     lib/connectors_utility.rb
                     lib/utility/es_client.rb
                     lib/utility/logger.rb
-                    lib/utility/bulk_queue.rb
                     lib/utility/common.rb
                     lib/utility/constants.rb
                     lib/utility/cron.rb
                     lib/utility/errors.rb
                     lib/utility/es_client.rb
                     lib/utility/environment.rb
-                    lib/utility/error_monitor.rb
                     lib/utility/exception_tracking.rb
                     lib/utility/extension_mapping_util.rb
-                    lib/utility/filtering.rb
                     lib/utility/logger.rb
                     lib/utility.rb
                     lib/utility/elasticsearch/index/text_analysis_settings.rb
@@ -40,7 +37,6 @@ Gem::Specification.new do |s|
                     lib/connectors/crawler/scheduler.rb
                     lib/core/elastic_connector_actions.rb
                     lib/core/connector_settings.rb
-                    lib/core/filtering/validation_status.rb
                   ]
   s.license     = 'Elastic-2.0'
   s.add_dependency 'activesupport', '~>5.2.6'

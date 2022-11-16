@@ -17,10 +17,6 @@ require 'utility/logger'
 module App
   Utility::Environment.set_execution_environment(App::Config) do
     App::PreflightCheck.run!
-
-    # set exit hook
-    Kernel.at_exit { App::Dispatcher.shutdown! }
-
     App::Dispatcher.start!
   rescue App::PreflightCheck::CheckFailure => e
     Utility::Logger.error("Preflight check failed: #{e.message}")

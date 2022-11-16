@@ -8,10 +8,6 @@ require 'active_support/core_ext/time/zones'
 require 'simplecov'
 require 'simplecov-material'
 
-# debug utils
-require 'pry'
-require 'pry-nav'
-
 Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 
 # Eneable coverage report

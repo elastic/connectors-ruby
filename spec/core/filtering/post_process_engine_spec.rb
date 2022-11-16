@@ -11,16 +11,14 @@ require 'core/filtering'
 describe Core::Filtering::PostProcessEngine do
   let(:job_description) do
     {
-      'connector' => {
-        'filtering' => [
-          {
-            'domain' => Core::Filtering::DEFAULT_DOMAIN,
-            'rules' => rules,
-            'advanced_snippet' => snippet,
-            'warnings' => []
-          }
-        ]
-      }
+      Core::Filtering::FILTERING => [
+        {
+          Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
+          Core::Filtering::RULES => rules,
+          Core::Filtering::ADVANCED_SNIPPET => snippet,
+          Core::Filtering::WARNINGS => []
+        }
+      ]
     }
   end
   let(:rules) { [] }
@@ -32,11 +30,11 @@ describe Core::Filtering::PostProcessEngine do
   let(:test_operator) { Core::Filtering::SimpleRule::Rule::EQUALS }
   let(:test_rule) do
     {
-      'id' => test_rule_id,
-      'field' => test_field,
-      'value' => test_value,
-      'policy' => Core::Filtering::SimpleRule::Policy::EXCLUDE,
-      'rule' => test_operator
+      Core::Filtering::SimpleRule::ID => test_rule_id,
+      Core::Filtering::SimpleRule::FIELD => test_field,
+      Core::Filtering::SimpleRule::VALUE => test_value,
+      Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::EXCLUDE,
+      Core::Filtering::SimpleRule::RULE => test_operator
     }
   end
 
@@ -69,24 +67,28 @@ describe Core::Filtering::PostProcessEngine do
 
     context 'no matches' do
       let(:document) { { 'foo' => 'baz' } }
-
       it_behaves_like 'included', Core::Filtering::SimpleRule::DEFAULT_RULE_ID
     end
 
     context 'document with symbol keys' do
       let(:document) { { :foo => 'bar' } }
-
       it_behaves_like 'excluded', 'test'
     end
 
     context 'document with nested field values' do
       let(:document) { { 'foo' => { 'bar' => 'baz' } } }
-
       it_behaves_like 'included', Core::Filtering::SimpleRule::DEFAULT_RULE_ID
 
       context 'when contains rule is used' do
         let(:test_operator) { Core::Filtering::SimpleRule::Rule::CONTAINS }
         it_behaves_like 'excluded', 'test'
+      end
+
+      xcontext 'when the rule has nested field' do
+        # TODO: maryna points out this is inconsistent between pre and post processing for mongo, should ask Dana.
+        let(:test_field) { 'foo.bar' }
+        let(:test_value) { 'baz' }
+        it_behaves_like 'excluded'
       end
     end
 
@@ -97,12 +99,10 @@ describe Core::Filtering::PostProcessEngine do
 
       context 'when the rule has the same value' do
         let(:test_value) { 123 }
-
         it_behaves_like 'excluded', 'test'
 
         context 'but value is a string' do
           let(:test_value) { '123' }
-
           it_behaves_like 'excluded', 'test'
         end
       end
@@ -118,12 +118,10 @@ describe Core::Filtering::PostProcessEngine do
         context 'range operator' do
           let(:test_operator) { Core::Filtering::SimpleRule::Rule::GREATER_THAN }
           let(:test_value) { '2022-11-09T00:00:000Z' }
-
           it_behaves_like 'excluded', 'test'
 
           context 'other way' do
             let(:test_value) { '2022-11-11T00:00:000Z' }
-
             it_behaves_like 'included', Core::Filtering::SimpleRule::DEFAULT_RULE_ID
           end
         end
@@ -132,7 +130,6 @@ describe Core::Filtering::PostProcessEngine do
       context 'date only' do
         let(:document) { { 'foo' => DateTime.parse('2022-11-10T00:00:000Z') } }
         let(:test_value) { '2022-11-10' }
-
         it_behaves_like 'excluded', 'test'
       end
 
@@ -140,7 +137,6 @@ describe Core::Filtering::PostProcessEngine do
         let(:ts_millis) { DateTime.now.to_time.to_i }
         let(:document) { { 'foo' => Time.at(ts_millis) } }
         let(:test_value) { ts_millis.to_s }
-
         it_behaves_like 'excluded', 'test'
       end
     end
@@ -151,36 +147,31 @@ describe Core::Filtering::PostProcessEngine do
     let(:rules) do
       [
         {
-          'id' => 'test1',
-          'field' => test_field,
-          'value' => 'bar/baz',
-          'policy' => Core::Filtering::SimpleRule::Policy::INCLUDE,
-          'rule' => Core::Filtering::SimpleRule::Rule::STARTS_WITH
+          Core::Filtering::SimpleRule::ID => 'test1',
+          Core::Filtering::SimpleRule::FIELD => test_field,
+          Core::Filtering::SimpleRule::VALUE => 'bar/baz',
+          Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
+          Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::STARTS_WITH
         },
         {
-          'id' => 'test2',
-          'field' => test_field,
-          'value' => 'bar',
-          'policy' => Core::Filtering::SimpleRule::Policy::EXCLUDE,
-          'rule' => Core::Filtering::SimpleRule::Rule::STARTS_WITH
+          Core::Filtering::SimpleRule::ID => 'test2',
+          Core::Filtering::SimpleRule::FIELD => test_field,
+          Core::Filtering::SimpleRule::VALUE => 'bar',
+          Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::EXCLUDE,
+          Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::STARTS_WITH
         }
       ]
     end
-
     context 'same field' do
       context 'included' do
         it_behaves_like 'included', 'test1'
       end
-
       context 'excluded' do
         let(:document) { { 'foo' => 'bar/qux/baz' } }
-
         it_behaves_like 'excluded', 'test2'
       end
-
       context 'no match' do
         let(:document) { { 'foo' => 'qux/bar/baz' } }
-
         it_behaves_like 'included', Core::Filtering::SimpleRule::DEFAULT_RULE_ID
       end
     end
@@ -189,16 +180,12 @@ describe Core::Filtering::PostProcessEngine do
       before(:each) do
         rules.unshift(Core::Filtering::SimpleRule::DEFAULT_RULE.to_h)
       end
-
       it_behaves_like 'included', 'test1'
-
       it 'does not have the default rule in the ordered rules' do
         expect(subject.rules.map(&:id)).to_not include(Core::Filtering::SimpleRule::DEFAULT_RULE_ID)
       end
-
       context 'no match' do
         let(:document) { { 'foo' => 'qux/bar/baz' } }
-
         it_behaves_like 'included', Core::Filtering::SimpleRule::DEFAULT_RULE_ID
       end
     end

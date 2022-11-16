@@ -7,10 +7,18 @@
 # frozen_string_literal: true
 
 require 'utility/logger'
+require 'active_support/core_ext/object/blank'
 
 module Core
   module Filtering
     class SimpleRule
+      POLICY = 'policy'
+      FIELD = 'field'
+      RULE = 'rule'
+      VALUE = 'value'
+      ID = 'id'
+      ORDER = 'order'
+
       DEFAULT_RULE_ID = 'DEFAULT'
 
       class Policy
@@ -28,27 +36,50 @@ module Core
         GREATER_THAN = '>'
       end
 
-      attr_reader :policy, :field, :rule, :value, :id
+      attr_reader :policy, :field, :rule, :value, :id, :order
 
       def initialize(rule_hash)
-        @policy = rule_hash.fetch('policy')
-        @field = rule_hash.fetch('field')
-        @rule = rule_hash.fetch('rule')
-        @value = rule_hash.fetch('value')
-        @id = rule_hash.fetch('id')
+        @policy = SimpleRule.flex_fetch(rule_hash, POLICY)
+        unless @policy == Policy::INCLUDE || @policy == Policy::EXCLUDE
+          raise "Invalid policy '#{policy}' for rule '#{rule_hash}'"
+        end
+        @field = SimpleRule.flex_fetch(rule_hash, FIELD)
+        @rule = SimpleRule.flex_fetch(rule_hash, RULE)
+        @value = SimpleRule.flex_fetch(rule_hash, VALUE)
+        @id = SimpleRule.flex_fetch(rule_hash, ID)
+        @order = SimpleRule.flex_fetch(rule_hash, ORDER, 0)
         @rule_hash = rule_hash
       rescue KeyError => e
-        raise "#{e.key} is required"
+        raise "#{e.key} is required: #{e.message}"
       end
 
-      def self.from_args(id, policy, field, rule, value)
+      def self.flex_fetch(hash, key, default_value = nil)
+        result = hash[key]
+        if result.nil?
+          result = hash[key.to_sym]
+        end
+        if result.nil?
+          result = hash[key.to_s]
+        end
+        if default_value.nil?
+          if result != false && result.blank?
+            raise KeyError.new("#{key} is required", key: key)
+          end
+        elsif result.nil?
+          result = default_value
+        end
+        result
+      end
+
+      def self.from_args(id, policy, field, rule, value, order = 0)
         SimpleRule.new(
           {
-            'id' => id,
-            'policy' => policy,
-            'field' => field,
-            'rule' => rule,
-            'value' => value
+            ID => id,
+            POLICY => policy,
+            FIELD => field,
+            RULE => rule,
+            VALUE => value,
+            ORDER => order
           }
         )
       end
@@ -58,7 +89,8 @@ module Core
         'field' => '_',
         'rule' => 'regex',
         'value' => '.*',
-        'id' => SimpleRule::DEFAULT_RULE_ID
+        'id' => SimpleRule::DEFAULT_RULE_ID,
+        'order' => 0
       )
 
       def match?(document)
@@ -121,6 +153,10 @@ module Core
 
       def to_h
         @rule_hash
+      end
+
+      def ==(other)
+        other.is_a?(SimpleRule) && other.to_h == to_h
       end
 
       private

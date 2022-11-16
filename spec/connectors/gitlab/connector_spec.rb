@@ -32,6 +32,24 @@ describe Connectors::GitLab::Connector do
   it_behaves_like 'a connector'
 
   describe '.validate_filtering' do
+    shared_examples_for 'filtering is valid' do
+      it 'returns validation result with state \'valid\' and no errors' do
+        validation_result = described_class.validate_filtering(filtering)
+
+        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
+        expect(validation_result[:errors]).to be_empty
+      end
+    end
+
+    shared_examples_for 'filtering is invalid' do
+      it 'returns validation result with state \'invalid\' and no errors' do
+        validation_result = described_class.validate_filtering(filtering)
+
+        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
+        expect(validation_result[:errors]).to_not be_empty
+      end
+    end
+
     context 'filtering is not present' do
       let(:filtering) {
         {}
@@ -47,7 +65,8 @@ describe Connectors::GitLab::Connector do
         }
       }
 
-      it_behaves_like 'filtering is valid'
+      # TODO: will be replaced with GitLab specific filtering validation
+      it_behaves_like 'filtering is invalid'
     end
   end
 

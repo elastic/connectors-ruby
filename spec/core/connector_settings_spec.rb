@@ -13,38 +13,6 @@ describe Core::ConnectorSettings do
   let(:connectors_meta) { {} }
   subject { described_class.send(:new, elasticsearch_response, connectors_meta) }
 
-  before(:each) do
-    allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return(connectors_meta)
-  end
-
-  context '.fetch_by_id' do
-    let(:connector_id) { '123' }
-    let(:elasticsearch_response) do
-      {
-        :found => found
-      }
-    end
-    before(:each) do
-      allow(Core::ElasticConnectorActions).to receive(:get_connector).and_return(elasticsearch_response)
-    end
-
-    context 'when connector does not exist' do
-      let(:found) { false }
-
-      it 'returns nil' do
-        expect(described_class.fetch_by_id(connector_id)).to be_nil
-      end
-    end
-
-    context 'when connector exists' do
-      let(:found) { true }
-
-      it 'returns a connector entity' do
-        expect(described_class.fetch_by_id(connector_id)).to be_kind_of(described_class)
-      end
-    end
-  end
-
   context 'pipeline settings' do
     it 'has defaults' do
       expect(subject.request_pipeline).to eq(Core::ConnectorSettings::DEFAULT_REQUEST_PIPELINE)
@@ -75,13 +43,11 @@ describe Core::ConnectorSettings do
       context 'index specific values are present' do
         let(:elasticsearch_response) {
           {
-            :_source => {
-              :pipeline => {
-                :name => 'bar',
-                :extract_binary_content => true,
-                :reduce_whitespace => false,
-                :run_ml_inference => true
-              }
+            :pipeline => {
+              :name => 'bar',
+              :extract_binary_content => true,
+              :reduce_whitespace => false,
+              :run_ml_inference => true
             }
           }
         }
@@ -100,17 +66,15 @@ describe Core::ConnectorSettings do
     context 'filtering is present' do
       let(:elasticsearch_response) {
         {
-          :_source => {
-            :filtering => [
-              {
-                :domain => 'DEFAULT',
-                :active => {
-                  :rules => [],
-                  :advanced_snippet => {},
-                }
+          :filtering => [
+            {
+              :domain => 'DEFAULT',
+              :active => {
+                :rules => [],
+                :advanced_snippet => {},
               }
-            ]
-          }
+            }
+          ]
         }
       }
 
@@ -133,7 +97,7 @@ describe Core::ConnectorSettings do
     end
   end
 
-  describe '.fetch_native_connectors' do
+  describe '#fetch_native_connectors' do
     let(:connectors_meta) {
       {
         :pipeline => {
@@ -151,6 +115,10 @@ describe Core::ConnectorSettings do
          { '_id' => '456', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access,
          { '_id' => '789', '_source' => { 'something' => 'something', 'is_native' => true } }.with_indifferent_access
       ]
+    end
+
+    before(:each) do
+      allow(Core::ElasticConnectorActions).to receive(:connectors_meta).and_return(connectors_meta)
     end
 
     context 'when no paging is needed' do

@@ -7,7 +7,6 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
-require 'connectors/example/example_advanced_snippet_validator'
 require 'core/filtering/validation_status'
 require 'utility'
 
@@ -47,8 +46,18 @@ module Connectors
         # raise 'something went wrong'
       end
 
-      def self.advanced_snippet_validator
-        ExampleAdvancedSnippetValidator
+      def self.validate_filtering(filtering = {})
+        # TODO: real filtering validation will follow later
+        errors = [
+          {
+            :ids => ['missing-implementation'],
+            :messages => ['Filtering is not implemented yet for the example connector']
+          }
+        ]
+
+        return { :state => Core::Filtering::ValidationStatus::INVALID, :errors => errors } if filtering.present?
+
+        { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
       end
 
       def yield_documents

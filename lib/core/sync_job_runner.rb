@@ -23,9 +23,9 @@ module Core
   class SyncJobRunner
     JOB_REPORTING_INTERVAL = 10
 
-    def initialize(connector_settings, job)
+    def initialize(connector_settings)
       @connector_settings = connector_settings
-      @sink = Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
+      @ingester = Core::Ingestion::Ingester.new(Core::Ingestion::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline))
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @sync_finished = false
       @sync_error = nil
@@ -35,7 +35,6 @@ module Core
         :indexed_document_volume => 0,
         :error => nil
       }
-      @job = job
     end
 
     def execute
@@ -48,16 +47,9 @@ module Core
     def do_sync!
       Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
-      # connector service doesn't support multiple jobs running simultaneously
-      raise Core::JobAlreadyRunningError.new(@connector_settings.id) if @connector_settings.running?
-
-      Core::ElasticConnectorActions.update_connector_last_sync_status(@connector_settings.id, Connectors::SyncStatus::IN_PROGRESS)
-
-      # claim the job
-      @job.make_running!
-
-      job_description = @job.es_source
-      job_id = @job.id
+      job_record = ElasticConnectorActions.claim_job(@connector_settings.id)
+      job_description = job_record['_source']
+      job_id = job_record['_id']
       job_description['_id'] = job_id
 
       unless job_id.present?
@@ -69,7 +61,7 @@ module Core
         Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
 
         Utility::Logger.info("Checking active filtering for sync job #{job_id} for connector #{@connector_settings.id}.")
-        validate_filtering(job_description.dig(:connector, :filtering))
+        validate_filtering(job_description[:filtering])
         Utility::Logger.debug("Active filtering for sync job #{job_id} for connector #{@connector_settings.id} is valid.")
 
         connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: job_description)
@@ -88,12 +80,12 @@ module Core
           document = add_ingest_metadata(document)
           post_process_result = post_processing_engine.process(document)
           if post_process_result.is_include?
-            @sink.ingest(document)
+            @ingester.ingest(document)
             incoming_ids << document['id']
           end
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
+            ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
@@ -103,15 +95,15 @@ module Core
         Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
 
         ids_to_delete.each do |id|
-          @sink.delete(id)
+          @ingester.delete(id)
 
           if Time.now - reporting_cycle_start >= JOB_REPORTING_INTERVAL
-            ElasticConnectorActions.update_sync(job_id, @sink.ingestion_stats.merge(:metadata => connector_instance.metadata))
+            ElasticConnectorActions.update_sync(job_id, @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata))
             reporting_cycle_start = Time.now
           end
         end
 
-        @sink.flush
+        @ingester.flush
 
         # We use this mechanism for checking, whether an interrupt (or something else lead to the thread not finishing)
         # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
@@ -120,7 +112,7 @@ module Core
         @sync_error = e.message
         Utility::ExceptionTracking.log_exception(e)
       ensure
-        stats = @sink.ingestion_stats
+        stats = @ingester.ingestion_stats
 
         Utility::Logger.debug("Sync stats are: #{stats}")
 
@@ -137,7 +129,7 @@ module Core
         end
 
         unless connector_instance.nil?
-          metadata = @sink.ingestion_stats.merge(:metadata => connector_instance.metadata)
+          metadata = @ingester.ingestion_stats.merge(:metadata => connector_instance.metadata)
           metadata[:total_document_count] = ElasticConnectorActions.document_count(@connector_settings.index_name)
         end
 

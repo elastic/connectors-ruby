@@ -9,9 +9,15 @@
 require 'core/filtering/post_process_engine'
 require 'core/filtering/post_process_result'
 require 'core/filtering/simple_rule'
-require 'core/filtering/validation_job_runner'
-require 'core/filtering/validation_status'
 
 module Core::Filtering
+  FILTERING = 'filtering'
+  DOMAIN = 'domain'
+  ACTIVE = 'active'
+  DRAFT = 'draft'
+  RULES = 'rules'
+  ADVANCED_SNIPPET = 'advanced_snippet'
   DEFAULT_DOMAIN = 'DEFAULT'
+  VALIDATION = 'validation'
+  WARNINGS = 'warnings'
 end
