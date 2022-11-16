@@ -13,13 +13,13 @@ module Core
   class JobCleanUp
     class << self
       def execute(connector_id = nil)
-        cleanup_orphaned_jobs
-        cleanup_stuck_jobs(connector_id)
+        process_orphaned_jobs
+        process_stuck_jobs(connector_id)
       end
 
       private
 
-      def cleanup_orphaned_jobs
+      def process_orphaned_jobs
         Utility::Logger.info('Start cleaning up orphaned jobs...')
         orphaned_jobs = ConnectorJob.orphaned_jobs
         if orphaned_jobs.empty?
@@ -30,12 +30,12 @@ module Core
         # delete content indicies in case they are re-created by sync job
         content_indices = orphaned_jobs.map(&:index_name).compact.uniq
         ElasticConnectorActions.delete_indices(content_indices) if content_indices.any?
-        result = ConnectorJob.cleanup_jobs(orphaned_jobs)
+        result = ConnectorJob.delete_jobs(orphaned_jobs)
         Utility::Logger.error("Error found when deleting jobs: #{result['failures']}") if result['failures']&.any?
         Utility::Logger.info("Successfully deleted #{result['deleted']} out of #{result['total']} orphaned jobs.")
       end
 
-      def cleanup_stuck_jobs(connector_id = nil)
+      def process_stuck_jobs(connector_id = nil)
         Utility::Logger.info("Start cleaning up stuck jobs for #{connector_id ? "connector #{connector_id}" : 'native connectors'}...")
         stuck_jobs = ConnectorJob.stuck_jobs(connector_id)
         if stuck_jobs.empty?

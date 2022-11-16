@@ -22,7 +22,7 @@ describe Core::JobCleanUp do
 
     it 'should not clean up orphaned jobs' do
       expect(Core::ElasticConnectorActions).to_not receive(:delete_indices)
-      expect(Core::ConnectorJob).to_not receive(:cleanup_jobs)
+      expect(Core::ConnectorJob).to_not receive(:delete_jobs)
 
       described_class.execute
     end
@@ -43,12 +43,12 @@ describe Core::JobCleanUp do
       before(:each) do
         allow(job1).to receive(:index_name).and_return(:index_name)
         allow(job2).to receive(:index_name).and_return(:index_name)
-        allow(Core::ConnectorJob).to receive(:cleanup_jobs).and_return({})
+        allow(Core::ConnectorJob).to receive(:delete_jobs).and_return({})
       end
 
       it 'should clean up orphaned jobs' do
         expect(Core::ElasticConnectorActions).to receive(:delete_indices)
-        expect(Core::ConnectorJob).to receive(:cleanup_jobs)
+        expect(Core::ConnectorJob).to receive(:delete_jobs)
 
         described_class.execute
       end

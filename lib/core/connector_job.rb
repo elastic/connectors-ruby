@@ -42,7 +42,7 @@ module Core
       fetch_jobs_by_query(query, page_size)
     end
 
-    def self.cleanup_jobs(jobs)
+    def self.delete_jobs(jobs)
       query = { terms: { '_id': jobs.map(&:id) } }
       ElasticConnectorActions.delete_jobs_by_query(query)
     end
