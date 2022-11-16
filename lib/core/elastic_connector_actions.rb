@@ -220,29 +220,6 @@ module Core
         update_connector_fields(connector_id, body)
       end
 
-      def complete_sync(connector_id, job_id, sync_status, sync_error, metadata)
-        metadata ||= {}
-        update_connector_fields(connector_id,
-                                :last_sync_status => sync_status,
-                                :last_sync_error => sync_error,
-                                :error => sync_error,
-                                :last_synced => Time.now,
-                                :last_indexed_document_count => metadata[:indexed_document_count],
-                                :last_deleted_document_count => metadata[:deleted_document_count])
-
-        body = {
-          :doc => {
-            :status => sync_status,
-            :completed_at => Time.now,
-            :last_seen => Time.now,
-            :error => sync_error
-          }.merge(metadata).tap do |doc|
-            doc[:canceled_at] = Time.now if sync_status == Connectors::SyncStatus::CANCELED
-          end
-        }
-        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
-      end
-
       def fetch_document_ids(index_name)
         page_size = 1000
         result = []

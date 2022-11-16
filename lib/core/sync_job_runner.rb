@@ -133,11 +133,11 @@ module Core
         # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
         @sync_status = Connectors::SyncStatus::COMPLETED
         @sync_error = nil
-      rescue Core::ConnectorNotFoundError, Core::ConnectorJobNotFoundError, Core::InvalidConnectorJobStatusError => e
+      rescue ConnectorNotFoundError, ConnectorJobNotFoundError, InvalidConnectorJobStatusError => e
         Utility::Logger.error(e.message)
         @sync_status = Connectors::SyncStatus::ERROR
         @sync_error = e.message
-      rescue Core::ConnectorJobCanceledError => e
+      rescue ConnectorJobCanceledError => e
         Utility::Logger.error(e.message)
         @sync_status = Connectors::SyncStatus::CANCELED
         # Cancelation is an expected action and we shouldn't log an error
@@ -157,6 +157,7 @@ module Core
         @sync_status ||= Connectors::SyncStatus::ERROR
         @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.' if @sync_status == Connectors::SyncStatus::ERROR && @sync_error.nil?
 
+        # update job if it's still present
         if reload_job!
           case @sync_status
           when Connectors::SyncStatus::COMPLETED
@@ -173,6 +174,7 @@ module Core
           end
         end
 
+        # update connector if it's still present
         if reload_connector!
           @connector_settings.update_last_sync!(@job)
         end
