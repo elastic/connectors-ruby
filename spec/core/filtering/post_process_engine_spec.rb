@@ -12,10 +12,10 @@ describe Core::Filtering::PostProcessEngine do
   let(:filtering) do
     [
       {
-        Core::Filtering::DOMAIN => Core::Filtering::DEFAULT_DOMAIN,
-        Core::Filtering::RULES => rules,
-        Core::Filtering::ADVANCED_SNIPPET => snippet,
-        Core::Filtering::WARNINGS => []
+        'domain' => Core::Filtering::DEFAULT_DOMAIN,
+        'rules' => rules,
+        'advanced_snippet' => snippet,
+        'warnings' => []
       }
     ]
   end

@@ -33,7 +33,7 @@ describe Connectors::GitLab::Connector do
 
   before(:each) do
     allow(job_description).to receive(:dup).and_return(job_description)
-    allow(job_description).to receive(:filtering).and_return(filtering)
+    allow(job_description).to receive(:extracted_filtering).and_return(filtering)
   end
 
   it_behaves_like 'a connector'

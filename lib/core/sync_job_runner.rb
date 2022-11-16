@@ -51,6 +51,9 @@ module Core
     def initialize(connector_settings, job, max_ingestion_queue_size, max_ingestion_queue_bytes)
       @connector_settings = connector_settings
       @connector_id = connector_settings.id
+      @index_name = connector_settings.index_name
+      @job = job
+      @job_id = job.id
       @sink = Core::Ingestion::EsSink.new(
         connector_settings.index_name,
         @connector_settings.request_pipeline,
@@ -61,10 +64,6 @@ module Core
         max_ingestion_queue_bytes
       )
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
-      @connector_instance = nil
-      @sync_status = nil
-      @sync_error = nil
-      @job = nil
     end
 
     def execute
@@ -75,43 +74,28 @@ module Core
     private
 
     def do_sync!
-      Utility::Logger.info("Claiming a sync job for connector #{@connector_id}.")
-
-      # connector service doesn't support multiple jobs running simultaneously
-      raise Core::JobAlreadyRunningError.new(@connector_settings.id) if @connector_settings.running?
-
-      Core::ElasticConnectorActions.update_connector_last_sync_status(@connector_settings.id, Connectors::SyncStatus::IN_PROGRESS)
-
-      # claim the job
-      @job.make_running!
-
-      job_description = @job.es_source
-      job_id = @job.id
-      job_description['_id'] = job_id
-
-      unless job_id.present?
-        Utility::Logger.error("Failed to claim the job for #{@connector_settings.id}. Please check the logs for the cause of this error.")
-        return
-      end
+      return unless claim_job!
 
       begin
-        Utility::Logger.debug("Successfully claimed job for connector #{@connector_settings.id}.")
+        @sink = Core::Ingestion::EsSink.new(@index_name, @connector_settings.request_pipeline)
 
-        Utility::Logger.info("Checking active filtering for sync job #{job_id} for connector #{@connector_settings.id}.")
-        validate_filtering(job_description.dig(:connector, :filtering))
-        Utility::Logger.debug("Active filtering for sync job #{job_id} for connector #{@connector_settings.id} is valid.")
+        Utility::Logger.info("Checking active filtering for sync job #{@job_id} for connector #{@connector_id}.")
+        validate_filtering(@job.filtering)
+        Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
 
         @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: @job)
-
         @connector_instance.do_health_check!
 
-        incoming_ids = []
-        existing_ids = ElasticConnectorActions.fetch_document_ids(@connector_settings.index_name)
+        @sync_status = nil
+        @sync_error = nil
+        @reporting_cycle_start = Time.now
 
-        Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@connector_settings.index_name}.")
+        incoming_ids = []
+        existing_ids = ElasticConnectorActions.fetch_document_ids(@index_name)
+
+        Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@index_name}.")
 
         post_processing_engine = Core::Filtering::PostProcessEngine.new(@job.filtering)
-        @reporting_cycle_start = Time.now
         Utility::Logger.info('Yielding documents...')
         @connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
@@ -129,7 +113,7 @@ module Core
 
         ids_to_delete = existing_ids - incoming_ids.uniq
 
-        Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@connector_settings.index_name}.")
+        Utility::Logger.info("Deleting #{ids_to_delete.size} documents from index #{@index_name}.")
 
         ids_to_delete.each do |id|
           @sink.delete(id)
@@ -148,11 +132,12 @@ module Core
         # We use this mechanism for checking, whether an interrupt (or something else lead to the thread not finishing)
         # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
         @sync_status = Connectors::SyncStatus::COMPLETED
-      rescue ConnectorNotFoundError, ConnectorJobNotFoundError, InvalidConnectorJobStatusError => e
+        @sync_error = nil
+      rescue Core::ConnectorNotFoundError, Core::ConnectorJobNotFoundError, Core::InvalidConnectorJobStatusError => e
         Utility::Logger.error(e.message)
         @sync_status = Connectors::SyncStatus::ERROR
         @sync_error = e.message
-      rescue ConnectorJobCanceledError => e
+      rescue Core::ConnectorJobCanceledError => e
         Utility::Logger.error(e.message)
         @sync_status = Connectors::SyncStatus::CANCELED
         # Cancelation is an expected action and we shouldn't log an error
@@ -165,14 +150,14 @@ module Core
         stats = @sink.ingestion_stats
 
         Utility::Logger.debug("Sync stats are: #{stats}")
-        Utility::Logger.info("Upserted #{stats[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
-        Utility::Logger.info("Deleted #{stats[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
+        Utility::Logger.info("Upserted #{stats[:indexed_document_count]} documents into #{@index_name}.")
+        Utility::Logger.info("Deleted #{stats[:deleted_document_count]} documents into #{@index_name}.")
 
         # Make sure to not override a previous error message
         @sync_status ||= Connectors::SyncStatus::ERROR
         @sync_error = 'Sync thread didn\'t finish execution. Check connector logs for more details.' if @sync_status == Connectors::SyncStatus::ERROR && @sync_error.nil?
 
-        if @job = ConnectorJob.fetch_by_id(@job_id)
+        if reload_job!
           case @sync_status
           when Connectors::SyncStatus::COMPLETED
             @job.done!(stats, @connector_instance&.metadata)
@@ -188,11 +173,34 @@ module Core
           end
         end
 
-        if @connector_settings = ConnectorSettings.fetch_by_id(@connector_id)
+        if reload_connector!
           @connector_settings.update_last_sync!(@job)
         end
 
         Utility::Logger.info("Completed the job (ID: #{@job_id}) with status: #{@sync_status}#{@sync_error ? " and error: #{@sync_error}" : ''}")
+      end
+    end
+
+    def claim_job!
+      Utility::Logger.info("Claiming job (ID: #{@job_id}) for connector (ID: #{@connector_id}).")
+
+      # connector service doesn't support multiple jobs running simultaneously
+      if @connector_settings.running?
+        Utility::Logger.warn("Failed to claim job (ID: #{@job_id}) for connector (ID: #{@connector_id}), there are already jobs running.")
+        return false
+      end
+
+      begin
+        Core::ElasticConnectorActions.update_connector_last_sync_status(@connector_id, Connectors::SyncStatus::IN_PROGRESS)
+
+        @job.make_running!
+
+        Utility::Logger.info("Successfully claimed job (ID: #{@job_id}) for connector (ID: #{@connector_id}).")
+        true
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e)
+        Utility::Logger.error("Failed to claim job (ID: #{@job_id}) for connector (ID: #{@connector_id}). Please check the logs for the cause of this error.")
+        false
       end
     end
 
@@ -231,20 +239,24 @@ module Core
 
     def check_job
       # raise error if the connector is deleted
-      if (@connector_settings = ConnectorSettings.fetch_by_id(@connector_id)).nil?
-        raise ConnectorNotFoundError(@connector_id)
-      end
+      raise ConnectorNotFoundError.new(@connector_id) unless reload_connector!
 
       # raise error if the job is deleted
-      if (@job = ConnectorJob.fetch_by_id(@job_id)).nil?
-        raise ConnectorJobNotFoundError(@job_id)
-      end
+      raise ConnectorJobNotFoundError.new(@job_id) unless reload_job!
 
       # raise error if the job is canceled
       raise ConnectorJobCanceledError.new(@job_id) if @job.canceling?
 
       # raise error if the job is not in the status in_progress
       raise InvalidConnectorJobStatusError.new(@job_id, @job.status) unless @job.in_progress?
+    end
+
+    def reload_job!
+      @job = ConnectorJob.fetch_by_id(@job_id)
+    end
+
+    def reload_connector!
+      @connector_settings = ConnectorSettings.fetch_by_id(@connector_id)
     end
   end
 end
