@@ -103,7 +103,9 @@ describe Connectors::MongoDB::Connector do
   let(:filtering) {
     {
       :rules => rules,
-      :advanced_snippet => advanced_snippet
+      :advanced_snippet => {
+        :value => advanced_snippet
+      }
     }
   }
 

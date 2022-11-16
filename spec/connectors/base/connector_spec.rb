@@ -17,6 +17,12 @@ describe Connectors::Base::Connector do
 
   let(:advanced_snippet) {
     {
+      :value => advanced_snippet_value
+    }
+  }
+
+  let(:advanced_snippet_value) {
+    {
       :find => {
         :filter => {
           :$text => {
@@ -71,12 +77,12 @@ describe Connectors::Base::Connector do
 
     context 'advanced filter config is present' do
       it 'returns advanced filter config' do
-        expect(subject.advanced_filter_config).to eq(advanced_snippet)
+        expect(subject.advanced_filter_config).to eq(advanced_snippet_value)
       end
     end
 
     context 'advanced filter config is nil' do
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         nil
       }
 
@@ -84,7 +90,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'advanced filter config is empty' do
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         {}
       }
 
@@ -156,7 +162,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'only advanced filter config is empty' do
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         {}
       }
 
@@ -164,7 +170,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'only advanced filter config is nil' do
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         nil
       }
 
@@ -176,7 +182,7 @@ describe Connectors::Base::Connector do
         []
       }
 
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         {}
       }
 
@@ -188,7 +194,7 @@ describe Connectors::Base::Connector do
         nil
       }
 
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         nil
       }
 
@@ -263,7 +269,7 @@ describe Connectors::Base::Connector do
       it 'extracts the advanced filter config' do
         advanced_filter_config = subject.advanced_filter_config
 
-        expect(advanced_filter_config).to eq(advanced_snippet)
+        expect(advanced_filter_config).to eq(advanced_snippet_value)
       end
     end
 
@@ -277,7 +283,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'filter config is nil' do
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         nil
       }
 
@@ -285,7 +291,7 @@ describe Connectors::Base::Connector do
     end
 
     context 'filter config is empty' do
-      let(:advanced_snippet) {
+      let(:advanced_snippet_value) {
         {}
       }
 

@@ -36,13 +36,13 @@ module Connectors
 
         return valid_snippet if config_schema.nil? || config_schema.empty?
 
-        return fields_constraint_violation if fields_constraints_violated?(config_schema, advanced_snippet)
-
         schema_fields = config_schema[:fields].is_a?(Hash) ? config_schema.dig(:fields, :values) : config_schema[:fields]
         snippet_field_names = advanced_snippet&.keys&.map(&:to_s)
         schema_field_names = schema_fields.map { |field| field[:name] }
 
         return unexpected_field(schema_field_names, snippet_field_names) if unexpected_field_present?(snippet_field_names, schema_field_names)
+
+        return fields_constraint_violation(config_schema[:fields]) if fields_constraints_violated?(config_schema, advanced_snippet)
 
         schema_fields.each do |field|
           name = field[:name]
@@ -145,13 +145,13 @@ module Connectors
         }
       end
 
-      def fields_constraint_violation
+      def fields_constraint_violation(fields)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
               :ids => [ADVANCED_SNIPPET_ID],
-              :messages => ['A fields constraint was violated. Check advanced snippet field constraints.']
+              :messages => ["A fields constraint was violated for fields: '#{fields[:values].map { |v| v[:name] }}'. Check advanced snippet field constraints."]
             }
           ]
         }
