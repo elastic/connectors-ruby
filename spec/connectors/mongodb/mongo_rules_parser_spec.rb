@@ -50,6 +50,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => 'bar' })
           end
         end
+
         context 'greater' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::GREATER_THAN }
           it 'parses rule as greater' do
@@ -57,6 +58,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$gt' => 'bar' } })
           end
         end
+
         context 'less' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::LESS_THAN }
           it 'parses rule as less' do
@@ -64,6 +66,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$lt' => 'bar' } })
           end
         end
+
         context 'starts with' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
           it 'parses rule as starts with' do
@@ -71,6 +74,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => /^bar/ })
           end
         end
+
         context 'ends with' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
           it 'parses rule as ends with' do
@@ -79,6 +83,7 @@ describe Connectors::MongoDB::MongoRulesParser do
           end
         end
       end
+
       context 'on exclude rule' do
         let(:policy) { Core::Filtering::SimpleRule::Policy::EXCLUDE }
         context Core::Filtering::SimpleRule::Rule::EQUALS do
@@ -87,6 +92,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$ne' => 'bar' } })
           end
         end
+
         context 'greater' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::GREATER_THAN }
           it 'parses rule as less or equals' do
@@ -94,6 +100,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$lte' => 'bar' } })
           end
         end
+
         context 'less' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::LESS_THAN }
           it 'parses rule as less or equals' do
@@ -101,6 +108,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$gte' => 'bar' } })
           end
         end
+
         context 'starts with' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
           it 'parses rule as not starts with' do
@@ -108,6 +116,7 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$not' => /^bar/ } })
           end
         end
+
         context 'ends with' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
           it 'parses rule as not ends with' do
@@ -147,7 +156,7 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with one default rule' do
       let(:rules) do
         [
-          { id: 'DEFAULT', field: 'foo', value: '*.', policy: 'include', rule: 'regex' }
+          { 'id' => 'DEFAULT', 'field' => 'foo', 'value' => '*.', 'policy' => 'include', 'rule' => 'regex' }
         ]
       end
       it 'parses rules as empty' do
@@ -159,8 +168,8 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with one default rule and one non-default' do
       let(:rules) do
         [
-          { id: 'DEFAULT', field: 'foo', value: '*.', policy: 'include', rule: 'regex' },
-          { id: '123', field: 'foo', value: 'bla', policy: 'include', rule: 'equals' }
+          { 'id' => 'DEFAULT', 'field' => 'foo', 'value' => '*.', 'policy' => 'include', 'rule' => 'regex' },
+          { 'id' => '123', 'field' => 'foo', 'value' => 'bla', 'policy' => 'include', 'rule' => 'equals' }
         ]
       end
       it 'parses rules as just non-default' do
@@ -214,12 +223,12 @@ describe Connectors::MongoDB::MongoRulesParser do
     end
 
     context 'with no id on the rule' do
-      let(:rules) { [{ field: 'foo', value: 'bar', policy: 'include', rule: ops[:equals] }] }
+      let(:rules) { [{ 'field' => 'foo', 'value' => 'bar', 'policy' => 'include', 'rule' => ops[:equals] }] }
       it_behaves_like 'raises_validation_error', /id is required/
     end
 
     context 'with invalid operator' do
-      let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'invalid' }] }
+      let(:rules) { [{ 'id' => '1', 'field' => 'foo', 'value' => '(', 'policy' => 'include', 'rule' => 'invalid' }] }
       it_behaves_like 'raises_validation_error', /Unknown operator/
     end
 
@@ -306,11 +315,12 @@ describe Connectors::MongoDB::MongoRulesParser do
         let(:value) { '123' }
         it_behaves_like 'keeps valid rules'
       end
+
       context 'with two equals rules' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:equals] },
-            { id: '2', field: 'foo', value: '456', policy: 'include', rule: ops[:equals] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:equals] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '456', 'policy' => 'include', 'rule' => ops[:equals] }
           ]
         end
         it_behaves_like 'filters invalid rules'
@@ -327,8 +337,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude the same starts_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:starts_with] },
-            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:starts_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:starts_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '123', 'policy' => 'exclude', 'rule' => ops[:starts_with] }
           ]
         end
         it_behaves_like 'filters invalid rules'
@@ -337,8 +347,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude different starts_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:starts_with] },
-            { id: '2', field: 'foo', value: '456', policy: 'exclude', rule: ops[:starts_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:starts_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '456', 'policy' => 'exclude', 'rule' => ops[:starts_with] }
           ]
         end
         it_behaves_like 'keeps valid rules'
@@ -347,8 +357,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude overlapping conflicting starts_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '1234', policy: 'include', rule: ops[:starts_with] },
-            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:starts_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '1234', 'policy' => 'include', 'rule' => ops[:starts_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '123', 'policy' => 'exclude', 'rule' => ops[:starts_with] }
           ]
         end
         it_behaves_like 'filters invalid rules'
@@ -357,8 +367,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude overlapping non-conflicting starts_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '12', policy: 'include', rule: ops[:starts_with] },
-            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:starts_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '12', 'policy' => 'include', 'rule' => ops[:starts_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '123', 'policy' => 'exclude', 'rule' => ops[:starts_with] }
           ]
         end
         it_behaves_like 'keeps valid rules'
@@ -375,8 +385,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude the same ends_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
-            { id: '2', field: 'foo', value: '123', policy: 'exclude', rule: ops[:ends_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:ends_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '123', 'policy' => 'exclude', 'rule' => ops[:ends_with] }
           ]
         end
         it_behaves_like 'filters invalid rules'
@@ -385,8 +395,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude different ends_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
-            { id: '2', field: 'foo', value: '456', policy: 'exclude', rule: ops[:ends_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:ends_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '456', 'policy' => 'exclude', 'rule' => ops[:ends_with] }
           ]
         end
         it_behaves_like 'keeps valid rules'
@@ -395,8 +405,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude overlapping conflicting ends_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
-            { id: '2', field: 'foo', value: '23', policy: 'exclude', rule: ops[:ends_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:ends_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '23', 'policy' => 'exclude', 'rule' => ops[:ends_with] }
           ]
         end
         it_behaves_like 'filters invalid rules'
@@ -405,8 +415,8 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'with include and exclude overlapping non-conflicting ends_with' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '123', policy: 'include', rule: ops[:ends_with] },
-            { id: '2', field: 'foo', value: '0123', policy: 'exclude', rule: ops[:ends_with] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '123', 'policy' => 'include', 'rule' => ops[:ends_with] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '0123', 'policy' => 'exclude', 'rule' => ops[:ends_with] }
           ]
         end
         it_behaves_like 'keeps valid rules'
@@ -417,37 +427,40 @@ describe Connectors::MongoDB::MongoRulesParser do
       context 'collapses include greater_then' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:greater_then] },
-            { id: '2', field: 'foo', value: '30', policy: 'include', rule: ops[:greater_then] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '3', 'policy' => 'include', 'rule' => ops[:greater_then] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '30', 'policy' => 'include', 'rule' => ops[:greater_then] }
           ]
         end
         let(:expected_rules) { [rules[0]] }
         it_behaves_like 'keeps specific rules'
       end
+
       context 'does not collapse include/exclude greater_then' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:greater_then] },
-            { id: '2', field: 'foo', value: '30', policy: 'exclude', rule: ops[:greater_then] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '3', 'policy' => 'include', 'rule' => ops[:greater_then] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '30', 'policy' => 'exclude', 'rule' => ops[:greater_then] }
           ]
         end
         it_behaves_like 'keeps valid rules'
       end
+
       context 'collapses include less_then' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:less_then] },
-            { id: '2', field: 'foo', value: '30', policy: 'include', rule: ops[:less_then] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '3', 'policy' => 'include', 'rule' => ops[:less_then] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '30', 'policy' => 'include', 'rule' => ops[:less_then] }
           ]
         end
         let(:expected_rules) { [rules[1]] }
         it_behaves_like 'keeps specific rules'
       end
+
       context 'does not collapse include/exclude less_then' do
         let(:rules) do
           [
-            { id: '1', field: 'foo', value: '3', policy: 'include', rule: ops[:less_then] },
-            { id: '2', field: 'foo', value: '30', policy: 'exclude', rule: ops[:less_then] }
+            { 'id' => '1', 'field' => 'foo', 'value' => '3', 'policy' => 'include', 'rule' => ops[:less_then] },
+            { 'id' => '2', 'field' => 'foo', 'value' => '30', 'policy' => 'exclude', 'rule' => ops[:less_then] }
           ]
         end
         it_behaves_like 'keeps valid rules'

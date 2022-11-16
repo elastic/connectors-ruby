@@ -159,9 +159,9 @@ module Connectors
       def validate_rule(rule)
         op = rule.rule&.to_s
         id = rule.id&.to_s
-        if id.blank?
-          raise FilteringRulesValidationError.new('Rule id is required')
-        end
+        raise FilteringRulesValidationError.new('Rule id is required') if id.blank?
+        raise FilteringRulesValidationError.new('value is required') if rule.value.blank?
+        raise FilteringRulesValidationError.new('field is required') if rule.field.blank?
         case op
         when SimpleRule::Rule::EQUALS,
           SimpleRule::Rule::GREATER_THAN,
