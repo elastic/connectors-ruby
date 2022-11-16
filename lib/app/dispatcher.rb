@@ -30,10 +30,8 @@ module App
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
         start_job_cleanup_task!
-
         # start sync jobs consumer
         start_consumer!
-
         start_polling_jobs!
       end
 

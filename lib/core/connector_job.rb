@@ -8,13 +8,14 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/sync_status'
+require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'utility'
 
 module Core
   class ConnectorJob
     DEFAULT_PAGE_SIZE = 100
-    STUCK_THRESHOLD = 30
+    STUCK_THRESHOLD = 60
 
     def self.fetch_by_id(job_id)
       es_response = ElasticConnectorActions.get_job(job_id)
@@ -36,13 +37,8 @@ module Core
     end
 
     def self.orphaned_jobs(page_size = DEFAULT_PAGE_SIZE)
-      connector_ids = ConnectorSettings.fetch_native_connectors.map(&:id)
+      connector_ids = ConnectorSettings.fetch_all_connectors.map(&:id)
       query = { bool: { must_not: { terms: { 'connector.id': connector_ids } } } }
-      fetch_jobs_by_query(query, page_size)
-    end
-
-    def self.fetch_by_connector_id(connector_id, page_size = DEFAULT_PAGE_SIZE)
-      query = { term: { 'connector.id': connector_id } }
       fetch_jobs_by_query(query, page_size)
     end
 

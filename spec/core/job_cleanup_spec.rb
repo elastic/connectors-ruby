@@ -16,8 +16,7 @@ describe Core::JobCleanUp do
     let(:job2) { double }
 
     before(:each) do
-      allow(described_class).to receive(:orphaned_jobs_for_single_connector).and_return(orphaned_jobs)
-      allow(described_class).to receive(:orphaned_jobs_for_native_connectors).and_return(orphaned_jobs)
+      allow(Core::ConnectorJob).to receive(:orphaned_jobs).and_return(orphaned_jobs)
       allow(Core::ConnectorJob).to receive(:stuck_jobs).and_return(stuck_jobs)
     end
 
