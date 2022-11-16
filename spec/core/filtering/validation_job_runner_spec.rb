@@ -20,7 +20,8 @@ describe Core::Filtering::ValidationJobRunner do
   let(:connector_settings) { double }
 
   let(:service_type) { 'foo' }
-  let(:filtering) { {} }
+  let(:filtering) { { :draft => draft_filtering } }
+  let(:draft_filtering) { {} }
 
   let(:validation_state) {
     Core::Filtering::ValidationStatus::EDITED
@@ -48,7 +49,7 @@ describe Core::Filtering::ValidationJobRunner do
     allow(connector_settings).to receive(:service_type).and_return(service_type)
 
     allow(connector_class).to receive(:service_type).and_return(service_type)
-    allow(connector_class).to receive(:validate_filtering).with(filtering).and_return(validation_result)
+    allow(connector_class).to receive(:validate_filtering).with(draft_filtering).and_return(validation_result)
   end
 
   shared_examples_for 'updates the filtering validation' do |connector_id, expected_validation_result|
@@ -93,7 +94,7 @@ describe Core::Filtering::ValidationJobRunner do
 
     context 'when an error is thrown during validation' do
       before(:each) do
-        allow(connector_class).to receive(:validate_filtering).with(filtering).and_raise(StandardError.new('Error occurred during validation'))
+        allow(connector_class).to receive(:validate_filtering).with(draft_filtering).and_raise(StandardError.new('Error occurred during validation'))
       end
 
       it 'sets a filtering error and logs the exception' do
@@ -116,7 +117,7 @@ describe Core::Filtering::ValidationJobRunner do
 
     context 'when validation thread did not finish execution' do
       before(:each) do
-        allow(connector_class).to receive(:validate_filtering).with(filtering).and_raise(Exception)
+        allow(connector_class).to receive(:validate_filtering).with(draft_filtering).and_raise(Exception)
       end
 
       it 'sets an error, that the validation thread was killed' do

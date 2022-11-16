@@ -12,13 +12,6 @@ require 'active_support/core_ext/object/blank'
 module Core
   module Filtering
     class SimpleRule
-      POLICY = 'policy'
-      FIELD = 'field'
-      RULE = 'rule'
-      VALUE = 'value'
-      ID = 'id'
-      ORDER = 'order'
-
       DEFAULT_RULE_ID = 'DEFAULT'
 
       class Policy
@@ -39,47 +32,28 @@ module Core
       attr_reader :policy, :field, :rule, :value, :id, :order
 
       def initialize(rule_hash)
-        @policy = SimpleRule.flex_fetch(rule_hash, POLICY)
+        @policy = rule_hash.fetch('policy')
         unless @policy == Policy::INCLUDE || @policy == Policy::EXCLUDE
           raise "Invalid policy '#{policy}' for rule '#{rule_hash}'"
         end
-        @field = SimpleRule.flex_fetch(rule_hash, FIELD)
-        @rule = SimpleRule.flex_fetch(rule_hash, RULE)
-        @value = SimpleRule.flex_fetch(rule_hash, VALUE)
-        @id = SimpleRule.flex_fetch(rule_hash, ID)
-        @order = SimpleRule.flex_fetch(rule_hash, ORDER, 0)
+        @field = rule_hash.fetch('field')
+        @rule = rule_hash.fetch('rule')
+        @value = rule_hash.fetch('value')
+        @id = rule_hash.fetch('id')
         @rule_hash = rule_hash
       rescue KeyError => e
         raise "#{e.key} is required: #{e.message}"
       end
 
-      def self.flex_fetch(hash, key, default_value = nil)
-        result = hash[key]
-        if result.nil?
-          result = hash[key.to_sym]
-        end
-        if result.nil?
-          result = hash[key.to_s]
-        end
-        if default_value.nil?
-          if result != false && result.blank?
-            raise KeyError.new("#{key} is required", key: key)
-          end
-        elsif result.nil?
-          result = default_value
-        end
-        result
-      end
-
       def self.from_args(id, policy, field, rule, value, order = 0)
         SimpleRule.new(
           {
-            ID => id,
-            POLICY => policy,
-            FIELD => field,
-            RULE => rule,
-            VALUE => value,
-            ORDER => order
+            'id' => id,
+            'policy' => policy,
+            'field' => field,
+            'rule' => rule,
+            'value' => value,
+            'order' => order
           }
         )
       end

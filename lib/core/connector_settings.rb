@@ -8,7 +8,6 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/connector_status'
-require 'connectors/registry'
 require 'core/elastic_connector_actions'
 require 'utility'
 
@@ -24,18 +23,16 @@ module Core
 
     DEFAULT_PAGE_SIZE = 100
 
-    # Error Classes
-    class ConnectorNotFoundError < StandardError; end
-
     def self.fetch_by_id(connector_id)
       es_response = ElasticConnectorActions.get_connector(connector_id)
-      connectors_meta = ElasticConnectorActions.connectors_meta
+      return nil unless es_response[:found]
 
-      raise ConnectorNotFoundError.new("Connector with id=#{connector_id} was not found.") unless es_response[:found]
+      connectors_meta = ElasticConnectorActions.connectors_meta
       new(es_response, connectors_meta)
     end
 
     def self.fetch_native_connectors(page_size = DEFAULT_PAGE_SIZE)
+      require 'connectors/registry' unless defined?(Connectors::REGISTRY)
       query = {
         bool: {
           filter: [
@@ -87,25 +84,25 @@ module Core
 
     def filtering
       # assume for now, that first object in filtering array or a filter object itself is the only filtering object
-      filtering = @elasticsearch_response[:filtering]
+      filtering = @elasticsearch_response.dig(:_source, :filtering)
 
       Utility::Filtering.extract_filter(filtering)
     end
 
     def request_pipeline
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
     end
 
     def extract_binary_content?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
     end
 
     def reduce_whitespace?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
     end
 
     def run_ml_inference?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
+      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
     end
 
     def formatted
@@ -120,6 +117,32 @@ module Core
 
     def valid_index_name?
       index_name&.start_with?(Utility::Constants::CONTENT_INDEX_PREFIX)
+    end
+
+    def ready_for_sync?
+      Connectors::REGISTRY.registered?(service_type) &&
+        valid_index_name? &&
+        connector_status_allows_sync?
+    end
+
+    def running?
+      @elasticsearch_response[:_source][:last_sync_status] == Connectors::SyncStatus::IN_PROGRESS
+    end
+
+    def update_last_sync!(job)
+      doc = {
+        :last_sync_status => job.status,
+        :last_synced => Time.now,
+        :last_sync_error => job.error,
+        :error => job.error
+      }
+
+      if job.terminated?
+        doc[:last_indexed_document_count] = job[:indexed_document_count]
+        doc[:last_deleted_document_count] = job[:deleted_document_count]
+      end
+
+      Core::ElasticConnectorActions.update_connector_fields(job.connector_id, doc)
     end
 
     private

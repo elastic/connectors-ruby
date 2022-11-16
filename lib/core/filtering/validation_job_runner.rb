@@ -24,7 +24,7 @@ module Core
       def execute
         Utility::Logger.info("Starting a validation job for connector #{@connector_settings.id}.")
 
-        validation_result = @connector_class.validate_filtering(@connector_settings.filtering)
+        validation_result = @connector_class.validate_filtering(@connector_settings.filtering[:draft])
 
         # currently only used for connectors -> DEFAULT domain can be assumed (will be changed with the integration of crawler)
         ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { DEFAULT_DOMAIN => validation_result })

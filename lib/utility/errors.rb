@@ -60,18 +60,6 @@ module Utility
   class JobDocumentLimitError < StandardError; end
   class JobClaimingError < StandardError; end
 
-  class MonitoringError < StandardError
-    attr_accessor :tripped_by
-
-    def initialize(message = nil, tripped_by: nil)
-      super("#{message}#{tripped_by.present? ? " Tripped by - #{tripped_by.class}: #{tripped_by.message}" : ''}")
-      @tripped_by = tripped_by
-    end
-  end
-  class MaxSuccessiveErrorsExceededError < MonitoringError; end
-  class MaxErrorsExceededError < MonitoringError; end
-  class MaxErrorsInWindowExceededError < MonitoringError; end
-
   class JobSyncNotPossibleYetError < StandardError
     attr_accessor :sync_will_be_possible_at
 

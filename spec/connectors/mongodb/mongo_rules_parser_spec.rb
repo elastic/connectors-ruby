@@ -22,29 +22,27 @@ describe Connectors::MongoDB::MongoRulesParser do
     }
   end
 
+  subject { described_class.new(rules) }
+
+  let(:rules) do
+    [
+      {
+        'id' => 'test',
+        'field' => field,
+        'value' => value,
+        'policy' => policy,
+        'rule' => operator,
+        'order' => 0
+      }
+    ]
+  end
   let(:field) { 'foo' }
   let(:value) { 'bar' }
   let(:policy) { Core::Filtering::SimpleRule::Policy::INCLUDE }
   let(:operator) { Core::Filtering::SimpleRule::Rule::EQUALS }
-  let(:rules) do
-    [
-      {
-        Core::Filtering::SimpleRule::ID => 'test',
-        Core::Filtering::SimpleRule::FIELD => field,
-        Core::Filtering::SimpleRule::VALUE => value,
-        Core::Filtering::SimpleRule::POLICY => policy,
-        Core::Filtering::SimpleRule::RULE => operator,
-        Core::Filtering::SimpleRule::ORDER => 0
-      }
-    ]
-  end
-
-  subject do
-    described_class.new(rules)
-  end
 
   describe '#parse' do
-    context 'with one non-default rule' do
+    context 'with one rule' do
       context 'on include rule' do
         context Core::Filtering::SimpleRule::Rule::EQUALS do
           it 'parses rule as equals' do
@@ -124,18 +122,18 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           {
-            Core::Filtering::SimpleRule::ID => 'test1',
-            Core::Filtering::SimpleRule::FIELD => 'foo',
-            Core::Filtering::SimpleRule::VALUE => 'bar1',
-            Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::INCLUDE,
-            Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::EQUALS
+            'id' => 'test1',
+            'field' => 'foo',
+            'value' => 'bar1',
+            'policy' => Core::Filtering::SimpleRule::Policy::INCLUDE,
+            'rule' => Core::Filtering::SimpleRule::Rule::EQUALS
           },
           {
-            Core::Filtering::SimpleRule::ID => 'test2',
-            Core::Filtering::SimpleRule::FIELD => 'foo',
-            Core::Filtering::SimpleRule::VALUE => 'bar2',
-            Core::Filtering::SimpleRule::POLICY => Core::Filtering::SimpleRule::Policy::EXCLUDE,
-            Core::Filtering::SimpleRule::RULE => Core::Filtering::SimpleRule::Rule::GREATER_THAN
+            'id' => 'test2',
+            'field' => 'foo',
+            'value' => 'bar2',
+            'policy' => Core::Filtering::SimpleRule::Policy::EXCLUDE,
+            'rule' => Core::Filtering::SimpleRule::Rule::GREATER_THAN
           }
         ]
       end
@@ -224,6 +222,7 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) { [{ id: '1', field: 'foo', value: '(', policy: 'include', rule: 'invalid' }] }
       it_behaves_like 'raises_validation_error', /Unknown operator/
     end
+
     context 'with invalid policy' do
       let(:policy) { 'invalid' }
       it_behaves_like 'raises_validation_error', /Invalid policy/
@@ -260,10 +259,10 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           {
-            Core::Filtering::SimpleRule::ID => 'test',
-            Core::Filtering::SimpleRule::FIELD => field,
-            Core::Filtering::SimpleRule::POLICY => policy,
-            Core::Filtering::SimpleRule::RULE => operator
+            'id' => 'test',
+            'field' => field,
+            'policy' => policy,
+            'rule' => operator
           }
         ]
       end
@@ -276,10 +275,10 @@ describe Connectors::MongoDB::MongoRulesParser do
       let(:rules) do
         [
           {
-            Core::Filtering::SimpleRule::ID => 'test',
-            Core::Filtering::SimpleRule::VALUE => value,
-            Core::Filtering::SimpleRule::POLICY => policy,
-            Core::Filtering::SimpleRule::RULE => operator
+            'id' => 'test',
+            'value' => value,
+            'policy' => policy,
+            'rule' => operator
           }
         ]
       end

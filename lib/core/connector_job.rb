@@ -15,18 +15,22 @@ module Core
   class ConnectorJob
     DEFAULT_PAGE_SIZE = 100
 
-    # Error Classes
-    class ConnectorJobNotFoundError < StandardError; end
-
     def self.fetch_by_id(job_id)
       es_response = ElasticConnectorActions.get_job(job_id)
+      return nil unless es_response[:found]
 
-      raise ConnectorJobNotFoundError.new("Connector job with id=#{job_id} was not found.") unless es_response[:found]
       new(es_response)
     end
 
-    def self.pending_jobs(page_size = DEFAULT_PAGE_SIZE)
-      query = { terms: { status: Connectors::SyncStatus::PENDING_STATUES } }
+    def self.pending_jobs(connectors_ids: [], page_size: DEFAULT_PAGE_SIZE)
+      status_term = { status: Connectors::SyncStatus::PENDING_STATUSES }
+
+      query = { bool: { must: [{ terms: status_term }] } }
+
+      return fetch_jobs_by_query(query, page_size) if connectors_ids.empty?
+
+      query[:bool][:must] << { terms: { 'connector.id' => connectors_ids } }
+
       fetch_jobs_by_query(query, page_size)
     end
 
@@ -50,6 +54,10 @@ module Core
       @elasticsearch_response[:_source][property_name]
     end
 
+    def error
+      self[:error]
+    end
+
     def status
       self[:status]
     end
@@ -62,16 +70,36 @@ module Core
       status == Connectors::SyncStatus::CANCELING
     end
 
+    def suspended?
+      status == Connectors::SyncStatus::SUSPENDED
+    end
+
+    def canceled?
+      status == Connectors::SyncStatus::CANCELED
+    end
+
+    def pending?
+      Connectors::SyncStatus::PENDING_STATUSES.include?(status)
+    end
+
+    def active?
+      Connectors::SyncStatus::ACTIVE_STATUSES.include?(status)
+    end
+
+    def terminated?
+      Connectors::SyncStatus::TERMINAL_STATUSES.include?(status)
+    end
+
     def connector_snapshot
-      self[:connector]
+      self[:connector] || {}
     end
 
     def connector_id
-      connector_snapshot[:id]
+      @elasticsearch_response[:_source][:connector][:id]
     end
 
     def index_name
-      connector_snapshot[:configuration]
+      connector_snapshot[:index_name]
     end
 
     def language
@@ -87,36 +115,54 @@ module Core
     end
 
     def filtering
-      connector_snapshot[:filtering]
+      Utility::Filtering.extract_filter(connector_snapshot[:filtering])
     end
 
     def pipeline
-      connector_snapshot[:pipeline]
+      @elasticsearch_response[:_source][:pipeline]
     end
 
     def connector
       @connector ||= ConnectorSettings.fetch_by_id(connector_id)
     end
 
-    def reload_connector!
-      @connector = nil
-      connector
+    def done!(ingestion_stats = {}, connector_metadata = {})
+      terminate!(Connectors::SyncStatus::COMPLETED, nil, ingestion_stats, connector_metadata)
     end
 
-    def reload
-      es_response = ElasticConnectorActions.get_job(id)
-      raise ConnectorJobNotFoundError.new("Connector job with id=#{id} was not found.") unless es_response[:found]
-      # TODO: remove the usage of with_indifferent_access. get_id method is expected to return a hash
-      @elasticsearch_response = es_response.with_indifferent_access
-      @connector = nil
+    def error!(message, ingestion_stats = {}, connector_metadata = {})
+      terminate!(Connectors::SyncStatus::ERROR, message, ingestion_stats, connector_metadata)
+    end
+
+    def cancel!(ingestion_stats = {}, connector_metadata = {})
+      terminate!(Connectors::SyncStatus::CANCELED, nil, ingestion_stats, connector_metadata)
+    end
+
+    def with_concurrency_control
+      response = ElasticConnectorActions.get_job(id)
+
+      yield response, response['_seq_no'], response['_primary_term']
+    end
+
+    def make_running!
+      with_concurrency_control do |es_doc, seq_no, primary_term|
+        now = Time.now
+        doc = {
+          status: Connectors::SyncStatus::IN_PROGRESS,
+          started_at: now,
+          last_seen: now,
+          worker_hostname: Socket.gethostname
+        }
+
+        ElasticConnectorActions.update_job_fields(es_doc[:_id], doc, seq_no, primary_term)
+      end
+    end
+
+    def es_source
+      @elasticsearch_response[:_source]
     end
 
     private
-
-    def initialize(es_response)
-      # TODO: remove the usage of with_indifferent_access. The initialize method should expect a hash argument
-      @elasticsearch_response = es_response.with_indifferent_access
-    end
 
     def self.fetch_jobs_by_query(query, page_size)
       results = []
@@ -132,6 +178,33 @@ module Core
       end
 
       results
+    end
+
+    def initialize(es_response)
+      # TODO: remove the usage of with_indifferent_access. The initialize method should expect a hash argument
+      @elasticsearch_response = es_response.with_indifferent_access
+    end
+
+    def terminate!(status, error = nil, ingestion_stats = {}, connector_metadata = {})
+      ingestion_stats ||= {}
+      ingestion_stats[:total_document_count] = ElasticConnectorActions.document_count(index_name)
+      doc = {
+        :last_seen => Time.now,
+        :completed_at => Time.now,
+        :status => status,
+        :error => error
+      }.merge(ingestion_stats)
+      doc[:canceled_at] = Time.now if status == Connectors::SyncStatus::CANCELED
+      doc[:metadata] = connector_metadata if connector_metadata&.any?
+      ElasticConnectorActions.update_job_fields(id, doc)
+    end
+
+    def seq_no
+      @elasticsearch_response[:_seq_no]
+    end
+
+    def primary_term
+      @elasticsearch_response[:_primary_term]
     end
   end
 end
