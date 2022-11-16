@@ -29,3 +29,5 @@ native_mode: true
 connector_id: CHANGEME
 service_type: CHANGEME
 
+max_ingestion_queue_size: 500
+max_ingestion_queue_bytes: 5242880

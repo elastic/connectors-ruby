@@ -11,15 +11,25 @@ require 'utility/constants'
 module Core
   module Jobs
     class Consumer
-      def initialize(scheduler:, app_config:, poll_interval: 3, termination_timeout: 60, min_threads: 1, max_threads: 5, max_queue: 100, idle_time: 5)
+      def initialize(scheduler:,
+                     max_ingestion_queue_size:,
+                     max_ingestion_queue_bytes:,
+                     poll_interval: 3,
+                     termination_timeout: 60,
+                     min_threads: 1,
+                     max_threads: 5,
+                     max_queue: 100,
+                     idle_time: 5)
         @scheduler = scheduler
-        @app_config = app_config
         @poll_interval = poll_interval
         @termination_timeout = termination_timeout
         @min_threads = min_threads
         @max_threads = max_threads
         @max_queue = max_queue
         @idle_time = idle_time
+
+        @max_ingestion_queue_size = max_ingestion_queue_size
+        @max_ingestion_queue_bytes = max_ingestion_queue_bytes
 
         @running = Concurrent::AtomicBoolean.new(false)
       end
@@ -82,8 +92,8 @@ module Core
                 job_runner = Core::SyncJobRunner.new(
                   connector_settings,
                   job,
-                  (@app_config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i,
-                  (@app_config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i
+                  @max_ingestion_queue_size,
+                  @max_ingestion_queue_bytes
                 )
                 job_runner.execute
               rescue Core::JobAlreadyRunningError
