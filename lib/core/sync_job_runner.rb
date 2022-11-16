@@ -77,8 +77,6 @@ module Core
       return unless claim_job!
 
       begin
-        @sink = Core::Ingestion::EsSink.new(@index_name, @connector_settings.request_pipeline)
-
         Utility::Logger.info("Checking active filtering for sync job #{@job_id} for connector #{@connector_id}.")
         validate_filtering(@job.filtering)
         Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
