@@ -36,7 +36,7 @@ describe Core::Scheduler do
     context 'with sync task' do
       let(:allow_sync) { true }
       let(:sync_now) { false }
-      let(:last_synced) { 'last synced' }
+      let(:last_synced) { Time.now }
       let(:sync_enabled) { true }
       let(:sync_interval) { '0 0 * * * ?' }
       let(:scheduling_settings) do
@@ -116,12 +116,6 @@ describe Core::Scheduler do
         let(:cron_parser) { nil }
 
         it_behaves_like 'does not trigger', :sync
-      end
-
-      context 'when connector is never synced' do
-        let(:last_synced) { nil }
-
-        it_behaves_like 'triggers', :sync
       end
 
       context 'when next trigger time is in the future' do
