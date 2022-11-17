@@ -53,6 +53,7 @@ describe Connectors::Factory do
         connector_instance = subject.connector('my-connector', configuration, job_description)
 
         expect(connector_instance).to_not be_nil
+        expect(connector_instance.is_a?(MyConnector)).to eq(true)
       end
     end
 
