@@ -95,7 +95,7 @@ module Core
     end
 
     def connector_id
-      @elasticsearch_response[:_source][:connector][:id]
+      connector_snapshot[:id]
     end
 
     def index_name
@@ -119,7 +119,7 @@ module Core
     end
 
     def pipeline
-      @elasticsearch_response[:_source][:pipeline]
+      connector_snapshot[:pipeline]
     end
 
     def connector

@@ -132,7 +132,7 @@ module Core
     def update_last_sync!(job)
       # if job is nil, connector still needs to be updated, to avoid it stuck at in_progress
       job_status = job&.status || Connectors::SyncStatus::ERROR
-      job_error = job&.error
+      job_error = job.nil? ? 'Could\'t find the job' : job.error
       job_error ||= 'unknown error' if job_status == Connectors::SyncStatus::ERROR
       doc = {
         :last_sync_status => job_status,

@@ -170,6 +170,8 @@ module Core
             @sync_error = 'The job is not ended as expected for unknown reason'
             @job.error!(@sync_error, stats, @connector_instance&.metadata)
           end
+          # need to reload the job to get the latest job status
+          reload_job!
         end
 
         # update connector if it's still present

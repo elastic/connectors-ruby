@@ -179,7 +179,7 @@ describe Core::ConnectorSettings do
 
     context 'with nil job' do
       let(:job) { nil }
-      let(:expected_error) { 'unknown error' }
+      let(:expected_error) { 'Could\'t find the job' }
 
       it 'updates connector with error' do
         expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(
@@ -190,6 +190,18 @@ describe Core::ConnectorSettings do
             :last_sync_error => expected_error,
             :error => expected_error
           )
+        )
+        subject.update_last_sync!(job)
+      end
+    end
+
+    context 'with error job without error message' do
+      let(:job_error) { nil }
+      let(:expected_error) { 'unknown error' }
+
+      it 'updates with error' do
+        expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(
+          id, hash_including(:last_sync_error => expected_error, :error => expected_error)
         )
         subject.update_last_sync!(job)
       end
