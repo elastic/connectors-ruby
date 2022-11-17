@@ -20,10 +20,10 @@ module Core
       private
 
       def process_orphaned_jobs
-        Utility::Logger.info('Start cleaning up orphaned jobs...')
+        Utility::Logger.debug('Start cleaning up orphaned jobs...')
         orphaned_jobs = ConnectorJob.orphaned_jobs
         if orphaned_jobs.empty?
-          Utility::Logger.info('No orphaned jobs found. Skipping...')
+          Utility::Logger.debug('No orphaned jobs found. Skipping...')
           return
         end
 
@@ -36,10 +36,10 @@ module Core
       end
 
       def process_stuck_jobs(connector_id = nil)
-        Utility::Logger.info("Start cleaning up stuck jobs for #{connector_id ? "connector #{connector_id}" : 'native connectors'}...")
+        Utility::Logger.debug("Start cleaning up stuck jobs for #{connector_id ? "connector #{connector_id}" : 'native connectors'}...")
         stuck_jobs = ConnectorJob.stuck_jobs(connector_id)
         if stuck_jobs.empty?
-          Utility::Logger.info('No stuck jobs found. Skipping...')
+          Utility::Logger.debug('No stuck jobs found. Skipping...')
           return
         end
 
