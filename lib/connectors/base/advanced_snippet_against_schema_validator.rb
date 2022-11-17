@@ -42,7 +42,7 @@ module Connectors
 
         return unexpected_field(schema_field_names, snippet_field_names) if unexpected_field_present?(snippet_field_names, schema_field_names)
 
-        return fields_constraint_violation(config_schema[:fields]) if fields_constraints_violated?(config_schema, advanced_snippet)
+        return fields_constraint_violation(config_schema[:fields]) if fields_constraints_violated?(config_schema[:fields], advanced_snippet)
 
         schema_fields.each do |field|
           name = field[:name]
@@ -67,10 +67,10 @@ module Connectors
         valid_snippet
       end
 
-      def fields_constraints_violated?(config_schema, advanced_snippet)
-        return false unless config_schema[:fields].is_a?(Hash)
+      def fields_constraints_violated?(fields, advanced_snippet)
+        return false if !fields.present? || !fields.is_a?(Hash)
 
-        constraints = config_schema.dig(:fields, :constraints)
+        constraints = fields[:constraints]
         constraints = constraints.is_a?(Array) ? constraints : [constraints]
 
         constraints.each do |constraint|
