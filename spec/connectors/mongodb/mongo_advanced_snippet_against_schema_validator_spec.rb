@@ -17,6 +17,24 @@ describe Connectors::MongoDB::MongoAdvancedSnippetAgainstSchemaValidator do
   subject { described_class.new(advanced_snippet) }
 
   describe '#is_snippet_valid?' do
+    context 'advanced snippet is not present' do
+      context 'advanced snippet is nil' do
+        let(:advanced_snippet) {
+          nil
+        }
+
+        it_behaves_like 'advanced snippet is valid'
+      end
+
+      context 'advanced snippet is empty' do
+        let(:advanced_snippet) {
+          {}
+        }
+
+        it_behaves_like 'advanced snippet is valid'
+      end
+    end
+
     context 'aggregate and find present' do
       let(:advanced_snippet) {
         {
@@ -27,6 +45,96 @@ describe Connectors::MongoDB::MongoAdvancedSnippetAgainstSchemaValidator do
 
       it_behaves_like 'advanced snippet is invalid'
     end
+
+    context 'find' do
+      context 'find is not present' do
+        context 'find is nil' do
+          let(:advanced_snippet) {
+            {
+              :find => nil
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
+
+        context 'find is empty' do
+          let(:advanced_snippet) {
+            {
+              :find => {}
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
+      end
+
+      context 'filter is not present' do
+        context 'filter is nil' do
+          let(:advanced_snippet) {
+            {
+              :find => {
+                :filter => nil
+              }
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
+
+        context 'filter is empty' do
+          let(:advanced_snippet) {
+            {
+              :find => {
+                :filter => {}
+              }
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
+      end
+
+      context 'options are not present' do
+        context 'options are nil' do
+          let(:advanced_snippet) {
+            {
+              :find => {
+                :options => nil
+              }
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
+
+        context 'options are empty' do
+          let(:advanced_snippet) {
+            {
+              :find => {
+                :options => {}
+              }
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
+      end
+
+      context 'filter and options are empty' do
+        let(:advanced_snippet) {
+          {
+            :find => {
+              :filter => {},
+              :options => {}
+            }
+          }
+        }
+
+        it_behaves_like 'advanced snippet is valid'
+      end
+    end
+
 
     context 'aggregate' do
       context 'options' do
