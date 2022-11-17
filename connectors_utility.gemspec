@@ -40,6 +40,7 @@ Gem::Specification.new do |s|
                     lib/connectors/crawler/scheduler.rb
                     lib/core/elastic_connector_actions.rb
                     lib/core/connector_settings.rb
+                    lib/core/connector_job.rb
                     lib/core/filtering/validation_status.rb
                   ]
   s.license     = 'Elastic-2.0'
