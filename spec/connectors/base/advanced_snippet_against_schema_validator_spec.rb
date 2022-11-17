@@ -209,6 +209,14 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
 
             it_behaves_like 'advanced snippet is invalid'
           end
+
+          context 'advanced snippet is empty' do
+            let(:advanced_snippet) {
+              {}
+            }
+
+            it_behaves_like 'advanced snippet is invalid'
+          end
         end
       end
 
