@@ -60,7 +60,7 @@ module Connectors
           if field[:fields].present?
             validation_result = validate_against_schema(field, snippet_field_value, recursion_depth + 1)
 
-            return validation_result unless validation_result[:is_valid]
+            return validation_result unless validation_result[:state] == Core::Filtering::ValidationStatus::VALID
           end
         end
 
