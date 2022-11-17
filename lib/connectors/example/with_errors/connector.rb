@@ -32,7 +32,7 @@ module Connectors
             },
             'generated_document_count' => {
               'label' => 'Number of documents to generate',
-              'value' => 10000
+              'value' => 10_000
             }
           }
         end
@@ -48,10 +48,9 @@ module Connectors
           Faker::Config.random = Random.new(1337) # we want to have a seed to consistently generate same text over and over
         end
 
-        def do_health_check
-        end
+        def do_health_check; end
 
-        def self.validate_filtering(filtering = {})
+        def self.validate_filtering(_filtering = {})
           { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
         end
 

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'connectors/example/connector'
+require 'connectors/example/simple/connector'
 require 'spec_helper'
 
-describe Connectors::Example::Connector do
+describe Connectors::Example::Simple::Connector do
   subject { described_class.new(configuration: configuration) }
   let(:configuration) do
     {
