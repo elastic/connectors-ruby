@@ -449,7 +449,7 @@ describe Core::SyncJobRunner do
           end
 
           it 'marks the job error' do
-            expect(job).to receive(:error!).with(Core::InvalidConnectorJobStatusError.new(job_id, job_status).message, ingestion_stats, connector_metadata)
+            expect(job).to receive(:error!).with(Core::ConnectorJobNotRunningError.new(job_id, job_status).message, ingestion_stats, connector_metadata)
             expect(connector_settings).to receive(:update_last_sync!)
 
             subject.execute

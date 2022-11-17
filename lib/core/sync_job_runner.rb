@@ -39,9 +39,9 @@ module Core
     end
   end
 
-  class InvalidConnectorJobStatusError < StandardError
+  class ConnectorJobNotRunningError < StandardError
     def initialize(job_id, status)
-      super("Connector job (ID: '#{job_id}') is in status of '#{status}'.")
+      super("Connector job (ID: '#{job_id}') is not running but in status of '#{status}'.")
     end
   end
 
@@ -131,7 +131,7 @@ module Core
         # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
         @sync_status = Connectors::SyncStatus::COMPLETED
         @sync_error = nil
-      rescue ConnectorNotFoundError, ConnectorJobNotFoundError, InvalidConnectorJobStatusError => e
+      rescue ConnectorNotFoundError, ConnectorJobNotFoundError, ConnectorJobNotRunningError => e
         Utility::Logger.error(e.message)
         @sync_status = Connectors::SyncStatus::ERROR
         @sync_error = e.message
@@ -250,7 +250,7 @@ module Core
       raise ConnectorJobCanceledError.new(@job_id) if @job.canceling?
 
       # raise error if the job is not in the status in_progress
-      raise InvalidConnectorJobStatusError.new(@job_id, @job.status) unless @job.in_progress?
+      raise ConnectorJobNotRunningError.new(@job_id, @job.status) unless @job.in_progress?
     end
 
     def reload_job!
