@@ -31,6 +31,9 @@ describe App::Dispatcher do
     allow(Utility::ExceptionTracking).to receive(:log_exception)
     allow(Utility::Logger).to receive(:info)
 
+    allow(Core::ElasticConnectorActions).to receive(:update_connector_sync_now).and_return(true)
+    allow(Core::Jobs::Producer).to receive(:enqueue_job).and_return(true)
+
     stub_const('App::Dispatcher::POLL_INTERVAL', 1)
     stub_const('App::Dispatcher::TERMINATION_TIMEOUT', 1)
     stub_const('App::Dispatcher::HEARTBEAT_INTERVAL', 60 * 30)
@@ -81,6 +84,7 @@ describe App::Dispatcher do
           expect { described_class.start! }.to_not raise_error
         end
       end
+
       shared_examples_for('logs info') do
         it 'does log info' do
           expect { described_class.start! }.to_not raise_error
@@ -103,18 +107,21 @@ describe App::Dispatcher do
         before(:each) do
           allow(connector_settings).to receive(:service_type).and_return('')
           allow(connector_settings).to receive(:index_name).and_return('')
+          allow(connector_settings).to receive(:id).and_return('connector_id')
         end
 
         shared_examples_for 'sync' do
           it 'starts sync job' do
-            expect(described_class).to receive(:start_heartbeat_task)
-            expect(sync_job_runner).to receive(:execute)
+            # creates a new job document
+            expect(Core::ElasticConnectorActions).to receive(:update_connector_sync_now)
+            # expect(sync_job_runner).to receive(:execute)
             expect { described_class.start! }.to_not raise_error
           end
         end
 
         shared_examples_for 'no sync' do
           it 'does not start sync job' do
+            pending('this will be moved to Core::Jobs::Consumer')
             expect(described_class).to_not receive(:start_heartbeat_task)
             expect(sync_job_runner).to_not receive(:execute)
             expect { described_class.start! }.to_not raise_error
@@ -124,29 +131,32 @@ describe App::Dispatcher do
         it_behaves_like 'sync'
 
         context 'when sync throws an error' do
+          pending('this spec will be moved to Core::Jobs::Consumer')
           before(:each) do
             allow(sync_job_runner).to receive(:execute).and_raise('Oh no!')
           end
 
-          it_behaves_like 'logs exception'
+          # it_behaves_like 'logs exception'
         end
 
         context 'when sync is already running' do
+          pending('this spec will be moved to Core::Jobs::Consumer')
           before(:each) do
             allow(sync_job_runner).to receive(:execute).and_raise(Core::JobAlreadyRunningError.new(connector_id))
           end
           let(:info_message) { 'already running' }
 
-          it_behaves_like 'logs info'
+          # it_behaves_like 'logs info'
         end
 
         context 'on version conflict' do
+          pending('this will be moved to Core::Jobs::Consumer')
           before(:each) do
             allow(sync_job_runner).to receive(:execute).and_raise(Core::ConnectorVersionChangedError.new(connector_id, 0, 0))
           end
           let(:info_message) { 'version conflict' }
 
-          it_behaves_like 'logs info'
+          # it_behaves_like 'logs info'
         end
       end
 

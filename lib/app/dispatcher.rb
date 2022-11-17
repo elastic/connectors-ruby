@@ -28,6 +28,10 @@ module App
       def start!
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
+
+        # start sync jobs consumer
+        start_consumer!
+
         start_polling_jobs!
       end
 
@@ -37,6 +41,8 @@ module App
         scheduler.shutdown
         pool.shutdown
         pool.wait_for_termination(TERMINATION_TIMEOUT)
+
+        stop_consumer!
       end
 
       private
@@ -68,7 +74,10 @@ module App
         scheduler.when_triggered do |connector_settings, task|
           case task
           when :sync
-            start_sync_task(connector_settings)
+            # update connector sync_now flag
+            Core::ElasticConnectorActions.update_connector_sync_now(connector_settings.id, false)
+
+            Core::Jobs::Producer.enqueue_job(job_type: :sync, connector_settings: connector_settings)
           when :heartbeat
             start_heartbeat_task(connector_settings)
           when :configuration
@@ -81,22 +90,6 @@ module App
         end
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, 'The connector service failed due to unexpected error.')
-      end
-
-      def start_sync_task(connector_settings)
-        start_heartbeat_task(connector_settings)
-        pool.post do
-          Utility::Logger.info("Initiating a sync job for #{connector_settings.formatted}...")
-          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-          job_runner = Core::SyncJobRunner.new(connector_settings)
-          job_runner.execute
-        rescue Core::JobAlreadyRunningError
-          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
-        rescue Core::ConnectorVersionChangedError => e
-          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
-        rescue StandardError => e
-          Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
-        end
       end
 
       def start_heartbeat_task(connector_settings)
@@ -131,6 +124,28 @@ module App
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Filter validation task for #{connector_settings.formatted} failed due to unexpected error.")
         end
+      end
+
+      def start_consumer!
+        @consumer = Core::Jobs::Consumer.new(
+          poll_interval: POLL_INTERVAL,
+          termination_timeout: TERMINATION_TIMEOUT,
+          min_threads: MIN_THREADS,
+          max_threads: MAX_THREADS,
+          max_queue: MAX_QUEUE,
+          max_ingestion_queue_size: (App::Config.max_ingestion_queue_size || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE).to_i,
+          max_ingestion_queue_bytes: (App::Config.max_ingestion_queue_bytes || Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES).to_i,
+          scheduler: scheduler
+        )
+
+        @consumer.subscribe!(index_name: Utility::Constants::JOB_INDEX)
+      end
+
+      def stop_consumer!
+        return if @consumer.nil?
+        return unless @consumer.running?
+
+        @consumer.shutdown!
       end
     end
   end

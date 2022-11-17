@@ -13,7 +13,7 @@ module Utility
         return {} unless filtering.present?
 
         # assume for now, that first object in filtering array or a filter object itself is the only filtering object
-        filter = filtering.is_a?(Array) ? filtering[0] : filtering
+        filter = filtering.is_a?(Array) ? filtering.first : filtering
 
         filter.present? ? filter : {}
       end

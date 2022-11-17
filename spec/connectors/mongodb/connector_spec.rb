@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'connectors/mongodb/connector'
+require 'core/filtering/simple_rule'
 require 'hashie/mash'
 require 'spec_helper'
 
@@ -40,7 +41,15 @@ describe Connectors::MongoDB::Connector do
   end
 
   let(:rules) do
-    [{ 'field' => 'name', 'rule' => 'Equals', 'policy' => 'include', 'value' => 'apple' }]
+    [
+      {
+        'id' => 'test',
+        'field' => 'name',
+        'rule' => Core::Filtering::SimpleRule::Rule::EQUALS,
+        'policy' => Core::Filtering::SimpleRule::Policy::INCLUDE,
+        'value' => 'apple'
+      }
+    ]
   end
 
   let(:pipeline) {
@@ -94,13 +103,17 @@ describe Connectors::MongoDB::Connector do
   let(:filtering) {
     {
       :rules => rules,
-      :advanced_snippet => advanced_snippet
+      :advanced_snippet => {
+        :value => advanced_snippet
+      }
     }
   }
 
   let(:job_description) {
     {
-      :filtering => filtering
+      :connector => {
+        :filtering => filtering
+      }
     }
   }
 
@@ -195,24 +208,6 @@ describe Connectors::MongoDB::Connector do
   end
 
   describe '#validate_filtering' do
-    shared_examples_for 'filtering is valid' do
-      it 'returns validation result with state \'valid\' and no errors' do
-        validation_result = described_class.validate_filtering(filtering)
-
-        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
-        expect(validation_result[:errors]).to be_empty
-      end
-    end
-
-    shared_examples_for 'filtering is invalid' do
-      it 'returns validation result with state \'invalid\' and no errors' do
-        validation_result = described_class.validate_filtering(filtering)
-
-        expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
-        expect(validation_result[:errors]).to_not be_empty
-      end
-    end
-
     context 'filtering is not present' do
       let(:filtering) {
         {}
@@ -317,11 +312,12 @@ describe Connectors::MongoDB::Connector do
     context 'when collection is found' do
       context 'when data is distributed in multiple pages' do
         let(:page_size) { 3 }
+        let(:doc2) { { '_id' => '2', 'more' => { 'nested' => 'data' } } }
 
         let(:first_page_data) do
           [
             { '_id' => '1', 'some' => { 'nested' => 'data' } },
-            { '_id' => '2', 'more' => { 'nested' => 'data' } },
+            doc2,
             { '_id' => '167', 'nothing' => nil }
           ]
         end
@@ -376,6 +372,19 @@ describe Connectors::MongoDB::Connector do
           expect(yielded_documents.size).to eq(all_data.size)
           expected_ids.each do |id|
             expect(yielded_documents).to include(a_hash_including('id' => id))
+          end
+        end
+
+        context 'when a single document causes an error' do
+          let(:tolerable_error) { 'mock serialization failure' }
+          before(:each) do
+            allow(subject).to receive(:serialize).and_call_original
+            allow(subject).to receive(:serialize).with(doc2).and_raise(tolerable_error)
+          end
+
+          it 'does not crash' do
+            expect(Utility::Logger).to receive(:warn).with(include(tolerable_error))
+            expect { subject.yield_documents { |_| }.to_a }.to_not raise_error
           end
         end
 

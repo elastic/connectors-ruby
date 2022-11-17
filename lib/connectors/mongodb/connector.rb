@@ -9,6 +9,7 @@
 require 'connectors/base/connector'
 require 'core/filtering/validation_status'
 require 'connectors/mongodb/mongo_rules_parser'
+require 'connectors/mongodb/mongo_advanced_snippet_against_schema_validator'
 require 'mongo'
 require 'utility'
 
@@ -51,21 +52,8 @@ module Connectors
         }
       end
 
-      def self.validate_filtering(filtering = {})
-        valid_filtering = { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
-
-        return valid_filtering unless filtering.present?
-
-        advanced_filter_config = filtering[:advanced_snippet] || {}
-        filter_keys = advanced_filter_config&.keys
-
-        if !filter_keys&.empty? && (filter_keys.size != 1 || !ALLOWED_TOP_LEVEL_FILTER_KEYS.include?(filter_keys[0]&.to_s))
-          return { :state => Core::Filtering::ValidationStatus::INVALID,
-                   :errors => [{ :ids => ['wrong-keys'],
-                                 :messages => ["Only one of #{ALLOWED_TOP_LEVEL_FILTER_KEYS} is allowed in the filtering object. Keys present: '#{filter_keys}'."] }] }
-        end
-
-        valid_filtering
+      def self.advanced_snippet_validator
+        MongoAdvancedSnippetAgainstSchemaValidator
       end
 
       def initialize(configuration: {}, job_description: {})
@@ -106,15 +94,15 @@ module Connectors
           loop do
             found_in_page = 0
 
+            Utility::Logger.info("Requesting #{PAGE_SIZE} documents from MongoDB (Starting at #{skip})")
             view = cursor.skip(skip).limit(PAGE_SIZE)
             view.each do |document|
-              yield serialize(document)
-
-              found_in_page += 1
-              found_overall += 1
-
-              overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
-
+              yield_with_handling_tolerable_errors do
+                yield serialize(document)
+                found_in_page += 1
+                found_overall += 1
+                overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
+              end
               break if overall_limit_reached
             end
 

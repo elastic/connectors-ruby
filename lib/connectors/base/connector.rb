@@ -6,12 +6,15 @@
 
 # frozen_string_literal: true
 
+require 'active_support/core_ext/hash/indifferent_access'
+require 'app/config'
 require 'bson'
+require 'connectors/base/advanced_snippet_validator'
 require 'core/ingestion'
+require 'connectors/tolerable_error_helper'
+require 'core/filtering/validation_status'
 require 'utility'
 require 'utility/filtering'
-require 'app/config'
-require 'active_support/core_ext/hash/indifferent_access'
 
 module Connectors
   module Base
@@ -40,23 +43,42 @@ module Connectors
         ]
       end
 
-      def self.validate_filtering(_filtering = {})
-        raise 'Not implemented for this connector'
+      def self.advanced_snippet_validator
+        AdvancedSnippetValidator
+      end
+
+      def self.validate_filtering(filtering = {})
+        # nothing to validate
+        return { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] } unless filtering.present?
+
+        filter = Utility::Filtering.extract_filter(filtering)
+        advanced_snippet = filter.dig(:advanced_snippet, :value)
+
+        snippet_validator_instance = advanced_snippet_validator.new(advanced_snippet)
+
+        snippet_validator_instance.is_snippet_valid?
       end
 
       attr_reader :rules, :advanced_filter_config
 
       def initialize(configuration: {}, job_description: {})
+        error_monitor = Utility::ErrorMonitor.new
+        @tolerable_error_helper = Connectors::TolerableErrorHelper.new(error_monitor)
+
         @configuration = configuration.dup || {}
         @job_description = job_description&.dup || {}
 
-        filtering = Utility::Filtering.extract_filter(@job_description[:filtering])
+        filtering = Utility::Filtering.extract_filter(@job_description.dig(:connector, :filtering))
 
         @rules = filtering[:rules] || []
-        @advanced_filter_config = filtering[:advanced_snippet] || {}
+        @advanced_filter_config = filtering.dig(:advanced_snippet, :value) || {}
       end
 
       def yield_documents; end
+
+      def yield_with_handling_tolerable_errors(identifier: nil, &block)
+        @tolerable_error_helper.yield_single_document(identifier: identifier, &block)
+      end
 
       def do_health_check
         raise 'Not implemented for this connector'

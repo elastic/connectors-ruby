@@ -15,8 +15,16 @@ describe Core::SingleScheduler do
         allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id).and_return(connector_setting)
       end
 
-      it 'fetches crawler connectors' do
+      it 'fetches the connector' do
         expect(subject.connector_settings).to eq([connector_setting])
+      end
+
+      context 'when connector does not exist' do
+        let(:connector_setting) { nil }
+
+        it 'fetches no connector' do
+          expect(subject.connector_settings).to be_empty
+        end
       end
     end
 
@@ -25,7 +33,7 @@ describe Core::SingleScheduler do
         allow(Core::ConnectorSettings).to receive(:fetch_by_id).with(connector_id).and_raise(StandardError)
       end
 
-      it 'fetches crawler connectors' do
+      it 'fetches no connector' do
         expect(subject.connector_settings).to be_empty
       end
     end

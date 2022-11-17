@@ -31,6 +31,8 @@ cp config/connectors.yml.example config/connectors.yml
 - `native_mode`: Whether to run the application in `native mode`. Defaults to `true`.
 - `connector_id`: The ID of the connector that the application will sync data for. This is required when `native_mode` is `false`.
 - `service_type`: The service type of the connector that the application will sync data for. This is required when `native_mode` is `false`. 
+- `max_ingestion_queue_size`: When number of documents in bulk operation exceeds this number, a bulk request is issued to Elasticsearch. Defaults to `500`.
+- `max_ingestion_queue_bytes`: When byte size of bulk operation exceeds this number, a bulk request is issued to Elasticsearch. Defaults to `5242880`.
 
 ## Run the connector service on Elastic Cloud
 

@@ -49,10 +49,17 @@ module Core
       end
 
       def get_connector(connector_id)
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
         client.get(:index => Utility::Constants::CONNECTORS_INDEX, :id => connector_id, :ignore => 404).with_indifferent_access
       end
 
+      def get_job(job_id)
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
+        client.get(:index => Utility::Constants::JOB_INDEX, :id => job_id, :ignore => 404).with_indifferent_access
+      end
+
       def connectors_meta
+        # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta') || {}
@@ -67,6 +74,19 @@ module Core
             :from => offset,
             :query => query,
             :sort => ['name']
+          }
+        )
+      end
+
+      def search_jobs(query, page_size, offset)
+        client.search(
+          :index => Utility::Constants::JOB_INDEX,
+          :ignore => 404,
+          :body => {
+              :size => page_size,
+              :from => offset,
+              :query => query,
+              :sort => ['created_at']
           }
         )
       end
@@ -93,7 +113,7 @@ module Core
       def update_filtering_validation(connector_id, filter_validation_results)
         return if filter_validation_results.empty?
 
-        filtering = get_connector(connector_id)[:filtering]
+        filtering = get_connector(connector_id).dig(:_source, :filtering)
 
         case filtering
         when Hash
@@ -105,18 +125,42 @@ module Core
             update_filter_validation(filter, filter_validation_results)
           end
         else
-          Utility::Logger.warn("ES returned invalid filtering format: #{filtering}. Skipping validation.")
+          Utility::Logger.warn("Elasticsearch returned invalid filtering format: #{filtering}. Skipping validation.")
           return
         end
 
         update_connector_fields(connector_id, { :filtering => filtering })
       end
 
-      def claim_job(connector_id)
+      def update_connector_sync_now(connector_id, sync_now)
+        doc = connector_with_concurrency_control(connector_id)
+
+        body = { sync_now: sync_now, last_synced: Time.now }
+
+        update_connector_fields(
+          connector_id,
+          body,
+          doc[:seq_no],
+          doc[:primary_term]
+        )
+      end
+
+      def update_connector_last_sync_status(connector_id, last_sync_status)
+        doc = connector_with_concurrency_control(connector_id)
+
+        update_connector_fields(
+          connector_id,
+          { last_sync_status: last_sync_status },
+          doc[:seq_no],
+          doc[:primary_term]
+        )
+      end
+
+      def connector_with_concurrency_control(connector_id)
         seq_no = nil
         primary_term = nil
-        sync_in_progress = false
-        connector_record = client.get(
+
+        doc = client.get(
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :ignore => 404,
@@ -124,39 +168,31 @@ module Core
         ).tap do |response|
           seq_no = response['_seq_no']
           primary_term = response['_primary_term']
-          sync_in_progress = response.dig('_source', 'last_sync_status') == Connectors::SyncStatus::IN_PROGRESS
         end
-        if sync_in_progress
-          raise JobAlreadyRunningError.new(connector_id)
-        end
-        update_connector_fields(
-          connector_id,
-          { :sync_now => false,
-            :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-            :last_synced => Time.now },
-          seq_no,
-          primary_term
-        )
 
+        { doc: doc, seq_no: seq_no, primary_term: primary_term }
+      end
+
+      def create_job(connector_settings:)
         body = {
-          :connector_id => connector_id,
-          :status => Connectors::SyncStatus::IN_PROGRESS,
-          :worker_hostname => Socket.gethostname,
-          :created_at => Time.now,
-          :started_at => Time.now,
-          :last_seen => Time.now,
-          :filtering => convert_connector_filtering_to_job_filtering(connector_record.dig('_source', 'filtering'))
+          status: Connectors::SyncStatus::PENDING,
+          created_at: Time.now,
+          last_seen: Time.now,
+          connector: {
+            id: connector_settings.id,
+            filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering),
+            index_name: connector_settings.index_name,
+            language: connector_settings[:language],
+            pipeline: connector_settings[:pipeline],
+            service_type: connector_settings.service_type
+          }
         }
 
-        index_response = client.index(:index => Utility::Constants::JOB_INDEX, :body => body, :refresh => true)
-        if index_response['result'] == 'created'
-          return client.get(
-            :index => Utility::Constants::JOB_INDEX,
-            :id => index_response['_id'],
-            :ignore => 404
-          ).with_indifferent_access
-        end
-        raise JobNotCreatedError.new(connector_id, index_response)
+        index_response = client.index(index: Utility::Constants::JOB_INDEX, body: body, refresh: true)
+
+        return index_response if index_response['result'] == 'created'
+
+        raise JobNotCreatedError.new(connector_settings.id, index_response)
       end
 
       def convert_connector_filtering_to_job_filtering(connector_filtering)
@@ -419,54 +455,60 @@ module Core
             :cancelation_requested_at => { :type => :date },
             :canceled_at => { :type => :date },
             :completed_at => { :type => :date },
-            :configuration => { :type => :object },
-            :connector_id => { :type => :keyword },
+            :connector => {
+              :properties => {
+                :configuration => { :type => :object },
+                :filtering => {
+                  :properties => {
+                    :domain => { :type => :keyword },
+                    :rules => {
+                      :properties => {
+                        :id => { :type => :keyword },
+                        :policy => { :type => :keyword },
+                        :field => { :type => :keyword },
+                        :rule => { :type => :keyword },
+                        :value => { :type => :keyword },
+                        :order => { :type => :short },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :advanced_snippet => {
+                      :properties => {
+                        :value => { :type => :object },
+                        :created_at => { :type => :date },
+                        :updated_at => { :type => :date }
+                      }
+                    },
+                    :warnings => {
+                      :properties => {
+                        :ids => { :type => :keyword },
+                        :messages => { :type => :text }
+                      }
+                    }
+                  }
+                },
+                :id => { :type => :keyword },
+                :index_name => { :type => :keyword },
+                :language => { :type => :keyword },
+                :pipeline => {
+                  :properties => {
+                    :extract_binary_content => { :type => :boolean },
+                    :name => { :type => :keyword },
+                    :reduce_whitespace => { :type => :boolean },
+                    :run_ml_inference => { :type => :boolean }
+                  }
+                },
+                :service_type => { :type => :keyword }
+              }
+            },
             :created_at => { :type => :date },
             :deleted_document_count => { :type => :integer },
             :error => { :type => :text },
-            :filtering => {
-              :properties => {
-                :domain => { :type => :keyword },
-                :rules => {
-                  :properties => {
-                    :id => { :type => :keyword },
-                    :policy => { :type => :keyword },
-                    :field => { :type => :keyword },
-                    :rule => { :type => :keyword },
-                    :value => { :type => :keyword },
-                    :order => { :type => :short },
-                    :created_at => { :type => :date },
-                    :updated_at => { :type => :date }
-                  }
-                },
-                :advanced_snippet => {
-                  :properties => {
-                    :value => { :type => :object },
-                    :created_at => { :type => :date },
-                    :updated_at => { :type => :date }
-                  }
-                },
-                :warnings => {
-                  :properties => {
-                    :ids => { :type => :keyword },
-                    :messages => { :type => :text }
-                  }
-                }
-              }
-            },
-            :index_name => { :type => :keyword },
             :indexed_document_count => { :type => :integer },
             :indexed_document_volume => { :type => :integer },
             :last_seen => { :type => :date },
             :metadata => { :type => :object },
-            :pipeline => {
-              :properties => {
-                :extract_binary_content => { :type => :boolean },
-                :name => { :type => :keyword },
-                :reduce_whitespace => { :type => :boolean },
-                :run_ml_inference => { :type => :boolean }
-              }
-            },
             :started_at => { :type => :date },
             :status => { :type => :keyword },
             :total_document_count => { :type => :integer },
@@ -478,31 +520,15 @@ module Core
       end
 
       def update_connector_fields(connector_id, doc = {}, seq_no = nil, primary_term = nil)
-        return if doc.empty?
-        update_args = {
-          :index => Utility::Constants::CONNECTORS_INDEX,
-          :id => connector_id,
-          :body => { :doc => doc },
-          :refresh => true,
-          :retry_on_conflict => 3
-        }
-        # seq_no and primary_term are used for optimistic concurrency control
-        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html
-        if seq_no && primary_term
-          update_args[:if_seq_no] = seq_no
-          update_args[:if_primary_term] = primary_term
-          update_args.delete(:retry_on_conflict)
-        end
-        begin
-          client.update(update_args)
-        rescue Elastic::Transport::Transport::Errors::Conflict
-          # VersionConflictException
-          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
-          raise ConnectorVersionChangedError.new(connector_id, seq_no, primary_term)
-        end
+        update_doc_fields(Utility::Constants::CONNECTORS_INDEX, connector_id, doc, seq_no, primary_term)
+      end
+
+      def update_job_fields(job_id, doc = {}, seq_no = nil, primary_term = nil)
+        update_doc_fields(Utility::Constants::JOB_INDEX, job_id, doc, seq_no, primary_term)
       end
 
       def document_count(index_name)
+        client.indices.refresh(:index => index_name)
         client.count(:index => index_name)['count']
       end
 
@@ -532,6 +558,31 @@ module Core
         if domain_validations.key?(domain)
           new_validation_state = { :draft => { :validation => domain_validations[domain] } }
           filter.deep_merge!(new_validation_state)
+        end
+      end
+
+      def update_doc_fields(index, id, doc = {}, seq_no = nil, primary_term = nil)
+        return if doc.empty?
+        update_args = {
+          :index => index,
+          :id => id,
+          :body => { :doc => doc },
+          :refresh => true,
+          :retry_on_conflict => 3
+        }
+
+        if seq_no && primary_term
+          update_args[:if_seq_no] = seq_no
+          update_args[:if_primary_term] = primary_term
+          update_args.delete(:retry_on_conflict)
+        end
+
+        begin
+          client.update(update_args)
+        rescue Elastic::Transport::Transport::Errors::Conflict
+          # VersionConflictException
+          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
+          raise ConnectorVersionChangedError.new(id, seq_no, primary_term)
         end
       end
     end

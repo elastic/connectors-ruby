@@ -10,9 +10,11 @@ require 'app/preflight_check'
 describe App::PreflightCheck do
   describe '.run!' do
     let(:client) { double }
+    let(:native_mode) { true }
 
     before(:each) do
       allow(described_class).to receive(:client).and_return(client)
+      allow(App::Config).to receive(:native_mode).and_return(native_mode)
     end
 
     context 'when Elasticsearch is not running' do
@@ -112,6 +114,30 @@ describe App::PreflightCheck do
 
             it 'should pass the check' do
               expect { described_class.run! }.to_not raise_error(described_class::CheckFailure)
+            end
+
+            context 'when in single mode' do
+              let(:native_mode) { false }
+              before(:each) do
+                allow(App::Config).to receive(:service_type).and_return('mongodb')
+                allow(Connectors::REGISTRY).to receive(:registered?).and_return(supported?)
+              end
+
+              context 'when service type is not supported' do
+                let(:supported?) { false }
+
+                it 'should fail the check' do
+                  expect { described_class.run! }.to raise_error(described_class::CheckFailure)
+                end
+              end
+
+              context 'when service type is supported' do
+                let(:supported?) { true }
+
+                it 'should fail the check' do
+                  expect { described_class.run! }.to_not raise_error(described_class::CheckFailure)
+                end
+              end
             end
           end
 

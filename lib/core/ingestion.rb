@@ -6,6 +6,4 @@
 
 # frozen_string_literal: true
 
-require 'core/ingestion/ingester'
 require 'core/ingestion/es_sink'
-require 'core/ingestion/console_sink'
