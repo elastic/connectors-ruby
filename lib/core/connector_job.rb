@@ -118,10 +118,6 @@ module Core
       connector_snapshot[:filtering]
     end
 
-    def extracted_filtering
-      Utility::Filtering.extract_filter(filtering)
-    end
-
     def pipeline
       @elasticsearch_response[:_source][:pipeline]
     end

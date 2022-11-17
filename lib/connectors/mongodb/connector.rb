@@ -56,7 +56,7 @@ module Connectors
         MongoAdvancedSnippetAgainstSchemaValidator
       end
 
-      def initialize(job_description:, configuration: {})
+      def initialize(configuration: {}, job_description: nil)
         super
 
         @host = configuration.dig(:host, :value)

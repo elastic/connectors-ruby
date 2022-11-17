@@ -36,7 +36,7 @@ module Connectors
         }
       end
 
-      def initialize(job_description:, configuration: {})
+      def initialize(configuration: {}, job_description: nil)
         super
       end
 

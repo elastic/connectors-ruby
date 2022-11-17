@@ -25,15 +25,8 @@ describe Connectors::GitLab::Connector do
     }
   }
 
-  let(:job_description) { double }
-
   subject do
-    Connectors::GitLab::Connector.new(job_description: job_description, configuration: config)
-  end
-
-  before(:each) do
-    allow(job_description).to receive(:dup).and_return(job_description)
-    allow(job_description).to receive(:extracted_filtering).and_return(filtering)
+    Connectors::GitLab::Connector.new(configuration: config)
   end
 
   it_behaves_like 'a connector'

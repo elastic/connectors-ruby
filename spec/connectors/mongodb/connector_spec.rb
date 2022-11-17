@@ -6,7 +6,7 @@ require 'hashie/mash'
 require 'spec_helper'
 
 describe Connectors::MongoDB::Connector do
-  subject { described_class.new(job_description: job_description, configuration: configuration) }
+  subject { described_class.new(configuration: configuration, job_description: job_description) }
 
   let(:configuration) do
     {
@@ -131,7 +131,7 @@ describe Connectors::MongoDB::Connector do
 
   before(:each) do
     allow(job_description).to receive(:dup).and_return(job_description)
-    allow(job_description).to receive(:extracted_filtering).and_return(filtering)
+    allow(job_description).to receive(:filtering).and_return(filtering)
 
     allow(Mongo::Client).to receive(:new).and_yield(mongo_client)
 
