@@ -135,7 +135,6 @@ describe Connectors::MongoDB::MongoAdvancedSnippetAgainstSchemaValidator do
       end
     end
 
-
     context 'aggregate' do
       context 'options' do
         context 'snippet with every option' do
