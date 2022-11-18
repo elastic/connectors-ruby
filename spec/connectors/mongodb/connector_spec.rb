@@ -109,13 +109,7 @@ describe Connectors::MongoDB::Connector do
     }
   }
 
-  let(:job_description) {
-    {
-      :connector => {
-        :filtering => filtering
-      }
-    }
-  }
+  let(:job_description) { double }
 
   let(:mongodb_host) { '127.0.0.1:27027' }
   let(:mongodb_database) { 'sample-database' }
@@ -136,6 +130,9 @@ describe Connectors::MongoDB::Connector do
   let(:actual_database_names) { ['sample-database'] }
 
   before(:each) do
+    allow(job_description).to receive(:dup).and_return(job_description)
+    allow(job_description).to receive(:filtering).and_return(filtering)
+
     allow(Mongo::Client).to receive(:new).and_yield(mongo_client)
 
     allow(mongo_client).to receive(:collections).and_return([Hashie::Mash.new({ :name => actual_collection_name })])

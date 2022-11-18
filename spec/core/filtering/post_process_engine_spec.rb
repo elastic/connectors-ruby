@@ -9,19 +9,15 @@
 require 'core/filtering'
 
 describe Core::Filtering::PostProcessEngine do
-  let(:job_description) do
-    {
-      'connector' => {
-        'filtering' => [
-          {
-            'domain' => Core::Filtering::DEFAULT_DOMAIN,
-            'rules' => rules,
-            'advanced_snippet' => snippet,
-            'warnings' => []
-          }
-        ]
+  let(:filtering) do
+    [
+      {
+        'domain' => Core::Filtering::DEFAULT_DOMAIN,
+        'rules' => rules,
+        'advanced_snippet' => snippet,
+        'warnings' => []
       }
-    }
+    ]
   end
   let(:rules) { [] }
   let(:snippet) { {} }
@@ -40,7 +36,7 @@ describe Core::Filtering::PostProcessEngine do
     }
   end
 
-  subject { described_class.new(job_description) }
+  subject { described_class.new(filtering) }
 
   shared_examples_for 'included' do |matching_rule_id|
     it 'is included' do

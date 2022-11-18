@@ -13,7 +13,7 @@ module Utility
     class QueueOverflowError < StandardError; end
 
     # 500 items or 5MB
-    def initialize(operation_count_threshold = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_LENGTH, size_threshold = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES)
+    def initialize(operation_count_threshold = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_SIZE, size_threshold = Utility::Constants::DEFAULT_MAX_INGESTION_QUEUE_BYTES)
       @operation_count_threshold = operation_count_threshold.freeze
       @size_threshold = size_threshold.freeze
 
