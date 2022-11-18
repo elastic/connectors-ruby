@@ -222,7 +222,7 @@ DEPENDENCIES
   dry-validation (= 1.7.0)
   ecs-logging (~> 1.0.0)
   elasticsearch (~> 8.5.0)
-  faker
+  faker (~> 2.22.0)
   faraday (~> 1.10.0)
   faraday_middleware (= 1.0.0)
   forwardable (~> 1.3.2)

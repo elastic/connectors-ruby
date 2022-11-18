@@ -60,6 +60,6 @@ gem 'elasticsearch', '~> 8.5.0'
 gem 'signet', '~> 0.16.0'
 
 # Dependency for example connector
-gem 'faker'
+gem 'faker', '~> 2.22.0'
 # Dependency for mongo connector
 gem 'mongo', '~> 2.18'
