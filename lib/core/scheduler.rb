@@ -112,11 +112,13 @@ module Core
         return false
       end
 
-      last_synced = begin
-        Time.parse(connector_settings[:last_synced])
-      rescue StandardError
-        Time.now
+      # We want to sync when sync never actually happened
+      last_synced = connector_settings[:last_synced]
+      if last_synced.nil? || last_synced.empty?
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} has never synced yet, running initial sync.")
+        return true
       end
+
       next_trigger_time = cron_parser.next_time(last_synced)
 
       # Sync if next trigger for the connector is in past
