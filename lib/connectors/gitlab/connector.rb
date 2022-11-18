@@ -41,7 +41,7 @@ module Connectors
         GitLabAdvancedSnippetValidator
       end
 
-      def initialize(configuration: {}, job_description: {})
+      def initialize(configuration: {}, job_description: nil)
         super
 
         @extractor = Connectors::GitLab::Extractor.new(
