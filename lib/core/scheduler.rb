@@ -90,13 +90,6 @@ module Core
         return false
       end
 
-      # We want to sync when sync never actually happened
-      last_synced = connector_settings[:last_synced]
-      if last_synced.nil? || last_synced.empty?
-        Utility::Logger.info("#{connector_settings.formatted.capitalize} has never synced yet, running initial sync.")
-        return true
-      end
-
       current_schedule = scheduling_settings[:interval]
 
       # Don't sync if there is no actual scheduling interval
@@ -117,6 +110,13 @@ module Core
       unless cron_parser
         Utility::Logger.error("Unable to parse sync schedule for #{connector_settings.formatted}: expression #{current_schedule} is not a valid Quartz Cron definition.")
         return false
+      end
+
+      # We want to sync when sync never actually happened
+      last_synced = connector_settings[:last_synced]
+      if last_synced.nil? || last_synced.empty?
+        Utility::Logger.info("#{connector_settings.formatted.capitalize} has never synced yet, running initial sync.")
+        return true
       end
 
       next_trigger_time = cron_parser.next_time(Time.parse(last_synced))
