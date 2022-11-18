@@ -51,6 +51,7 @@ module Utility
     def note_success
       @consecutive_error_count = 0
       @success_count += 1
+      @window_errors[@window_index] = false
       increment_window_index
     end
 
@@ -92,10 +93,31 @@ module Utility
     end
 
     def num_errors_in_window
-      @window_errors.count(&:itself).to_f
+      @window_errors.count { |e| e == true } .to_f
     end
 
     def increment_window_index
+      # We keep the errors array of the size @window_size this way, imagine @window_size = 5
+      # Error array inits as falses:
+      # [ false, false, false, false, false ]
+      # Third document raises an error:
+      # [ false, false, true,  false, false ]
+      #                 ^^^^ 
+      #                 2 % 5 == 2
+      # Fifth document raises an error:
+      # [ false, false, true,  false, true  ]
+      #                               ^^^^
+      #                               4 % 5 == 4
+      # Sixth document raises an error:
+      # [ true, false, true,   false, true  ]
+      #   ^^^^
+      #   5 % 5 == 0
+      #
+      # Eigth document is successful:
+      # [ true, false, false,  false, true  ]
+      #                ^^^^^
+      #                7 % 5 == 2
+      # And so on.
       @window_index = (@window_index + 1) % @window_size
     end
 
