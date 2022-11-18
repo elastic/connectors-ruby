@@ -28,6 +28,7 @@ cp config/connectors.yml.example config/connectors.yml
 - `poll_interval`: The interval (in seconds) to poll connectors from Elasticsearch. Defaults to `3`.
 - `termination_timeout`: The maximum number of seconds to wait for the pool shutdown to complete. Defaults to `60`.
 - `heartbeat_interval`: The interval (in seconds) to send a new heartbeat for a connector. Defaults to `1800`.
+- `job_cleanup_interval`: The interval (in seconds) to run a job cleanup task. Defaults to `300`.
 - `native_mode`: Whether to run the application in `native mode`. Defaults to `true`.
 - `connector_id`: The ID of the connector that the application will sync data for. This is required when `native_mode` is `false`.
 - `service_type`: The service type of the connector that the application will sync data for. This is required when `native_mode` is `false`. 

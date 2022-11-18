@@ -8,12 +8,14 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/sync_status'
+require 'core/connector_settings'
 require 'core/elastic_connector_actions'
 require 'utility'
 
 module Core
   class ConnectorJob
     DEFAULT_PAGE_SIZE = 100
+    STUCK_THRESHOLD = 60
 
     def self.fetch_by_id(job_id)
       es_response = ElasticConnectorActions.get_job(job_id)
@@ -34,12 +36,33 @@ module Core
       fetch_jobs_by_query(query, page_size)
     end
 
-    def self.orphaned_jobs(_page_size = DEFAULT_PAGE_SIZE)
-      []
+    def self.orphaned_jobs(page_size = DEFAULT_PAGE_SIZE)
+      connector_ids = ConnectorSettings.fetch_all_connectors.map(&:id)
+      query = { bool: { must_not: { terms: { 'connector.id': connector_ids } } } }
+      fetch_jobs_by_query(query, page_size)
     end
 
-    def self.stuck_jobs(_page_size = DEFAULT_PAGE_SIZE)
-      []
+    def self.delete_jobs(jobs)
+      query = { terms: { '_id': jobs.map(&:id) } }
+      ElasticConnectorActions.delete_jobs_by_query(query)
+    end
+
+    def self.stuck_jobs(connector_id = nil, page_size = DEFAULT_PAGE_SIZE)
+      connector_ids = if connector_id
+                        [connector_id]
+                      else
+                        ConnectorSettings.fetch_native_connectors.map(&:id)
+                      end
+      query = {
+        bool: {
+          filter: [
+              { terms: { 'connector.id': connector_ids } },
+              { terms: { status: Connectors::SyncStatus::ACTIVE_STATUSES } },
+              { range: { last_seen: { lte: "now-#{STUCK_THRESHOLD}s" } } }
+          ]
+        }
+      }
+      fetch_jobs_by_query(query, page_size)
     end
 
     def self.enqueue(_connector_id)

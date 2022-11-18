@@ -54,6 +54,7 @@ puts "Parsing #{CONFIG_FILE} configuration file."
     optional(:poll_interval).value(:integer)
     optional(:termination_timeout).value(:integer)
     optional(:heartbeat_interval).value(:integer)
+    optional(:job_cleanup_interval).value(:integer)
 
     optional(:max_ingestion_queue_size).value(:integer) # items
     optional(:max_ingestion_queue_bytes).value(:integer) # bytes

@@ -12,6 +12,7 @@ require 'app/dispatcher'
 describe App::Dispatcher do
   let(:scheduler) { double }
   let(:pool) { double }
+  let(:job_cleanup_timer) { double }
   let(:sync_job_runner) { double }
   let(:filter_validation_job_runner) { double }
   let(:connector_id) { 123 }
@@ -20,9 +21,12 @@ describe App::Dispatcher do
   before(:each) do
     allow(described_class).to receive(:scheduler).and_return(scheduler)
     allow(described_class).to receive(:pool).and_return(pool)
+    allow(described_class).to receive(:job_cleanup_timer).and_return(job_cleanup_timer)
 
     allow(Core::ElasticConnectorActions).to receive(:ensure_content_index_exists)
     allow(pool).to receive(:post).and_yield
+    allow(job_cleanup_timer).to receive(:execute)
+    allow(scheduler).to receive(:when_triggered)
     allow(Core::SyncJobRunner).to receive(:new).and_return(sync_job_runner)
     allow(sync_job_runner).to receive(:execute)
     allow(Core::Filtering::ValidationJobRunner).to receive(:new).and_return(filter_validation_job_runner)
@@ -58,10 +62,12 @@ describe App::Dispatcher do
       end
     end
 
+    it 'starts the job clean up task' do
+      expect(job_cleanup_timer).to receive(:execute)
+      described_class.start!
+    end
+
     context 'without native connectors' do
-      before(:each) do
-        allow(scheduler).to receive(:when_triggered)
-      end
       it 'starts no sync jobs' do
         expect(described_class).to_not receive(:start_sync_task)
         expect(described_class).to_not receive(:start_heartbeat_task)
@@ -246,6 +252,7 @@ describe App::Dispatcher do
       expect(scheduler).to receive(:shutdown)
       expect(pool).to receive(:shutdown)
       expect(pool).to receive(:wait_for_termination)
+      expect(job_cleanup_timer).to receive(:shutdown)
       described_class.shutdown!
     end
   end
