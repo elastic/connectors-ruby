@@ -72,10 +72,12 @@ describe Connectors::Factory do
   end
 
   describe '#registered_connectors' do
+    let(:registered_connectors) {
+      %w[a-connector b-connector c-connector]
+    }
+
     before(:each) do
-      subject.register('b-connector', MyConnector)
-      subject.register('c-connector', MyConnector)
-      subject.register('a-connector', MyConnector)
+      registered_connectors.each { |connector| subject.register(connector, MyConnector) }
     end
 
     it 'returns registered connectors' do
