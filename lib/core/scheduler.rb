@@ -119,7 +119,7 @@ module Core
         return true
       end
 
-      next_trigger_time = cron_parser.next_time(last_synced)
+      next_trigger_time = cron_parser.next_time(Time.parse(last_synced))
 
       # Sync if next trigger for the connector is in past
       if next_trigger_time < Time.now
