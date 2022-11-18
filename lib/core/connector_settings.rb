@@ -49,6 +49,11 @@ module Core
       fetch_connectors_by_query(query, page_size)
     end
 
+    def self.fetch_all_connectors(page_size = DEFAULT_PAGE_SIZE)
+      query = { match_all: {} }
+      fetch_connectors_by_query(query, page_size)
+    end
+
     def id
       @elasticsearch_response[:_id]
     end

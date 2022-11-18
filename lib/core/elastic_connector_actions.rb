@@ -91,6 +91,17 @@ module Core
         )
       end
 
+      def delete_jobs_by_query(query)
+        client.delete_by_query(
+          :index => Utility::Constants::JOB_INDEX,
+          :body => { :query => query }
+        )
+      end
+
+      def delete_indices(indices)
+        client.indices.delete(:index => indices, :ignore_unavailable => true)
+      end
+
       def update_connector_configuration(connector_id, configuration)
         update_connector_fields(connector_id, :configuration => configuration)
       end
