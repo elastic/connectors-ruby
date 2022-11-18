@@ -265,7 +265,8 @@ module Connectors
 
       FIND_FILTER = {
         :name => 'filter',
-        :type => FILTER
+        :type => FILTER,
+        :optional => true
       }
 
       FIND = {

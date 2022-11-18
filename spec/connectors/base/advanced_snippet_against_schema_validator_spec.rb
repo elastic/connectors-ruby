@@ -22,7 +22,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
   it_behaves_like 'an advanced snippet validator'
 
   describe '#is_snippet_valid?' do
-    context 'fields constraint is present' do
+    context 'fields constraints are present' do
       let(:constraints) {
         [false]
       }
@@ -48,18 +48,35 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
       }
 
       context 'only one field allowed' do
-        let(:constraints) {
-          [->(fields) { fields.size == 1 }]
-        }
-
-        let(:advanced_snippet) {
-          {
-            :field_one => 'value one',
-            :field_two => 'value two'
+        context 'constraint is not wrapped in an array' do
+          let(:constraints) {
+            ->(fields) { fields.size == 1 }
           }
-        }
 
-        it_behaves_like 'advanced snippet is invalid'
+          let(:advanced_snippet) {
+            {
+              :field_one => 'value one',
+              :field_two => 'value two'
+            }
+          }
+
+          it_behaves_like 'advanced snippet is invalid'
+        end
+
+        context 'constraint is wrapped in an array' do
+          let(:constraints) {
+            [->(fields) { fields.size == 1 }]
+          }
+
+          let(:advanced_snippet) {
+            {
+              :field_one => 'value one',
+              :field_two => 'value two'
+            }
+          }
+
+          it_behaves_like 'advanced snippet is invalid'
+        end
       end
 
       context 'two fields allowed' do
@@ -75,6 +92,41 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
         }
 
         it_behaves_like 'advanced snippet is valid'
+      end
+
+      context 'two fields are allowed and their key must be equal to their value' do
+        let(:constraints) {
+          [
+            ->(fields) { fields.size == 2 },
+            lambda { |fields|
+              fields.each { |field_name, field_value|
+                return false unless field_name.to_s == field_value
+              }
+            }
+          ]
+        }
+
+        context 'the value of the second field is not the same as the field name' do
+          let(:advanced_snippet) {
+            {
+              :field_one => 'field_one',
+              :field_two => 'wrong value'
+            }
+          }
+
+          it_behaves_like 'advanced snippet is invalid'
+        end
+
+        context 'both field names equal their value' do
+          let(:advanced_snippet) {
+            {
+              :field_one => 'field_one',
+              :field_two => 'field_two'
+            }
+          }
+
+          it_behaves_like 'advanced snippet is valid'
+        end
       end
     end
 
@@ -205,6 +257,14 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               {
                 'wrong name' => [1, 2, 3]
               }
+            }
+
+            it_behaves_like 'advanced snippet is invalid'
+          end
+
+          context 'advanced snippet is empty' do
+            let(:advanced_snippet) {
+              {}
             }
 
             it_behaves_like 'advanced snippet is invalid'
