@@ -28,9 +28,7 @@ describe Connectors::Factory do
   }
 
   class MyConnector
-    def initialize(configuration: {}, job_description: {})
-      # nothing needed
-    end
+    def initialize(configuration: {}, job_description: {}); end
   end
 
   before(:each) do
