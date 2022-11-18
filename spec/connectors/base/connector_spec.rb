@@ -60,13 +60,12 @@ describe Connectors::Base::Connector do
     }
   }
 
-  let(:job_description) {
-    {
-      :connector => {
-        :filtering => filtering
-      }
-    }
-  }
+  let(:job_description) { double }
+
+  before(:each) do
+    allow(job_description).to receive(:dup).and_return(job_description)
+    allow(job_description).to receive(:filtering).and_return(filtering)
+  end
 
   describe '#advanced_filter_config' do
     shared_examples_for 'advanced_filter_config is not present' do

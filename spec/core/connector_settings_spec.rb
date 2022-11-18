@@ -133,6 +133,81 @@ describe Core::ConnectorSettings do
     end
   end
 
+  describe '#update_last_sync!' do
+    let(:id) { 'id' }
+    let(:job) { double }
+    let(:job_status) { Connectors::SyncStatus::ERROR }
+    let(:job_error) { 'something wrong' }
+    let(:terminated?) { true }
+    let(:indexed_document_count) { 10 }
+    let(:deleted_document_count) { 5 }
+
+    before(:each) do
+      allow(subject).to receive(:id).and_return(id)
+      allow(job).to receive(:status).and_return(job_status)
+      allow(job).to receive(:error).and_return(job_error)
+      allow(job).to receive(:terminated?).and_return(terminated?)
+      allow(job).to receive(:[]).with(:indexed_document_count).and_return(indexed_document_count)
+      allow(job).to receive(:[]).with(:deleted_document_count).and_return(deleted_document_count)
+    end
+
+    it 'updates connector' do
+      expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(
+        id,
+        hash_including(
+          :last_sync_status => job_status,
+          :last_synced => anything,
+          :last_sync_error => job_error,
+          :error => job_error,
+          :last_indexed_document_count => indexed_document_count,
+          :last_deleted_document_count => deleted_document_count
+        )
+      )
+      subject.update_last_sync!(job)
+    end
+
+    context 'when it\'s not terminated' do
+      let(:terminated?) { false }
+
+      it 'does not update stats' do
+        expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(
+          id, hash_excluding(:last_indexed_document_count, :last_deleted_document_count)
+        )
+        subject.update_last_sync!(job)
+      end
+    end
+
+    context 'with nil job' do
+      let(:job) { nil }
+      let(:expected_error) { 'Could\'t find the job' }
+
+      it 'updates connector with error' do
+        expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(
+          id,
+          hash_including(
+            :last_sync_status => Connectors::SyncStatus::ERROR,
+            :last_synced => anything,
+            :last_sync_error => expected_error,
+            :error => expected_error
+          )
+        )
+        subject.update_last_sync!(job)
+      end
+    end
+
+    context 'with error job without error message' do
+      let(:job_error) { nil }
+      let(:expected_error) { 'unknown error' }
+
+      it 'updates with error' do
+        expect(Core::ElasticConnectorActions).to receive(:update_connector_fields).with(
+          id, hash_including(:last_sync_error => expected_error, :error => expected_error)
+        )
+        subject.update_last_sync!(job)
+      end
+    end
+  end
+
   describe '.fetch_native_connectors' do
     let(:connectors_meta) {
       {

@@ -14,8 +14,8 @@ module Core
     class PostProcessEngine
       attr_reader :rules
 
-      def initialize(job_description)
-        @rules = ordered_rules(job_description.dig('connector', 'filtering'))
+      def initialize(filtering)
+        @rules = ordered_rules(filtering)
       end
 
       def process(document)
