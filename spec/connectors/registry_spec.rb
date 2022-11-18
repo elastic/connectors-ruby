@@ -36,8 +36,8 @@ describe Connectors::Factory do
 
   describe '#registered?' do
     context 'my-connector is registered' do
-      it 'should return that sharepoint connector is registered' do
-        expect(subject.registered?('my-connector')).to eq(true)
+      it 'should return that my-connector is registered' do
+        expect(subject.registered?('my-connector')).to be_truthy
       end
 
       it 'should return that another-connector is not registered' do
