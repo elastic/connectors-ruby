@@ -38,34 +38,38 @@ describe Connectors::Factory do
   end
 
   describe '#connector_class' do
-    it 'returns registered class' do
-      expect(subject.connector_class(registered_connector)).to eq MyConnector
+    context 'when called against previously registered service type' do
+      it 'returns registered class' do
+        expect(subject.connector_class(registered_connector)).to eq MyConnector
+      end
     end
   end
 
   describe '#registered?' do
-    context 'my-connector is registered' do
+    context 'when called against previously registered service type' do
       it 'should return that my-connector is registered' do
         expect(subject.registered?(registered_connector)).to be_truthy
       end
+    end
 
-      it 'should return that another-connector is not registered' do
+    context 'when called against non-registered service type' do
+      it 'should return that non-registered service type is not registered' do
         expect(subject.registered?(unregistered_connector)).to be_falsey
       end
     end
   end
 
   describe '#connector' do
-    context 'my-connector is registered' do
-      it 'should return a my-connector instance' do
+    context 'when called against previously registered service type' do
+      it 'should return the corresponding connector instance' do
         connector_instance = subject.connector(registered_connector, configuration, job_description)
 
         expect(connector_instance).to be_a(MyConnector)
       end
     end
 
-    context 'another-connector is not registered' do
-      it 'should raise an exception, that another-connector is not registered' do
+    context 'when called against non-registered service type' do
+      it 'should raise an exception, that non-registered connector is not registered' do
         expect { subject.connector(unregistered_connector, configuration, job_description) }.to raise_exception
       end
     end
