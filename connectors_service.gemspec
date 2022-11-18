@@ -3,7 +3,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_service'
-  s.version     = File.read('VERSION')
+  s.version     = File.read('VERSION').strip
   s.homepage    = 'https://github.com/elastic/connectors-ruby'
   s.summary     = 'Gem containing Elastic connectors service'
   s.description = ''

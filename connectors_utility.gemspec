@@ -1,13 +1,13 @@
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_utility'
-  s.version     = File.read('VERSION')
+  s.version     = File.read('VERSION').strip
   s.homepage    = 'https://github.com/elastic/connectors-ruby'
   s.summary     = 'Gem containing shared Connector Services libraries'
   s.description = ''
   s.authors     = ['Elastic']
   s.metadata    = {
-    "revision" => `git rev-parse HEAD`
+    "revision" => `git rev-parse HEAD`.strip,
     "repository" => 'https://github.com/elastic/connectors-ruby'
   }
   s.email       = 'ent-search-dev@elastic.co'
