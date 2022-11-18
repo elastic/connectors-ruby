@@ -56,11 +56,13 @@ module Connectors
 
         def yield_documents
           @generated_document_count.times.map do |i|
-            raise 'could not extract document' if rand(1..100) > (100 - @chance_to_raise)
+            yield_with_handling_tolerable_errors do
+              raise 'that is a random exception' if rand(1..100) > (100 - @chance_to_raise)
 
-            document = { :id => i, :name => Faker::Name.name, :text => Faker::Lorem.sentence }
+              document = { 'id' => i, 'name' => Faker::Name.name, 'text' => Faker::Lorem.sentence }
 
-            yield document
+              yield document
+            end
           end
         end
       end
