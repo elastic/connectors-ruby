@@ -30,8 +30,7 @@ describe Connectors::Factory do
 
   describe '#connector_class' do
     it 'returns registered class' do
-      connector_class = subject.connector_class('my-connector')
-      expect(connector_class == (MyConnector)).to eq(true)
+      expect(subject.connector_class('my-connector')).to eq MyConnector
     end
   end
 
