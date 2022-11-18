@@ -98,12 +98,6 @@ describe Core::Scheduler do
         it_behaves_like 'does not trigger', :sync
       end
 
-      context 'when connector is never synced' do
-        let(:last_synced) { nil }
-
-        it_behaves_like 'triggers', :sync
-      end
-
       context 'when connector sync interval is not configured' do
         let(:sync_interval) { nil }
 
@@ -122,6 +116,12 @@ describe Core::Scheduler do
         let(:cron_parser) { nil }
 
         it_behaves_like 'does not trigger', :sync
+      end
+
+      context 'when connector is never synced' do
+        let(:last_synced) { nil }
+
+        it_behaves_like 'triggers', :sync
       end
 
       context 'when next trigger time is in the future' do

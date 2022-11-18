@@ -118,7 +118,7 @@ module Core
     end
 
     def connector_id
-      @elasticsearch_response[:_source][:connector][:id]
+      connector_snapshot[:id]
     end
 
     def index_name
@@ -138,15 +138,22 @@ module Core
     end
 
     def filtering
-      Utility::Filtering.extract_filter(connector_snapshot[:filtering])
+      connector_snapshot[:filtering]
     end
 
     def pipeline
-      @elasticsearch_response[:_source][:pipeline]
+      connector_snapshot[:pipeline]
     end
 
     def connector
       @connector ||= ConnectorSettings.fetch_by_id(connector_id)
+    end
+
+    def update_metadata(ingestion_stats = {}, connector_metadata = {})
+      ingestion_stats ||= {}
+      doc = { :last_seen => Time.now }.merge(ingestion_stats)
+      doc[:metadata] = connector_metadata if connector_metadata&.any?
+      ElasticConnectorActions.update_job_fields(id, doc)
     end
 
     def done!(ingestion_stats = {}, connector_metadata = {})

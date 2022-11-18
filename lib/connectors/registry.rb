@@ -24,7 +24,7 @@ module Connectors
       @connectors[name]
     end
 
-    def connector(name, configuration, job_description: {})
+    def connector(name, configuration, job_description: nil)
       klass = connector_class(name)
       if klass.present?
         return klass.new(configuration: configuration, job_description: job_description)

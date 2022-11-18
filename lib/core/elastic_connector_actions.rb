@@ -231,37 +231,6 @@ module Core
         update_connector_fields(connector_id, body)
       end
 
-      def update_sync(job_id, metadata)
-        body = {
-          :doc => { :last_seen => Time.now }.merge(metadata)
-        }
-        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
-      end
-
-      def complete_sync(connector_id, job_id, metadata, error)
-        sync_status = error ? Connectors::SyncStatus::ERROR : Connectors::SyncStatus::COMPLETED
-
-        metadata ||= {}
-
-        update_connector_fields(connector_id,
-                                :last_sync_status => sync_status,
-                                :last_sync_error => error,
-                                :error => error,
-                                :last_synced => Time.now,
-                                :last_indexed_document_count => metadata[:indexed_document_count],
-                                :last_deleted_document_count => metadata[:deleted_document_count])
-
-        body = {
-          :doc => {
-            :status => sync_status,
-            :completed_at => Time.now,
-            :last_seen => Time.now,
-            :error => error
-          }.merge(metadata)
-        }
-        client.update(:index => Utility::Constants::JOB_INDEX, :id => job_id, :body => body)
-      end
-
       def fetch_document_ids(index_name)
         page_size = 1000
         result = []
