@@ -7,6 +7,7 @@
 # frozen_string_literal: true
 
 require 'utility/logger'
+require 'active_support/core_ext/object/blank'
 
 module Core
   module Filtering
@@ -28,27 +29,31 @@ module Core
         GREATER_THAN = '>'
       end
 
-      attr_reader :policy, :field, :rule, :value, :id
+      attr_reader :policy, :field, :rule, :value, :id, :order
 
       def initialize(rule_hash)
         @policy = rule_hash.fetch('policy')
+        unless @policy == Policy::INCLUDE || @policy == Policy::EXCLUDE
+          raise "Invalid policy '#{policy}' for rule '#{rule_hash}'"
+        end
         @field = rule_hash.fetch('field')
         @rule = rule_hash.fetch('rule')
         @value = rule_hash.fetch('value')
         @id = rule_hash.fetch('id')
         @rule_hash = rule_hash
       rescue KeyError => e
-        raise "#{e.key} is required"
+        raise "#{e.key} is required: #{e.message}"
       end
 
-      def self.from_args(id, policy, field, rule, value)
+      def self.from_args(id, policy, field, rule, value, order = 0)
         SimpleRule.new(
           {
             'id' => id,
             'policy' => policy,
             'field' => field,
             'rule' => rule,
-            'value' => value
+            'value' => value,
+            'order' => order
           }
         )
       end
@@ -58,7 +63,8 @@ module Core
         'field' => '_',
         'rule' => 'regex',
         'value' => '.*',
-        'id' => SimpleRule::DEFAULT_RULE_ID
+        'id' => SimpleRule::DEFAULT_RULE_ID,
+        'order' => 0
       )
 
       def match?(document)
@@ -121,6 +127,10 @@ module Core
 
       def to_h
         @rule_hash
+      end
+
+      def ==(other)
+        other.is_a?(SimpleRule) && other.to_h == to_h
       end
 
       private

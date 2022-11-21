@@ -39,7 +39,7 @@ describe Core::Filtering::SimpleRule do
 
   shared_examples_for 'a match' do
     it 'matches' do
-      expect(subject.match?(document)).to be
+      expect(subject.match?(document)).to be_truthy
     end
   end
 
