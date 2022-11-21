@@ -103,9 +103,7 @@ describe Connectors::MongoDB::Connector do
   let(:filtering) {
     {
       :rules => rules,
-      :advanced_snippet => {
-        :value => advanced_snippet
-      }
+      :advanced_snippet => advanced_snippet
     }
   }
 
@@ -201,84 +199,6 @@ describe Connectors::MongoDB::Connector do
       expect(Mongo::Client).to receive(:new).with(mongodb_host, hash_including(:database => mongodb_database))
 
       subject.is_healthy?
-    end
-  end
-
-  describe '#validate_filtering' do
-    context 'filtering is not present' do
-      let(:filtering) {
-        {}
-      }
-
-      it_behaves_like 'filtering is valid'
-    end
-
-    context 'find is present' do
-      let(:advanced_snippet) {
-        {
-          :find => {}
-        }
-      }
-
-      it_behaves_like 'filtering is valid'
-    end
-
-    context 'aggregate is present' do
-      let(:advanced_snippet) {
-        {
-          :aggregate => {}
-        }
-      }
-
-      it_behaves_like 'filtering is valid'
-    end
-
-    context 'advanced config is empty' do
-      let(:advanced_snippet) {
-        {}
-      }
-
-      it_behaves_like 'filtering is valid'
-    end
-
-    context 'advanced config is nil' do
-      let(:advanced_snippet) {
-        nil
-      }
-
-      it_behaves_like 'filtering is valid'
-    end
-
-    context 'aggregate and find are present' do
-      let(:advanced_snippet) {
-        {
-            :aggregate => {},
-            :find => {}
-        }
-      }
-
-      it_behaves_like 'filtering is invalid'
-    end
-
-    context 'aggregate and one wrong key are present' do
-      let(:advanced_snippet) {
-        {
-          :aggregate => {},
-          :wrong_key => {}
-        }
-      }
-
-      it_behaves_like 'filtering is invalid'
-    end
-
-    context 'wrong key is present' do
-      let(:advanced_snippet) {
-        {
-          :wrong_key_one => {}
-        }
-      }
-
-      it_behaves_like 'filtering is invalid'
     end
   end
 
