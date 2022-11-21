@@ -189,13 +189,15 @@ module Core
           status: Connectors::SyncStatus::PENDING,
           created_at: Time.now,
           last_seen: Time.now,
+          trigger_method: connector_settings.sync_now? ? 'on-demand' : 'scheduled',
           connector: {
             id: connector_settings.id,
             filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering),
             index_name: connector_settings.index_name,
             language: connector_settings[:language],
             pipeline: connector_settings[:pipeline],
-            service_type: connector_settings.service_type
+            service_type: connector_settings.service_type,
+            configuration: connector_settings.configuration
           }
         }
 

@@ -88,6 +88,10 @@ module Core
       self[:scheduling]
     end
 
+    def sync_now?
+      self[:sync_now] == true
+    end
+
     def filtering
       # assume for now, that first object in filtering array or a filter object itself is the only filtering object
       filtering = @elasticsearch_response.dig(:_source, :filtering)
