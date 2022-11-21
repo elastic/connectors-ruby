@@ -8,6 +8,7 @@
 
 require 'connectors/connector_status'
 require 'connectors/registry'
+require 'core/filtering'
 
 module Core
   module Filtering
