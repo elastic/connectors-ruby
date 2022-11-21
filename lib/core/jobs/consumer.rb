@@ -6,7 +6,9 @@
 
 # frozen_string_literal: true
 
+require 'utility/logger'
 require 'utility/constants'
+require 'concurrent'
 
 module Core
   module Jobs
@@ -48,6 +50,7 @@ module Core
       def shutdown!
         Utility::Logger.info("Shutting down consumer for #{@index_name} index")
         @running.make_false
+        @loop.shutdown
         pool.shutdown
         pool.wait_for_termination(@termination_timeout)
         # reset pool
@@ -58,58 +61,50 @@ module Core
 
       def start_loop!
         Utility::Logger.info("Starting a new consumer for #{@index_name} index")
-
-        Thread.new do
-          # assign a name to the thread
-          # see @TODO in #self.running?
-          Thread.current[:name] = "consumer-group-#{@index_name}"
-
-          loop do
-            if @running.false?
-              Utility::Logger.info('Shutting down the loop')
-              break
-            end
-
-            sleep(@poll_interval)
-            Utility::Logger.debug('Getting registered connectors')
-
-            connectors = ready_for_sync_connectors
-            next unless connectors.any?
-
-            Utility::Logger.debug("Number of available connectors: #{connectors.size}")
-
-            # @TODO It is assumed that @index_name is used to retrive pending jobs.
-            # This will be discussed after 8.6 release
-            pending_jobs = Core::ConnectorJob.pending_jobs(connectors_ids: connectors.keys)
-            Utility::Logger.info("Number of pending jobs: #{pending_jobs.size}")
-
-            pending_jobs.each do |job|
-              connector_settings = connectors[job.connector_id]
-
-              pool.post do
-                Utility::Logger.info("Connector #{connector_settings.formatted} picked up the job #{job.id}")
-                Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
-                job_runner = Core::SyncJobRunner.new(
-                  connector_settings,
-                  job,
-                  @max_ingestion_queue_size,
-                  @max_ingestion_queue_bytes
-                )
-                job_runner.execute
-              rescue Core::JobAlreadyRunningError
-                Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
-              rescue Core::ConnectorVersionChangedError => e
-                Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
-              rescue StandardError => e
-                Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
-              end
-            end
-          rescue StandardError => e
-            Utility::ExceptionTracking.log_exception(e, 'The consumer group failed')
-          end
-        end
-
+        @loop = Concurrent::TimerTask.execute(execution_interval: @poll_interval, run_now: true) { execute }
         @running.make_true
+      end
+
+      def execute
+        Utility::Logger.debug('Getting registered connectors')
+
+        connectors = ready_for_sync_connectors
+        return unless connectors.any?
+
+        Utility::Logger.debug("Number of available connectors: #{connectors.size}")
+
+        # @TODO It is assumed that @index_name is used to retrive pending jobs.
+        # This will be discussed after 8.6 release
+        pending_jobs = Core::ConnectorJob.pending_jobs(connectors_ids: connectors.keys)
+        Utility::Logger.info("Number of pending jobs: #{pending_jobs.size}")
+
+        pending_jobs.each do |job|
+          connector_settings = connectors[job.connector_id]
+
+          execute_job(job, connector_settings)
+        end
+      rescue StandardError => e
+        Utility::ExceptionTracking.log_exception(e, 'The consumer group failed')
+      end
+
+      def execute_job(job, connector_settings)
+        pool.post do
+          Utility::Logger.info("Connector #{connector_settings.formatted} picked up the job #{job.id}")
+          Core::ElasticConnectorActions.ensure_content_index_exists(connector_settings.index_name)
+          job_runner = Core::SyncJobRunner.new(
+            connector_settings,
+            job,
+            @max_ingestion_queue_size,
+            @max_ingestion_queue_bytes
+          )
+          job_runner.execute
+        rescue Core::JobAlreadyRunningError
+          Utility::Logger.info("Sync job for #{connector_settings.formatted} is already running, skipping.")
+        rescue Core::ConnectorVersionChangedError => e
+          Utility::Logger.info("Could not start the job because #{connector_settings.formatted} has been updated externally. Message: #{e.message}")
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
+        end
       end
 
       def pool
