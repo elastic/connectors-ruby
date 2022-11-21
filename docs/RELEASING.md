@@ -23,6 +23,14 @@ To release the connector service:
 
 Two Gems will be published to RubyGems: [connectors_service](https://rubygems.org/gems/connectors_service) and [connectors_utility](https://rubygems.org/gems/connectors_utility)
 
+> Note: you should be logged into rubygems (your_gem_account_name is the ent-search email from vault under `ent-search-team/rubygem`)
+
+```shell
+curl -u {your_gem_account_name} https://rubygems.org/api/v1/api_key.yaml > ~/.gem/credentials
+Enter host password for user '{your_gem_account_name}': {your_password}
+
+```
+
 Take care of the branching (minor releases only):
 
 - Increment the VERSION on main to match the next minor release
