@@ -11,8 +11,6 @@ require 'connectors/registry'
 
 module Core
   module Filtering
-    DEFAULT_DOMAIN = 'DEFAULT'
-
     class ValidationJobRunner
       def initialize(connector_settings)
         @connector_settings = connector_settings
@@ -27,7 +25,7 @@ module Core
         validation_result = @connector_class.validate_filtering(@connector_settings.filtering[:draft])
 
         # currently only used for connectors -> DEFAULT domain can be assumed (will be changed with the integration of crawler)
-        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { DEFAULT_DOMAIN => validation_result })
+        ElasticConnectorActions.update_filtering_validation(@connector_settings.id, { Core::Filtering::DEFAULT_DOMAIN => validation_result })
 
         @validation_finished = true
       rescue StandardError => e

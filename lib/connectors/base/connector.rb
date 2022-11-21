@@ -71,7 +71,7 @@ module Connectors
         filtering = Utility::Filtering.extract_filter(@job_description&.filtering)
 
         @rules = filtering[:rules] || []
-        @advanced_filter_config = filtering.dig(:advanced_snippet, :value) || {}
+        @advanced_filter_config = filtering[:advanced_snippet] || {}
       end
 
       def yield_documents; end
