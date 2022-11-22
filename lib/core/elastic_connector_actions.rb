@@ -8,6 +8,7 @@
 #
 require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
+require 'connectors/job_trigger_method'
 require 'connectors/sync_status'
 require 'utility'
 require 'elastic-transport'
@@ -189,7 +190,7 @@ module Core
           status: Connectors::SyncStatus::PENDING,
           created_at: Time.now,
           last_seen: Time.now,
-          trigger_method: connector_settings.sync_now? ? 'on-demand' : 'scheduled',
+          trigger_method: connector_settings.sync_now? ? Connectors::JobTriggerMethod::ON_DEMAND : Connectors::JobTriggerMethod::SCHEDULED,
           connector: {
             id: connector_settings.id,
             filtering: convert_connector_filtering_to_job_filtering(connector_settings.filtering),

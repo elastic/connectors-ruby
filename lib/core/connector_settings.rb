@@ -103,18 +103,6 @@ module Core
       Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
     end
 
-    def extract_binary_content?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
-    end
-
-    def reduce_whitespace?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
-    end
-
-    def run_ml_inference?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
-    end
-
     def formatted
       properties = ["ID: #{id}"]
       properties << "Service type: #{service_type}" if service_type

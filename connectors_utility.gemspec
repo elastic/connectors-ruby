@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
                     lib/core/connector_settings.rb
                     lib/core/connector_job.rb
                     lib/core/filtering/validation_status.rb
+                    lib/connectors/job_trigger_method.rb
                   ]
   s.license     = 'Elastic-2.0'
   s.add_dependency 'activesupport', '~>5.2.6'
