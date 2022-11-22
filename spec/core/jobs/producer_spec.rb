@@ -13,7 +13,7 @@ describe Core::Jobs::Producer do
     end
 
     context 'when the job type is supported' do
-      let(:job_type) { Core::Jobs::Producer::JOB_TYPES.first}
+      let(:job_type) { Core::Jobs::Producer::JOB_TYPES.first }
 
       context 'when connector_settings is not a kind of Core::ConnectorSettings' do
         it 'raise ArgumentError' do
