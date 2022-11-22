@@ -32,6 +32,12 @@ module Connectors
           parse_less_than(rule)
         when Core::Filtering::SimpleRule::Rule::REGEX
           parse_regex(rule)
+        when Core::Filtering::SimpleRule::Rule::STARTS_WITH
+          parse_starts_with(rule)
+        when Core::Filtering::SimpleRule::Rule::ENDS_WITH
+          parse_ends_with(rule)
+        when Core::Filtering::SimpleRule::Rule::CONTAINS
+          parse_contains(rule)
         else
           raise "Unknown operator: #{op}"
         end
@@ -74,6 +80,30 @@ module Connectors
           { rule.field => /#{rule.value}/ }
         else
           { rule.field => { '$not' => /#{rule.value}/ } }
+        end
+      end
+
+      def parse_starts_with(rule)
+        if rule.is_include?
+          { rule.field => /^#{rule.value}/ }
+        else
+          { rule.field => { '$not' => /^#{rule.value}/ } }
+        end
+      end
+
+      def parse_ends_with(rule)
+        if rule.is_include?
+          { rule.field => /#{rule.value}$/ }
+        else
+          { rule.field => { '$not' => /#{rule.value}$/ } }
+        end
+      end
+
+      def parse_contains(rule)
+        if rule.is_include?
+          { rule.field => /.*#{rule.value}.*/ }
+        else
+          { rule.field => { '$not' => /.*#{rule.value}.*/ } }
         end
       end
     end
