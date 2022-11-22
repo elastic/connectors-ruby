@@ -12,5 +12,6 @@ require_relative 'connectors/connector_status'
 require_relative 'connectors/sync_status'
 require_relative 'core/scheduler'
 require_relative 'core/elastic_connector_actions'
+require_relative 'core/connector_job'
 
 require_relative 'connectors/crawler/scheduler'
