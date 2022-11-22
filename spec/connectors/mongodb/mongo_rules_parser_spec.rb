@@ -218,7 +218,7 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with invalid operator' do
       let(:operator) { 'invalid' }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Unknown operator/)
+        expect { subject.parse }.to raise_error(RuntimeError, /Unknown rule/)
       end
     end
 
