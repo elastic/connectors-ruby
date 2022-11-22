@@ -8,6 +8,8 @@
 
 require 'utility/logger'
 require 'utility/constants'
+require 'core/connector_job'
+require 'core/sync_job_runner'
 require 'concurrent'
 
 module Core
@@ -32,37 +34,49 @@ module Core
 
         @max_ingestion_queue_size = max_ingestion_queue_size
         @max_ingestion_queue_bytes = max_ingestion_queue_bytes
-
-        @running = Concurrent::AtomicBoolean.new(false)
       end
 
       def subscribe!(index_name:)
-        @index_name = index_name
+        Utility::Logger.info("Starting a new consumer for #{@index_name} index")
 
-        start_loop!
+        @index_name = index_name
+        start_timer_task!
+        start_thread_pool!
       end
 
       def running?
-        # @TODO check if a loop thread is alive
-        pool.running? && @running.true?
+        pool&.running? && timer_task&.running?
       end
 
       def shutdown!
         Utility::Logger.info("Shutting down consumer for #{@index_name} index")
-        @running.make_false
-        @loop.shutdown
+
+        timer_task.shutdown
         pool.shutdown
         pool.wait_for_termination(@termination_timeout)
-        # reset pool
-        @pool = nil
+        reset_pool!
       end
 
       private
 
-      def start_loop!
-        Utility::Logger.info("Starting a new consumer for #{@index_name} index")
-        @loop = Concurrent::TimerTask.execute(execution_interval: @poll_interval, run_now: true) { execute }
-        @running.make_true
+      attr_reader :pool, :timer_task
+
+      def start_timer_task!
+        @timer_task = Concurrent::TimerTask.execute(execution_interval: @poll_interval, run_now: true) { execute }
+      end
+
+      def start_thread_pool!
+        @pool = Concurrent::ThreadPoolExecutor.new(
+          min_threads: @min_threads,
+          max_threads: @max_threads,
+          max_queue: @max_queue,
+          fallback_policy: :abort,
+          idletime: @idle_time
+        )
+      end
+
+      def reset_pool!
+        @pool = nil
       end
 
       def execute
@@ -80,7 +94,6 @@ module Core
 
         pending_jobs.each do |job|
           connector_settings = connectors[job.connector_id]
-
           execute_job(job, connector_settings)
         end
       rescue StandardError => e
@@ -105,16 +118,6 @@ module Core
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e, "Sync job for #{connector_settings.formatted} failed due to unexpected error.")
         end
-      end
-
-      def pool
-        @pool ||= Concurrent::ThreadPoolExecutor.new(
-          min_threads: @min_threads,
-          max_threads: @max_threads,
-          max_queue: @max_queue,
-          fallback_policy: :abort,
-          idletime: @idle_time
-        )
       end
 
       def ready_for_sync_connectors
