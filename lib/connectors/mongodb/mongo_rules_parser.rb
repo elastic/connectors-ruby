@@ -13,32 +13,27 @@ require 'core/filtering/simple_rule'
 module Connectors
   module MongoDB
     class MongoRulesParser < Connectors::Base::SimpleRulesParser
-      def parse_rule(simple_rule)
-        field = simple_rule.field
-        value = simple_rule.value
-
-        raise "value is required for field: #{field}" unless value.present?
-
-        raise "field is required for simple rule: #{simple_rule}" unless field.present?
-
-        rule = simple_rule.rule
-        case rule
+      def parse_rule(rule)
+        field = rule.field
+        value = rule.value
+        unless value.present?
+          raise "value is required for field: #{field}"
+        end
+        unless field.present?
+          raise "field is required for rule: #{rule}"
+        end
+        op = rule.rule
+        case op
         when Core::Filtering::SimpleRule::Rule::EQUALS
-          parse_equals(simple_rule)
+          parse_equals(rule)
         when Core::Filtering::SimpleRule::Rule::GREATER_THAN
-          parse_greater_than(simple_rule)
+          parse_greater_than(rule)
         when Core::Filtering::SimpleRule::Rule::LESS_THAN
-          parse_less_than(simple_rule)
+          parse_less_than(rule)
         when Core::Filtering::SimpleRule::Rule::REGEX
-          parse_regex(simple_rule)
-        when Core::Filtering::SimpleRule::Rule::STARTS_WITH
-          parse_starts_with(simple_rule)
-        when Core::Filtering::SimpleRule::Rule::ENDS_WITH
-          parse_ends_with(simple_rule)
-        when Core::Filtering::SimpleRule::Rule::CONTAINS
-          parse_contains(simple_rule)
+          parse_regex(rule)
         else
-          raise "Unknown rule: #{rule}"
+          raise "Unknown operator: #{op}"
         end
       end
 
@@ -79,30 +74,6 @@ module Connectors
           { rule.field => /#{rule.value}/ }
         else
           { rule.field => { '$not' => /#{rule.value}/ } }
-        end
-      end
-
-      def parse_starts_with(rule)
-        if rule.is_include?
-          { rule.field => /^#{rule.value}/ }
-        else
-          { rule.field => { '$not' => /^#{rule.value}/ } }
-        end
-      end
-
-      def parse_ends_with(rule)
-        if rule.is_include?
-          { rule.field => /#{rule.value}$/ }
-        else
-          { rule.field => { '$not' => /#{rule.value}$/ } }
-        end
-      end
-
-      def parse_contains(rule)
-        if rule.is_include?
-          { rule.field => /.*#{rule.value}.*/ }
-        else
-          { rule.field => { '$not' => /.*#{rule.value}.*/ } }
         end
       end
     end

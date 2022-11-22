@@ -33,66 +33,27 @@ describe Connectors::MongoDB::MongoRulesParser do
   describe '#parse' do
     context 'with one rule' do
       context 'on include rule' do
-        context 'equals' do
+        context Core::Filtering::SimpleRule::Rule::EQUALS do
           it 'parses rule as equals' do
             result = subject.parse
             expect(result).to match({ 'foo' => 'bar' })
           end
         end
-
-        context 'greater than' do
+        context 'greater' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::GREATER_THAN }
           it 'parses rule as greater' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$gt' => 'bar' } })
           end
         end
-
-        context 'less than' do
+        context 'less' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::LESS_THAN }
           it 'parses rule as less' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$lt' => 'bar' } })
           end
         end
-
-        context 'regex' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::REGEX }
-
-          it 'parses rule as a regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => /bar/ })
-          end
-        end
-
-        context 'starts with' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
-
-          it 'parses rule as a starts with regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => /^bar/ })
-          end
-        end
-
-        context 'ends with' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
-
-          it 'parses rule as an ends with regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => /bar$/ })
-          end
-        end
-
-        context 'contains' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::CONTAINS }
-
-          it 'parses rule as a contains regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => /.*bar.*/ })
-          end
-        end
       end
-
       context 'on exclude rule' do
         let(:policy) { Core::Filtering::SimpleRule::Policy::EXCLUDE }
         context Core::Filtering::SimpleRule::Rule::EQUALS do
@@ -101,56 +62,18 @@ describe Connectors::MongoDB::MongoRulesParser do
             expect(result).to match({ 'foo' => { '$ne' => 'bar' } })
           end
         end
-
-        context 'greater than' do
+        context 'greater' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::GREATER_THAN }
           it 'parses rule as less or equals' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$lte' => 'bar' } })
           end
         end
-
-        context 'less than' do
+        context 'less' do
           let(:operator) { Core::Filtering::SimpleRule::Rule::LESS_THAN }
           it 'parses rule as less or equals' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$gte' => 'bar' } })
-          end
-        end
-
-        context 'regex' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::REGEX }
-
-          it 'parses rule as a not regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => { '$not' => /bar/ } })
-          end
-        end
-
-        context 'starts with' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::STARTS_WITH }
-
-          it 'parses rule as a not starting with regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => { '$not' => /^bar/ } })
-          end
-        end
-
-        context 'ends with' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::ENDS_WITH }
-
-          it 'parses rule as a not ending with regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => { '$not' => /bar$/ } })
-          end
-        end
-
-        context 'contains' do
-          let(:operator) { Core::Filtering::SimpleRule::Rule::CONTAINS }
-
-          it 'parses rule as a not containing regex' do
-            result = subject.parse
-            expect(result).to match({ 'foo' => { '$not' => /.*bar.*/ } })
           end
         end
       end
@@ -218,7 +141,7 @@ describe Connectors::MongoDB::MongoRulesParser do
     context 'with invalid operator' do
       let(:operator) { 'invalid' }
       it 'raises error' do
-        expect { subject.parse }.to raise_error(RuntimeError, /Unknown rule/)
+        expect { subject.parse }.to raise_error(RuntimeError, /Unknown operator/)
       end
     end
 
