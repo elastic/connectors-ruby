@@ -8,6 +8,7 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/connector_status'
+require 'connectors/sync_status'
 require 'core/elastic_connector_actions'
 require 'utility'
 
