@@ -139,10 +139,12 @@ module Core
       job_status = job&.status || Connectors::SyncStatus::ERROR
       job_error = job.nil? ? 'Could\'t find the job' : job.error
       job_error ||= 'unknown error' if job_status == Connectors::SyncStatus::ERROR
+      connector_status = job_status == Connectors::SyncStatus::ERROR ? Connectors::ConnectorStatus::ERROR : Connectors::ConnectorStatus::CONNECTED
       doc = {
         :last_sync_status => job_status,
         :last_synced => Time.now,
         :last_sync_error => job_error,
+        :status => connector_status,
         :error => job_error
       }
       if job&.terminated?
