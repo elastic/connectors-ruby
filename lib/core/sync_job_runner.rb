@@ -208,10 +208,11 @@ module Core
     end
 
     def add_ingest_metadata(document)
+      return document unless @job
       document.tap do |it|
-        it['_extract_binary_content'] = @job&.extract_binary_content? if @job&.extract_binary_content?
-        it['_reduce_whitespace'] = @job&.reduce_whitespace? if @job&.reduce_whitespace?
-        it['_run_ml_inference'] = @job&.run_ml_inference? if @job&.run_ml_inference?
+        it['_extract_binary_content'] = @job.extract_binary_content? if @job.extract_binary_content?
+        it['_reduce_whitespace'] = @job.reduce_whitespace? if @job.reduce_whitespace?
+        it['_run_ml_inference'] = @job.run_ml_inference? if @job.run_ml_inference?
       end
     end
 
