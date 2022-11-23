@@ -141,6 +141,7 @@ describe Core::ConnectorSettings do
     let(:terminated?) { true }
     let(:indexed_document_count) { 10 }
     let(:deleted_document_count) { 5 }
+    let(:expected_connector_status) { Connectors::ConnectorStatus::ERROR }
 
     before(:each) do
       allow(subject).to receive(:id).and_return(id)
@@ -158,6 +159,7 @@ describe Core::ConnectorSettings do
           :last_sync_status => job_status,
           :last_synced => anything,
           :last_sync_error => job_error,
+          :status => expected_connector_status,
           :error => job_error,
           :last_indexed_document_count => indexed_document_count,
           :last_deleted_document_count => deleted_document_count
@@ -188,6 +190,7 @@ describe Core::ConnectorSettings do
             :last_sync_status => Connectors::SyncStatus::ERROR,
             :last_synced => anything,
             :last_sync_error => expected_error,
+            :status => expected_connector_status,
             :error => expected_error
           )
         )
