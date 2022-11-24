@@ -16,6 +16,11 @@ module Core
       class Policy
         INCLUDE = 'include'
         EXCLUDE = 'exclude'
+
+        POLICIES = [
+          INCLUDE,
+          EXCLUDE
+        ]
       end
 
       class Rule
@@ -26,6 +31,16 @@ module Core
         CONTAINS = 'contains'
         LESS_THAN = '<'
         GREATER_THAN = '>'
+
+        RULES = [
+          REGEX,
+          EQUALS,
+          STARTS_WITH,
+          ENDS_WITH,
+          CONTAINS,
+          LESS_THAN,
+          GREATER_THAN
+        ]
       end
 
       attr_reader :policy, :field, :rule, :value, :id
