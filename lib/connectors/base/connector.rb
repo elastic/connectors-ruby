@@ -9,10 +9,14 @@
 require 'active_support/core_ext/hash/indifferent_access'
 require 'app/config'
 require 'bson'
-require 'connectors/base/advanced_snippet_validator'
-require 'core/ingestion'
 require 'connectors/tolerable_error_helper'
+require 'core/filtering/advanced_snippet/advanced_snippet_validator'
+require 'core/filtering/simple_rules/validation/no_conflicting_policies_rules_validator'
+require 'core/filtering/simple_rules/validation/single_rule_against_schema_validator'
+require 'core/filtering/filter_validator'
+require 'core/filtering/processing_stage'
 require 'core/filtering/validation_status'
+require 'core/ingestion'
 require 'utility'
 require 'utility/filtering'
 
@@ -43,20 +47,26 @@ module Connectors
         ]
       end
 
-      def self.advanced_snippet_validator
-        AdvancedSnippetValidator
+      def self.advanced_snippet_validators
+        Core::Filtering::AdvancedSnippet::AdvancedSnippetValidator
+      end
+
+      def self.simple_rules_validators
+        {
+          Core::Filtering::ProcessingStage::ALL => [
+            Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValidator,
+            Core::Filtering::SimpleRules::Validation::NoConflictingPoliciesRulesValidator
+          ]
+        }
       end
 
       def self.validate_filtering(filtering = {})
-        # nothing to validate
-        return { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] } unless filtering.present?
-
         filter = Utility::Filtering.extract_filter(filtering)
-        advanced_snippet = filter.dig(:advanced_snippet, :value)
 
-        snippet_validator_instance = advanced_snippet_validator.new(advanced_snippet)
-
-        snippet_validator_instance.is_snippet_valid?
+        filter_validator = Core::Filtering::FilterValidator.new(snippet_validator_classes: advanced_snippet_validators,
+                                                                rules_validator_classes: simple_rules_validators,
+                                                                rules_pre_processing_active: Utility::Filtering.rule_pre_processing_active?(filter))
+        filter_validator.is_filter_valid?(filter)
       end
 
       attr_reader :rules, :advanced_filter_config
@@ -98,10 +108,6 @@ module Connectors
       rescue StandardError => e
         Utility::ExceptionTracking.log_exception(e, "Connector for service #{self.class.service_type} failed the health check for 3rd-party service.")
         false
-      end
-
-      def filtering_present?
-        @advanced_filter_config.present? && !@advanced_filter_config.empty? || @rules.present?
       end
 
       def metadata

@@ -17,6 +17,10 @@ module Utility
 
         filter.present? ? filter : {}
       end
+
+      def rule_pre_processing_active?(filter)
+        !filter.dig('advanced_snippet', 'value')&.present?
+      end
     end
   end
 end

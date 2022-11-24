@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'connectors/mongodb/connector'
-require 'core/filtering/simple_rule'
+require 'core/filtering/simple_rules/simple_rule'
 require 'hashie/mash'
 require 'spec_helper'
 

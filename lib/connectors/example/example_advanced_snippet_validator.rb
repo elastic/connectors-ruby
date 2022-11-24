@@ -6,11 +6,12 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/advanced_snippet_validator'
+require 'core/filtering/advanced_snippet/advanced_snippet_validator'
+require 'core/filtering/validation_status'
 
 module Connectors
   module Example
-    class ExampleAdvancedSnippetValidator < Connectors::Base::AdvancedSnippetValidator
+    class ExampleAdvancedSnippetValidator < Core::Filtering::AdvancedSnippet::AdvancedSnippetValidator
 
       def is_snippet_valid?
         # TODO: real filtering validation will follow later
