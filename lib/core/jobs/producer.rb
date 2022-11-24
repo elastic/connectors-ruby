@@ -6,6 +6,9 @@
 
 # frozen_string_literal: true
 
+require 'core/connector_settings'
+require 'core/elastic_connector_actions'
+
 module Core
   module Jobs
     class Producer
