@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     if dep.latest_version?
       s.add_dependency dep.name
     else
-      s.add_dependency dep.name, dep.requirement
+      s.add_dependency dep.name, dep.requirement.as_list
     end
   end
 end
