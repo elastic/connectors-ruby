@@ -95,7 +95,7 @@ module Core
       end
 
       def is_required_value_missing?(snippet_field_value)
-        snippet_field_value.nil? || !snippet_field_value.present?
+        !snippet_field_value.present?
       end
 
       def valid_snippet
