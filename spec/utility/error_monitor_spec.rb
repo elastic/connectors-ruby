@@ -18,13 +18,13 @@ describe Utility::ErrorMonitor do
   end
 
   it 'raises an error after too many errors in a window' do
-    monitor = Utility::ErrorMonitor.new(:max_error_ratio => 0.15, window_size: 100) 
+    monitor = Utility::ErrorMonitor.new(:max_error_ratio => 0.15, window_size: 100)
 
     10.times do
       monitor.note_error(StandardError.new)
     end
 
-    84.times do 
+    84.times do
       monitor.note_success
     end
 
@@ -57,7 +57,7 @@ describe Utility::ErrorMonitor do
           monitor.note_error(StandardError.new)
         end
 
-        40.times do 
+        40.times do
           monitor.note_success
         end
       end
@@ -77,7 +77,7 @@ describe Utility::ErrorMonitor do
         # 40 x success; 5 x failure; 40 x success; 5 x failure, real error_ratio = 0.1
         # After:
         # 1 x success; 5x failure; 94 x success, real_error_ratio = 0.05
-        94.times do 
+        94.times do
           monitor.note_success
         end
 
