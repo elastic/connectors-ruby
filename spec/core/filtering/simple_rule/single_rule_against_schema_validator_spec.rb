@@ -36,7 +36,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
     end
 
     context 'when field is empty' do
-      context 'field is nil' do
+      context 'when field is nil' do
         let(:field) {
           nil
         }
@@ -44,7 +44,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
         it_behaves_like 'simple rules are invalid'
       end
 
-      context 'field is empty string' do
+      context 'when field is empty string' do
         let(:field) {
           ''
         }
@@ -54,7 +54,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
     end
 
     context 'when value is empty' do
-      context 'value is nil' do
+      context 'when value is nil' do
         let(:value) {
           nil
         }
@@ -62,7 +62,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
         it_behaves_like 'simple rules are invalid'
       end
 
-      context 'value is empty string' do
+      context 'when value is empty string' do
         let(:value) {
           ''
         }
@@ -72,7 +72,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
     end
 
     context 'when policy is empty' do
-      context 'policy is nil' do
+      context 'when policy is nil' do
         let(:policy) {
           nil
         }
@@ -80,7 +80,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
         it_behaves_like 'simple rules are invalid'
       end
 
-      context 'policy is empty string' do
+      context 'when policy is empty string' do
         let(:policy) {
           ''
         }
