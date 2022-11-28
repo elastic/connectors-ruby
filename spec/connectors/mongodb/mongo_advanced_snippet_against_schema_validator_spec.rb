@@ -18,7 +18,7 @@ describe Connectors::MongoDB::MongoAdvancedSnippetAgainstSchemaValidator do
 
   shared_examples_for 'advanced snippet is valid' do
     it 'is valid' do
-      validation_result = subject.is_snippet_valid?
+      validation_result = subject.is_snippet_valid
 
       expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
       expect(validation_result[:errors]).to be_empty
@@ -27,7 +27,7 @@ describe Connectors::MongoDB::MongoAdvancedSnippetAgainstSchemaValidator do
 
   shared_examples_for 'advanced snippet is invalid' do
     it '' do
-      validation_result = subject.is_snippet_valid?
+      validation_result = subject.is_snippet_valid
 
       expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
       expect(validation_result[:errors]).to_not be_empty
@@ -37,7 +37,7 @@ describe Connectors::MongoDB::MongoAdvancedSnippetAgainstSchemaValidator do
     end
   end
 
-  describe '#is_snippet_valid?' do
+  describe '#is_snippet_valid' do
     context 'advanced snippet is not present' do
       context 'advanced snippet is nil' do
         let(:advanced_snippet) {

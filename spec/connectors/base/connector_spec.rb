@@ -222,7 +222,7 @@ describe Connectors::Base::Connector do
   describe '.validate_filtering' do
     context 'when filtering is valid' do
       before do
-        allow(filter_validator).to receive(:is_filter_valid?).with(filtering).and_return({ :state => Core::Filtering::ValidationStatus::VALID, :errors => [] })
+        allow(filter_validator).to receive(:is_filter_valid).with(filtering).and_return({ :state => Core::Filtering::ValidationStatus::VALID, :errors => [] })
       end
 
       it_behaves_like 'filtering is valid'
@@ -230,7 +230,7 @@ describe Connectors::Base::Connector do
 
     context 'when filtering is invalid' do
       before do
-        allow(filter_validator).to receive(:is_filter_valid?).with(filtering).and_return({ :state => Core::Filtering::ValidationStatus::INVALID, :errors => [{ :ids => ['error-id'], :messages => ['error-message'] }] })
+        allow(filter_validator).to receive(:is_filter_valid).with(filtering).and_return({ :state => Core::Filtering::ValidationStatus::INVALID, :errors => [{ :ids => ['error-id'], :messages => ['error-message'] }] })
       end
 
       it_behaves_like 'filtering is invalid'

@@ -13,8 +13,8 @@ shared_examples 'a schema validator' do
 end
 
 shared_examples 'an advanced snippet validator' do
-  it 'defines is_snippet_valid? method' do
-    expect(described_class.method_defined?(:is_snippet_valid?)).to eq true
+  it 'defines is_snippet_valid method' do
+    expect(described_class.method_defined?(:is_snippet_valid)).to eq true
   end
 end
 
@@ -39,7 +39,7 @@ end
 
 shared_examples_for 'simple rules are valid' do
   it '' do
-    validation_result = subject.are_rules_valid?
+    validation_result = subject.are_rules_valid
 
     expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
     expect(validation_result[:errors]).to be_empty
@@ -48,7 +48,7 @@ end
 
 shared_examples_for 'simple rules are invalid' do
   it '' do
-    validation_result = subject.are_rules_valid?
+    validation_result = subject.are_rules_valid
 
     expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
     expect(validation_result[:errors]).to_not be_empty

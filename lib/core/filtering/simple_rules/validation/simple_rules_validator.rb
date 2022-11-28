@@ -15,7 +15,7 @@ module Core
             @rules = rules || []
           end
 
-          def are_rules_valid?
+          def are_rules_valid
             raise 'Simple rules validation not implemented'
           end
         end

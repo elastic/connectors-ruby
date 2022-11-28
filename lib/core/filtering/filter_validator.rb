@@ -28,7 +28,7 @@ module Core
         }
       end
 
-      def is_filter_valid?(filter = {})
+      def is_filter_valid(filter = {})
         return { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] } unless filter.present?
 
         snippet_validation_result = execute_validation(@snippet_validators_classes, filter)
@@ -71,9 +71,9 @@ module Core
         validators['classes'].each do |validator_class|
           case validator_type
           when ADVANCED_SNIPPET
-            validation_result = validator_class.new(advanced_snippet).is_snippet_valid?
+            validation_result = validator_class.new(advanced_snippet).is_snippet_valid
           when SIMPLE_RULES
-            validation_result = validator_class.new(filter['rules']).are_rules_valid?
+            validation_result = validator_class.new(filter['rules']).are_rules_valid
           else
             raise "Unknown validator: #{validator_type}"
           end

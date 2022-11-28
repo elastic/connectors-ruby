@@ -40,7 +40,7 @@ describe Core::Filtering::SimpleRules::Validation::NoConflictingPoliciesRulesVal
 
   subject { described_class.new(simple_rules) }
 
-  describe '#are_rules_valid?' do
+  describe '#are_rules_valid' do
     context 'when one simple rule uses include policy and another simple rule uses exclude policy for the same fields' do
       context 'when include rule comes before the exclude rule' do
         let(:simple_rules) do

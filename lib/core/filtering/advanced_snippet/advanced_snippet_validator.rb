@@ -18,7 +18,7 @@ module Core
           @advanced_snippet = advanced_snippet || {}
         end
 
-        def is_snippet_valid?
+        def is_snippet_valid
           raise 'Advanced Snippet validation not implemented'
         end
       end

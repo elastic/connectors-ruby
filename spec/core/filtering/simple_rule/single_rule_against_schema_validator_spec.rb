@@ -30,7 +30,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
 
   subject { described_class.new(simple_rules) }
 
-  describe '#are_rules_valid?' do
+  describe '#are_rules_valid' do
     context 'when one valid rule is present' do
       it_behaves_like 'simple rules are valid'
     end

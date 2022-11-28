@@ -21,7 +21,7 @@ module Core
             @schema_validator = SchemaValidator.new(error_id: SIMPLE_RULES_ID)
           end
 
-          def are_rules_valid?
+          def are_rules_valid
             @rules.each do |rule|
               validation_result = @schema_validator.validate_against_schema(@schema, rule)
               return validation_result unless validation_result[:state] == Core::Filtering::ValidationStatus::VALID

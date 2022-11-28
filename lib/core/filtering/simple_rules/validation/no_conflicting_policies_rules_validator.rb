@@ -14,7 +14,7 @@ module Core
       module Validation
         class NoConflictingPoliciesRulesValidator < Core::Filtering::SimpleRules::Validation::SimpleRulesValidator
 
-          def are_rules_valid?
+          def are_rules_valid
             rule_field_value_to_policy = {}
 
             @rules.each do |simple_rule|

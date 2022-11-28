@@ -66,7 +66,7 @@ module Connectors
         filter_validator = Core::Filtering::FilterValidator.new(snippet_validator_classes: advanced_snippet_validators,
                                                                 rules_validator_classes: simple_rules_validators,
                                                                 rules_pre_processing_active: Utility::Filtering.rule_pre_processing_active?(filter))
-        filter_validator.is_filter_valid?(filter)
+        filter_validator.is_filter_valid(filter)
       end
 
       attr_reader :rules, :advanced_filter_config

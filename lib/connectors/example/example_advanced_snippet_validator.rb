@@ -13,7 +13,7 @@ module Connectors
   module Example
     class ExampleAdvancedSnippetValidator < Core::Filtering::AdvancedSnippet::AdvancedSnippetValidator
 
-      def is_snippet_valid?
+      def is_snippet_valid
         # TODO: real filtering validation will follow later
         errors = [
           {

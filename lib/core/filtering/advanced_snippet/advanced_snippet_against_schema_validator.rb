@@ -22,7 +22,7 @@ module Core
           @schema_validator = Core::Filtering::SchemaValidator.new(schema: schema, payload: advanced_snippet, error_id: ADVANCED_SNIPPET_ID)
         end
 
-        def is_snippet_valid?
+        def is_snippet_valid
           @schema_validator.validate_against_schema
         end
 

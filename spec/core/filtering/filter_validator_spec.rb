@@ -62,7 +62,7 @@ describe Core::Filtering::FilterValidator do
 
   shared_examples_for 'filtering is valid' do
     it '' do
-      validation_result = subject.is_filter_valid?(filtering)
+      validation_result = subject.is_filter_valid(filtering)
 
       expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
       expect(validation_result[:errors]).to be_empty
@@ -71,7 +71,7 @@ describe Core::Filtering::FilterValidator do
 
   shared_examples_for 'filtering is invalid' do
     it '' do
-      validation_result = subject.is_filter_valid?(filtering)
+      validation_result = subject.is_filter_valid(filtering)
 
       expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
       expect(validation_result[:errors]).to_not be_empty
@@ -85,11 +85,11 @@ describe Core::Filtering::FilterValidator do
 
       expect(Utility::Logger).to receive(:warn).exactly(times).times
 
-      subject.is_filter_valid?(filtering)
+      subject.is_filter_valid(filtering)
     end
   end
 
-  describe '#is_filter_valid?' do
+  describe '#is_filter_valid' do
     before(:each) {
       allow(rule_validator_one_class).to receive(:new).and_return(rule_validator_one_instance)
       allow(rule_validator_two_class).to receive(:new).and_return(rule_validator_two_instance)
@@ -136,17 +136,17 @@ describe Core::Filtering::FilterValidator do
 
       context 'when every validator returns valid' do
         before do
-          allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-          allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+          allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+          allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
-          allow(snippet_validator_one_instance).to receive(:is_snippet_valid?).and_return(valid_filtering_validation_result)
-          allow(snippet_validator_two_instance).to receive(:is_snippet_valid?).and_return(valid_filtering_validation_result)
+          allow(snippet_validator_one_instance).to receive(:is_snippet_valid).and_return(valid_filtering_validation_result)
+          allow(snippet_validator_two_instance).to receive(:is_snippet_valid).and_return(valid_filtering_validation_result)
         end
 
         it_behaves_like 'filtering is valid'
 
         it 'returns one valid result' do
-          validation_result = subject.is_filter_valid?(filtering)
+          validation_result = subject.is_filter_valid(filtering)
 
           expect(validation_result).to match(valid_filtering_validation_result)
         end
@@ -166,11 +166,11 @@ describe Core::Filtering::FilterValidator do
         }
 
         before do
-          allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
-          allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+          allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
+          allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
-          allow(snippet_validator_one_instance).to receive(:is_snippet_valid?).and_return(valid_filtering_validation_result)
-          allow(snippet_validator_two_instance).to receive(:is_snippet_valid?).and_return(valid_filtering_validation_result)
+          allow(snippet_validator_one_instance).to receive(:is_snippet_valid).and_return(valid_filtering_validation_result)
+          allow(snippet_validator_two_instance).to receive(:is_snippet_valid).and_return(valid_filtering_validation_result)
         end
 
         it_behaves_like 'filtering is invalid'
@@ -178,7 +178,7 @@ describe Core::Filtering::FilterValidator do
         it_behaves_like 'logs a warning'
 
         it 'returns one error related to rules in the merged result' do
-          validation_result = subject.is_filter_valid?(filtering)
+          validation_result = subject.is_filter_valid(filtering)
 
           expect(validation_result[:errors]).to match([{ :ids => ['simple-rules'], :messages => ['error message'] }])
         end
@@ -198,11 +198,11 @@ describe Core::Filtering::FilterValidator do
         }
 
         before do
-          allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-          allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+          allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+          allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
-          allow(snippet_validator_one_instance).to receive(:is_snippet_valid?).and_return(valid_filtering_validation_result)
-          allow(snippet_validator_two_instance).to receive(:is_snippet_valid?).and_return(invalid_filtering_validation_result)
+          allow(snippet_validator_one_instance).to receive(:is_snippet_valid).and_return(valid_filtering_validation_result)
+          allow(snippet_validator_two_instance).to receive(:is_snippet_valid).and_return(invalid_filtering_validation_result)
         end
 
         it_behaves_like 'filtering is invalid'
@@ -210,7 +210,7 @@ describe Core::Filtering::FilterValidator do
         it_behaves_like 'logs a warning'
 
         it 'returns one error related to advanced snippet in the merged result' do
-          validation_result = subject.is_filter_valid?(filtering)
+          validation_result = subject.is_filter_valid(filtering)
 
           expect(validation_result[:errors]).to match([{ :ids => ['advanced-snippet'], :messages => ['error message'] }])
         end
@@ -268,11 +268,11 @@ describe Core::Filtering::FilterValidator do
         four_times = 4
 
         before do
-          allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_rules_validation_result_one)
-          allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(invalid_rules_validation_result_two)
+          allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_rules_validation_result_one)
+          allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(invalid_rules_validation_result_two)
 
-          allow(snippet_validator_one_instance).to receive(:is_snippet_valid?).and_return(invalid_snippet_validation_result_one)
-          allow(snippet_validator_two_instance).to receive(:is_snippet_valid?).and_return(invalid_snippet_validation_result_two)
+          allow(snippet_validator_one_instance).to receive(:is_snippet_valid).and_return(invalid_snippet_validation_result_one)
+          allow(snippet_validator_two_instance).to receive(:is_snippet_valid).and_return(invalid_snippet_validation_result_two)
         end
 
         it_behaves_like 'filtering is invalid'
@@ -280,7 +280,7 @@ describe Core::Filtering::FilterValidator do
         it_behaves_like 'logs a warning', four_times
 
         it 'returns four errors, two related to advanced snippet and two related to simple rules' do
-          validation_result = subject.is_filter_valid?(filtering)
+          validation_result = subject.is_filter_valid(filtering)
 
           expect(validation_result[:errors]).to include(*invalid_snippet_validation_result_one[:errors],
                                                         *invalid_snippet_validation_result_one[:errors],
@@ -331,8 +331,8 @@ describe Core::Filtering::FilterValidator do
 
           context 'when all common validators return valid' do
             before do
-              allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-              allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+              allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+              allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
             end
 
             it_behaves_like 'filtering is valid'
@@ -340,8 +340,8 @@ describe Core::Filtering::FilterValidator do
 
           context 'when one common validator returns invalid' do
             before do
-              allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
-              allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+              allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
+              allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
             end
 
             it_behaves_like 'filtering is invalid'
@@ -362,8 +362,8 @@ describe Core::Filtering::FilterValidator do
 
           context 'when both pre-processing validators return valid' do
             before do
-              allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-              allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+              allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+              allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
             end
 
             it_behaves_like 'filtering is valid'
@@ -372,9 +372,9 @@ describe Core::Filtering::FilterValidator do
           context 'when one pre-processing validator returns invalid' do
             before do
               # returns invalid
-              allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
+              allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
               # returns valid
-              allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+              allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
             end
 
             it_behaves_like 'filtering is invalid'
@@ -408,8 +408,8 @@ describe Core::Filtering::FilterValidator do
 
             context 'when both post-processing validators return valid' do
               before do
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               it_behaves_like 'filtering is valid'
@@ -418,9 +418,9 @@ describe Core::Filtering::FilterValidator do
             context 'when one post-processing validator returns invalid' do
               before do
                 # returns invalid
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
                 # returns valid
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               it_behaves_like 'filtering is invalid'
@@ -437,9 +437,9 @@ describe Core::Filtering::FilterValidator do
             context 'when one post-processing validator returns invalid' do
               before do
                 # returns invalid
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
                 # returns valid
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               # should still be invalid as we always execute post processing
@@ -476,16 +476,16 @@ describe Core::Filtering::FilterValidator do
             context 'when all return valid' do
               before do
                 # pre-processing
-                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # all stages
-                allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # post-processing
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               it_behaves_like 'filtering is valid'
@@ -494,17 +494,17 @@ describe Core::Filtering::FilterValidator do
             context 'when one pre-processing validator returns invalid' do
               before do
                 # pre-processing
-                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
                 # returns invalid
-                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
+                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
 
                 # all stages
-                allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # post-processing
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               it_behaves_like 'filtering is invalid'
@@ -513,16 +513,16 @@ describe Core::Filtering::FilterValidator do
             context 'when one common validator returns invalid' do
               before do
                 # pre-processing
-                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # all stages
-                allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
-                allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
+                allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # post-processing
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               it_behaves_like 'filtering is invalid'
@@ -531,17 +531,17 @@ describe Core::Filtering::FilterValidator do
             context 'when one post-processing validator returns invalid' do
               before do
                 # pre-processing
-                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # all stages
-                allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # post-processing
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
                 # returns invalid
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
               end
 
               it_behaves_like 'filtering is invalid'
@@ -556,17 +556,17 @@ describe Core::Filtering::FilterValidator do
             context 'when one pre-processing validator returns invalid' do
               before do
                 # pre-processing
-                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(pre_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
                 # returns invalid (is ignored)
-                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(invalid_filtering_validation_result)
+                allow(pre_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(invalid_filtering_validation_result)
 
                 # all stages
-                allow(rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
 
                 # post-processing
-                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
-                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid?).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_one_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
+                allow(post_processing_rule_validator_two_instance).to receive(:are_rules_valid).and_return(valid_filtering_validation_result)
               end
 
               # pre-processing is not executed
