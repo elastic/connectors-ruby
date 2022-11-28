@@ -86,7 +86,7 @@ module Core
       end
 
       def unexpected_field_present?(actual_field_names, expected_field_names)
-        return false if actual_field_names.nil? || !actual_field_names.present?
+        return false unless actual_field_names.present?
 
         difference = actual_field_names - expected_field_names
 
