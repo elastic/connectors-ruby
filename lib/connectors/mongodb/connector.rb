@@ -59,12 +59,12 @@ module Connectors
       def initialize(configuration: {}, job_description: nil)
         super
 
-        @host = configuration.dig(:host, :value)
-        @database = configuration.dig(:database, :value)
-        @collection = configuration.dig(:collection, :value)
-        @user = configuration.dig(:user, :value)
-        @password = configuration.dig(:password, :value)
-        @direct_connection = configuration.dig(:direct_connection, :value)
+        @host = @configuration.dig(:host, :value)
+        @database = @configuration.dig(:database, :value)
+        @collection = @configuration.dig(:collection, :value)
+        @user = @configuration.dig(:user, :value)
+        @password = @configuration.dig(:password, :value)
+        @direct_connection = @configuration.dig(:direct_connection, :value)
       end
 
       def yield_documents
