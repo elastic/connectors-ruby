@@ -129,6 +129,7 @@ describe Connectors::MongoDB::Connector do
 
   before(:each) do
     allow(job_description).to receive(:dup).and_return(job_description)
+    allow(job_description).to receive(:configuration).and_return(configuration)
     allow(job_description).to receive(:filtering).and_return(filtering)
 
     allow(Mongo::Client).to receive(:new).and_yield(mongo_client)

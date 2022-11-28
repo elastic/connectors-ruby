@@ -65,7 +65,7 @@ module Connectors
         error_monitor = Utility::ErrorMonitor.new
         @tolerable_error_helper = Connectors::TolerableErrorHelper.new(error_monitor)
 
-        @configuration = configuration.dup || {}
+        @configuration = job_description&.configuration&.dup || configuration&.dup || {}
         @job_description = job_description&.dup
 
         filtering = Utility::Filtering.extract_filter(@job_description&.filtering)
