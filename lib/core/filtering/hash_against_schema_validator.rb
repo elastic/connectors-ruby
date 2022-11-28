@@ -24,7 +24,7 @@ module Core
         # Prevent unintentional/intentional SystemStackErrors/crashes
         return unexpected_error if exceeded_recursion_depth?(recursion_depth)
 
-        return valid_snippet if schema.nil? || schema.empty?
+        return valid_snippet unless schema.present?
 
         schema_fields = schema[:fields].is_a?(Hash) ? schema.dig(:fields, :values) : schema[:fields]
         snippet_field_names = payload&.keys&.map(&:to_s)
