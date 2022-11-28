@@ -56,7 +56,7 @@ describe Core::Scheduler do
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(allow_sync)
         allow(connector_settings).to receive(:id).and_return('123')
         allow(connector_settings).to receive(:connector_status).and_return('configured')
-        allow(connector_settings).to receive(:[]).with(:sync_now).and_return(sync_now)
+        allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
         allow(connector_settings).to receive(:[]).with(:last_synced).and_return(last_synced)
         allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
         allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
