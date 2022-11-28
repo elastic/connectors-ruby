@@ -173,32 +173,26 @@ describe Core::Scheduler do
 
     context 'with configuration task' do
       let(:connector_status) { Connectors::ConnectorStatus::CREATED }
-      let(:needs_service_type) { false }
+      let(:needs_configuration) { false }
+
       before(:each) do
         allow(subject).to receive(:sync_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:filtering_validation_triggered?).with(connector_settings).and_return(false)
         allow(connector_settings).to receive(:connector_status).and_return(connector_status)
-        allow(connector_settings).to receive(:needs_service_type?).and_return(needs_service_type)
+        allow(connector_settings).to receive(:needs_configuration?).and_return(needs_configuration)
       end
 
-      it_behaves_like 'triggers', :configuration
-
-      # Regression bug!!!
-      # We need to trigger configuration for the connector that was created with no service_type.
-      # Otherwise on-prem connectors won't be able to start the flow at all.
-      context 'when connector has no service_type' do
-        let(:needs_service_type) { true }
+      context 'when connector needs configuration' do
+        let(:needs_configuration) { true }
 
         it_behaves_like 'triggers', :configuration
       end
 
-      (Connectors::ConnectorStatus::STATUSES - [Connectors::ConnectorStatus::CREATED]).each do |status|
-        context "when connector status is #{status}" do
-          let(:connector_status) { status }
+      context 'when connector does not need configuration' do
+        let(:needs_configuration) { false }
 
-          it_behaves_like 'does not trigger', :configuration
-        end
+        it_behaves_like 'does not trigger', :configuration
       end
     end
 

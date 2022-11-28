@@ -131,6 +131,13 @@ module Core
         connector_status_allows_sync?
     end
 
+    def needs_configuration?
+      # Regression bug!!!
+      # We need to trigger configuration for the connector that was created with no service_type.
+      # Otherwise on-prem connectors won't be able to start the flow at all.
+      needs_service_type? || Connectors::ConnectorStatus::STATUSES_NEEDING_CONFIGURATION.include?(connector_status)
+    end
+
     def running?
       @elasticsearch_response[:_source][:last_sync_status] == Connectors::SyncStatus::IN_PROGRESS
     end

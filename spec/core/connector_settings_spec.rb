@@ -283,4 +283,63 @@ describe Core::ConnectorSettings do
       end
     end
   end
+
+  describe '.needs_configuration?' do
+    let(:connector_status) {
+      Connectors::ConnectorStatus::CONNECTED
+    }
+
+    before do
+      allow(subject).to receive(:connector_status).and_return(connector_status)
+      allow(subject).to receive(:needs_service_type?).and_return(false)
+    end
+
+    shared_examples_for 'needs configuration' do
+      it '' do
+        expect(subject.needs_configuration?).to be_truthy
+      end
+    end
+
+    shared_examples_for 'does not need configuration' do
+      it '' do
+        expect(subject.needs_configuration?).to be_falsey
+      end
+    end
+
+    context 'when service type is not needed' do
+      before do
+        allow(subject).to receive(:needs_service_type?).and_return(false)
+      end
+
+      it_behaves_like 'does not need configuration'
+    end
+
+    context 'when service type is needed' do
+      before do
+        allow(subject).to receive(:needs_service_type?).and_return(true)
+      end
+
+      it_behaves_like 'needs configuration'
+    end
+
+    Connectors::ConnectorStatus::STATUSES_NEEDING_CONFIGURATION.each do |status|
+      context "when connector has status #{status}" do
+        let(:connector_status) {
+          status
+        }
+
+        it_behaves_like 'needs configuration'
+      end
+    end
+
+    (Connectors::ConnectorStatus::STATUSES - Connectors::ConnectorStatus::STATUSES_NEEDING_CONFIGURATION).each do |status|
+      context "when connector has status #{status}" do
+        let(:connector_status) {
+          status
+        }
+
+        it_behaves_like 'does not need configuration'
+      end
+    end
+  end
 end

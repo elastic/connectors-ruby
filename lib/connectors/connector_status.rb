@@ -27,5 +27,10 @@ module Connectors
       CONNECTED,
       ERROR
     ]
+
+    STATUSES_NEEDING_CONFIGURATION = [
+      CREATED,
+      NEEDS_CONFIGURATION
+    ]
   end
 end

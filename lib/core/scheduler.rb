@@ -144,7 +144,7 @@ module Core
     end
 
     def configuration_triggered?(connector_settings)
-      connector_settings.needs_service_type? || connector_settings.connector_status == Connectors::ConnectorStatus::CREATED
+      connector_settings.needs_configuration?
     end
 
     def filtering_validation_triggered?(connector_settings)
