@@ -11,6 +11,7 @@ require 'app/config'
 require 'bson'
 require 'connectors/base/advanced_snippet_validator'
 require 'core/ingestion'
+require 'core/filtering/transform/filter_transformer_facade'
 require 'connectors/tolerable_error_helper'
 require 'core/filtering/validation_status'
 require 'utility'
@@ -47,11 +48,18 @@ module Connectors
         AdvancedSnippetValidator
       end
 
+      def self.filter_transformers
+        []
+      end
+
       def self.validate_filtering(filtering = {})
         # nothing to validate
         return { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] } unless filtering.present?
 
         filter = Utility::Filtering.extract_filter(filtering)
+
+        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, filter_transformers).transform
+
         advanced_snippet = filter.dig(:advanced_snippet, :value)
 
         snippet_validator_instance = advanced_snippet_validator.new(advanced_snippet)
