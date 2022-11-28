@@ -18,12 +18,12 @@ module Core
             rule_type_value_to_policy = {}
 
             @rules.each do |simple_rule|
-              rule_type_value = simple_rule.slice('rule', 'field', 'value')
+              rule_field_value = simple_rule.slice('rule', 'field', 'value')
               policy = simple_rule['policy']
 
-              return conflicting_rules(rule_type_value) if rule_type_value_to_policy.key?(rule_type_value) && rule_type_value_to_policy[rule_type_value]['policy'] != policy
+              return conflicting_rules(rule_field_value) if rule_type_value_to_policy.key?(rule_field_value) && rule_type_value_to_policy[rule_field_value]['policy'] != policy
 
-              rule_type_value_to_policy[rule_type_value] = policy
+              rule_type_value_to_policy[rule_field_value] = policy
             end
 
             { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
