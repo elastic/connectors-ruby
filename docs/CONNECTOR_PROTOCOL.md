@@ -44,34 +44,36 @@ This is our main communication index, used to communicate the connector's config
     filtering_advanced_config: boolean, -> Whether to display filtering advanced config in the Kibana UI
     filtering_rules: boolean            -> Whether to display filtering rules in the Kibana UI
   },
-  filtering: {          -> Filtering rules
-    domain: string,     -> what data domain these rules apply to
-    active: {           -> "active" rules are run in jobs. 
-      rules: {
-        id: string,         -> rule identifier
-        policy: string,     -> one of ["include", "exclude"]
-        field: string,      -> the field on the document this rule applies to
-        rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
-        value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
-        order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
-        created_at: string, -> when the rule was added
-        updated_at: string  -> when the rule was last edited
-      },
-      advanced_snippet: {   -> used for filtering data from the 3rd party at query time
-        value: object,      -> this JSON object is passed directly to the connector
-        created_at: string, -> when this JSON object was created
-        updated_at: string  -> when this JSON object was last edited
-      },
-      validation: {
-        state: string,      -> one of ["edited", "valid", "invalid"]
-        errors: {
-          ids: string,      -> the id(s) of any rules that are deemed invalid
-          messages: string  -> the message(s) to display in Kibana, explaining what is invalid
+  filtering: [          -> Array of filtering rules, connectors use the first entry by default
+    {          
+      domain: string,     -> what data domain these rules apply to
+      active: {           -> "active" rules are run in jobs. 
+        rules: {
+          id: string,         -> rule identifier
+          policy: string,     -> one of ["include", "exclude"]
+          field: string,      -> the field on the document this rule applies to
+          rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
+          value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
+          order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
+          created_at: string, -> when the rule was added
+          updated_at: string  -> when the rule was last edited
+        },
+        advanced_snippet: {   -> used for filtering data from the 3rd party at query time
+          value: object,      -> this JSON object is passed directly to the connector
+          created_at: string, -> when this JSON object was created
+          updated_at: string  -> when this JSON object was last edited
+        },
+        validation: {
+          state: string,      -> one of ["edited", "valid", "invalid"]
+          errors: {
+            ids: string,      -> the id(s) of any rules that are deemed invalid
+            messages: string  -> the message(s) to display in Kibana, explaining what is invalid
+          }
         }
-      }
-    },
-    draft: object;      -> Identical to the above "active" object, but used when drafting edits to filtering rules
-  };
+      },
+      draft: object;      -> Identical to the above "active" object, but used when drafting edits to filtering rules
+    }
+  ];
   index_name: string;   -> The name of the content index where data will be written to
   is_native: boolean;   -> Whether this is a native connector
   language: string;     -> the language used for the analyzer
@@ -240,39 +242,41 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   completed_at: date; -> The data/time when the job is completed
   connector: {              -> Connector snapshot
     configuration: object;  -> Connector configuration
-    filtering: {            -> Filtering rules
-      domain: string,       -> what data domain these rules apply to
-      rules: {
-        id: string,         -> rule identifier
-        policy: string,     -> one of ["include", "exclude"]
-        field: string,      -> the field on the document this rule applies to
-        rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
-        value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
-        order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
-        created_at: string, -> when the rule was added
-        updated_at: string  -> when the rule was last edited
-      },
-      advanced_snippet: {   -> used for filtering data from the 3rd party at query time
-        value: object,      -> this JSON object is passed directly to the connector
-        created_at: string, -> when this JSON object was created
-        updated_at: string  -> when this JSON object was last edited
-      },
-      warnings: {
-        ids: string,        -> the id(s) of any rules that cannot be used for query-time filtering
-        messages: string    -> the reason(s) those rules cannot be used for query-time filtering
-      }
-    };
-    connector_id: string;   -> ID of the connector
-    index_name: string;     -> The name of the content index
-    language: string        -> The language used for the analyzer
-    pipeline: {             -> Connector pipeline
-      extract_binary_content: boolean;
-      name: string;
-      reduce_whitespace: boolean;
-      run_ml_inference: boolean;
-    };
-    service_type: string;   -> Service type of the connector
-  };
+    filtering: [             -> Array of filtering rules, connectors use the first entry by default
+      {
+        domain: string,       -> what data domain these rules apply to
+        rules: {
+          id: string,         -> rule identifier
+          policy: string,     -> one of ["include", "exclude"]
+          field: string,      -> the field on the document this rule applies to
+          rule: string,       -> one of ["regex", "starts_with", "ends_with", "contains", "equals", "<", ">"]
+          value: string,      -> paired with the `rule`, this `value` either matches the contents of the document's `field` or does not
+          order: number,      -> the order in which to match rules. The first rule to match has its `policy` applied
+          created_at: string, -> when the rule was added
+          updated_at: string  -> when the rule was last edited
+        },
+        advanced_snippet: {   -> used for filtering data from the 3rd party at query time
+          value: object,      -> this JSON object is passed directly to the connector
+          created_at: string, -> when this JSON object was created
+          updated_at: string  -> when this JSON object was last edited
+        },
+        warnings: {
+          ids: string,        -> the id(s) of any rules that cannot be used for query-time filtering
+          messages: string    -> the reason(s) those rules cannot be used for query-time filtering
+        }
+      };
+      connector_id: string;   -> ID of the connector
+      index_name: string;     -> The name of the content index
+      language: string        -> The language used for the analyzer
+      pipeline: {             -> Connector pipeline
+        extract_binary_content: boolean;
+        name: string;
+        reduce_whitespace: boolean;
+        run_ml_inference: boolean;
+      };
+      service_type: string;   -> Service type of the connector
+    }
+  ];
   created_at: date; -> The date/time when the job is created
   deleted_document_count: number; -> Number of documents deleted in the job
   error: string; -> Optional error message
