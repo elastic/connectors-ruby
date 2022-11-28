@@ -85,6 +85,19 @@ To add a new custom connector, all you have to do is adding a new directory unde
     end
     ```
 
+It's also possible to add a fail-safe mechanism to the method to also tolerate some of the errors that happen when yielding the documents. To do so you can use `yield_with_handling_tolerable_errors` function:
+    ```ruby
+    def yield_documents
+      foobar_client.files do |file|
+        yield_with_handling_tolerable_errors do
+          serialized_document = serialize(file)
+          yield serialized_document
+        end
+      end
+    end
+    ```
+The `yield_with_handling_tolerable_errors` function call will allow to tolerate some errors inside the block function passed to it and will raise only if too many consecutive errors happened (10 consecutive errors by default) or certain rate of errors was reached when yielding documents (15% documents out of 100 last documents).
+
 7. Register your new connector in [Connectors::REGISTRY](https://github.com/elastic/connectors-ruby/blob/main/lib/connectors/registry.rb). E.g.
     ```ruby
     require_relative 'foobar/connector'
