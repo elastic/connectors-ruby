@@ -93,7 +93,7 @@ module Utility
     end
 
     def num_errors_in_window
-      @window_errors.count { |e| e == true } .to_f
+      @window_errors.count(true).to_f
     end
 
     def increment_window_index
