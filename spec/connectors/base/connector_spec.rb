@@ -7,13 +7,11 @@
 # frozen_string_literal: true
 
 require 'connectors/base/connector'
+require 'core/filtering/filter_validator'
+require 'spec_helper'
 
 describe Connectors::Base::Connector do
   subject { described_class.new(configuration: connector_configuration, job_description: job_description) }
-
-  let(:advanced_snippet_validator_class) { double }
-
-  let(:advanced_snippet_validator_instance) { double }
 
   let(:advanced_snippet) {
     {
@@ -54,6 +52,8 @@ describe Connectors::Base::Connector do
     }
   }
 
+  let(:filter_validator) { double }
+
   let(:job_description) { double }
   let(:job_configuration) { { :job_key => 'value' } }
   let(:connector_configuration) { { :connector_key => 'value' } }
@@ -62,6 +62,7 @@ describe Connectors::Base::Connector do
     allow(job_description).to receive(:dup).and_return(job_description)
     allow(job_description).to receive(:configuration).and_return(job_configuration)
     allow(job_description).to receive(:filtering).and_return(filtering)
+    allow(Core::Filtering::FilterValidator).to receive(:new).and_return(filter_validator)
   end
 
   describe '.initialize' do
@@ -135,80 +136,6 @@ describe Connectors::Base::Connector do
       }
 
       it_behaves_like 'rules are not present'
-    end
-  end
-
-  describe '#filtering_present?' do
-    shared_examples_for 'filtering is not present' do
-      it 'returns false' do
-        expect(subject.filtering_present?).to eq(false)
-      end
-    end
-
-    shared_examples_for 'filtering is present' do
-      it 'returns true' do
-        expect(subject.filtering_present?).to eq(true)
-      end
-    end
-
-    context 'rules and advanced filter config are present' do
-      it_behaves_like 'filtering is present'
-    end
-
-    context 'only rules are nil' do
-      let(:rules) {
-        nil
-      }
-
-      it_behaves_like 'filtering is present'
-    end
-
-    context 'only rules are empty' do
-      let(:rules) {
-        []
-      }
-
-      it_behaves_like 'filtering is present'
-    end
-
-    context 'only advanced filter config is empty' do
-      let(:advanced_snippet) {
-        {}
-      }
-
-      it_behaves_like 'filtering is present'
-    end
-
-    context 'only advanced filter config is nil' do
-      let(:advanced_snippet) {
-        nil
-      }
-
-      it_behaves_like 'filtering is present'
-    end
-
-    context 'rules are empty and advanced filter config is empty' do
-      let(:rules) {
-        []
-      }
-
-      let(:advanced_snippet) {
-        {}
-      }
-
-      it_behaves_like 'filtering is not present'
-    end
-
-    context 'rules are nil and advanced filter config is nil' do
-      let(:rules) {
-        nil
-      }
-
-      let(:advanced_snippet) {
-        nil
-      }
-
-      it_behaves_like 'filtering is not present'
     end
   end
 
@@ -310,41 +237,20 @@ describe Connectors::Base::Connector do
   end
 
   describe '.validate_filtering' do
-    context 'filtering is not present' do
-      # We don't validate filtering, if it's not present -> just return valid
-
-      context 'filtering is nil' do
-        let(:filtering) {
-          nil
-        }
-
-        it_behaves_like 'filtering is valid'
+    context 'when filtering is valid' do
+      before do
+        allow(filter_validator).to receive(:is_filter_valid).with(filtering).and_return({ :state => Core::Filtering::ValidationStatus::VALID, :errors => [] })
       end
 
-      context 'filtering is an empty array' do
-        let(:filtering) {
-          []
-        }
-
-        it_behaves_like 'filtering is valid'
-      end
-
-      context 'filtering is an empty hash' do
-        let(:filtering) {
-          {}
-        }
-
-        it_behaves_like 'filtering is valid'
-      end
+      it_behaves_like 'filtering is valid'
     end
 
-    before(:each) {
-      allow(advanced_snippet_validator_class).to receive(:new).and_return(advanced_snippet_validator_instance)
-      allow(advanced_snippet_validator_instance).to receive(:is_snippet_valid?).and_return({ :state => Core::Filtering::ValidationStatus::VALID, :errors => [] })
+    context 'when filtering is invalid' do
+      before do
+        allow(filter_validator).to receive(:is_filter_valid).with(filtering).and_return({ :state => Core::Filtering::ValidationStatus::INVALID, :errors => [{ :ids => ['error-id'], :messages => ['error-message'] }] })
+      end
 
-      allow(described_class).to receive(:advanced_snippet_validator).and_return(advanced_snippet_validator_class)
-    }
-
-    it_behaves_like 'filtering is valid'
+      it_behaves_like 'filtering is invalid'
+    end
   end
 end

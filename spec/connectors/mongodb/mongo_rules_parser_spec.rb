@@ -6,7 +6,7 @@
 # frozen_string_literal: true
 
 require 'connectors/mongodb/mongo_rules_parser'
-require 'core/filtering/simple_rule'
+require 'core/filtering/simple_rules/simple_rule'
 
 describe Connectors::MongoDB::MongoRulesParser do
   let(:policy) { '' }

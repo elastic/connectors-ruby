@@ -6,7 +6,7 @@
 
 # frozen_string_literal: true
 require 'active_support/time'
-require 'core/filtering/simple_rule'
+require 'core/filtering/simple_rules/simple_rule'
 
 describe Core::Filtering::SimpleRule do
   subject {
