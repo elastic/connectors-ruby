@@ -21,6 +21,9 @@ module Connectors
 
       ALLOWED_TOP_LEVEL_FILTER_KEYS = %w[find aggregate]
 
+      AGGREGATE = 'aggregate'
+      FIND = 'find'
+
       PAGE_SIZE = 100
 
       def self.service_type
@@ -81,44 +84,56 @@ module Connectors
           # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
           # It's done due to the fact that usage of .find.each leads to memory leaks or overuse of memory - the whole result set seems to stay in memory
           # during the sync. Sometimes (not 100% sure) it even leads to a real leak, when the memory for these objects is never recycled.
-          cursor, options = create_db_cursor_on_collection(client[@collection])
-          skip = 0
+          cursor_type, cursor_with_options = create_db_cursor_on_collection(client[@collection])
+          cursor, options = cursor_with_options
 
-          found_overall = 0
+          case cursor_type
+          when FIND
+            skip = 0
+            found_overall = 0
 
-          # if no overall limit is specified by filtering use -1 to not break ingestion, when no overall limit is specified (found_overall is only increased,
-          # thus can never reach -1)
-          overall_limit = Float::INFINITY
+            # if no overall limit is specified by filtering use -1 to not break ingestion, when no overall limit is specified (found_overall is only increased,
+            # thus can never reach -1)
+            overall_limit = Float::INFINITY
 
-          if options.present?
-            # there could be a skip parameter defined for filtering
-            skip = options.fetch(:skip, skip)
-            # there could be a limit parameter defined for filtering -> used for an overall limit (not a page limit, which was introduced for memory optimization)
-            overall_limit = options.fetch(:limit, overall_limit)
-          end
-
-          overall_limit_reached = false
-
-          loop do
-            found_in_page = 0
-
-            Utility::Logger.info("Requesting #{PAGE_SIZE} documents from MongoDB (Starting at #{skip})")
-            view = cursor.skip(skip).limit(PAGE_SIZE)
-            view.each do |document|
-              yield_with_handling_tolerable_errors do
-                yield serialize(document)
-                found_in_page += 1
-                found_overall += 1
-                overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
-              end
-              break if overall_limit_reached
+            if options.present?
+              # there could be a skip parameter defined for filtering
+              skip = options.fetch(:skip, skip)
+              # there could be a limit parameter defined for filtering -> used for an overall limit (not a page limit, which was introduced for memory optimization)
+              overall_limit = options.fetch(:limit, overall_limit)
             end
 
-            page_was_empty = found_in_page == 0
+            overall_limit_reached = false
 
-            break if page_was_empty || overall_limit_reached
+            loop do
+              found_in_page = 0
 
-            skip += PAGE_SIZE
+              Utility::Logger.info("Requesting #{PAGE_SIZE} documents from MongoDB (Starting at #{skip})")
+              view = cursor.skip(skip).limit(PAGE_SIZE)
+              view.each do |document|
+                yield_with_handling_tolerable_errors do
+                  yield serialize(document)
+                  found_in_page += 1
+                  found_overall += 1
+                  overall_limit_reached = found_overall >= overall_limit && overall_limit != Float::INFINITY
+                end
+                break if overall_limit_reached
+              end
+
+              page_was_empty = found_in_page == 0
+
+              break if page_was_empty || overall_limit_reached
+
+              skip += PAGE_SIZE
+            end
+          when AGGREGATE
+            cursor.each do |document|
+              yield_with_handling_tolerable_errors do
+                yield serialize(document)
+              end
+            end
+          else
+            raise "Unknown retrieval function #{cursor_type} for MongoDB."
           end
         end
       end
@@ -126,13 +141,13 @@ module Connectors
       private
 
       def create_db_cursor_on_collection(collection)
-        return create_find_cursor(collection) if @advanced_filter_config[:find].present?
+        return [AGGREGATE, create_aggregate_cursor(collection)] if @advanced_filter_config[:aggregate].present?
 
-        return create_aggregate_cursor(collection) if @advanced_filter_config[:aggregate].present?
+        return [FIND, create_find_cursor(collection)] if @advanced_filter_config[:find].present?
 
-        return create_simple_rules_cursor(collection) if @rules.present?
+        return [FIND, create_simple_rules_cursor(collection)] if @rules.present?
 
-        collection.find
+        [FIND, collection.find]
       end
 
       def create_aggregate_cursor(collection)
