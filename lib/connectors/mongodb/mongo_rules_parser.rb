@@ -7,12 +7,12 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/object'
-require 'connectors/base/simple_rules_parser'
-require 'core/filtering/simple_rule'
+require 'core/filtering/simple_rules/simple_rules_parser'
+require 'core/filtering/simple_rules/simple_rule'
 
 module Connectors
   module MongoDB
-    class MongoRulesParser < Connectors::Base::SimpleRulesParser
+    class MongoRulesParser < Core::Filtering::SimpleRules::SimpleRulesParser
       def parse_rule(simple_rule)
         field = simple_rule.field
         value = simple_rule.value
