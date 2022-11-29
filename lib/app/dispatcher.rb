@@ -86,7 +86,10 @@ module App
         scheduler.when_triggered do |connector_settings, task|
           case task
           when :sync
-            # update connector sync_now flag
+            # TODO: #update_connector_sync_now should be moved to Core::ConnectorSettings,
+            # there should not be any business logic related code in Core::ElasticConnectorActions.
+            # #update_connector_sync_now should not update `last_synced` after https://github.com/elastic/enterprise-search-team/issues/3366 is resolved,
+            # schedule should not based on `last_synced`
             Core::ElasticConnectorActions.update_connector_sync_now(connector_settings.id, false)
 
             Core::Jobs::Producer.enqueue_job(job_type: :sync, connector_settings: connector_settings)

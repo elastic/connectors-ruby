@@ -129,6 +129,7 @@ describe Connectors::MongoDB::Connector do
 
   before(:each) do
     allow(job_description).to receive(:dup).and_return(job_description)
+    allow(job_description).to receive(:configuration).and_return(configuration)
     allow(job_description).to receive(:filtering).and_return(filtering)
 
     allow(Mongo::Client).to receive(:new).and_yield(mongo_client)
@@ -564,6 +565,7 @@ describe Connectors::MongoDB::Connector do
 
       it 'calls the mongo client aggregate method with pipeline and options' do
         expect(actual_collection).to receive(:aggregate).with(pipeline, options)
+        expect(mongo_collection_cursor).to receive(:each)
         expect(mongo_collection_cursor).to receive(:each)
 
         # aggregate does not expose this functionality
