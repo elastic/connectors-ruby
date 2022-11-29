@@ -565,6 +565,11 @@ describe Connectors::MongoDB::Connector do
 
       it 'calls the mongo client aggregate method with pipeline and options' do
         expect(actual_collection).to receive(:aggregate).with(pipeline, options)
+        expect(mongo_collection_cursor).to receive(:each)
+
+        # aggregate does not expose this functionality
+        expect(mongo_collection_cursor).to_not receive(:skip)
+        expect(mongo_collection_cursor).to_not receive(:limit)
 
         subject.yield_documents
       end
@@ -588,6 +593,7 @@ describe Connectors::MongoDB::Connector do
 
       it 'calls the mongo client aggregate method with pipeline and empty options' do
         expect(actual_collection).to receive(:aggregate).with(pipeline, {})
+        expect(mongo_collection_cursor).to receive(:each)
 
         subject.yield_documents
       end
@@ -611,6 +617,7 @@ describe Connectors::MongoDB::Connector do
 
       it 'calls the mongo client aggregate method with pipeline and empty options' do
         expect(actual_collection).to receive(:aggregate).with([], options)
+        expect(mongo_collection_cursor).to receive(:each)
 
         subject.yield_documents
       end
@@ -632,6 +639,7 @@ describe Connectors::MongoDB::Connector do
 
       it 'logs a warning' do
         expect(Utility::Logger).to receive(:warn).with('\'Aggregate\' was specified with an empty pipeline and empty options.')
+        expect(mongo_collection_cursor).to receive(:each)
 
         subject.yield_documents
       end
