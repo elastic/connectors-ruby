@@ -8,6 +8,13 @@ require 'spec_helper'
 describe Connectors::MongoDB::Connector do
   subject { described_class.new(configuration: configuration, job_description: job_description) }
 
+  let(:filter_transformers) {
+    {
+      'rules' => [],
+      'advanced_snippet' => []
+    }
+  }
+
   let(:configuration) do
     {
       :host => {
@@ -128,6 +135,9 @@ describe Connectors::MongoDB::Connector do
   let(:actual_database_names) { ['sample-database'] }
 
   before(:each) do
+    # transformers are tested in their own specs (multiple transformers and their interaction should be tested here later)
+    allow(described_class).to receive(:filter_transformers).and_return(filter_transformers)
+
     allow(job_description).to receive(:dup).and_return(job_description)
     allow(job_description).to receive(:configuration).and_return(configuration)
     allow(job_description).to receive(:filtering).and_return(filtering)
