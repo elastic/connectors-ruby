@@ -11,8 +11,11 @@ module Core
   module Filtering
     module SimpleRules
       module Validation
+
+        DEFAULT_RULE_ID = 'DEFAULT'
+
         ALLOWED_VALUE_TYPES = ->(rule_value) { rule_value.is_a?(String) || rule_value.is_a?(Integer) || rule_value.is_a?(TrueClass) || rule_value.is_a?(FalseClass) }
-        MATCH_ALL_REGEX_NOT_ALLOWED = ->(simple_rule) { !(simple_rule['rule'] == Core::Filtering::SimpleRule::Rule::REGEX && (simple_rule['value'] == '(.*)' || simple_rule['value'] == '.*')) }
+        MATCH_ALL_REGEX_NOT_ALLOWED = ->(simple_rule) { simple_rule['id'] == DEFAULT_RULE_ID || !(simple_rule['rule'] == Core::Filtering::SimpleRule::Rule::REGEX && (simple_rule['value'] == '(.*)' || simple_rule['value'] == '.*')) }
 
         SINGLE_RULE_SCHEMA = {
           :fields => {

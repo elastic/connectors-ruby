@@ -6,6 +6,8 @@
 
 # frozen_string_literal: true
 
+require 'core/filtering/validation_status'
+
 shared_examples 'a schema validator' do
   it 'defines validate_against_schema method' do
     expect(described_class.method_defined?(:validate_against_schema)).to eq true
