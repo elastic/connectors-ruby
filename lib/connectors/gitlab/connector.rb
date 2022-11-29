@@ -37,7 +37,7 @@ module Connectors
         }
       end
 
-      def self.advanced_snippet_validator
+      def self.advanced_snippet_validators
         GitLabAdvancedSnippetValidator
       end
 

@@ -9,7 +9,7 @@
 require 'connectors/mongodb/mongo_advanced_snippet_snake_case_transformer'
 
 describe Connectors::MongoDB::MongoAdvancedSnippetSnakeCaseTransformer do
-  let(:filter) {
+  let(:advanced_snippet) {
     {
       'allowDiskUse' => false,
       'nested' => {
@@ -31,9 +31,33 @@ describe Connectors::MongoDB::MongoAdvancedSnippetSnakeCaseTransformer do
     }
   }
 
-  subject { described_class.new(filter) }
+  subject { described_class.new(advanced_snippet) }
 
   describe '#transform' do
+    shared_examples_for 'does not throw error' do
+      it '' do
+        expect { subject.transform }.to_not raise_exception
+      end
+    end
+
+    context 'when advanced snippet is empty' do
+      context 'when advanced snippet is nil' do
+        let(:advanced_snippet) {
+          nil
+        }
+
+        it_behaves_like 'does not throw error'
+      end
+
+      context 'when advanced snippet is nil' do
+        let(:advanced_snippet) {
+          {}
+        }
+
+        it_behaves_like 'does not throw error'
+      end
+    end
+
     context 'when filter contains camel case keys' do
       it 'transforms all keys to snake_case' do
         expect(subject.transform).to eq({

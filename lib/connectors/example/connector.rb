@@ -47,7 +47,7 @@ module Connectors
         # raise 'something went wrong'
       end
 
-      def self.advanced_snippet_validator
+      def self.advanced_snippet_validators
         ExampleAdvancedSnippetValidator
       end
 

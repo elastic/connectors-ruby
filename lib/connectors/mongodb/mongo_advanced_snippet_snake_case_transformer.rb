@@ -23,7 +23,7 @@ module Connectors
       private
 
       def snake_case_filter(advanced_snippet, transformed_filter = {})
-        advanced_snippet.each do |key, value|
+        advanced_snippet&.each do |key, value|
           snake_case_key = key.to_s.underscore
 
           value = value.is_a?(Hash) ? snake_case_filter(value, {}) : value
