@@ -9,6 +9,7 @@ require 'core/filtering/simple_rules/validation/single_rule_against_schema_valid
 require 'core/filtering/simple_rules/simple_rule'
 
 describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValidator do
+  let(:id) { 'id' }
   let(:field) { 'foo' }
   let(:value) { 'bar' }
   let(:order) { 1 }
@@ -18,7 +19,7 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
   let(:simple_rules) do
     [
       {
-        'id' => 'test',
+        'id' => id,
         'field' => field,
         'value' => value,
         'policy' => policy,
@@ -117,7 +118,21 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
           '(.*)'
         }
 
-        it_behaves_like 'simple rules are invalid'
+        context 'when rule is not the default rule' do
+          let(:id) {
+            'not the default rule'
+          }
+
+          it_behaves_like 'simple rules are invalid'
+        end
+
+        context 'when rule is the default rule' do
+          let(:id) {
+            'DEFAULT'
+          }
+
+          it_behaves_like 'simple rules are valid'
+        end
       end
 
       context 'when regex does not have parentheses' do
@@ -125,7 +140,21 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
           '.*'
         }
 
-        it_behaves_like 'simple rules are invalid'
+        context 'when rule is not the default rule' do
+          let(:id) {
+            'not the default rule'
+          }
+
+          it_behaves_like 'simple rules are invalid'
+        end
+
+        context 'when rule is the default rule' do
+          let(:id) {
+            'DEFAULT'
+          }
+
+          it_behaves_like 'simple rules are valid'
+        end
       end
     end
   end
