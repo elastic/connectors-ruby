@@ -51,7 +51,7 @@ module Utility
     def note_success
       @consecutive_error_count = 0
       @success_count += 1
-      increment_window_index
+      track_window_error(false)
     end
 
     def note_error(error, id: Time.now.to_i)
@@ -60,10 +60,9 @@ module Utility
       Utility::Logger.debug("Message id: #{id} - #{error_message}\n#{stack_trace}")
       @total_error_count += 1
       @consecutive_error_count += 1
-      @window_errors[@window_index] = true
       @error_queue << DocumentError.new(error.class.name, error_message, stack_trace, id)
       @error_queue = @error_queue.drop(1) if @error_queue.size > @error_queue_size
-      increment_window_index
+      track_window_error(true)
       @last_error = error
 
       raise_if_necessary
@@ -92,10 +91,32 @@ module Utility
     end
 
     def num_errors_in_window
-      @window_errors.count(&:itself).to_f
+      @window_errors.count(true).to_f
     end
 
-    def increment_window_index
+    def track_window_error(is_error)
+      # We keep the errors array of the size @window_size this way, imagine @window_size = 5
+      # Error array inits as falses:
+      # [ false, false, false, false, false ]
+      # Third document raises an error:
+      # [ false, false, true,  false, false ]
+      #                 ^^^^
+      #                 2 % 5 == 2
+      # Fifth document raises an error:
+      # [ false, false, true,  false, true  ]
+      #                               ^^^^
+      #                               4 % 5 == 4
+      # Sixth document raises an error:
+      # [ true, false, true,   false, true  ]
+      #   ^^^^
+      #   5 % 5 == 0
+      #
+      # Eigth document is successful:
+      # [ true, false, false,  false, true  ]
+      #                ^^^^^
+      #                7 % 5 == 2
+      # And so on.
+      @window_errors[@window_index] = is_error
       @window_index = (@window_index + 1) % @window_size
     end
 
