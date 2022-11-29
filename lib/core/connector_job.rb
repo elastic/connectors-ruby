@@ -142,7 +142,19 @@ module Core
     end
 
     def pipeline
-      connector_snapshot[:pipeline]
+      connector_snapshot[:pipeline] || {}
+    end
+
+    def extract_binary_content?
+      pipeline[:extract_binary_content]
+    end
+
+    def reduce_whitespace?
+      pipeline[:reduce_whitespace]
+    end
+
+    def run_ml_inference?
+      pipeline[:run_ml_inference]
     end
 
     def connector

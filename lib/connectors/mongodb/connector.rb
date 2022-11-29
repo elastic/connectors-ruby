@@ -8,7 +8,9 @@
 
 require 'connectors/base/connector'
 require 'core/filtering/validation_status'
+require 'core/filtering/transform/transformation_target'
 require 'connectors/mongodb/mongo_rules_parser'
+require 'connectors/mongodb/mongo_advanced_snippet_snake_case_transformer'
 require 'connectors/mongodb/mongo_advanced_snippet_against_schema_validator'
 require 'mongo'
 require 'utility'
@@ -56,15 +58,21 @@ module Connectors
         MongoAdvancedSnippetAgainstSchemaValidator
       end
 
+      def self.filter_transformers
+        {
+          Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET => [MongoAdvancedSnippetSnakeCaseTransformer]
+        }
+      end
+
       def initialize(configuration: {}, job_description: nil)
         super
 
-        @host = configuration.dig(:host, :value)
-        @database = configuration.dig(:database, :value)
-        @collection = configuration.dig(:collection, :value)
-        @user = configuration.dig(:user, :value)
-        @password = configuration.dig(:password, :value)
-        @direct_connection = configuration.dig(:direct_connection, :value)
+        @host = @configuration.dig(:host, :value)
+        @database = @configuration.dig(:database, :value)
+        @collection = @configuration.dig(:collection, :value)
+        @user = @configuration.dig(:user, :value)
+        @password = @configuration.dig(:password, :value)
+        @direct_connection = @configuration.dig(:direct_connection, :value)
       end
 
       def yield_documents

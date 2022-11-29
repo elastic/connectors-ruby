@@ -17,6 +17,84 @@ describe Utility::ErrorMonitor do
     expect(monitor.instance_variable_get('@window_size')).to eq(100)
   end
 
+  it 'raises an error after too many errors in a window' do
+    monitor = Utility::ErrorMonitor.new(:max_error_ratio => 0.15, window_size: 100)
+
+    10.times do
+      monitor.note_error(StandardError.new)
+    end
+
+    84.times do
+      monitor.note_success
+    end
+
+    5.times do
+      monitor.note_error(StandardError.new)
+    end
+
+    expect { monitor.note_error(StandardError.new) }.to raise_error(Utility::ErrorMonitor::MaxErrorsInWindowExceededError)
+  end
+
+  context 'when successes and failures were reported before' do
+    # Regression test.
+    # Problem fixed was that monitor incorrectly calculates max_error_ratio - it never
+    # actually considered either ratio or window size - it was always raising an error if
+    # window_size * max_error_ratio errors happened, which is 15 in case of this setup.
+    # What it should do is really consider the window and error ratio, e.g:
+    # 85 documents were correctly ingested, 15 failed. Window will be: 85 x success, 15 x failure,
+    # error_ratio = 0.15, but condition to raise is max_error_ratio < error_ratio - it's false, so
+    # no error is raised.
+    #
+    # Then 90 documents were ingested correctly, window moves and will be: 10 x failure, 90 x success,
+    # error_ratio = 0.1; Then 10 errors happen, but error_ratio will stay the same because window will be
+    # 90 x success, 10 x failure.
+    let(:monitor) { Utility::ErrorMonitor.new(:max_error_ratio => 0.15, window_size: 100, max_consecutive_errors: 100) }
+    before(:each) do
+      # Setup is 100 triggers:
+      # 5 x failure; 40 x success; 5 x failure; 40 x success, error_ratio = 0.1
+      2.times do
+        5.times do
+          monitor.note_error(StandardError.new)
+        end
+
+        40.times do
+          monitor.note_success
+        end
+      end
+    end
+
+    it 'raises an error after too many errors in a window' do
+      expect {
+        # Before:
+        # 5 x failure; 40 x success; 5 x failure; 40 x success, real error_ratio = 0.1
+        # After:
+        # 40 x success; 5 x failure; 40 x success; 5 x failure, real error_ratio = 0.1
+        5.times do
+          monitor.note_error(StandardError.new)
+        end
+
+        # Before:
+        # 40 x success; 5 x failure; 40 x success; 5 x failure, real error_ratio = 0.1
+        # After:
+        # 1 x success; 5x failure; 94 x success, real_error_ratio = 0.05
+        94.times do
+          monitor.note_success
+        end
+
+        # Before:
+        # 1 x success; 5 x failure; 94 x success, real_error_ratio = 0.05
+        # After:
+        # 85 x success, 15 x failure, real_error_ratio = 0.15.
+        # Any error within next 85 documents should trigger the MaxErrorsInWindowExceededError
+        15.times do
+          monitor.note_error(StandardError.new)
+        end
+      }.to_not raise_error
+
+      expect { monitor.note_error(StandardError.new) }.to raise_error(Utility::ErrorMonitor::MaxErrorsInWindowExceededError)
+    end
+  end
+
   it 'raises an error after too many failures in a row' do
     monitor = Utility::ErrorMonitor.new(:max_consecutive_errors => 3)
     expect { add_errors(monitor, 4) }.to raise_error do |e|

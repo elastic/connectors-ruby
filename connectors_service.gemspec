@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-require_relative 'lib/app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_service'
-  s.version     = App::Config[:version]
+  s.version     = File.read('VERSION').strip
   s.homepage    = 'https://github.com/elastic/connectors-ruby'
   s.summary     = 'Gem containing Elastic connectors service'
   s.description = ''
@@ -20,7 +19,7 @@ Gem::Specification.new do |s|
     if dep.latest_version?
       s.add_dependency dep.name
     else
-      s.add_dependency dep.name, dep.requirement
+      s.add_dependency dep.name, dep.requirement.as_list
     end
   end
 end

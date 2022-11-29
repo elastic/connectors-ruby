@@ -1,15 +1,14 @@
-require_relative 'lib/app/config'
 
 Gem::Specification.new do |s|
   s.name        = 'connectors_utility'
-  s.version     = App::Config[:version]
+  s.version     = File.read('VERSION').strip
   s.homepage    = 'https://github.com/elastic/connectors-ruby'
   s.summary     = 'Gem containing shared Connector Services libraries'
   s.description = ''
   s.authors     = ['Elastic']
   s.metadata    = {
-    "revision" => App::Config[:revision],
-    "repository" => App::Config[:repository]
+    "revision" => `git rev-parse HEAD`.strip,
+    "repository" => 'https://github.com/elastic/connectors-ruby'
   }
   s.email       = 'ent-search-dev@elastic.co'
   s.files       = %w[
@@ -42,6 +41,7 @@ Gem::Specification.new do |s|
                     lib/core/connector_settings.rb
                     lib/core/connector_job.rb
                     lib/core/filtering/validation_status.rb
+                    lib/connectors/job_trigger_method.rb
                   ]
   s.license     = 'Elastic-2.0'
   s.add_dependency 'activesupport', '~>5.2.6'

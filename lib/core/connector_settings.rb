@@ -8,6 +8,7 @@
 
 require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/connector_status'
+require 'connectors/sync_status'
 require 'core/elastic_connector_actions'
 require 'utility'
 
@@ -87,6 +88,10 @@ module Core
       self[:scheduling]
     end
 
+    def sync_now?
+      self[:sync_now] == true
+    end
+
     def filtering
       # assume for now, that first object in filtering array or a filter object itself is the only filtering object
       filtering = @elasticsearch_response.dig(:_source, :filtering)
@@ -96,18 +101,6 @@ module Core
 
     def request_pipeline
       Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :name), @connectors_meta.dig(:pipeline, :default_name), DEFAULT_REQUEST_PIPELINE)
-    end
-
-    def extract_binary_content?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :extract_binary_content), @connectors_meta.dig(:pipeline, :default_extract_binary_content), DEFAULT_EXTRACT_BINARY_CONTENT)
-    end
-
-    def reduce_whitespace?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :reduce_whitespace), @connectors_meta.dig(:pipeline, :default_reduce_whitespace), DEFAULT_REDUCE_WHITESPACE)
-    end
-
-    def run_ml_inference?
-      Utility::Common.return_if_present(@elasticsearch_response.dig(:_source, :pipeline, :run_ml_inference), @connectors_meta.dig(:pipeline, :default_run_ml_inference), DEFAULT_RUN_ML_INFERENCE)
     end
 
     def formatted
@@ -139,10 +132,12 @@ module Core
       job_status = job&.status || Connectors::SyncStatus::ERROR
       job_error = job.nil? ? 'Could\'t find the job' : job.error
       job_error ||= 'unknown error' if job_status == Connectors::SyncStatus::ERROR
+      connector_status = (job_status == Connectors::SyncStatus::ERROR ? Connectors::ConnectorStatus::ERROR : Connectors::ConnectorStatus::CONNECTED)
       doc = {
         :last_sync_status => job_status,
         :last_synced => Time.now,
         :last_sync_error => job_error,
+        :status => connector_status,
         :error => job_error
       }
       if job&.terminated?
