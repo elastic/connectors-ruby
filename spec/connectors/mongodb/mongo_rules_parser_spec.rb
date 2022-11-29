@@ -46,6 +46,14 @@ describe Connectors::MongoDB::MongoRulesParser do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$gt' => 'bar' } })
           end
+
+          context 'with a number string' do
+            let(:value) { '10' }
+            it 'parses rule as greater' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => { '$gt' => 10.0 } })
+            end
+          end
         end
 
         context 'less than' do
@@ -53,6 +61,14 @@ describe Connectors::MongoDB::MongoRulesParser do
           it 'parses rule as less' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$lt' => 'bar' } })
+          end
+
+          context 'with a number string' do
+            let(:value) { '10' }
+            it 'parses rule as less' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => { '$lt' => 10.0 } })
+            end
           end
         end
 

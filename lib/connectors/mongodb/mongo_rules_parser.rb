@@ -59,18 +59,20 @@ module Connectors
       end
 
       def parse_greater_than(rule)
+        coerced_value = try_parse_float(rule.value)
         if rule.is_include?
-          { rule.field => { '$gt' => rule.value } }
+          { rule.field => { '$gt' => coerced_value } }
         else
-          { rule.field => { '$lte' => rule.value } }
+          { rule.field => { '$lte' => coerced_value } }
         end
       end
 
       def parse_less_than(rule)
+        coerced_value = try_parse_float(rule.value)
         if rule.is_include?
-          { rule.field => { '$lt' => rule.value } }
+          { rule.field => { '$lt' => coerced_value } }
         else
-          { rule.field => { '$gte' => rule.value } }
+          { rule.field => { '$gte' => coerced_value } }
         end
       end
 
@@ -104,6 +106,12 @@ module Connectors
         else
           { rule.field => { '$not' => /.*#{rule.value}.*/ } }
         end
+      end
+
+      def try_parse_float(value)
+        Float(value)
+      rescue StandardError
+        value
       end
     end
   end
