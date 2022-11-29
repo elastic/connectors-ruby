@@ -25,7 +25,7 @@ module Connectors
       NON_NEGATIVE_INTEGER = ->(value) { value.is_a?(Integer) && value >= 0 }
       READ_CONCERN_LEVEL = ->(level) { %w[local available majority linearizable].include?(level) }
       STRING_OR_DOCUMENT = ->(value) { value.is_a?(Hash) || value.is_a?(String) }
-      MUTUAL_EXCLUSIVE_FILTER = ->(fields) { fields.size <= 1 }
+      MUTUAL_EXCLUSIVE_FILTER = ->(fields) { fields.nil? || fields.size <= 1 }
 
       AGGREGATION_PIPELINE = lambda { |pipeline|
         return false unless pipeline.is_a?(Array)
@@ -265,7 +265,8 @@ module Connectors
 
       FIND_FILTER = {
         :name => 'filter',
-        :type => FILTER
+        :type => FILTER,
+        :optional => true
       }
 
       FIND = {

@@ -6,13 +6,13 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/advanced_snippet_validator'
+require 'core/filtering/advanced_snippet/advanced_snippet_validator'
 
 module Connectors
   module GitLab
-    class GitLabAdvancedSnippetValidator < Connectors::Base::AdvancedSnippetValidator
+    class GitLabAdvancedSnippetValidator < Core::Filtering::AdvancedSnippet::AdvancedSnippetValidator
 
-      def is_snippet_valid?
+      def is_snippet_valid
         # TODO: real filtering validation will follow later
         errors = [
           {
@@ -21,13 +21,11 @@ module Connectors
           }
         ]
 
-        validation_result = if @advanced_snippet.present? && !@advanced_snippet.empty?
-                              { :state => Core::Filtering::ValidationStatus::INVALID, :errors => errors }
-                            else
-                              { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
-                            end
-        log_validation_result(validation_result)
-        validation_result
+        if @advanced_snippet.present? && !@advanced_snippet.empty?
+          { :state => Core::Filtering::ValidationStatus::INVALID, :errors => errors }
+        else
+          { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] }
+        end
       end
 
     end

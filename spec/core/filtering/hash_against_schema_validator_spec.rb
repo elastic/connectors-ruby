@@ -5,10 +5,10 @@
 #
 # frozen_string_literal: true
 
-require 'connectors/base/advanced_snippet_against_schema_validator'
+require 'core/filtering/hash_against_schema_validator'
 require 'core/filtering/validation_status'
 
-describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
+describe Core::Filtering::SchemaValidator do
   let(:config_schema) {
     {}
   }
@@ -17,12 +17,33 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
     {}
   }
 
-  subject { described_class.new(advanced_snippet, config_schema) }
+  subject { described_class.new(schema: config_schema, payload: advanced_snippet, error_id: 'error') }
 
-  it_behaves_like 'an advanced snippet validator'
+  shared_examples_for 'hash is valid' do
+    it '' do
+      validation_result = subject.validate_against_schema
 
-  describe '#is_snippet_valid?' do
-    context 'fields constraint is present' do
+      expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::VALID)
+      expect(validation_result[:errors]).to be_empty
+    end
+  end
+
+  shared_examples_for 'hash is invalid' do
+    it '' do
+      validation_result = subject.validate_against_schema
+
+      expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
+      expect(validation_result[:errors]).to_not be_empty
+      expect(validation_result[:errors]).to be_an(Array)
+      expect(validation_result[:errors][0][:ids]).to_not be_empty
+      expect(validation_result[:errors][0][:messages]).to be_an(Array)
+    end
+  end
+
+  it_behaves_like 'a schema validator'
+
+  describe '#validate_against_schema' do
+    context 'fields constraints are present' do
       let(:constraints) {
         [false]
       }
@@ -48,18 +69,35 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
       }
 
       context 'only one field allowed' do
-        let(:constraints) {
-          [->(fields) { fields.size == 1 }]
-        }
-
-        let(:advanced_snippet) {
-          {
-            :field_one => 'value one',
-            :field_two => 'value two'
+        context 'constraint is not wrapped in an array' do
+          let(:constraints) {
+            ->(fields) { fields.size == 1 }
           }
-        }
 
-        it_behaves_like 'advanced snippet is invalid'
+          let(:advanced_snippet) {
+            {
+              :field_one => 'value one',
+              :field_two => 'value two'
+            }
+          }
+
+          it_behaves_like 'hash is invalid'
+        end
+
+        context 'constraint is wrapped in an array' do
+          let(:constraints) {
+            [->(fields) { fields.size == 1 }]
+          }
+
+          let(:advanced_snippet) {
+            {
+              :field_one => 'value one',
+              :field_two => 'value two'
+            }
+          }
+
+          it_behaves_like 'hash is invalid'
+        end
       end
 
       context 'two fields allowed' do
@@ -74,7 +112,42 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
           }
         }
 
-        it_behaves_like 'advanced snippet is valid'
+        it_behaves_like 'hash is valid'
+      end
+
+      context 'two fields are allowed and their key must be equal to their value' do
+        let(:constraints) {
+          [
+            ->(fields) { fields.size == 2 },
+            lambda { |fields|
+              fields.each { |field_name, field_value|
+                return false unless field_name.to_s == field_value
+              }
+            }
+          ]
+        }
+
+        context 'the value of the second field is not the same as the field name' do
+          let(:advanced_snippet) {
+            {
+              :field_one => 'field_one',
+              :field_two => 'wrong value'
+            }
+          }
+
+          it_behaves_like 'hash is invalid'
+        end
+
+        context 'both field names equal their value' do
+          let(:advanced_snippet) {
+            {
+              :field_one => 'field_one',
+              :field_two => 'field_two'
+            }
+          }
+
+          it_behaves_like 'hash is valid'
+        end
       end
     end
 
@@ -113,17 +186,17 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
       }
 
       before(:each) do
-        stub_const('Connectors::Base::AdvancedSnippetAgainstSchemaValidator::MAX_RECURSION_DEPTH', 1)
+        stub_const('Core::Filtering::SchemaValidator::MAX_RECURSION_DEPTH', 1)
       end
 
       it 'stops logs warning' do
         allow(Utility::Logger).to receive(:warn)
         expect(Utility::Logger).to receive(:warn).with(include('Recursion depth for filtering validation exceeded'))
 
-        subject.is_snippet_valid?
+        subject.validate_against_schema
       end
 
-      it_behaves_like 'advanced snippet is invalid'
+      it_behaves_like 'hash is invalid'
     end
 
     context 'config schema is empty' do
@@ -132,7 +205,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
           {}
         }
 
-        it_behaves_like 'advanced snippet is valid'
+        it_behaves_like 'hash is valid'
       end
 
       context 'config schema is nil' do
@@ -140,7 +213,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
           nil
         }
 
-        it_behaves_like 'advanced snippet is valid'
+        it_behaves_like 'hash is valid'
       end
     end
 
@@ -166,7 +239,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
                 }
               }
 
-              it_behaves_like 'advanced snippet is valid'
+              it_behaves_like 'hash is valid'
             end
 
             context 'field key is a symbol' do
@@ -176,7 +249,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
                 }
               }
 
-              it_behaves_like 'advanced snippet is valid'
+              it_behaves_like 'hash is valid'
             end
           end
 
@@ -187,7 +260,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
 
           context 'field has wrong name, but correct type' do
@@ -197,7 +270,18 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
+          end
+
+          context 'correct and a wrong field present' do
+            let(:advanced_snippet) {
+              {
+                :field => 'a string',
+                :another_field => 'another string'
+              }
+            }
+
+            it_behaves_like 'hash is invalid'
           end
 
           context 'field has wrong name and wrong type' do
@@ -207,7 +291,15 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
+          end
+
+          context 'advanced snippet is empty' do
+            let(:advanced_snippet) {
+              {}
+            }
+
+            it_behaves_like 'hash is invalid'
           end
         end
       end
@@ -231,7 +323,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
             }
           }
 
-          it_behaves_like 'advanced snippet is valid'
+          it_behaves_like 'hash is valid'
         end
 
         context 'advanced snippet does not contain array with \'A\'' do
@@ -241,7 +333,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
             }
           }
 
-          it_behaves_like 'advanced snippet is invalid'
+          it_behaves_like 'hash is invalid'
         end
       end
 
@@ -275,7 +367,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
             }
           }
 
-          it_behaves_like 'advanced snippet is valid'
+          it_behaves_like 'hash is valid'
         end
 
         context 'one name is wrong' do
@@ -287,7 +379,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
             }
           }
 
-          it_behaves_like 'advanced snippet is invalid'
+          it_behaves_like 'hash is invalid'
         end
 
         context 'one type is wrong' do
@@ -299,7 +391,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
             }
           }
 
-          it_behaves_like 'advanced snippet is invalid'
+          it_behaves_like 'hash is invalid'
         end
 
         context 'one field is missing' do
@@ -311,7 +403,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is valid'
+            it_behaves_like 'hash is valid'
           end
         end
 
@@ -321,7 +413,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               nil
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
 
           context 'advanced snippet is empty hash' do
@@ -329,7 +421,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               {}
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
         end
       end
@@ -384,7 +476,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is valid'
+            it_behaves_like 'hash is valid'
           end
 
           context 'advanced snippet only contains strings as keys' do
@@ -401,7 +493,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is valid'
+            it_behaves_like 'hash is valid'
           end
 
           context 'advanced snippet contains string and symbols as keys' do
@@ -418,7 +510,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is valid'
+            it_behaves_like 'hash is valid'
           end
 
           context 'advanced snippet does not contain optional field' do
@@ -434,7 +526,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is valid'
+            it_behaves_like 'hash is valid'
           end
         end
 
@@ -446,7 +538,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
 
           context 'has wrong type' do
@@ -456,7 +548,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
         end
 
@@ -470,7 +562,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
 
           context 'has wrong type' do
@@ -482,7 +574,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
         end
 
@@ -498,7 +590,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
 
           context 'has wrong type' do
@@ -512,7 +604,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
         end
 
@@ -531,7 +623,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
 
           context 'has wrong type' do
@@ -548,7 +640,7 @@ describe Connectors::Base::AdvancedSnippetAgainstSchemaValidator do
               }
             }
 
-            it_behaves_like 'advanced snippet is invalid'
+            it_behaves_like 'hash is invalid'
           end
         end
       end
