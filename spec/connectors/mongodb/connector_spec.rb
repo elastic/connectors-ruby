@@ -566,7 +566,6 @@ describe Connectors::MongoDB::Connector do
       it 'calls the mongo client aggregate method with pipeline and options' do
         expect(actual_collection).to receive(:aggregate).with(pipeline, options)
         expect(mongo_collection_cursor).to receive(:each)
-        expect(mongo_collection_cursor).to receive(:each)
 
         # aggregate does not expose this functionality
         expect(mongo_collection_cursor).to_not receive(:skip)
