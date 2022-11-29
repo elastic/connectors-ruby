@@ -8,7 +8,9 @@
 
 require 'connectors/base/connector'
 require 'core/filtering/validation_status'
+require 'core/filtering/transform/transformation_target'
 require 'connectors/mongodb/mongo_rules_parser'
+require 'connectors/mongodb/mongo_advanced_snippet_snake_case_transformer'
 require 'connectors/mongodb/mongo_advanced_snippet_against_schema_validator'
 require 'mongo'
 require 'utility'
@@ -54,6 +56,12 @@ module Connectors
 
       def self.advanced_snippet_validator
         MongoAdvancedSnippetAgainstSchemaValidator
+      end
+
+      def self.filter_transformers
+        {
+          Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET => [MongoAdvancedSnippetSnakeCaseTransformer]
+        }
       end
 
       def initialize(configuration: {}, job_description: nil)
