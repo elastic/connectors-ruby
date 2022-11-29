@@ -13,25 +13,39 @@ module Core
     module Transform
       class FilterTransformerFacade < Core::Filtering::Transform::FilterTransformer
 
-        def initialize(filter, transformers = [])
+        def initialize(filter = {}, rule_transformer_classes = [], snippet_transformer_classes = [])
           super(filter)
 
-          @transformer_classes = transformers.is_a?(Array) ? transformers : [transformers]
-          @facade = FilterTransformer.new(filter, call_all_transformers)
+          @rule_transformers = rule_transformer_classes.is_a?(Array) ? rule_transformer_classes : [rule_transformer_classes]
+          @snippet_transformers = snippet_transformer_classes.is_a?(Array) ? snippet_transformer_classes : [snippet_transformer_classes]
+
+          @facade = FilterTransformer.new(filter, execute_rule_and_snippet_transformations)
         end
 
         def transform
           @facade.transform
         end
 
-        def call_all_transformers
-          lambda do |filter|
-            @transformer_classes.each do |transformer_class|
-              filter = transformer_class.new(filter).transform
-            end
+        private
 
-            filter
+        def execute_rule_and_snippet_transformations
+          lambda do |filter|
+            rules = filter[:rules]
+            advanced_snippet = filter[:advanced_snippet]
+
+            {
+              :rules => call_transformers(@rule_transformers, rules),
+              :advanced_snippet => call_transformers(@snippet_transformers, advanced_snippet)
+            }
           end
+        end
+
+        def call_transformers(transformer_classes, payload)
+          transformer_classes.each do |transformer_class|
+            payload = transformer_class.new(payload).transform if transformer_class.present?
+          end
+
+          payload
         end
       end
     end

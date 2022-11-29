@@ -49,7 +49,10 @@ module Connectors
       end
 
       def self.filter_transformers
-        []
+        {
+          'advanced_snippet' => [],
+          'rules' => []
+        }
       end
 
       def self.validate_filtering(filtering = {})
@@ -57,8 +60,7 @@ module Connectors
         return { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] } unless filtering.present?
 
         filter = Utility::Filtering.extract_filter(filtering)
-
-        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, filter_transformers).transform
+        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, filter_transformers['rules'], filter_transformers['advanced_snippet']).transform
 
         advanced_snippet = filter.dig(:advanced_snippet, :value)
 
@@ -76,10 +78,11 @@ module Connectors
         @configuration = job_description&.configuration&.dup || configuration&.dup || {}
         @job_description = job_description&.dup
 
-        filtering = Utility::Filtering.extract_filter(@job_description&.filtering)
+        filter = Utility::Filtering.extract_filter(@job_description&.filtering)
+        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, self.class.filter_transformers['rules'], self.class.filter_transformers['advanced_snippet']).transform
 
-        @rules = filtering[:rules] || []
-        @advanced_filter_config = filtering[:advanced_snippet] || {}
+        @rules = filter[:rules] || []
+        @advanced_filter_config = filter[:advanced_snippet] || {}
       end
 
       def yield_documents; end

@@ -11,17 +11,20 @@ require 'active_support'
 
 module Connectors
   module MongoDB
-    class MongoFilterSnakeCaseTransformer < Core::Filtering::Transform::FilterTransformer
+    class MongoAdvancedSnippetSnakeCaseTransformer < Core::Filtering::Transform::FilterTransformer
 
-      def initialize(filter = {}, transformation = ->(f) { snake_case_filter(f) })
+      def initialize(advanced_snippet = {})
         super
+
+        @advanced_snippet = advanced_snippet
+        @transformation = ->(snippet) { snake_case_filter(snippet) }
       end
 
       private
 
-      def snake_case_filter(filter, transformed_filter = {})
-        filter.each do |key, value|
-          snake_case_key = key.underscore
+      def snake_case_filter(advanced_snippet, transformed_filter = {})
+        advanced_snippet.each do |key, value|
+          snake_case_key = key.to_s.underscore
 
           value = value.is_a?(Hash) ? snake_case_filter(value, {}) : value
 

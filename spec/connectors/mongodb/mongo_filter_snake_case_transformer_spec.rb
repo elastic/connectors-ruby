@@ -6,9 +6,9 @@
 
 # frozen_string_literal: true
 
-require 'connectors/mongodb/mongo_filter_snake_case_transformer'
+require 'connectors/mongodb/mongo_advanced_snippet_snake_case_transformer'
 
-describe Connectors::MongoDB::MongoFilterSnakeCaseTransformer do
+describe Connectors::MongoDB::MongoAdvancedSnippetSnakeCaseTransformer do
   let(:filter) {
     {
       'allowDiskUse' => false,
