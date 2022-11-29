@@ -149,3 +149,35 @@ make test
 This project is fairly simple and conventional as a bundler-based Ruby project, so any popular IDE with ruby support should work fine. The maintaining team uses several IDEs including Intellij, RubyMine, Sublime, and VSCode.
 
 Debugging varies from IDE to IDE, but the gems `ruby-debug-ide`, `pry-remote`, `pry-nav`, and `debase` are all included in the Gemfile, and should be sufficient to power your debugging.
+
+## Backporting
+
+We use a tool called `backport`
+
+### Setup
+
+Configure backport to give it a GitHub access token.
+
+Go to https://github.com/settings/tokens/new and generate a new personal access token.
+It requires the "repo" scope - Full control of private repositories.
+Copy the token string.
+Click "Enable SSO" and authorize this token for Swiftype and Elastic.
+Edit `~/.backport/config.json` with the contents:
+
+```
+{
+  "accessToken": "<access_token>",
+  "username": "<github_username>"
+}
+```
+
+### Execution
+
+Simply run:
+
+```
+yarn run backport --pr <your-pull-request-number>
+```
+
+Use the SPACE character to select the destination branch, the arrow keys to navigate, and ENTER to confirm your selection.
+Your backport PR will be generated for you.

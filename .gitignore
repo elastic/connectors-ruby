@@ -54,3 +54,6 @@ ent-search-dev.json
 
 config/connectors.yml
 .vscode
+
+# node deps
+node_modules
