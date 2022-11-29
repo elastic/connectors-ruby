@@ -12,7 +12,7 @@ describe Core::Filtering::AdvancedSnippet::AdvancedSnippetValidator do
 
   describe '#is_snippet_valid' do
     it 'should raise an exception' do
-      expect { subject.is_snippet_valid }.to raise_exception
+      expect { subject.is_snippet_valid }.to raise_exception(StandardError, 'Advanced Snippet validation not implemented')
     end
   end
 end
