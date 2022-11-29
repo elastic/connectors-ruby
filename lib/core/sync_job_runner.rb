@@ -51,11 +51,12 @@ module Core
     def initialize(connector_settings, job, max_ingestion_queue_size, max_ingestion_queue_bytes)
       @connector_settings = connector_settings
       @connector_id = connector_settings.id
-      @index_name = connector_settings.index_name
+      @index_name = job.index_name
+      @service_type = job.service_type
       @job = job
       @job_id = job.id
       @sink = Core::Ingestion::EsSink.new(
-        connector_settings.index_name,
+        @index_name,
         @connector_settings.request_pipeline,
         Utility::BulkQueue.new(
           max_ingestion_queue_size,
@@ -63,7 +64,7 @@ module Core
         ),
         max_ingestion_queue_bytes
       )
-      @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
+      @connector_class = Connectors::REGISTRY.connector_class(@service_type)
     end
 
     def execute
@@ -81,7 +82,7 @@ module Core
         validate_filtering(@job.filtering)
         Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
 
-        @connector_instance = Connectors::REGISTRY.connector(@connector_settings.service_type, @connector_settings.configuration, job_description: @job)
+        @connector_instance = Connectors::REGISTRY.connector(@service_type, @connector_settings.configuration, job_description: @job)
         @connector_instance.do_health_check!
 
         @sync_status = nil
@@ -207,18 +208,19 @@ module Core
     end
 
     def add_ingest_metadata(document)
+      return document unless @job
       document.tap do |it|
-        it['_extract_binary_content'] = @connector_settings.extract_binary_content? if @connector_settings.extract_binary_content?
-        it['_reduce_whitespace'] = @connector_settings.reduce_whitespace? if @connector_settings.reduce_whitespace?
-        it['_run_ml_inference'] = @connector_settings.run_ml_inference? if @connector_settings.run_ml_inference?
+        it['_extract_binary_content'] = @job.extract_binary_content? if @job.extract_binary_content?
+        it['_reduce_whitespace'] = @job.reduce_whitespace? if @job.reduce_whitespace?
+        it['_run_ml_inference'] = @job.run_ml_inference? if @job.run_ml_inference?
       end
     end
 
     def validate_configuration!
       expected_fields = @connector_class.configurable_fields.keys.map(&:to_s).sort
-      actual_fields = @connector_settings.configuration.keys.map(&:to_s).sort
+      actual_fields = @job.configuration.keys.map(&:to_s).sort
 
-      raise IncompatibleConfigurableFieldsError.new(@connector_class.service_type, expected_fields, actual_fields) if expected_fields != actual_fields
+      raise IncompatibleConfigurableFieldsError.new(@service_type, expected_fields, actual_fields) if expected_fields != actual_fields
     end
 
     def validate_filtering(filtering)

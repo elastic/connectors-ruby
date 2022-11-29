@@ -95,6 +95,12 @@ describe Core::SyncJobRunner do
     allow(job).to receive(:error!)
     allow(job).to receive(:canceling?).and_return(job_canceling)
     allow(job).to receive(:in_progress?).and_return(job_in_progress)
+    allow(job).to receive(:index_name).and_return(output_index_name)
+    allow(job).to receive(:service_type).and_return(service_type)
+    allow(job).to receive(:extract_binary_content?).and_return(extract_binary_content)
+    allow(job).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
+    allow(job).to receive(:run_ml_inference?).and_return(run_ml_inference)
+    allow(job).to receive(:configuration).and_return(connector_stored_configuration)
 
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
@@ -108,18 +114,12 @@ describe Core::SyncJobRunner do
     allow(sink).to receive(:ingestion_stats).and_return(ingestion_stats)
 
     allow(connector_settings).to receive(:id).and_return(connector_id)
-    allow(connector_settings).to receive(:service_type).and_return(service_type)
-    allow(connector_settings).to receive(:index_name).and_return(output_index_name)
     allow(connector_settings).to receive(:configuration).and_return(connector_stored_configuration)
     allow(connector_settings).to receive(:request_pipeline).and_return(request_pipeline)
-    allow(connector_settings).to receive(:extract_binary_content?).and_return(extract_binary_content)
-    allow(connector_settings).to receive(:reduce_whitespace?).and_return(reduce_whitespace)
-    allow(connector_settings).to receive(:run_ml_inference?).and_return(run_ml_inference)
     allow(connector_settings).to receive(:running?).and_return(connector_running)
     allow(connector_settings).to receive(:update_last_sync!)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
-    allow(connector_class).to receive(:service_type).and_return(service_type)
     allow(connector_class).to receive(:validate_filtering).and_return(filtering_validation_result)
     allow(connector_class).to receive(:new).and_return(connector_instance)
 
