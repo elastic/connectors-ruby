@@ -6,6 +6,7 @@
 
 # frozen_string_literal: true
 
+require 'core/filtering/transform/transformation_target'
 require 'core/filtering/transform/filter_transformer'
 
 module Core
@@ -13,8 +14,15 @@ module Core
     module Transform
       class FilterTransformerFacade < Core::Filtering::Transform::FilterTransformer
 
-        def initialize(filter = {}, rule_transformer_classes = [], snippet_transformer_classes = [])
+        def initialize(filter = {},
+                       filter_transformers = {
+                           Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET => [],
+                           Core::Filtering::Transform::TransformationTarget::RULES => [],
+                         })
           super(filter)
+
+          rule_transformer_classes = filter_transformers[Core::Filtering::Transform::TransformationTarget::RULES]
+          snippet_transformer_classes = filter_transformers[Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET]
 
           @rule_transformers = rule_transformer_classes.is_a?(Array) ? rule_transformer_classes : [rule_transformer_classes]
           @snippet_transformers = snippet_transformer_classes.is_a?(Array) ? snippet_transformer_classes : [snippet_transformer_classes]

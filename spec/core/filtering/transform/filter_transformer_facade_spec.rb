@@ -5,6 +5,7 @@
 #
 
 require 'core/filtering/transform/filter_transformer_facade'
+require 'core/filtering/transform/transformation_target'
 
 describe Core::Filtering::Transform::FilterTransformerFacade do
   def transform_rule(rules, key, new_value)
@@ -112,7 +113,14 @@ describe Core::Filtering::Transform::FilterTransformerFacade do
     }
   }
 
-  subject { described_class.new(filter, rule_transformers, snippet_transformers) }
+  let(:filter_transformers) {
+    {
+      Core::Filtering::Transform::TransformationTarget::RULES => rule_transformers,
+      Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET => snippet_transformers,
+    }
+  }
+
+  subject { described_class.new(filter, filter_transformers) }
 
   describe '#transform' do
     before do

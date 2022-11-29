@@ -12,6 +12,7 @@ require 'bson'
 require 'connectors/base/advanced_snippet_validator'
 require 'core/ingestion'
 require 'core/filtering/transform/filter_transformer_facade'
+require 'core/filtering/transform/transformation_target'
 require 'connectors/tolerable_error_helper'
 require 'core/filtering/validation_status'
 require 'utility'
@@ -50,8 +51,8 @@ module Connectors
 
       def self.filter_transformers
         {
-          'advanced_snippet' => [],
-          'rules' => []
+          Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET => [],
+          Core::Filtering::Transform::TransformationTarget::RULES => []
         }
       end
 
@@ -60,7 +61,7 @@ module Connectors
         return { :state => Core::Filtering::ValidationStatus::VALID, :errors => [] } unless filtering.present?
 
         filter = Utility::Filtering.extract_filter(filtering)
-        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, filter_transformers['rules'], filter_transformers['advanced_snippet']).transform
+        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, filter_transformers).transform
 
         advanced_snippet = filter.dig(:advanced_snippet, :value)
 
@@ -79,7 +80,7 @@ module Connectors
         @job_description = job_description&.dup
 
         filter = Utility::Filtering.extract_filter(@job_description&.filtering)
-        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, self.class.filter_transformers['rules'], self.class.filter_transformers['advanced_snippet']).transform
+        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, self.class.filter_transformers).transform
 
         @rules = filter[:rules] || []
         @advanced_filter_config = filter[:advanced_snippet] || {}
