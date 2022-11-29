@@ -9,10 +9,14 @@
 require 'active_support/core_ext/hash/indifferent_access'
 require 'app/config'
 require 'bson'
+require 'connectors/base/advanced_snippet_validator'
+require 'core/ingestion'
 require 'connectors/tolerable_error_helper'
 require 'core/filtering/advanced_snippet/advanced_snippet_validator'
 require 'core/filtering/simple_rules/validation/no_conflicting_policies_rules_validator'
 require 'core/filtering/simple_rules/validation/single_rule_against_schema_validator'
+require 'core/filtering/transform/filter_transformer_facade'
+require 'core/filtering/transform/transformation_target'
 require 'core/filtering/filter_validator'
 require 'core/filtering/processing_stage'
 require 'core/filtering/validation_status'
@@ -60,6 +64,13 @@ module Connectors
         }
       end
 
+      def self.filter_transformers
+        {
+          Core::Filtering::Transform::TransformationTarget::ADVANCED_SNIPPET => [],
+          Core::Filtering::Transform::TransformationTarget::RULES => []
+        }
+      end
+
       def self.validate_filtering(filtering = {})
         filter = Utility::Filtering.extract_filter(filtering)
 
@@ -75,13 +86,14 @@ module Connectors
         error_monitor = Utility::ErrorMonitor.new
         @tolerable_error_helper = Connectors::TolerableErrorHelper.new(error_monitor)
 
-        @configuration = configuration.dup || {}
+        @configuration = job_description&.configuration&.dup || configuration&.dup || {}
         @job_description = job_description&.dup
 
-        filtering = Utility::Filtering.extract_filter(@job_description&.filtering)
+        filter = Utility::Filtering.extract_filter(@job_description&.filtering)
+        filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, self.class.filter_transformers).transform
 
-        @rules = filtering[:rules] || []
-        @advanced_filter_config = filtering[:advanced_snippet] || {}
+        @rules = filter[:rules] || []
+        @advanced_filter_config = filter[:advanced_snippet] || {}
       end
 
       def yield_documents; end

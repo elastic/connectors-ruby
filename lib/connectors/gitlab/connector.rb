@@ -45,8 +45,8 @@ module Connectors
         super
 
         @extractor = Connectors::GitLab::Extractor.new(
-          :base_url => configuration.dig(:base_url, :value),
-          :api_token => configuration.dig(:api_token, :value)
+          :base_url => @configuration.dig(:base_url, :value),
+          :api_token => @configuration.dig(:api_token, :value)
         )
       end
 

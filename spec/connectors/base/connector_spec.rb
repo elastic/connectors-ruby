@@ -11,7 +11,7 @@ require 'core/filtering/filter_validator'
 require 'spec_helper'
 
 describe Connectors::Base::Connector do
-  subject { described_class.new(job_description: job_description) }
+  subject { described_class.new(configuration: connector_configuration, job_description: job_description) }
 
   let(:advanced_snippet) {
     {
@@ -55,11 +55,28 @@ describe Connectors::Base::Connector do
   let(:filter_validator) { double }
 
   let(:job_description) { double }
+  let(:job_configuration) { { :job_key => 'value' } }
+  let(:connector_configuration) { { :connector_key => 'value' } }
 
   before(:each) do
     allow(job_description).to receive(:dup).and_return(job_description)
+    allow(job_description).to receive(:configuration).and_return(job_configuration)
     allow(job_description).to receive(:filtering).and_return(filtering)
     allow(Core::Filtering::FilterValidator).to receive(:new).and_return(filter_validator)
+  end
+
+  describe '.initialize' do
+    it 'uses job configuration' do
+      expect(subject.instance_variable_get('@configuration')).to eq(job_configuration)
+    end
+
+    context 'when job configuration is not provided' do
+      let(:job_configuration) { nil }
+
+      it 'uses connector configuration' do
+        expect(subject.instance_variable_get('@configuration')).to eq(connector_configuration)
+      end
+    end
   end
 
   describe '#advanced_filter_config' do
