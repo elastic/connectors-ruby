@@ -21,7 +21,7 @@ module Core
               rule_field_value = simple_rule.slice('rule', 'field', 'value')
               policy = simple_rule['policy']
 
-              return conflicting_rules(rule_field_value) if rule_field_value_to_policy.key?(rule_field_value) && rule_field_value_to_policy[rule_field_value]['policy'] != policy
+              return conflicting_rules(rule_field_value) if rule_field_value_to_policy.key?(rule_field_value)
 
               rule_field_value_to_policy[rule_field_value] = policy
             end
