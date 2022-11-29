@@ -38,6 +38,30 @@ describe Connectors::MongoDB::MongoRulesParser do
             result = subject.parse
             expect(result).to match({ 'foo' => 'bar' })
           end
+
+          context 'with a number' do
+            let(:value) { 123 }
+            it 'parses rule as equals' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => 123 })
+            end
+          end
+
+          context 'with a boolean' do
+            let(:value) { 'false' }
+            it 'parses rule as equals' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => false })
+            end
+          end
+
+          context 'with a date' do
+            let(:value) { '2019-11-02' }
+            it 'parses rule as equals' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => Date.parse('2019-11-02') })
+            end
+          end
         end
 
         context 'greater than' do
