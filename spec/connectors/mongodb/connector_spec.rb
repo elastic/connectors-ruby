@@ -566,6 +566,10 @@ describe Connectors::MongoDB::Connector do
         expect(actual_collection).to receive(:aggregate).with(pipeline, options)
         expect(mongo_collection_cursor).to receive(:each)
 
+        # aggregate does not expose this functionality
+        expect(mongo_collection_cursor).to_not receive(:skip)
+        expect(mongo_collection_cursor).to_not receive(:limit)
+
         subject.yield_documents
       end
     end

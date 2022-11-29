@@ -119,6 +119,8 @@ module Connectors
               skip += PAGE_SIZE
             end
           when AGGREGATE
+            # We've to handle aggregate separately as it does not expose skip/limit like .find
+            # These have to be specified as aggregation pipeline stages
             cursor.each do |document|
               yield_with_handling_tolerable_errors do
                 yield serialize(document)
