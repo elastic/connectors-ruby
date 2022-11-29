@@ -6,12 +6,12 @@
 
 # frozen_string_literal: true
 
-require 'connectors/base/advanced_snippet_against_schema_validator'
+require 'core/filtering/advanced_snippet/advanced_snippet_against_schema_validator'
 require 'connectors/mongodb/mongo_advanced_snippet_schema'
 
 module Connectors
   module MongoDB
-    class MongoAdvancedSnippetAgainstSchemaValidator < Connectors::Base::AdvancedSnippetAgainstSchemaValidator
+    class MongoAdvancedSnippetAgainstSchemaValidator < Core::Filtering::AdvancedSnippet::AdvancedSnippetAgainstSchemaValidator
 
       def initialize(advanced_snippet, schema = Connectors::MongoDB::AdvancedSnippet::SCHEMA)
         super

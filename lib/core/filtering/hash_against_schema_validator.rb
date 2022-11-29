@@ -7,83 +7,73 @@
 
 require 'active_support/core_ext/hash'
 require 'utility/logger'
-require 'connectors/base/advanced_snippet_validator'
-require 'core/filtering/validation_status'
 
-module Connectors
-  module Base
-    class AdvancedSnippetAgainstSchemaValidator < Connectors::Base::AdvancedSnippetValidator
+module Core
+  module Filtering
+    class SchemaValidator
 
       MAX_RECURSION_DEPTH = 50
-      ADVANCED_SNIPPET_ID = 'advanced_snippet'
 
-      def initialize(advanced_snippet, schema)
-        super(advanced_snippet)
+      def initialize(schema: {}, payload: {}, error_id: '')
         @schema = schema
+        @payload = payload
+        @error_id = error_id
       end
 
-      def is_snippet_valid?
-        validation_result = validate_against_schema(@schema, @advanced_snippet)
-        log_validation_result(validation_result)
-        validation_result
-      end
-
-      private
-
-      def validate_against_schema(config_schema, advanced_snippet, recursion_depth = 0)
+      def validate_against_schema(schema = @schema, payload = @payload, recursion_depth = 0)
         # Prevent unintentional/intentional SystemStackErrors/crashes
         return unexpected_error if exceeded_recursion_depth?(recursion_depth)
 
-        return valid_snippet if config_schema.nil? || config_schema.empty?
+        return valid_snippet unless schema.present?
 
-        schema_fields = config_schema[:fields].is_a?(Hash) ? config_schema.dig(:fields, :values) : config_schema[:fields]
-        snippet_field_names = advanced_snippet&.keys&.map(&:to_s)
+        schema_fields = schema[:fields].is_a?(Hash) ? schema.dig(:fields, :values) : schema[:fields]
+        snippet_field_names = payload&.keys&.map(&:to_s)
         schema_field_names = schema_fields.map { |field| field[:name] }
 
         return unexpected_field(schema_field_names, snippet_field_names) if unexpected_field_present?(snippet_field_names, schema_field_names)
 
-        return fields_constraint_violation(config_schema[:fields]) if fields_constraints_violated?(config_schema, advanced_snippet)
+        return fields_constraint_violation(schema[:fields]) if fields_constraints_violated?(schema[:fields], payload)
 
         schema_fields.each do |field|
           name = field[:name]
           type = field[:type]
           optional = field[:optional] || false
 
-          snippet_field_value = advanced_snippet.with_indifferent_access[name]
+          snippet_field_value = payload.nil? ? nil : payload.with_indifferent_access[name]
 
           next if optional && (snippet_field_value.nil? || !snippet_field_value.present?)
 
-          return wrong_names(snippet_field_names, name) unless snippet_field_names.include?(name)
+          return required_value_missing(name) if is_required_value_missing?(snippet_field_value)
 
           return wrong_type(name, type, snippet_field_value) if type_error_present?(type, snippet_field_value)
 
           if field[:fields].present?
             validation_result = validate_against_schema(field, snippet_field_value, recursion_depth + 1)
 
-            return validation_result unless validation_result[:is_valid]
+            return validation_result unless validation_result[:state] == Core::Filtering::ValidationStatus::VALID
           end
         end
 
         valid_snippet
       end
 
-      def fields_constraints_violated?(config_schema, advanced_snippet)
-        return false unless config_schema[:fields].is_a?(Hash)
+      def fields_constraints_violated?(fields, payload)
+        return false if !fields.present? || !fields.is_a?(Hash)
 
-        constraints = config_schema.dig(:fields, :constraints)
+        constraints = fields[:constraints]
         constraints = constraints.is_a?(Array) ? constraints : [constraints]
 
         constraints.each do |constraint|
-          return true unless constraint.call(advanced_snippet)
+          return true unless constraint.call(payload)
         end
 
         false
       end
 
-      def type_error_present?(schema_type, snippet_value)
-        return !schema_type.call(snippet_value) if schema_type.is_a?(Proc)
+      def type_error_present?(schema_type, value)
+        return !schema_type.call(value) if schema_type.is_a?(Proc)
 
-        !snippet_value.is_a?(schema_type)
+        !value.is_a?(schema_type)
       end
 
       def exceeded_recursion_depth?(recursion_depth)
@@ -96,10 +86,16 @@ module Connectors
       end
 
       def unexpected_field_present?(actual_field_names, expected_field_names)
+        return false unless actual_field_names.present?
+
         difference = actual_field_names - expected_field_names
 
         # we have field names, which we didn't expect
         !difference.empty?
+      end
+
+      def is_required_value_missing?(snippet_field_value)
+        !snippet_field_value.present?
       end
 
       def valid_snippet
@@ -109,12 +105,24 @@ module Connectors
         }
       end
 
+      def required_value_missing(field)
+        {
+          :state => Core::Filtering::ValidationStatus::INVALID,
+          :errors => [
+            {
+              :ids => [@error_id],
+              :messages => ["Required value missing for field '#{field}'."]
+            }
+          ]
+        }
+      end
+
       def unexpected_field(expected_fields, actual_fields)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
-              :ids => [ADVANCED_SNIPPET_ID],
+              :ids => [@error_id],
               :messages => ["Encountered unexpected fields '#{actual_fields}'. Expected: '#{expected_fields}'."]
             }
           ]
@@ -126,20 +134,8 @@ module Connectors
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
-              :ids => [ADVANCED_SNIPPET_ID],
+              :ids => [@error_id],
               :messages => ["Expected field type '#{expected_type.is_a?(Proc) ? 'custom matcher' : expected_type}' for field '#{field_name}', but got value '#{actual_value.inspect}' of type '#{actual_value.class}'."]
-            }
-          ]
-        }
-      end
-
-      def wrong_names(actual_field_names, expected_field_name)
-        {
-          :state => Core::Filtering::ValidationStatus::INVALID,
-          :errors => [
-            {
-              :ids => [ADVANCED_SNIPPET_ID],
-              :messages => ["Expected field name '#{expected_field_name}', but got #{actual_field_names}."]
             }
           ]
         }
@@ -150,8 +146,8 @@ module Connectors
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
-              :ids => [ADVANCED_SNIPPET_ID],
-              :messages => ["A fields constraint was violated for fields: '#{fields[:values].map { |v| v[:name] }}'. Check advanced snippet field constraints."]
+              :ids => [@error_id],
+              :messages => ["A fields constraint was violated for fields: '#{fields[:values].map { |v| v[:name] }}'."]
             }
           ]
         }
@@ -162,12 +158,13 @@ module Connectors
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
-              :ids => [ADVANCED_SNIPPET_ID],
+              :ids => [@error_id],
               :messages => ['Unexpected error. Check logs for details.']
             }
           ]
         }
       end
+
     end
   end
 end
