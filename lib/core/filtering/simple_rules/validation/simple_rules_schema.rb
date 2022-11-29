@@ -11,7 +11,6 @@ module Core
   module Filtering
     module SimpleRules
       module Validation
-
         DEFAULT_RULE_ID = 'DEFAULT'
 
         ALLOWED_VALUE_TYPES = ->(rule_value) { rule_value.is_a?(String) || rule_value.is_a?(Integer) || rule_value.is_a?(TrueClass) || rule_value.is_a?(FalseClass) }

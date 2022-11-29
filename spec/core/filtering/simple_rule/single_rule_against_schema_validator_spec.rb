@@ -133,7 +133,6 @@ describe Core::Filtering::SimpleRules::Validation::SingleRuleAgainstSchemaValida
 
           it_behaves_like 'simple rules are valid'
         end
-
       end
 
       context 'when regex does not have parentheses' do
