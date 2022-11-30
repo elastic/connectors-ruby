@@ -138,6 +138,18 @@ module Core
         @rule_hash
       end
 
+      def try_coerce_value
+        coerced = to_float(value)
+        begin
+          coerced = to_date(value) if coerced.is_a?(String)
+        rescue ArgumentError
+          coerced = to_bool(value) if coerced.is_a?(String)
+        end
+        coerced
+      rescue StandardError
+        value
+      end
+
       private
 
       def to_bool(str)
@@ -149,7 +161,13 @@ module Core
       def to_date(str)
         DateTime.parse(str)
       rescue ArgumentError
-        Time.at(str.to_i) # try with it as an int string of millis
+        Time.at(Integer(value)) # try with it as an int string of millis
+      end
+
+      def to_float(value)
+        Float(value)
+      rescue StandardError
+        value
       end
     end
   end

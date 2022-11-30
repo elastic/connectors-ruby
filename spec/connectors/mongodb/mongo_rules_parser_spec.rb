@@ -38,6 +38,30 @@ describe Connectors::MongoDB::MongoRulesParser do
             result = subject.parse
             expect(result).to match({ 'foo' => 'bar' })
           end
+
+          context 'with a number' do
+            let(:value) { 123 }
+            it 'parses rule as equals' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => 123 })
+            end
+          end
+
+          context 'with a boolean' do
+            let(:value) { 'false' }
+            it 'parses rule as equals' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => false })
+            end
+          end
+
+          context 'with a date' do
+            let(:value) { '2019-11-02' }
+            it 'parses rule as equals' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => Date.parse('2019-11-02') })
+            end
+          end
         end
 
         context 'greater than' do
@@ -46,6 +70,14 @@ describe Connectors::MongoDB::MongoRulesParser do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$gt' => 'bar' } })
           end
+
+          context 'with a number string' do
+            let(:value) { '10' }
+            it 'parses rule as greater' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => { '$gt' => 10.0 } })
+            end
+          end
         end
 
         context 'less than' do
@@ -53,6 +85,14 @@ describe Connectors::MongoDB::MongoRulesParser do
           it 'parses rule as less' do
             result = subject.parse
             expect(result).to match({ 'foo' => { '$lt' => 'bar' } })
+          end
+
+          context 'with a number string' do
+            let(:value) { '10' }
+            it 'parses rule as less' do
+              result = subject.parse
+              expect(result).to match({ 'foo' => { '$lt' => 10.0 } })
+            end
           end
         end
 
