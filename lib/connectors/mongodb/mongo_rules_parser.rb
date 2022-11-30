@@ -51,26 +51,29 @@ module Connectors
       private
 
       def parse_equals(rule)
+        coerced = rule.try_coerce_value
         if rule.is_include?
-          { rule.field => rule.value }
+          { rule.field => coerced }
         else
-          { rule.field => { '$ne' => rule.value } }
+          { rule.field => { '$ne' => coerced } }
         end
       end
 
       def parse_greater_than(rule)
+        coerced = rule.try_coerce_value
         if rule.is_include?
-          { rule.field => { '$gt' => rule.value } }
+          { rule.field => { '$gt' => coerced } }
         else
-          { rule.field => { '$lte' => rule.value } }
+          { rule.field => { '$lte' => coerced } }
         end
       end
 
       def parse_less_than(rule)
+        coerced = rule.try_coerce_value
         if rule.is_include?
-          { rule.field => { '$lt' => rule.value } }
+          { rule.field => { '$lt' => coerced } }
         else
-          { rule.field => { '$gte' => rule.value } }
+          { rule.field => { '$gte' => coerced } }
         end
       end
 
