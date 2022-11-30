@@ -66,6 +66,21 @@ describe Connectors::Base::Connector do
   end
 
   describe '.initialize' do
+    let(:key) { 'key' }
+    let(:value) { 'value' }
+    let(:advanced_snippet) {
+      {
+        key => value
+      }
+    }
+
+    shared_examples_for 'advanced snippet is accessible with strings and symbols' do
+      it '' do
+        expect(subject.advanced_filter_config[:key]).to eq(value)
+        expect(subject.advanced_filter_config['key']).to eq(value)
+      end
+    end
+
     it 'uses job configuration' do
       expect(subject.instance_variable_get('@configuration')).to eq(job_configuration)
     end
@@ -77,6 +92,16 @@ describe Connectors::Base::Connector do
         expect(subject.instance_variable_get('@configuration')).to eq(connector_configuration)
       end
     end
+
+    context 'when advanced snippet contains key as string' do
+      it_behaves_like 'advanced snippet is accessible with strings and symbols'
+    end
+
+    context 'when advanced snippet contains key as symbol' do
+      let(:key) { :key }
+
+      it_behaves_like 'advanced snippet is accessible with strings and symbols'
+    end
   end
 
   describe '#advanced_filter_config' do
@@ -87,6 +112,12 @@ describe Connectors::Base::Connector do
     end
 
     context 'advanced filter config is present' do
+      let(:advanced_snippet) {
+        {
+          'some_field' => 'some_value'
+        }
+      }
+
       it 'returns advanced filter config' do
         expect(subject.advanced_filter_config).to eq(advanced_snippet)
       end
@@ -206,7 +237,7 @@ describe Connectors::Base::Connector do
       it 'extracts the advanced filter config' do
         advanced_filter_config = subject.advanced_filter_config
 
-        expect(advanced_filter_config).to eq(advanced_snippet)
+        expect(advanced_filter_config).to eq(advanced_snippet.with_indifferent_access)
       end
     end
 

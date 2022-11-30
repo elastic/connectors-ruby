@@ -91,7 +91,8 @@ module Connectors
         filter = Core::Filtering::Transform::FilterTransformerFacade.new(filter, self.class.filter_transformers).transform
 
         @rules = filter[:rules] || []
-        @advanced_filter_config = filter[:advanced_snippet] || {}
+        # regression bug, we need to keep indifferent access here until we get rid of symbols in the connectors
+        @advanced_filter_config = filter[:advanced_snippet]&.with_indifferent_access || {}
       end
 
       def yield_documents; end
