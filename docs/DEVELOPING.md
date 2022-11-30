@@ -86,7 +86,6 @@ To add a new custom connector, all you have to do is adding a new directory unde
     ```
 
   It's also possible to add a fail-safe mechanism to the method to also tolerate some of the errors that happen when yielding the documents. To do so you can use `yield_with_handling_tolerable_errors` function:
-
     ```ruby
     def yield_documents
       foobar_client.files do |file|
