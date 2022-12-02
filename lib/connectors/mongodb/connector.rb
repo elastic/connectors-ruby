@@ -153,10 +153,10 @@ module Connectors
       def create_aggregate_cursor(collection)
         aggregate = @advanced_filter_config[:aggregate]
 
-        pipeline = aggregate[:pipeline]
+        pipeline = aggregate[:pipeline] || []
         options = extract_options(aggregate)
 
-        if !pipeline.nil? && pipeline.empty? && !options.present?
+        if pipeline.empty? && options.empty?
           Utility::Logger.warn('\'Aggregate\' was specified with an empty pipeline and empty options.')
         end
 
