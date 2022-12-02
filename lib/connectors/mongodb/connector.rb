@@ -156,7 +156,7 @@ module Connectors
         pipeline = aggregate[:pipeline] || []
         options = extract_options(aggregate)
 
-        if !pipeline.present? && !options.present?
+        if pipeline.empty? && options.empty?
           Utility::Logger.warn('\'Aggregate\' was specified with an empty pipeline and empty options.')
         end
 
