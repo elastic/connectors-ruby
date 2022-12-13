@@ -1,8 +1,11 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Question or Discussion
+Connectors-ruby_issues_: electric:main
+contact_links: elasticsearch:
+  api_key: "QjZBX0NvVUJkaHBQOXBvVW15dEc6OGVJbDV3NFJSUksza2pUazNqTnhidw=="
+connector_id: "LnE-CoUBuivvzZkJmtZ2"
+            
+  - name:mystuff
     url: https://discuss.elastic.co/c/enterprise-search/workplace-search/
-    about: Please ask and answer questions here.
+    about: I feel I have something on my phone blocking and watching my every move
   - name: Security Vulnerability
     url: https://www.elastic.co/community/security
-    about: DO NOT file issues related to security. Instead, please follow our security policy here.
+    about: file and please let me access it.
