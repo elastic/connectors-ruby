@@ -12,6 +12,7 @@ require 'connectors'
 require 'core'
 require 'utility'
 require 'app/config'
+require 'objspace'
 
 module App
   class Dispatcher
@@ -27,6 +28,7 @@ module App
 
     class << self
       def start!
+        dump_with_timer
         running!
         Utility::Logger.info("Starting connector service in #{App::Config.native_mode ? 'native' : 'non-native'} mode...")
         start_job_cleanup_task!
@@ -69,6 +71,21 @@ module App
                        else
                          Core::SingleScheduler.new(App::Config.connector_id, POLL_INTERVAL, HEARTBEAT_INTERVAL)
                        end
+      end
+
+      def dump_with_timer
+        puts "Starting memory dumping timer"
+        Concurrent::TimerTask.new(:execution_interval => 30, :run_now => true) do
+          time = Time.now
+          filename = "/tmp/#{time}.dump"
+          puts "DUMPING MEMORY TO #{filename}"
+          file = File.open(filename, 'w')
+          ObjectSpace.dump_all(output: file)
+          file.close
+          puts "Done"
+        rescue StandardError => e
+          puts e
+        end.execute
       end
 
       def job_cleanup_timer

@@ -6,6 +6,9 @@
 
 # frozen_string_literal: true
 
+require 'objspace'
+ObjectSpace.trace_object_allocations_start
+
 $LOAD_PATH << '../'
 
 require 'app/dispatcher'
