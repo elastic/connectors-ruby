@@ -10,8 +10,21 @@ require 'active_support/core_ext/hash'
 require 'connectors/connector_status'
 require 'connectors/sync_status'
 require 'utility'
+require 'elastic-transport'
 
 module Core
+  class JobAlreadyRunningError < StandardError
+    def initialize(connector_id)
+      super("Sync job for connector '#{connector_id}' is already running.")
+    end
+  end
+
+  class ConnectorVersionChangedError < StandardError
+    def initialize(connector_id, seq_no, primary_term)
+      super("Version conflict: seq_no [#{seq_no}] and primary_term [#{primary_term}] do not match for connector '#{connector_id}'.")
+    end
+  end
+
   class ElasticConnectorActions
     class << self
 
@@ -72,10 +85,30 @@ module Core
       end
 
       def claim_job(connector_id)
-        update_connector_fields(connector_id,
-                                :sync_now => false,
-                                :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
-                                :last_synced => Time.now)
+        seq_no = nil
+        primary_term = nil
+        sync_in_progress = false
+        client.get(
+          :index => Utility::Constants::CONNECTORS_INDEX,
+          :id => connector_id,
+          :ignore => 404,
+          :refresh => true
+        ).tap do |response|
+          seq_no = response['_seq_no']
+          primary_term = response['_primary_term']
+          sync_in_progress = response.dig('_source', 'last_sync_status') == Connectors::SyncStatus::IN_PROGRESS
+        end
+        if sync_in_progress
+          raise JobAlreadyRunningError.new(connector_id)
+        end
+        update_connector_fields(
+          connector_id,
+          { :sync_now => false,
+            :last_sync_status => Connectors::SyncStatus::IN_PROGRESS,
+            :last_synced => Time.now },
+          seq_no,
+          primary_term
+        )
 
         body = {
           :connector_id => connector_id,
@@ -136,7 +169,7 @@ module Core
           }
           loop do
             response = client.search(:body => body)
-            hits = response['hits']['hits']
+            hits = response.dig('hits', 'hits') || []
 
             ids = hits.map { |h| h['_id'] }
             result += ids
@@ -242,15 +275,29 @@ module Core
         ensure_index_exists("#{Utility::Constants::JOB_INDEX}-v1", system_index_body(:alias_name => Utility::Constants::JOB_INDEX, :mappings => mappings))
       end
 
-      def update_connector_fields(connector_id, doc = {})
+      def update_connector_fields(connector_id, doc = {}, seq_no = nil, primary_term = nil)
         return if doc.empty?
-        client.update(
+        update_args = {
           :index => Utility::Constants::CONNECTORS_INDEX,
           :id => connector_id,
           :body => { :doc => doc },
           :refresh => true,
           :retry_on_conflict => 3
-        )
+        }
+        # seq_no and primary_term are used for optimistic concurrency control
+        # see https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html
+        if seq_no && primary_term
+          update_args[:if_seq_no] = seq_no
+          update_args[:if_primary_term] = primary_term
+          update_args.delete(:retry_on_conflict)
+        end
+        begin
+          client.update(update_args)
+        rescue Elastic::Transport::Transport::Errors::Conflict
+          # VersionConflictException
+          # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html#optimistic-concurrency-control-index
+          raise ConnectorVersionChangedError.new(connector_id, seq_no, primary_term)
+        end
       end
 
       private

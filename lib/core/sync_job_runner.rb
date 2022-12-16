@@ -40,7 +40,7 @@ module Core
     private
 
     def do_sync!
-      Utility::Logger.info("Starting sync for connector #{@connector_settings.id}.")
+      Utility::Logger.info("Claiming a sync job for connector #{@connector_settings.id}.")
 
       job_id = ElasticConnectorActions.claim_job(@connector_settings.id)
 
