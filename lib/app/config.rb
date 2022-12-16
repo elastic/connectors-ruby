@@ -113,6 +113,8 @@ module App
       return nil
     end
 
+    headers = ent_search_config['elasticsearch.headers'] || nil
+
     {
       :hosts => [
         {
@@ -122,7 +124,8 @@ module App
           host: uri.host,
           port: uri.port
         }
-      ]
+      ],
+      :headers => headers
     }
   end
 
