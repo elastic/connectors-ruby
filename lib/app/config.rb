@@ -113,7 +113,7 @@ module App
       return nil
     end
 
-    headers = ent_search_config['elasticsearch.headers'] || nil
+    headers = ent_search_config['elasticsearch.headers'] || ent_search_config.dig('elasticsearch', 'headers')
 
     {
       :hosts => [
