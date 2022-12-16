@@ -6,13 +6,14 @@
 
 # frozen_string_literal: true
 
-require 'active_support/core_ext/hash/indifferent_access'
 require 'connectors/base/connector'
 require 'mongo'
 
 module Connectors
   module MongoDB
     class Connector < Connectors::Base::Connector
+      PAGE_SIZE = 100
+
       def self.service_type
         'mongodb'
       end
@@ -57,10 +58,23 @@ module Connectors
 
       def yield_documents
         with_client do |client|
-          client[@collection].find.each do |document|
-            doc = document.with_indifferent_access
+          # We do paging using skip().limit() here to make Ruby recycle the memory for each page pulled from the server after it's not needed any more.
+          # This gives us more control on the usage of the memory (we can adjust PAGE_SIZE constant for that to decrease max memory consumption).
+          # It's done due to the fact that usage of .find.each leads to memory leaks or overuse of memory - the whole result set seems to stay in memory
+          # during the sync. Sometimes (not 100% sure) it even leads to a real leak, when the memory for these objects is never recycled.
+          cursor = client[@collection].find
+          skip = 0
 
-            yield serialize(doc)
+          loop do
+            found_count = 0
+            view = cursor.skip(skip).limit(PAGE_SIZE)
+            view.each do |document|
+              yield serialize(document)
+              found_count += 1
+            end
+
+            break if found_count == 0
+            skip += PAGE_SIZE
           end
         end
       end
@@ -76,32 +90,41 @@ module Connectors
       def with_client
         raise "Invalid value for 'Direct connection' : #{@direct_connection}." unless %w[true false].include?(@direct_connection.to_s.strip.downcase)
 
-        client = if @user.present? || @password.present?
-                   Mongo::Client.new(
-                     @host,
-                     database: @database,
-                     direct_connection: to_boolean(@direct_connection),
-                     user: @user,
-                     password: @password
-                   )
-                 else
-                   Mongo::Client.new(
-                     @host,
-                     database: @database,
-                     direct_connection: to_boolean(@direct_connection)
-                   )
-                 end
+        args = {
+                 database: @database,
+                 direct_connection: to_boolean(@direct_connection)
+               }
 
-        begin
-          Utility::Logger.debug("Existing Databases #{client.database_names}")
-          Utility::Logger.debug('Existing Collections:')
+        if @user.present? || @password.present?
+          args[:user] = @user
+          args[:password] = @password
+        end
 
-          client.collections.each { |coll| Utility::Logger.debug(coll.name) }
+        Mongo::Client.new(@host, args) do |client|
+          databases = client.database_names
+
+          Utility::Logger.debug("Existing Databases: #{databases}")
+          check_database_exists!(databases, @database)
+
+          collections = client.database.collection_names
+
+          Utility::Logger.debug("Existing Collections: #{collections}")
+          check_collection_exists!(collections, @database, @collection)
 
           yield client
-        ensure
-          client.close
         end
+      end
+
+      def check_database_exists!(databases, database)
+        return if databases.include?(database)
+
+        raise "Database (#{database}) does not exist. Existing databases: #{databases.join(', ')}"
+      end
+
+      def check_collection_exists!(collections, database, collection)
+        return if collections.include?(collection)
+
+        raise "Collection (#{collection}) does not exist within database '#{database}'. Existing collections: #{collections.join(', ')}"
       end
 
       def serialize(mongodb_document)
@@ -120,11 +143,10 @@ module Connectors
           mongodb_document.map { |v| serialize(v) }
         when Hash
           mongodb_document.map do |key, value|
-            remapped_key = key.to_sym == :_id ? :id : key.to_sym
-
+            key = 'id' if key == '_id'
             remapped_value = serialize(value)
-            [remapped_key, remapped_value]
-          end.to_h.with_indifferent_access
+            [key, remapped_value]
+          end.to_h
         else
           mongodb_document
         end

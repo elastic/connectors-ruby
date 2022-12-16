@@ -24,6 +24,7 @@ module Core
       @sink = Core::OutputSink::EsSink.new(connector_settings.index_name, @connector_settings.request_pipeline)
       @connector_class = Connectors::REGISTRY.connector_class(connector_settings.service_type)
       @connector_instance = Connectors::REGISTRY.connector(connector_settings.service_type, connector_settings.configuration)
+      @sync_finished = false
       @status = {
         :indexed_document_count => 0,
         :deleted_document_count => 0,
@@ -61,7 +62,7 @@ module Core
         @connector_instance.yield_documents do |document|
           document = add_ingest_metadata(document)
           @sink.ingest(document)
-          incoming_ids << document[:id]
+          incoming_ids << document['id']
           @status[:indexed_document_count] += 1
         end
 
@@ -75,6 +76,10 @@ module Core
         end
 
         @sink.flush
+
+        # We use this mechanism for checking, whether an interrupt (or something else lead to the thread not finishing)
+        # occurred as most of the time the main execution thread is interrupted and we miss this Signal/Exception here
+        @sync_finished = true
       rescue StandardError => e
         @status[:error] = e.message
         Utility::ExceptionTracking.log_exception(e)
@@ -83,10 +88,15 @@ module Core
         Utility::Logger.info("Upserted #{@status[:indexed_document_count]} documents into #{@connector_settings.index_name}.")
         Utility::Logger.info("Deleted #{@status[:deleted_document_count]} documents into #{@connector_settings.index_name}.")
 
+        # Make sure to not override a previous error message
+        if !@sync_finished && @status[:error].nil?
+          @status[:error] = 'Sync thread didn\'t finish execution. Check connector logs for more details.'
+        end
+
         ElasticConnectorActions.complete_sync(@connector_settings.id, job_id, @status.dup)
 
         if @status[:error]
-          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error #{@status[:error]}.")
+          Utility::Logger.info("Failed to sync for connector #{@connector_settings.id} with error '#{@status[:error]}'.")
         else
           Utility::Logger.info("Successfully synced for connector #{@connector_settings.id}.")
         end

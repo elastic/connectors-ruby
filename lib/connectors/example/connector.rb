@@ -20,11 +20,16 @@ module Connectors
         'Example Connector'
       end
 
+      # Field 'Foo' won't have a default value. Field 'Bar' will have the default value 'Value'.
       def self.configurable_fields
         {
           'foo' => {
             'label' => 'Foo',
             'value' => nil
+          },
+          :bar => {
+            :label => 'Bar',
+            :value => 'Value'
           }
         }
       end
@@ -49,6 +54,12 @@ module Connectors
 
         attachments.each_with_index do |att, index|
           data = { id: (index + 1).to_s, name: "example document #{index + 1}", _attachment: File.read(att) }
+
+          # Uncomment one of these two lines to simulate longer running sync jobs
+          #
+          # sleep(rand(10..60).seconds)
+          # sleep(rand(1..10).minutes)
+
           yield data
         end
       end
