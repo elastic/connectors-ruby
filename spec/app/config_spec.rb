@@ -37,7 +37,10 @@ describe App do
         {
           'elasticsearch.host' => 'http://localhost:9200',
           'elasticsearch.username' => 'elastic',
-          'elasticsearch.password' => 'changeme'
+          'elasticsearch.password' => 'changeme',
+          'elasticsearch.headers' => {
+            'x-pass-through' => true
+          }
         }
       end
 
@@ -51,7 +54,10 @@ describe App do
               host: 'localhost',
               port: 9200
             }
-          ]
+          ],
+          :headers => {
+            'x-pass-through' => true
+          }
         }
       end
 
@@ -121,7 +127,10 @@ describe App do
             'elasticsearch' => {
               'host' => 'http://localhost:9200',
               'username' => 'elastic',
-              'password' => 'changeme'
+              'password' => 'changeme',
+              'headers' => {
+                'x-pass-through' => true
+              }
             }
           }
         end
