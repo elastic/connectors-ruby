@@ -78,4 +78,33 @@ RSpec.describe Utility::EsClient do
       end
     end
   end
+
+  describe '#connection_configs' do
+    let(:disable_warnings) { false }
+    context 'when headers are present' do
+      let(:headers) do
+        {
+          :something => 'something'
+        }
+      end
+
+      it 'configures Elasticsearch client with headers' do
+        config[:elasticsearch][:headers] = headers
+
+        result = subject.connection_configs(config[:elasticsearch])
+
+        expect(result[:headers]).to eq(headers)
+      end
+    end
+
+    context 'when headers are not present' do
+      it 'configures Elasticsearch client with headers' do
+        config[:elasticsearch][:headers] = nil
+
+        result = subject.connection_configs(config[:elasticsearch])
+
+        expect(result).to_not have_key(:headers)
+      end
+    end
+  end
 end
