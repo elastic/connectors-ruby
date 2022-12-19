@@ -44,7 +44,7 @@ Gem::Specification.new do |s|
                     lib/connectors/job_trigger_method.rb
                   ]
   s.license     = 'Elastic-2.0'
-  s.add_dependency 'activesupport', '~>5.2.6'
+  s.add_dependency 'activesupport', '>= 5.2'
   s.add_dependency 'ecs-logging', '~> 1.0.0'
   s.add_dependency 'fugit', '~> 1.5.3'
   s.add_dependency 'mime-types', '= 3.1'
