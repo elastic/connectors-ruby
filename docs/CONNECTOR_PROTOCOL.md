@@ -277,6 +277,10 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
       service_type: string;   -> Service type of the connector
     }
   ];
+  checkpoint: {
+    <service_type>: object; -> free-form checkpoint data for the job that can be used to restart the crashed job
+    restart_attempts: number; -> number of times the job was attempted to continue from the checkpoint
+  };
   created_at: date; -> The date/time when the job is created
   deleted_document_count: number; -> Number of documents deleted in the job
   error: string; -> Optional error message
@@ -297,7 +301,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
 - `in_progress` -> A job is successfully started.
 - `canceling` -> The cancelation of the job is initiated.
 - `canceled` -> A job is canceled.
-- `suspended` -> A job is successfully started.
+- `suspended` -> A job has been suspended and will attempt to continue execution later.
 - `completed` -> A job is successfully completed.
 - `error` -> A job failed.
 
