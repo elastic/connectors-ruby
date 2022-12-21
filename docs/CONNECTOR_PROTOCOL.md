@@ -301,7 +301,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
 - `in_progress` -> A job is successfully started.
 - `canceling` -> The cancelation of the job is initiated.
 - `canceled` -> A job is canceled.
-- `suspended` -> A job has been suspended and will attempt to continue execution later.
+- `suspended` -> A job has been suspended and may attempt to continue execution later.
 - `completed` -> A job is successfully completed.
 - `error` -> A job failed.
 
