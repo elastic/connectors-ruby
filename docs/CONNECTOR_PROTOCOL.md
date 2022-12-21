@@ -278,7 +278,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
     }
   ];
   checkpoint: {
-    <service_type>: object; -> free-form checkpoint data for the job that can be used to restart the crashed job
+    data: object; -> free-form checkpoint data for the job that can be used to restart the crashed job
     restart_attempts: number; -> number of times the job was attempted to continue from the checkpoint
   };
   created_at: date; -> The date/time when the job is created
