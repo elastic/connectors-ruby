@@ -40,8 +40,8 @@ module Core
         Utility::Logger.info("Starting a new consumer for #{@index_name} index")
 
         @index_name = index_name
-        start_timer_task!
         start_thread_pool!
+        start_timer_task!
       end
 
       def running?
@@ -50,8 +50,8 @@ module Core
 
       def shutdown!
         Utility::Logger.info("Shutting down consumer for #{@index_name} index")
-
-        timer_task.shutdown
+        @shutdown = true
+        # timer_task.shutdown
         pool.shutdown
         pool.wait_for_termination(@termination_timeout)
         reset_pool!
@@ -62,7 +62,14 @@ module Core
       attr_reader :pool, :timer_task
 
       def start_timer_task!
-        @timer_task = Concurrent::TimerTask.execute(execution_interval: @poll_interval, run_now: true) { execute }
+        loop do
+          break if @shutdown
+
+          execute
+
+          sleep(@poll_interval)
+        end
+        # @timer_task = Concurrent::TimerTask.execute(execution_interval: @poll_interval, run_now: true) { execute }
       end
 
       def start_thread_pool!

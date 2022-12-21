@@ -71,6 +71,10 @@ install:
 	- gem install bundler -v $(shell cat .bundler-version) && rbenv rehash
 	bundle _$(shell cat .bundler-version)_ install --jobs 1
 
+install_for_production:
+	- gem install bundler -v $(shell cat .bundler-version) && rbenv rehash
+	bundle _$(shell cat .bundler-version)_ install --without development test --jobs 1
+
 build-docker:
 	docker build -t connectors .
 
@@ -79,6 +83,12 @@ run-docker:
 
 exec_app:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby app.rb
+
+run_producer:
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby producer_app.rb
+
+run_consumers:
+	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby consumer_app.rb
 
 exec_cli:
 	cd lib/app; bundle _$(shell cat .bundler-version)_ exec ruby console_app.rb

@@ -1,0 +1,8 @@
+---
+configMapGenerator:
+- name: enterprise-search-python-connectors-configuration
+  files:
+  - connectors-python.yml
+- name: enterprise-search-configuration
+  files:
+  - enterprise_search.yml

@@ -1,0 +1,25 @@
+# general metadata
+version: "8.6.0.0-20221123T101025Z"
+repository: "git@github.com:elastic/connectors.git"
+revision: "5452054864ad0863e9b185d25b28f1ff2f214849"
+elasticsearch:
+  # cloud_id: CHANGEME
+  hosts: http://localhost:9200
+  api_key: ZTdpTmhZUUJFMXlUVTl1eUcyTks6UTVwdDBaVlBSSXVCM2doMWFxMlYtQQ==
+  retry_on_failure: 3
+  request_timeout: 120
+  disable_warnings: true
+  trace: false
+  log: false
+thread_pool:
+  min_threads: 0
+  max_threads: 5
+  max_queue: 100
+log_level: info
+ecs_logging: false
+poll_interval: 3
+termination_timeout: 60
+heartbeat_interval: 1800
+native_mode: true
+connector_id: CHANGEME
+service_type: CHANGEME

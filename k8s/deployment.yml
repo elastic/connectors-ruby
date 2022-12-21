@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connectors-ruby-producer
+  labels:
+    service.type: connectors-ruby
+    service.group: producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.type: connectors-ruby
+      service.group: producer
+  template:
+    metadata:
+      labels:
+        service.type: connectors-ruby
+        service.group: producer
+    spec:
+      containers:
+      - name: connectors-ruby
+        image: connectors:latest
+        command: ["make"]
+        args: ["run_producer"]
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connectors-ruby-consumer
+  labels:
+    service.type: ruby
+    service.group: consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.type: connectors-ruby
+      service.group: consumer
+  template:
+    metadata:
+      labels:
+        service.type: connectors-ruby
+        service.group: consumer
+    spec:
+      containers:
+      - name: connectors-ruby
+        imagePullPolicy: Never
+        image: connectors:latest
+        command: ["make"]
+        args: ["run_consumers"]
+        volumeMounts:
+        - name: enterprise-search-configuration
+          mountPath: /app/config/ent-search
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        imagePullPolicy: Never
+      volumes:
+      - name: enterprise-search-configuration
+        configMap:
+          name: enterprise-search-configuration-4bf99k7m9b
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connectors-python
+  labels:
+    app: python
+    group: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.type: connectors-python
+      service.group: default
+  template:
+    metadata:
+      labels:
+        service.type: connectors-python
+        service.group: default
+    spec:
+      containers:
+      - name: connectors-python
+        image: connectors-python:latest
+        command: ["elastic-ingest"]
+        args: ["-c", "/app/config/connectors/connectors-python.yml", "--filebeat", '--debug']
+        env:
+        - name: ENT_SEARCH_CONFIG_PATH
+          value: /app/config/ent-search/enterprise_search.yml
+        volumeMounts:
+        - name: enterprise-search-configuration
+          mountPath: /app/config/ent-search/
+        - name: enterprise-search-python-connectors-configuration
+          mountPath: /app/config/connectors/
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      volumes:
+      - name: enterprise-search-configuration
+        configMap:
+          name: enterprise-search-configuration-4bf99k7m9b
+      - name: enterprise-search-python-connectors-configuration
+        configMap:
+          name: enterprise-search-python-connectors-configuration-5gdd5tk82b
