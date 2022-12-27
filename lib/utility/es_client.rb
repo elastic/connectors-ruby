@@ -43,6 +43,10 @@ module Utility
       configs[:transport_options] = es_config[:transport_options] if es_config[:transport_options]
       configs[:ca_fingerprint] = es_config[:ca_fingerprint] if es_config[:ca_fingerprint]
 
+      # headers
+      # these are necessary for cloud-hosted native connectors
+      configs[:headers] = es_config[:headers].to_h if es_config[:headers]
+
       # if log or trace is activated, we use the application logger
       configs[:logger] = if configs[:log] || configs[:trace]
                            Utility::Logger.logger
