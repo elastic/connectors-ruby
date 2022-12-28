@@ -241,6 +241,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   canceled_at: date; -> The date/time when the job is canceled
   completed_at: date; -> The data/time when the job is completed
   connector: {              -> Connector snapshot
+    id: string;   -> ID of the connector
     configuration: object;  -> Connector configuration
     filtering: [             -> Array of filtering rules, connectors use the first entry by default
       {
@@ -265,7 +266,6 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
           messages: string    -> the reason(s) those rules cannot be used for query-time filtering
         }
       };
-      connector_id: string;   -> ID of the connector
       index_name: string;     -> The name of the content index
       language: string        -> The language used for the analyzer
       pipeline: {             -> Connector pipeline
