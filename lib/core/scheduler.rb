@@ -148,6 +148,21 @@ module Core
     end
 
     def filtering_validation_triggered?(connector_settings)
+      features = connector_settings.features
+
+      if features.nil? || features.empty?
+        # Regression bug
+        Utility::Logger.error("#{connector_settings.formatted} features are empty. Skip filtering validation.")
+
+        return false
+      end
+
+      unless connector_settings.any_filtering_feature_enabled?
+        Utility::Logger.debug("#{connector_settings.formatted} all filtering features are disabled. Skip filtering validation.")
+
+        return false
+      end
+
       filtering = connector_settings.filtering
 
       unless filtering.present?
