@@ -78,10 +78,6 @@ module Core
       return unless claim_job!
 
       begin
-        Utility::Logger.info("Checking active filtering for sync job #{@job_id} for connector #{@connector_id}.")
-        validate_filtering(@job.filtering)
-        Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
-
         @connector_instance = Connectors::REGISTRY.connector(@service_type, @connector_settings.configuration, job_description: @job)
         @connector_instance.do_health_check!
 
@@ -94,19 +90,31 @@ module Core
 
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@index_name}.")
 
-        post_processing_engine = Core::Filtering::PostProcessEngine.new(@job.filtering)
-        Utility::Logger.info('Yielding documents...')
-        @connector_instance.yield_documents do |document|
-          document = add_ingest_metadata(document)
-          post_process_result = post_processing_engine.process(document)
-          if post_process_result.is_include?
+        # We want to validate advanced filtering rules even if basic rules are disabled
+        if @connector_settings.any_filtering_feature_enabled?
+          Utility::Logger.info("Checking active filtering for sync job #{@job_id} for connector #{@connector_id}.")
+          validate_filtering(@job.filtering)
+          Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
+        end
+
+        if @connector_settings.filtering_rule_feature_enabled?
+          post_processing_engine = Core::Filtering::PostProcessEngine.new(@job.filtering)
+
+          Utility::Logger.info('Yielding documents with basic rule filtering...')
+
+          yield_docs do |document|
+            post_process_result = post_processing_engine.process(document)
+            if post_process_result.is_include?
+              @sink.ingest(document)
+              incoming_ids << document['id']
+            end
+          end
+        else
+          Utility::Logger.info('Yielding documents without basic rule filtering...')
+
+          yield_docs do |document|
             @sink.ingest(document)
             incoming_ids << document['id']
-          end
-
-          periodically do
-            check_job
-            @job.update_metadata(@sink.ingestion_stats, @connector_instance.metadata)
           end
         end
 
@@ -181,6 +189,19 @@ module Core
         end
 
         Utility::Logger.info("Completed the job (ID: #{@job_id}) with status: #{@sync_status}#{@sync_error ? " and error: #{@sync_error}" : ''}")
+      end
+    end
+
+    def yield_docs
+      @connector_instance.yield_documents do |document|
+        document = add_ingest_metadata(document)
+
+        yield(document) if block_given?
+
+        periodically do
+          check_job
+          @job.update_metadata(@sink.ingestion_stats, @connector_instance.metadata)
+        end
       end
     end
 

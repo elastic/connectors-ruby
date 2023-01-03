@@ -53,12 +53,15 @@ describe Core::SyncJobRunner do
   let(:extracted_documents) { [] } # documents returned from 3rd-party system
   let(:connector_metadata) { { :foo => 'bar' } } # metadata returned from connectors
 
+  let(:any_filtering_feature_enabled) { true }
+  let(:filtering_rule_feature_enabled) { true }
   let(:filtering_validation_result) {
     {
       :state => Core::Filtering::ValidationStatus::VALID,
       :errors => []
     }
   }
+
   let(:connector_running) { false }
   let(:job_id) { 'job-123' }
   let(:job_canceling) { false }
@@ -118,6 +121,8 @@ describe Core::SyncJobRunner do
     allow(connector_settings).to receive(:request_pipeline).and_return(request_pipeline)
     allow(connector_settings).to receive(:running?).and_return(connector_running)
     allow(connector_settings).to receive(:update_last_sync!)
+    allow(connector_settings).to receive(:any_filtering_feature_enabled?).and_return(any_filtering_feature_enabled)
+    allow(connector_settings).to receive(:filtering_rule_feature_enabled?).and_return(filtering_rule_feature_enabled)
 
     allow(connector_class).to receive(:configurable_fields).and_return(connector_default_configuration)
     allow(connector_class).to receive(:validate_filtering).and_return(filtering_validation_result)
@@ -330,22 +335,44 @@ describe Core::SyncJobRunner do
 
       let(:extracted_documents) { [doc1, doc2] } # documents returned from 3rd-party system
 
-      it 'ingests returned documents into the sink' do
-        expect(sink).to receive(:ingest).with(doc1)
-        expect(sink).to receive(:ingest).with(doc2)
+      shared_examples_for 'indexes all docs' do
+        it '' do
+          expect(sink).to receive(:ingest).with(doc1)
+          expect(sink).to receive(:ingest).with(doc2)
 
-        subject.execute
+          subject.execute
+        end
       end
 
-      context 'with filtering rules' do
+      shared_examples_for 'validates filtering' do
+        it '' do
+          expect(connector_class).to receive(:validate_filtering)
+
+          subject.execute
+        end
+      end
+
+      shared_context 'exclude one document' do
         let(:additional_rules) do
           [
             Core::Filtering::SimpleRule.from_args('1', 'exclude', 'title', 'equals', 'Hello').to_h
           ]
         end
+
         before(:each) do
           filtering[0]['rules'].unshift(*additional_rules)
         end
+      end
+
+      it_behaves_like 'validates filtering'
+      it_behaves_like 'indexes all docs'
+      it_behaves_like 'runs a full sync'
+
+      context 'when filtering rule feature is enabled' do
+        include_context 'exclude one document'
+
+        let(:any_filtering_feature_enabled) { true }
+        let(:filtering_rule_feature_enabled) { true }
 
         it 'does not ingest the excluded document' do
           expect(sink).to_not receive(:ingest).with(doc1)
@@ -361,13 +388,38 @@ describe Core::SyncJobRunner do
             ]
           end
 
-          it 'indexes all docs' do
-            expect(sink).to receive(:ingest).with(doc1)
-            expect(sink).to receive(:ingest).with(doc2)
-
-            subject.execute
-          end
+          it_behaves_like 'validates filtering'
+          it_behaves_like 'indexes all docs'
+          it_behaves_like 'runs a full sync'
         end
+      end
+
+      context 'when no filtering feature is enabled' do
+        # will be ignored as no filtering feature is enabled
+        include_context 'exclude one document'
+
+        let(:any_filtering_feature_enabled) { false }
+        let(:filtering_rule_feature_enabled) { false }
+
+        # filtering won't be validated if all filtering features are disabled
+        it 'does not validate filtering' do
+          expect(connector_class).to_not receive(:validate_filtering)
+        end
+
+        it_behaves_like 'indexes all docs'
+        it_behaves_like 'runs a full sync'
+      end
+
+      context 'when another filtering feature is enabled while filtering basic rule feature is disabled' do
+        # will be ignored as no filtering feature is enabled
+        include_context 'exclude one document'
+
+        let(:any_filtering_feature_enabled) { true }
+        let(:filtering_rule_feature_enabled) { false }
+
+        it_behaves_like 'validates filtering'
+        it_behaves_like 'indexes all docs'
+        it_behaves_like 'runs a full sync'
       end
 
       context 'when some documents were present before' do
