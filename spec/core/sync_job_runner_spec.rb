@@ -411,7 +411,7 @@ describe Core::SyncJobRunner do
       end
 
       context 'when another filtering feature is enabled while filtering basic rule feature is disabled' do
-        # will be ignored as no filtering feature is enabled
+        # will be ignored as basic rule filtering is disabled
         include_context 'exclude one document'
 
         let(:any_filtering_feature_enabled) { true }
