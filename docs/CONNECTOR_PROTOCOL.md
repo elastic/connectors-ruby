@@ -131,48 +131,6 @@ This is our main communication index, used to communicate the connector's config
     },
     "version" : "1"
   },
-  "dynamic_templates": [
-    {
-      "custom_scheduling": {
-        "path_match": "custom_scheduling.*",
-        "mapping": {
-          "type": "object"
-        }
-      }
-    },
-    {
-      "custom_scheduling_configuration_overrides": {
-        "path_match": "custom_scheduling.*.configuration_overrides",
-        "mapping": {
-          "type": "object"
-        }
-      }
-    },
-    {
-      "custom_scheduling_enabled": {
-        "path_match": "custom_scheduling.*.enabled",
-        "mapping": {
-          "type": "boolean"
-        }
-      }
-    },
-    {
-      "custom_scheduling_interval": {
-        "path_match": "custom_scheduling.*.interval",
-        "mapping": {
-          "type": "text"
-        }
-      }
-    },
-    {
-      "custom_scheduling_name": {
-        "path_match": "custom_scheduling.*.name",
-        "mapping": {
-          "type": "text"
-        }
-      }
-    }
-  ]
   "properties" : {
     "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
