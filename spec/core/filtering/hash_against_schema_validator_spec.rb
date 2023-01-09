@@ -28,15 +28,26 @@ describe Core::Filtering::SchemaValidator do
     end
   end
 
-  shared_examples_for 'hash is invalid' do
+  shared_examples_for 'hash is invalid' do |expected|
     it '' do
       validation_result = subject.validate_against_schema
 
       expect(validation_result[:state]).to eq(Core::Filtering::ValidationStatus::INVALID)
       expect(validation_result[:errors]).to_not be_empty
       expect(validation_result[:errors]).to be_an(Array)
-      expect(validation_result[:errors][0][:ids]).to_not be_empty
-      expect(validation_result[:errors][0][:messages]).to be_an(Array)
+
+      if expected&.key?(:ids)
+        expect(validation_result[:errors][0][:ids]).to match(expected[:ids])
+      else
+        expect(validation_result[:errors][0][:ids]).to_not be_empty
+      end
+
+      if expected&.key?(:messages)
+        expect(validation_result[:errors][0][:messages]).to match(expected[:messages])
+      else
+        expect(validation_result[:errors][0][:messages]).to be_an(Array)
+        expect(validation_result[:errors][0][:messages]).to_not be_empty
+      end
     end
   end
 
@@ -304,36 +315,79 @@ describe Core::Filtering::SchemaValidator do
         end
       end
 
-      context 'config schema contains custom type matcher function' do
-        let(:config_schema) {
-          {
-            :fields => [
-              {
-                :name => 'field_with_custom_type',
-                :type => ->(field_value) { field_value.is_a?(Array) && field_value.include?('A') }
-              }
-            ]
-          }
+      context 'when config schema contains custom type matcher function' do
+        let(:custom_type_matcher_function) {
+          ->(field_value) { field_value.is_a?(Array) && field_value.include?('A') }
         }
 
-        context 'advanced snippet contains array with \'A\'' do
-          let(:advanced_snippet) {
+        context 'when custom type matcher function returns custom error message' do
+          let(:config_schema) {
             {
-              :field_with_custom_type => %w[A B C]
+              :fields => [
+                {
+                  :name => 'field_with_custom_type',
+                  :type => lambda { |field_value|
+                    return custom_type_matcher_function.call(field_value), 'array does not contain A'
+                  }
+                }
+              ]
             }
           }
 
-          it_behaves_like 'hash is valid'
+          context 'when advanced snippet contains array with \'A\'' do
+            let(:advanced_snippet) {
+              {
+                :field_with_custom_type => %w[A B C]
+              }
+            }
+
+            it_behaves_like 'hash is valid'
+          end
+
+          context 'when advanced snippet does not contain array with \'A\'' do
+            let(:advanced_snippet) {
+              {
+                :field_with_custom_type => %w[B C]
+              }
+            }
+
+            it_behaves_like 'hash is invalid', { :messages => ['array does not contain A'] }
+          end
         end
 
-        context 'advanced snippet does not contain array with \'A\'' do
-          let(:advanced_snippet) {
+        context 'when custom type matcher function does not return custom error message' do
+          let(:config_schema) {
             {
-              :field_with_custom_type => %w[B C]
+              :fields => [
+                {
+                  :name => 'field_with_custom_type',
+                  :type => lambda { |field_value|
+                    custom_type_matcher_function.call(field_value)
+                  }
+                }
+              ]
             }
           }
 
-          it_behaves_like 'hash is invalid'
+          context 'when advanced snippet contains array with \'A\'' do
+            let(:advanced_snippet) {
+              {
+                :field_with_custom_type => %w[A B C]
+              }
+            }
+
+            it_behaves_like 'hash is valid'
+          end
+
+          context 'when advanced snippet does not contain array with \'A\'' do
+            let(:advanced_snippet) {
+              {
+                :field_with_custom_type => %w[B C]
+              }
+            }
+
+            it_behaves_like 'hash is invalid', { :messages => ['Custom type matcher validation failed.'] }
+          end
         end
       end
 

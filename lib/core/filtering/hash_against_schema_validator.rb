@@ -45,7 +45,9 @@ module Core
 
           return required_value_missing(name) if is_required_value_missing?(snippet_field_value)
 
-          return wrong_type(name, type, snippet_field_value) if type_error_present?(type, snippet_field_value)
+          type_error_present, error_message = type_error_present?(name, type, snippet_field_value)
+
+          return wrong_type(error_message) if type_error_present
 
           if field[:fields].present?
             validation_result = validate_against_schema(field, snippet_field_value, recursion_depth + 1)
@@ -70,10 +72,25 @@ module Core
         false
       end
 
-      def type_error_present?(schema_type, value)
-        return !schema_type.call(value) if schema_type.is_a?(Proc)
+      def type_error_present?(field_name, schema_type, actual_value)
+        if schema_type.is_a?(Proc)
+          result = schema_type.call(actual_value)
 
-        !value.is_a?(schema_type)
+          # could already have a custom error message
+          if result.is_a?(Array)
+            is_valid, error_msg = result
+
+            return !is_valid, error_msg
+          end
+
+          # could only return a single boolean
+          return !result, 'Custom type matcher validation failed.'
+        end
+
+        error_msg = "Expected field type '#{schema_type}' for field '#{field_name}', but got value '#{actual_value.inspect}' of type '#{actual_value.class}'."
+        return true, error_msg unless actual_value.is_a?(schema_type)
+
+        false
       end
 
       def exceeded_recursion_depth?(recursion_depth)
@@ -129,13 +146,13 @@ module Core
         }
       end
 
-      def wrong_type(field_name, expected_type, actual_value)
+      def wrong_type(error_message)
         {
           :state => Core::Filtering::ValidationStatus::INVALID,
           :errors => [
             {
               :ids => [@error_id],
-              :messages => ["Expected field type '#{expected_type.is_a?(Proc) ? 'custom matcher' : expected_type}' for field '#{field_name}', but got value '#{actual_value.inspect}' of type '#{actual_value.class}'."]
+              :messages => [error_message]
             }
           ]
         }
