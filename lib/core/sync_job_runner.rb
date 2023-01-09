@@ -78,6 +78,13 @@ module Core
       return unless claim_job!
 
       begin
+        # We want to validate advanced filtering rules even if basic rules are disabled
+        if @connector_settings.any_filtering_feature_enabled?
+          Utility::Logger.info("Checking active filtering for sync job #{@job_id} for connector #{@connector_id}.")
+          validate_filtering(@job.filtering)
+          Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
+        end
+
         @connector_instance = Connectors::REGISTRY.connector(@service_type, @connector_settings.configuration, job_description: @job)
         @connector_instance.do_health_check!
 
@@ -90,32 +97,12 @@ module Core
 
         Utility::Logger.debug("#{existing_ids.size} documents are present in index #{@index_name}.")
 
-        # We want to validate advanced filtering rules even if basic rules are disabled
-        if @connector_settings.any_filtering_feature_enabled?
-          Utility::Logger.info("Checking active filtering for sync job #{@job_id} for connector #{@connector_id}.")
-          validate_filtering(@job.filtering)
-          Utility::Logger.debug("Active filtering for sync job #{@job_id} for connector #{@connector_id} is valid.")
-        end
+        post_processing_engine = @connector_settings.filtering_rule_feature_enabled? ? Core::Filtering::PostProcessEngine.new(@job.filtering) : nil
 
-        if @connector_settings.filtering_rule_feature_enabled?
-          post_processing_engine = Core::Filtering::PostProcessEngine.new(@job.filtering)
-
-          Utility::Logger.info('Yielding documents with basic rule filtering...')
-
-          yield_docs do |document|
-            post_process_result = post_processing_engine.process(document)
-            if post_process_result.is_include?
-              @sink.ingest(document)
-              incoming_ids << document['id']
-            end
-          end
-        else
-          Utility::Logger.info('Yielding documents without basic rule filtering...')
-
-          yield_docs do |document|
-            @sink.ingest(document)
-            incoming_ids << document['id']
-          end
+        yield_docs do |document|
+          next if post_processing_engine && !post_processing_engine.process(document).is_include?
+          @sink.ingest(document)
+          incoming_ids << document['id']
         end
 
         ids_to_delete = existing_ids - incoming_ids.uniq
