@@ -65,15 +65,15 @@ module Core
     end
 
     def features
-      self[:features]
+      self[:features] || {}
     end
 
     # being defensive here to avoid regressions, will be subject to change in the near future
     def filtering_rule_feature_enabled?
-      features && !features.empty? && features[:filtering_rules]
+      !!features[:filtering_rules]
     end
     def filtering_advanced_config_feature_enabled?
-      features && !features.empty? && features[:filtering_advanced_config]
+      !!features[:filtering_advanced_config]
     end
 
     def any_filtering_feature_enabled?

@@ -331,23 +331,13 @@ describe Core::ConnectorSettings do
           end
         end
 
-        context 'when features is an empty array' do
-          let(:features) {
-            []
-          }
-
-          it 'returns empty features' do
-            expect(subject.features).to be_empty
-          end
-        end
-
         context 'when features are nil' do
           let(:features) {
             nil
           }
 
           it 'returns nil features' do
-            expect(subject.features).to be_nil
+            expect(subject.features).to be_empty
           end
         end
       end
@@ -361,14 +351,6 @@ describe Core::ConnectorSettings do
       context 'when features are empty' do
         let(:features) {
           {}
-        }
-
-        it_behaves_like 'filtering rule feature is disabled'
-      end
-
-      context 'when features is an empty array' do
-        let(:features) {
-          []
         }
 
         it_behaves_like 'filtering rule feature is disabled'
@@ -416,14 +398,6 @@ describe Core::ConnectorSettings do
         it_behaves_like 'filtering advanced config feature is disabled'
       end
 
-      context 'when features is an empty array' do
-        let(:features) {
-          []
-        }
-
-        it_behaves_like 'filtering advanced config feature is disabled'
-      end
-
       context 'when features are nil' do
         let(:features) {
           nil
@@ -461,14 +435,6 @@ describe Core::ConnectorSettings do
       context 'when features are empty' do
         let(:features) {
           {}
-        }
-
-        it_behaves_like 'all filtering features are disabled'
-      end
-
-      context 'when features is an empty array' do
-        let(:features) {
-          []
         }
 
         it_behaves_like 'all filtering features are disabled'
