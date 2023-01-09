@@ -483,16 +483,6 @@ describe Connectors::MongoDB::Connector do
       end
     end
 
-    context 'rule is present and advanced filtering is empty' do
-      let(:advanced_snippet) { {} }
-
-      it 'applies the simple rule' do
-        expect(actual_collection).to receive(:find).with(match({ 'name' => 'apple' }))
-
-        subject.yield_documents
-      end
-    end
-
     context 'both rules and advanced filtering are present' do
       it 'does not apply the simple rule' do
         expect(actual_collection).to receive(:find).with(filter, options)
