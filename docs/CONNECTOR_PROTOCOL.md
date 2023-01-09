@@ -38,12 +38,25 @@ This is our main communication index, used to communicate the connector's config
     }
   };                    -> Definition and values of configurable
                            fields
-  description: string;  -> the description of the connector
+  custom_scheduling: {
+    [key]: {
+      configuration_overrides: {
+        [key]: {
+          label: string     -> The label to be displayed for the field in Kibana
+          value: string,    -> The value of the field configured in Kibana
+        }
+      };                    -> Configurable fields to be overridden when custom schedule runs
+      enabled: boolean;     -> Whether job schedule is enabled
+      interval: string;     -> Quartz Cron syntax
+      name: string;         -> The name of the custom schedule
+    }
+  };                        -> Schedules with custom configurations
+  description: string;  -> The description of the connector
   error: string;        -> Optional error message
   features: {
-    filtering_advanced_config: boolean, -> Whether to display filtering advanced config in the Kibana UI
-    filtering_rules: boolean            -> Whether to display filtering rules in the Kibana UI
-  },
+    filtering_advanced_config: boolean; -> Whether to display filtering advanced config in the Kibana UI
+    filtering_rules: boolean;           -> Whether to display filtering rules in the Kibana UI
+  };
   filtering: [          -> Array of filtering rules, connectors use the first entry by default
     {          
       domain: string,     -> what data domain these rules apply to
@@ -121,6 +134,7 @@ This is our main communication index, used to communicate the connector's config
   "properties" : {
     "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
+    "custom_scheduling" : { "type" : "object" },
     "description" : { "type" : "text" },
     "error" : { "type" : "keyword" },
     "features": {
@@ -390,7 +404,7 @@ For every half hour, and every time a job is executed, the connector should upda
 For custom connectors, the connector should also update `configuration` field if its status is `created`.
 
 The connector should also sync data for connectors:
-- Read connector definitions from `.elastic-connectors` regularly, and determine whether to sync data based on `sync_now` flag and `scheduling`. 
+- Read connector definitions from `.elastic-connectors` regularly, and determine whether to sync data based on `sync_now` flag, as well as `scheduling` and `custom_scheduling` values. 
 - Set the index mappings of the to-be-written-to index if not already present.
 - Sync with the data source and index resulting documents into the correct index.
 - Log jobs to `.elastic-connectors-sync-jobs`.
