@@ -67,7 +67,7 @@ push_gem:
 	bundle _$(shell cat .bundler-version)_ exec gem push .gems/*
 
 install:
-	rbenv install -s
+	RUBY_CFLAGS="-w" rbenv install -s
 	- gem install bundler -v $(shell cat .bundler-version) && rbenv rehash
 	bundle _$(shell cat .bundler-version)_ install --jobs 1
 
