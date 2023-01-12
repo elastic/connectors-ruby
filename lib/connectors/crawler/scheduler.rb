@@ -28,7 +28,7 @@ module Connectors
             # crawler only supports :sync
             if sync_triggered?(cs)
               yield cs, :sync, nil
-              break
+              next
             end
 
             custom_schedule_triggered, schedule_key = custom_schedule_triggered?(cs)
