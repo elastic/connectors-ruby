@@ -9,7 +9,6 @@
 require 'connectors/base/connector'
 require 'core/filtering/validation_status'
 require 'core/filtering/transform/transformation_target'
-require 'connectors/mongodb/mongo_rules_parser'
 require 'connectors/mongodb/mongo_advanced_snippet_snake_case_transformer'
 require 'connectors/mongodb/mongo_advanced_snippet_against_schema_validator'
 require 'mongo'
@@ -145,8 +144,6 @@ module Connectors
 
         return [FIND, create_find_cursor(collection)] if @advanced_filter_config[:find].present?
 
-        return [FIND, create_simple_rules_cursor(collection)] if @rules.present?
-
         [FIND, collection.find]
       end
 
@@ -174,16 +171,6 @@ module Connectors
         end
 
         [collection.find(filter, options), options]
-      end
-
-      def create_simple_rules_cursor(collection)
-        filter = {}
-        if @rules.present?
-          parser = MongoRulesParser.new(@rules)
-          filter = parser.parse
-        end
-        Utility::Logger.info("Filtering with simple rules filter: #{filter}")
-        filter.present? ? collection.find(filter) : collection.find
       end
 
       def extract_options(mongodb_function)
