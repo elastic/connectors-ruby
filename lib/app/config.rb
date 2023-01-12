@@ -37,6 +37,7 @@ puts "Parsing #{CONFIG_FILE} configuration file."
       optional(:log).value(:bool?)
       optional(:ca_fingerprint).value(:string)
       optional(:transport_options).value(:hash)
+      optional(:headers).value(:hash)
     end
 
     optional(:thread_pool).hash do
@@ -112,6 +113,8 @@ module App
       return nil
     end
 
+    headers = ent_search_config['elasticsearch.headers'] || ent_search_config.dig('elasticsearch', 'headers')
+
     {
       :hosts => [
         {
@@ -121,7 +124,8 @@ module App
           host: uri.host,
           port: uri.port
         }
-      ]
+      ],
+      :headers => headers
     }
   end
 

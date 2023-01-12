@@ -36,7 +36,11 @@ module Connectors
 
     def fatal_exception_classes
       [
-        Utility::ErrorMonitor::MonitoringError
+        Utility::ErrorMonitor::MonitoringError,
+        Core::ConnectorNotFoundError,
+        Core::ConnectorJobNotFoundError,
+        Core::ConnectorJobCanceledError,
+        Core::ConnectorJobNotRunningError
       ]
     end
   end
