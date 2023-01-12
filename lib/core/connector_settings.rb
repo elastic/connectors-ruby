@@ -64,6 +64,22 @@ module Core
       @elasticsearch_response[:_source][property_name]
     end
 
+    def features
+      self[:features] || {}
+    end
+
+    # being defensive here to avoid regressions, will be subject to change in the near future
+    def filtering_rule_feature_enabled?
+      !!features[:filtering_rules]
+    end
+    def filtering_advanced_config_feature_enabled?
+      !!features[:filtering_advanced_config]
+    end
+
+    def any_filtering_feature_enabled?
+      filtering_rule_feature_enabled? || filtering_advanced_config_feature_enabled?
+    end
+
     def index_name
       self[:index_name]
     end

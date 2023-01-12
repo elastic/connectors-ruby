@@ -53,6 +53,7 @@ describe Core::Scheduler do
         allow(subject).to receive(:heartbeat_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:configuration_triggered?).with(connector_settings).and_return(false)
         allow(subject).to receive(:filtering_validation_triggered?).with(connector_settings).and_return(false)
+
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(allow_sync)
         allow(connector_settings).to receive(:id).and_return('123')
         allow(connector_settings).to receive(:connector_status).and_return('configured')
@@ -203,6 +204,14 @@ describe Core::Scheduler do
     end
 
     context 'with filtering validation task' do
+      let(:any_filtering_feature_enabled) { true }
+      let(:features) {
+        {
+          :filtering_advanced_config => true,
+          :filtering_rules => true
+        }
+      }
+
       let(:state) {
         Core::Filtering::ValidationStatus::EDITED
       }
@@ -250,6 +259,30 @@ describe Core::Scheduler do
 
         allow(connector_settings).to receive(:filtering).and_return(filtering)
         allow(connector_settings).to receive(:formatted).and_return('MOCKED_VALUE')
+        allow(connector_settings).to receive(:features).and_return(features)
+        allow(connector_settings).to receive(:any_filtering_feature_enabled?).and_return(any_filtering_feature_enabled)
+      end
+
+      context 'when filtering feature flags are not set' do
+        let(:state) {
+          Core::Filtering::ValidationStatus::EDITED
+        }
+
+        context 'when all filtering features are disabled' do
+          let(:any_filtering_feature_enabled) {
+            false
+          }
+
+          it_behaves_like 'does not trigger', :filter_validation
+        end
+      end
+
+      context 'filtering feature flags are set' do
+        let(:any_filtering_feature_enabled) {
+          true
+        }
+
+        it_behaves_like 'triggers', :filter_validation
       end
 
       context 'filtering is not present' do

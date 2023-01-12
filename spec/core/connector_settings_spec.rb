@@ -268,4 +268,233 @@ describe Core::ConnectorSettings do
       end
     end
   end
+
+  shared_context 'filtering features' do
+    shared_examples_for 'filtering rule feature is disabled' do
+      it '' do
+        expect(subject.filtering_rule_feature_enabled?).to be_falsey
+      end
+    end
+
+    shared_examples_for 'filtering advanced config feature is disabled' do
+      it '' do
+        expect(subject.filtering_advanced_config_feature_enabled?).to be_falsey
+      end
+    end
+
+    shared_examples_for 'all filtering features are disabled' do
+      it '' do
+        expect(subject.any_filtering_feature_enabled?).to be_falsey
+      end
+    end
+
+    shared_examples_for 'at least one filtering feature is enabled' do
+      it '' do
+        expect(subject.any_filtering_feature_enabled?).to be_truthy
+      end
+    end
+
+    let(:filtering_rules_feature_enabled) {
+      true
+    }
+
+    let(:filtering_advanced_config_feature_enabled) {
+      true
+    }
+
+    let(:features) {
+      {
+        :filtering_rules => filtering_rules_feature_enabled,
+        :filtering_advanced_config => filtering_advanced_config_feature_enabled
+      }
+    }
+
+    let(:elasticsearch_response) {
+      {
+        :_source => {
+          :features => features
+        }
+      }
+    }
+  end
+
+  describe '#features' do
+    include_context 'filtering features' do
+      context 'when features are not present' do
+        context 'when features is an empty dict' do
+          let(:features) {
+            {}
+          }
+
+          it 'returns empty features' do
+            expect(subject.features).to be_empty
+          end
+        end
+
+        context 'when features are nil' do
+          let(:features) {
+            nil
+          }
+
+          it 'returns nil features' do
+            expect(subject.features).to be_empty
+          end
+        end
+      end
+    end
+  end
+
+  describe '#filtering_rule_feature_enabled?' do
+    include_context 'filtering features'
+
+    context 'when features are not present' do
+      context 'when features are empty' do
+        let(:features) {
+          {}
+        }
+
+        it_behaves_like 'filtering rule feature is disabled'
+      end
+
+      context 'when features are nil' do
+        let(:features) {
+          nil
+        }
+
+        it_behaves_like 'filtering rule feature is disabled'
+      end
+    end
+
+    context 'when features are present' do
+      context 'when filtering rule feature is disabled' do
+        let(:filtering_rules_feature_enabled) {
+          false
+        }
+
+        it_behaves_like 'filtering rule feature is disabled'
+      end
+
+      context 'when filtering rule feature is enabled' do
+        let(:filtering_rules_feature_enabled) {
+          true
+        }
+
+        it 'returns enabled' do
+          expect(subject.filtering_rule_feature_enabled?).to be_truthy
+        end
+      end
+    end
+  end
+
+  describe '#filtering_advanced_config_feature_enabled?' do
+    include_context 'filtering features'
+
+    context 'when features are not present' do
+      context 'when features are empty' do
+        let(:features) {
+          {}
+        }
+
+        it_behaves_like 'filtering advanced config feature is disabled'
+      end
+
+      context 'when features are nil' do
+        let(:features) {
+          nil
+        }
+
+        it_behaves_like 'filtering advanced config feature is disabled'
+      end
+    end
+
+    context 'when features are present' do
+      context 'when filtering advanced config feature is disabled' do
+        let(:filtering_advanced_config_feature_enabled) {
+          false
+        }
+
+        it_behaves_like 'filtering advanced config feature is disabled'
+      end
+
+      context 'when filtering advanced config feature is enabled' do
+        let(:filtering_advanced_config_feature_enabled) {
+          true
+        }
+
+        it 'returns enabled' do
+          expect(subject.filtering_advanced_config_feature_enabled?).to be_truthy
+        end
+      end
+    end
+  end
+
+  describe '#any_filtering_feature_enabled?' do
+    include_context 'filtering features'
+
+    context 'when features are not present' do
+      context 'when features are empty' do
+        let(:features) {
+          {}
+        }
+
+        it_behaves_like 'all filtering features are disabled'
+      end
+
+      context 'when features are nil' do
+        let(:features) {
+          nil
+        }
+
+        it_behaves_like 'all filtering features are disabled'
+      end
+    end
+
+    context 'when filtering advanced config feature and filtering rule feature are disabled' do
+      let(:filtering_advanced_config_feature_enabled) {
+        false
+      }
+
+      let(:filtering_rules_feature_enabled) {
+        false
+      }
+
+      it_behaves_like 'all filtering features are disabled'
+    end
+
+    context 'when filtering advanced config feature is enabled and filtering rule feature is disabled' do
+      let(:filtering_advanced_config_feature_enabled) {
+        true
+      }
+
+      let(:filtering_rules_feature_enabled) {
+        false
+      }
+
+      it_behaves_like 'at least one filtering feature is enabled'
+    end
+
+    context 'when filtering advanced config feature is disabled and filtering rule feature is enabled' do
+      let(:filtering_advanced_config_feature_enabled) {
+        false
+      }
+
+      let(:filtering_rules_feature_enabled) {
+        true
+      }
+
+      it_behaves_like 'at least one filtering feature is enabled'
+    end
+
+    context 'when filtering advanced config feature and filtering rule feature are enabled' do
+      let(:filtering_advanced_config_feature_enabled) {
+        true
+      }
+
+      let(:filtering_rules_feature_enabled) {
+        true
+      }
+
+      it_behaves_like 'at least one filtering feature is enabled'
+    end
+  end
 end

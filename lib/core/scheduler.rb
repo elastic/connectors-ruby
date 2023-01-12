@@ -148,6 +148,12 @@ module Core
     end
 
     def filtering_validation_triggered?(connector_settings)
+      unless connector_settings.any_filtering_feature_enabled?
+        Utility::Logger.debug("#{connector_settings.formatted} all filtering features are disabled. Skip filtering validation.")
+
+        return false
+      end
+
       filtering = connector_settings.filtering
 
       unless filtering.present?
