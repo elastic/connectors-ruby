@@ -58,14 +58,13 @@ describe Core::Scheduler do
         allow(connector_settings).to receive(:id).and_return('123')
         allow(connector_settings).to receive(:connector_status).and_return('configured')
         allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
-        allow(connector_settings).to receive(:[]).with(:last_synced).and_return(last_synced)
+        allow(connector_settings).to receive(:last_synced).and_return(last_synced)
         allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
         allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
         allow(connector_settings).to receive(:formatted).and_return('')
 
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(sync_interval)
         allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
-        allow(cron_parser).to receive(:next_time).and_return(next_trigger_time)
         allow(Time).to receive(:parse).and_return(nil)
       end
 

@@ -44,17 +44,14 @@ module Core
           end
         end
       rescue *Utility::AUTHORIZATION_ERRORS => e
-        Utility::ExceptionTracking.log_exception(e, 'Could not retrieve connectors settings due to authorization error.')
+        log_authorization_error(e)
       rescue StandardError => e
-        Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
+        log_standard_error(e)
       ensure
         if @is_shutting_down
           break
         end
-        if @poll_interval > 0 && !@is_shutting_down
-          Utility::Logger.debug("Sleeping for #{@poll_interval} seconds in #{self.class}.")
-          sleep(@poll_interval)
-        end
+        sleep_for_poll_interval
       end
     end
 
@@ -83,47 +80,7 @@ module Core
         return true
       end
 
-      # Don't sync if sync is explicitly disabled
-      scheduling_settings = connector_settings.scheduling_settings
-      unless scheduling_settings.present? && scheduling_settings[:enabled] == true
-        Utility::Logger.debug("#{connector_settings.formatted.capitalize} scheduling is disabled.")
-        return false
-      end
-
-      current_schedule = scheduling_settings[:interval]
-
-      # Don't sync if there is no actual scheduling interval
-      if current_schedule.nil? || current_schedule.empty?
-        Utility::Logger.warn("No sync schedule configured for #{connector_settings.formatted}.")
-        return false
-      end
-
-      current_schedule = begin
-        Utility::Cron.quartz_to_crontab(current_schedule)
-      rescue StandardError => e
-        Utility::ExceptionTracking.log_exception(e, "Unable to convert quartz (#{current_schedule}) to crontab.")
-        return false
-      end
-      cron_parser = Fugit::Cron.parse(current_schedule)
-
-      # Don't sync if the scheduling interval is non-parsable
-      unless cron_parser
-        Utility::Logger.error("Unable to parse sync schedule for #{connector_settings.formatted}: expression #{current_schedule} is not a valid Quartz Cron definition.")
-        return false
-      end
-
-      # We want to sync when sync never actually happened
-      last_synced = connector_settings[:last_synced]
-      if last_synced.nil? || last_synced.empty?
-        Utility::Logger.info("#{connector_settings.formatted.capitalize} has never synced yet, running initial sync.")
-        return true
-      end
-
-      next_trigger_time = cron_parser.next_time(Time.parse(last_synced))
-
-      # Sync if next trigger for the connector is in past
-      if next_trigger_time < Time.now
-        Utility::Logger.info("#{connector_settings.formatted.capitalize} sync is triggered by cron schedule #{current_schedule}.")
+      if schedule_triggered?(connector_settings.scheduling_settings, connector_settings.formatted, connector_settings.last_synced)
         return true
       end
 
@@ -194,6 +151,68 @@ module Core
         Utility::Logger.warn("The service type (#{service_type}) is not supported.")
         false
       end
+    end
+
+    def schedule_triggered?(scheduling_settings, identifier, last_synced)
+      # Don't sync if sync is explicitly disabled
+      unless scheduling_settings.present? && scheduling_settings[:enabled] == true
+        Utility::Logger.debug("#{identifier.capitalize} scheduling is disabled.")
+        return false
+      end
+
+      current_schedule = scheduling_settings[:interval]
+
+      # Don't sync if there is no actual scheduling interval
+      if current_schedule.nil? || current_schedule.empty?
+        Utility::Logger.warn("No sync schedule configured for #{identifier}.")
+        return false
+      end
+
+      current_schedule =
+        begin
+          Utility::Cron.quartz_to_crontab(current_schedule)
+        rescue StandardError => e
+          Utility::ExceptionTracking.log_exception(e, "Unable to convert quartz (#{current_schedule}) to crontab.")
+          return false
+        end
+      cron_parser = Fugit::Cron.parse(current_schedule)
+
+      # Don't sync if the scheduling interval is non-parsable
+      unless cron_parser
+        Utility::Logger.error("Unable to parse sync schedule for #{identifier}: expression #{current_schedule} is not a valid Quartz Cron definition.")
+        return false
+      end
+
+      # We want to sync when sync never actually happened
+      if last_synced.nil? || last_synced.empty?
+        Utility::Logger.info("#{identifier.capitalize} has never synced yet, running initial sync.")
+        return true
+      end
+
+      next_trigger_time = cron_parser.next_time(Time.parse(last_synced))
+
+      # Sync if next trigger for the connector is in past
+      if next_trigger_time < Time.now
+        Utility::Logger.info("#{identifier.capitalize} sync is triggered by cron schedule #{current_schedule}.")
+        return true
+      end
+
+      false
+    end
+
+    def sleep_for_poll_interval
+      if @poll_interval > 0 && !@is_shutting_down
+        Utility::Logger.debug("Sleeping for #{@poll_interval} seconds in #{self.class}.")
+        sleep(@poll_interval)
+      end
+    end
+
+    def log_authorization_error(e)
+      Utility::ExceptionTracking.log_exception(e, 'Could not retrieve connectors settings due to authorization error.')
+    end
+
+    def log_standard_error(e)
+      Utility::ExceptionTracking.log_exception(e, 'Sync failed due to unexpected error.')
     end
   end
 end
