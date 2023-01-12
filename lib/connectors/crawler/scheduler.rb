@@ -58,12 +58,10 @@ module Connectors
         cs.custom_scheduling_settings.each do |key, custom_scheduling|
           identifier = "#{cs.formatted} - #{custom_scheduling[:name]}"
           if schedule_triggered?(custom_scheduling, identifier, custom_scheduling[:last_synced])
-            puts("--TRUE-- #{key}")
             return true, key
           end
         end
 
-        puts("--FALSE--")
         false
       end
     end
