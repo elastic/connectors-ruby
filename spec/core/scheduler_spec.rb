@@ -65,6 +65,7 @@ describe Core::Scheduler do
 
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(sync_interval)
         allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
+        allow(cron_parser).to receive(:next_time).and_return(next_trigger_time)
         allow(Time).to receive(:parse).and_return(nil)
       end
 
