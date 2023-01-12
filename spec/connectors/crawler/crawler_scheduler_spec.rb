@@ -8,7 +8,7 @@ describe Connectors::Crawler::Scheduler do
   let(:heartbeat_interval) { 999 }
 
   shared_examples_for 'triggers' do |key|
-    it "yields :sync task with an optional scheduling_key value" do
+    it 'yields :sync task with an optional scheduling_key value' do
       expect { |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings, :sync, key)
     end
   end
