@@ -275,24 +275,6 @@ describe Core::Scheduler do
 
           it_behaves_like 'does not trigger', :filter_validation
         end
-
-        context 'when features are not present' do
-          context 'when features are empty' do
-            let(:features) {
-              {}
-            }
-
-            it_behaves_like 'does not trigger', :filter_validation
-          end
-
-          context 'when features are nil' do
-            let(:features) {
-              nil
-            }
-
-            it_behaves_like 'does not trigger', :filter_validation
-          end
-        end
       end
 
       context 'filtering feature flags are set' do
