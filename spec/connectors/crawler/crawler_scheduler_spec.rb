@@ -114,8 +114,8 @@ describe Connectors::Crawler::Scheduler do
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(weekly_interval)
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(monthly_interval)
         allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
-        allow(cron_parser).to receive(:next_time).with(parsed_last_synced).and_return(next_trigger_time)
 
+        allow(cron_parser).to receive(:next_time).with(parsed_last_synced).and_return(next_trigger_time)
         allow(cron_parser).to receive(:next_time).with(Time.parse(weekly_last_synced)).and_return(weekly_next_trigger_time)
         allow(cron_parser).to receive(:next_time).with(Time.parse(monthly_last_synced)).and_return(monthly_next_trigger_time)
       end

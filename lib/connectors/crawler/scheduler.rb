@@ -31,10 +31,11 @@ module Connectors
               next
             end
 
-            custom_schedule_triggered, schedule_key = custom_schedule_triggered?(cs)
-            if custom_schedule_triggered
-              yield cs, :sync, schedule_key
-            end
+            schedule_key = custom_schedule_triggered(cs)
+            puts('***')
+            puts(schedule_key)
+            puts('***')
+            yield cs, :sync, schedule_key if schedule_key
           end
         rescue *Utility::AUTHORIZATION_ERRORS => e
           log_authorization_error(e)
@@ -54,15 +55,16 @@ module Connectors
         service_type == 'elastic-crawler'
       end
 
-      def custom_schedule_triggered?(cs)
+      # custom scheduling has no ordering, so the first-found schedule is returned
+      def custom_schedule_triggered(cs)
         cs.custom_scheduling_settings.each do |key, custom_scheduling|
           identifier = "#{cs.formatted} - #{custom_scheduling[:name]}"
           if schedule_triggered?(custom_scheduling, identifier, custom_scheduling[:last_synced])
-            return true, key
+            return key
           end
         end
 
-        false
+        nil
       end
     end
   end
