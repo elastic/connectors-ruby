@@ -48,6 +48,7 @@ This is our main communication index, used to communicate the connector's config
       };                    -> Configurable fields to be overridden when custom schedule runs
       enabled: boolean;     -> Whether job schedule is enabled
       interval: string;     -> Quartz Cron syntax
+      last_synced: string;  -> Date/time of last job (UTC)
       name: string;         -> The name of the custom schedule
     }
   };                        -> Schedules with custom configurations
