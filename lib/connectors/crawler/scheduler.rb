@@ -32,9 +32,6 @@ module Connectors
             end
 
             schedule_key = custom_schedule_triggered(cs)
-            puts('***')
-            puts(schedule_key)
-            puts('***')
             yield cs, :sync, schedule_key if schedule_key
           end
         rescue *Utility::AUTHORIZATION_ERRORS => e
