@@ -22,10 +22,46 @@ module Connectors
         []
       end
 
+      def when_triggered
+        loop do
+          connector_settings.each do |cs|
+            # crawler only supports :sync
+            if sync_triggered?(cs)
+              yield cs, :sync, nil
+              next
+            end
+
+            schedule_key = custom_schedule_triggered(cs)
+            yield cs, :sync, schedule_key if schedule_key
+          end
+        rescue *Utility::AUTHORIZATION_ERRORS => e
+          log_authorization_error(e)
+        rescue StandardError => e
+          log_standard_error(e)
+        ensure
+          if @is_shutting_down
+            break
+          end
+          sleep_for_poll_interval
+        end
+      end
+
       private
 
       def connector_registered?(service_type)
         service_type == 'elastic-crawler'
+      end
+
+      # custom scheduling has no ordering, so the first-found schedule is returned
+      def custom_schedule_triggered(cs)
+        cs.custom_scheduling_settings.each do |key, custom_scheduling|
+          identifier = "#{cs.formatted} - #{custom_scheduling[:name]}"
+          if schedule_triggered?(custom_scheduling, identifier, custom_scheduling[:last_synced])
+            return key
+          end
+        end
+
+        nil
       end
     end
   end

@@ -7,6 +7,18 @@ describe Connectors::Crawler::Scheduler do
   let(:poll_interval) { 999 }
   let(:heartbeat_interval) { 999 }
 
+  shared_examples_for 'triggers' do |key|
+    it 'yields :sync task with an optional scheduling_key value' do
+      expect { |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings, :sync, key)
+    end
+  end
+
+  shared_examples_for 'does not trigger' do |task|
+    it "does not yield #{task} task" do
+      expect { |b| subject.when_triggered(&b) }.to_not yield_control
+    end
+  end
+
   describe '#connector_settings' do
     context 'when elasticsearch query runs successfully' do
       let(:connector_settings) { [{ :id => '123' }] }
@@ -26,6 +38,125 @@ describe Connectors::Crawler::Scheduler do
 
       it 'fetches crawler connectors' do
         expect(subject.connector_settings).to be_empty
+      end
+    end
+  end
+
+  describe '#when_triggered' do
+    let(:connector_settings) { double }
+
+    before(:each) do
+      allow(subject).to receive(:connector_settings).and_return([connector_settings])
+      allow(connector_settings).to receive(:service_type).and_return('elastic-crawler')
+      subject.instance_variable_set(:@is_shutting_down, true)
+    end
+
+    context 'when custom scheduling is present' do
+      let(:connector_settings) { double }
+
+      let(:sync_now) { false }
+      let(:last_synced) { 1.day.ago.beginning_of_day.to_s }
+      let(:parsed_last_synced) { Time.parse(last_synced) }
+      let(:sync_enabled) { true }
+      let(:sync_interval) { '0 0 * * * ?' }
+      let(:scheduling_settings) do
+        {
+          :enabled => sync_enabled,
+          :interval => sync_interval
+        }
+      end
+
+      let(:weekly_enabled) { false }
+      let(:weekly_interval) { '0 0 * * 1 ?' }
+      let(:weekly_last_synced) { 1.week.ago.beginning_of_day.to_s }
+      let(:monthly_enabled) { false }
+      let(:monthly_interval) { '0 0 * 1 * ?' }
+      let(:monthly_last_synced) { 1.month.ago.beginning_of_day.to_s }
+      let(:custom_scheduling_settings) do
+        {
+          :weekly_key => {
+            :name => 'weekly',
+            :enabled => weekly_enabled,
+            :interval => weekly_interval,
+            :last_synced => weekly_last_synced
+          },
+          :monthly_key => {
+            :name => 'monthly',
+            :enabled => monthly_enabled,
+            :interval => monthly_interval,
+            :last_synced => monthly_last_synced
+          }
+        }
+      end
+      let(:custom_sync_triggered) { false }
+
+      let(:next_trigger_time) { 1.day.from_now }
+      let(:weekly_next_trigger_time) { 1.day.from_now }
+      let(:monthly_next_trigger_time) { 1.day.from_now }
+
+      let(:cron_parser) { instance_double(Fugit::Cron) }
+
+      before(:each) do
+        allow(Core::ConnectorSettings).to receive(:fetch_crawler_connectors).and_return(connector_settings)
+
+        allow(subject).to receive(:sync_triggered?).with(connector_settings).and_call_original
+        allow(subject).to receive(:custom_sync_triggered?).with(connector_settings).and_call_original
+
+        allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(true)
+        allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
+        allow(connector_settings).to receive(:last_synced).and_return(last_synced)
+        allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
+        allow(connector_settings).to receive(:custom_scheduling_settings).and_return(custom_scheduling_settings)
+        allow(connector_settings).to receive(:valid_index_name?).and_return(true)
+        allow(connector_settings).to receive(:formatted).and_return('Formatted')
+
+        allow(Utility::Cron).to receive(:quartz_to_crontab).with(sync_interval)
+        allow(Utility::Cron).to receive(:quartz_to_crontab).with(weekly_interval)
+        allow(Utility::Cron).to receive(:quartz_to_crontab).with(monthly_interval)
+        allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
+
+        allow(cron_parser).to receive(:next_time).with(parsed_last_synced).and_return(next_trigger_time)
+        allow(cron_parser).to receive(:next_time).with(Time.parse(weekly_last_synced)).and_return(weekly_next_trigger_time)
+        allow(cron_parser).to receive(:next_time).with(Time.parse(monthly_last_synced)).and_return(monthly_next_trigger_time)
+      end
+
+      context 'when none are enabled' do
+        it_behaves_like 'does not trigger', :sync
+      end
+
+      context 'when one custom scheduling is enabled and ready to sync' do
+        let(:monthly_enabled) { true }
+        let(:monthly_next_trigger_time) { 1.day.ago }
+
+        before(:each) do
+          allow(Utility::Cron).to receive(:quartz_to_crontab).with(monthly_interval)
+        end
+
+        it_behaves_like 'triggers', :monthly_key
+      end
+
+      context 'when all custom schedulings are enabled and ready to sync' do
+        let(:weekly_enabled) { true }
+        let(:monthly_enabled) { true }
+
+        let(:weekly_next_trigger_time) { 1.day.ago }
+        let(:monthly_next_trigger_time) { 1.day.ago }
+
+        # it will return the first custom scheduling it encounters
+        it_behaves_like 'triggers', :weekly_key
+      end
+
+      context 'when base scheduling and all custom scheduling are enabled and require a sync' do
+        let(:enabled) { true }
+        let(:weekly_enabled) { true }
+        let(:monthly_enabled) { true }
+
+        let(:next_trigger_time) { 1.day.ago }
+        let(:weekly_next_trigger_time) { 1.day.ago }
+        let(:monthly_next_trigger_time) { 1.day.ago }
+
+        # it will return the base scheduling
+        it_behaves_like 'triggers', nil
       end
     end
   end

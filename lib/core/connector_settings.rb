@@ -104,8 +104,16 @@ module Core
       self[:scheduling]
     end
 
+    def custom_scheduling_settings
+      self[:custom_scheduling]
+    end
+
     def sync_now?
       self[:sync_now] == true
+    end
+
+    def last_synced
+      self[:last_synced]
     end
 
     def filtering
