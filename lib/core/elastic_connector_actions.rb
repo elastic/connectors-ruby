@@ -168,6 +168,25 @@ module Core
         )
       end
 
+      def update_connector_custom_scheduling_last_synced(connector_id, schedule_key)
+        doc = connector_with_concurrency_control(connector_id)
+
+        body = {
+          :custom_scheduling => {
+            schedule_key => {
+              :last_synced => Time.now
+            }
+          }
+        }
+
+        update_connector_fields(
+          connector_id,
+          body,
+          doc[:seq_no],
+          doc[:primary_term]
+        )
+      end
+
       def connector_with_concurrency_control(connector_id)
         seq_no = nil
         primary_term = nil
@@ -317,6 +336,7 @@ module Core
           :properties => {
             :api_key_id => { :type => :keyword },
             :configuration => { :type => :object },
+            :custom_schedule => { :type => :object },
             :description => { :type => :text },
             :error => { :type => :keyword },
             :features => {
