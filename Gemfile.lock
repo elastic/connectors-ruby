@@ -190,7 +190,7 @@ GEM
     timecop (0.9.4)
     tzinfo (1.2.10)
       thread_safe (~> 0.1)
-    tzinfo-data (1.2022.1)
+    tzinfo-data (1.2022.7)
       tzinfo (>= 1.0.0)
     unicode-display_width (2.1.0)
     webmock (3.14.0)
