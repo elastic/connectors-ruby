@@ -30,7 +30,6 @@ All communication will need to go through Elasticsearch. We've created a connect
 This is our main communication index, used to communicate the connector's configuration, status and other related data. All dates in UTC.
 ```
 {
-  id: string; -> Id of the connector
   api_key_id: string;   -> ID of the current API key in use
   configuration: {
     [key]: {
@@ -255,7 +254,6 @@ This is our main communication index, used to communicate the connector's config
 In addition to the connector index `.elastic-connectors`, we have an additional index to log all jobs run by connectors. This is the `.elastic-connectors-sync-jobs` index. Each JSON document will have the following structure:
 ```
 {
-  id: string; -> Id of the job
   cancelation_requested_at: date; -> The date/time when the cancelation of the job is requested
   canceled_at: date; -> The date/time when the job is canceled
   completed_at: date; -> The data/time when the job is completed
@@ -328,7 +326,6 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   },
   "dynamic": false,
   "properties" : {
-    "id": { "type": "keyword" },
     "cancelation_requested_at" : { "type" : "date" },
     "canceled_at" : { "type" : "date" },
     "completed_at" : { "type" : "date" },
