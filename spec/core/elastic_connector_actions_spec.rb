@@ -927,4 +927,35 @@ describe Core::ElasticConnectorActions do
       expect(described_class.send(:get_latest_index_in_alias, alias_name, indices)).to eq('.ent-search-connectors-v10')
     end
   end
+
+  describe '#update_connector_custom_scheduling_last_synced' do
+    let(:timestamp) { Time.now.beginning_of_day }
+    let(:doc) do
+      {
+        :custom_scheduling => { :custom_scheduling => { 'foo' => { :last_synced => nil } } },
+        :_seq_no => 1,
+        :_primary_term => ''
+      }
+    end
+    let(:expected_update_args) do
+      {
+        :index => connectors_index,
+        :id => connector_id,
+        :body => { :doc => { :custom_scheduling => { 'foo' => { :last_synced => timestamp } } } },
+        :refresh => true,
+        :retry_on_conflict => 3
+      }
+    end
+
+    before do
+      allow(es_client).to receive(:get).and_return(doc)
+      allow(Time).to receive(:now).and_return(timestamp)
+    end
+
+    it 'updates the custom_scheduling last_synced value' do
+      described_class.update_connector_custom_scheduling_last_synced(connector_id, 'foo')
+
+      expect(es_client).to have_received(:update).with(expected_update_args)
+    end
+  end
 end
