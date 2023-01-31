@@ -134,7 +134,6 @@ This is our main communication index, used to communicate the connector's config
   },
   "dynamic": false,
   "properties" : {
-    "id": { "type": "keyword" },
     "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
     "custom_scheduling" : { "type" : "object" },
