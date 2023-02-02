@@ -21,14 +21,15 @@ module Core
 
       def process_orphaned_jobs
         Utility::Logger.debug('Start cleaning up orphaned jobs...')
-        orphaned_jobs = ConnectorJob.orphaned_jobs
+        all_connectors = ConnectorSettings.fetch_all_connectors
+        orphaned_jobs = ConnectorJob.orphaned_jobs(all_connectors.map(&:id))
         if orphaned_jobs.empty?
           Utility::Logger.debug('No orphaned jobs found. Skipping...')
           return
         end
 
         # delete content indicies in case they are re-created by sync job
-        content_indices = orphaned_jobs.map(&:index_name).compact.uniq
+        content_indices = (orphaned_jobs.map(&:index_name) - all_connectors.map(&:index_name)).compact.uniq
         ElasticConnectorActions.delete_indices(content_indices) if content_indices.any?
         result = ConnectorJob.delete_jobs(orphaned_jobs)
         Utility::Logger.error("Error found when deleting jobs: #{result['failures']}") if result['failures']&.any?
