@@ -1,0 +1,13 @@
+ent_search:
+  listen_host: 0.0.0.0
+  ssl:
+    enabled: false
+
+elasticsearch:
+  # host: http://0.0.0.0:9200
+  host: http://host.docker.internal:9200
+  username: elastic
+  password: changeme
+
+allow_es_settings_modification: true
+secret_management.encryption_keys: [1603f8d7f94483625f252111ba7b4d10049a9c13bc4d4838ea2039516f6f1493]

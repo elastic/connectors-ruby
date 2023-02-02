@@ -10,7 +10,7 @@ gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
 gem 'activesupport', '~>5.2.6'
-gem 'mime-types', '= 3.1'
+gem 'mime-types', '~> 3.3'
 gem 'tzinfo-data'
 gem 'tzinfo'
 gem 'fugit', '~> 1.5.3'
@@ -26,6 +26,8 @@ gem 'dry-inflector', '= 0.2.1'
 gem 'dry-schema',  '= 1.8.0'
 gem 'dry-validation', '= 1.7.0'
 
+gem 'rack', '>= 2.2.3.1'
+
 group :test do
   gem 'rspec-collection_matchers', '~> 1.2.0'
   gem 'rspec-core', '~> 3.10.1'
@@ -34,9 +36,8 @@ group :test do
   gem 'rubocop-performance', '1.11.5'
   gem 'rspec-mocks'
   gem 'webmock'
-  gem 'rack', '>= 2.2.3.1'
   gem 'rack-test'
-  gem 'ruby-debug-ide'
+  # gem 'ruby-debug-ide'
   gem 'pry-remote'
   gem 'pry-nav'
   gem 'debase', '0.2.5.beta2'
