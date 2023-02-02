@@ -99,15 +99,10 @@ This is our main communication index, used to communicate the connector's config
     reduce_whitespace: boolean;         -> Whether the `request_pipeline` should squish redundant whitespace
     run_ml_inference: boolean;          -> Whether the `request_pipeline` should run the ML Inference pipeline
   };
-  preferences: {
-    [key]: {
-      label: string   -> The label to be displayed for the field in Kibana
-      value: string,  -> The value of the field configured in Kibana
-    }
-  };                  -> Dynamic preferences for the connector
+  preferences: object;  -> Contains dynamic field:value pairs for preferences for the connector
   scheduling: {
-    enabled: boolean; -> Whether job schedule is enabled
-    interval: string; -> Quartz Cron syntax
+    enabled: boolean;   -> Whether job schedule is enabled
+    interval: string;   -> Quartz Cron syntax
   };
   service_type: string; -> Service type of the connector
   status: string;       -> Connector status Enum, see below
