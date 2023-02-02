@@ -202,7 +202,7 @@ module Core
       end
 
       begin
-        Core::ElasticConnectorActions.update_connector_last_sync_status(@connector_id, Connectors::SyncStatus::IN_PROGRESS)
+        Core::ElasticConnectorActions.update_connector_sync_start(@connector_id)
 
         @job.make_running!
 
