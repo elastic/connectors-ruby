@@ -99,7 +99,9 @@ This is our main communication index, used to communicate the connector's config
     reduce_whitespace: boolean;         -> Whether the `request_pipeline` should squish redundant whitespace
     run_ml_inference: boolean;          -> Whether the `request_pipeline` should run the ML Inference pipeline
   };
-  preferences: object;  -> Contains dynamic field:value pairs for preferences for the connector
+  preferences: {
+    extract_full_html: boolean; -> Whether or not to fully extract HTML (Crawler)
+  };                            -> Contains dynamic field:value pairs for preferences for the connector
   scheduling: {
     enabled: boolean;   -> Whether job schedule is enabled
     interval: string;   -> Quartz Cron syntax
@@ -231,7 +233,11 @@ This is our main communication index, used to communicate the connector's config
         "run_ml_inference" : { "type" : "boolean" }
       }
     },
-    "preferences" : { "type" : "object" },
+    "preferences" : {
+      "properties" : {
+        "extract_full_html" : { "type" : "boolean" }pr
+      }
+    },
     "scheduling" : {
       "properties" : {
         "enabled" : { "type" : "boolean" },
