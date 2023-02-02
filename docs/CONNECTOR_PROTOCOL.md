@@ -40,16 +40,11 @@ This is our main communication index, used to communicate the connector's config
                            fields
   custom_scheduling: {
     [key]: {
-      configuration_overrides: {
-        [key]: {
-          label: string     -> The label to be displayed for the field in Kibana
-          value: string,    -> The value of the field configured in Kibana
-        }
-      };                    -> Configurable fields to be overridden when custom schedule runs
-      enabled: boolean;     -> Whether job schedule is enabled
-      interval: string;     -> Quartz Cron syntax
-      last_synced: string;  -> Date/time of last job (UTC)
-      name: string;         -> The name of the custom schedule
+      configuration_overrides: object;  -> Configurable fields to be overridden when custom schedule runs
+      enabled: boolean;                 -> Whether job schedule is enabled
+      interval: string;                 -> Quartz Cron syntax
+      last_synced: string;              -> Date/time of last job (UTC)
+      name: string;                     -> The name of the custom schedule
     }
   };                        -> Schedules with custom configurations
   description: string;  -> The description of the connector
@@ -97,13 +92,19 @@ This is our main communication index, used to communicate the connector's config
   last_sync_error: string;   -> Optional last job error message
   last_sync_status: string;  -> Status of the last job, or null if no job has been executed
   last_synced: date;    -> Date/time of last job (UTC)
-  name: string; -> the name to use for the connector
+  name: string;         -> the name to use for the connector
   pipeline: {
-    extract_binary_content: boolean; -> Whether the `request_pipeline` should handle binary data
-    name: string; ->  Ingest pipeline to utilize on indexing data to Elasticsearch
-    reduce_whitespace: boolean; -> Whether the `request_pipeline` should squish redundant whitespace
-    run_ml_inference: boolean; -> Whether the `request_pipeline` should run the ML Inference pipeline
-  }
+    extract_binary_content: boolean;    -> Whether the `request_pipeline` should handle binary data
+    name: string;                       ->  Ingest pipeline to utilize on indexing data to Elasticsearch
+    reduce_whitespace: boolean;         -> Whether the `request_pipeline` should squish redundant whitespace
+    run_ml_inference: boolean;          -> Whether the `request_pipeline` should run the ML Inference pipeline
+  };
+  preferences: {
+    [key]: {
+      label: string   -> The label to be displayed for the field in Kibana
+      value: string,  -> The value of the field configured in Kibana
+    }
+  };                  -> Dynamic preferences for the connector
   scheduling: {
     enabled: boolean; -> Whether job schedule is enabled
     interval: string; -> Quartz Cron syntax
@@ -115,7 +116,7 @@ This is our main communication index, used to communicate the connector's config
 ```
 **Possible values for 'status'**
 - `created` -> A document for a connector has been created in connector index but the connector has not connected to elasticsearch (written by index creator).
-- `needs_configuration` -> Configurable fields have been written into the connector, either by Kibana (for native connector) or connector (for custom connector).
+- `needs_configuration` -> Configurable fields have been written into the connector, either by Kibana (for nat*iv*e connector) or connector (for custom connector).
 - `configured` -> A connector has been fully configured (written by Kibana on updating configuration, or directly by connector if no further configuration is necessary).
 - `connected` -> A connector has successfully connected to the data source (written by connector on successfully connecting to data source).
 - `error` -> A connector has encountered an error, either because the data source is not healthy or the last job failed.
@@ -235,6 +236,7 @@ This is our main communication index, used to communicate the connector's config
         "run_ml_inference" : { "type" : "boolean" }
       }
     },
+    "preferences" : { "type" : "object" },
     "scheduling" : {
       "properties" : {
         "enabled" : { "type" : "boolean" },
