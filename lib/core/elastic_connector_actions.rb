@@ -531,8 +531,8 @@ module Core
       end
 
       def document_count(index_name)
-        client.indices.refresh(:index => index_name)
-        client.count(:index => index_name)['count']
+        client.indices.refresh(:index => index_name, :ignore_unavailable => true)
+        client.count(:index => index_name, :ignore_unavailable => true)['count']
       end
 
       private

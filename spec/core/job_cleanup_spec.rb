@@ -10,12 +10,14 @@ require 'core'
 
 describe Core::JobCleanUp do
   describe '.execute' do
+    let(:connectors) { [] }
     let(:orphaned_jobs) { [] }
     let(:stuck_jobs) { [] }
     let(:job1) { double }
     let(:job2) { double }
 
     before(:each) do
+      allow(Core::ConnectorSettings).to receive(:fetch_all_connectors).and_return(connectors)
       allow(Core::ConnectorJob).to receive(:orphaned_jobs).and_return(orphaned_jobs)
       allow(Core::ConnectorJob).to receive(:stuck_jobs).and_return(stuck_jobs)
     end

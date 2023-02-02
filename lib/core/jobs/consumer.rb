@@ -37,7 +37,7 @@ module Core
       end
 
       def subscribe!(index_name:)
-        Utility::Logger.info("Starting a new consumer for #{@index_name} index")
+        Utility::Logger.info("Starting a new consumer for #{index_name} index")
 
         @index_name = index_name
         start_timer_task!

@@ -36,8 +36,7 @@ module Core
       fetch_jobs_by_query(query, page_size)
     end
 
-    def self.orphaned_jobs(page_size = DEFAULT_PAGE_SIZE)
-      connector_ids = ConnectorSettings.fetch_all_connectors.map(&:id)
+    def self.orphaned_jobs(connector_ids = [], page_size = DEFAULT_PAGE_SIZE)
       query = { bool: { must_not: { terms: { 'connector.id': connector_ids } } } }
       fetch_jobs_by_query(query, page_size)
     end

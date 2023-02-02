@@ -72,7 +72,7 @@ module App
       end
 
       def job_cleanup_timer
-        @job_cleanup_timer ||= Concurrent::TimerTask.new(:execution_interval => JOB_CLEANUP_INTERVAL) do
+        @job_cleanup_timer ||= Concurrent::TimerTask.new(:execution_interval => JOB_CLEANUP_INTERVAL, :run_now => true) do
           connector_id = App::Config.native_mode ? nil : App::Config.connector_id
           Core::JobCleanUp.execute(connector_id)
         end
