@@ -111,7 +111,7 @@ This is our main communication index, used to communicate the connector's config
 ```
 **Possible values for 'status'**
 - `created` -> A document for a connector has been created in connector index but the connector has not connected to elasticsearch (written by index creator).
-- `needs_configuration` -> Configurable fields have been written into the connector, either by Kibana (for nat*iv*e connector) or connector (for custom connector).
+- `needs_configuration` -> Configurable fields have been written into the connector, either by Kibana (for native connector) or connector (for custom connector).
 - `configured` -> A connector has been fully configured (written by Kibana on updating configuration, or directly by connector if no further configuration is necessary).
 - `connected` -> A connector has successfully connected to the data source (written by connector on successfully connecting to data source).
 - `error` -> A connector has encountered an error, either because the data source is not healthy or the last job failed.
