@@ -132,6 +132,7 @@ This is our main communication index, used to communicate the connector's config
     },
     "version" : "1"
   },
+  "dynamic": false,
   "properties" : {
     "api_key_id" : { "type" : "keyword" },
     "configuration" : { "type" : "object" },
@@ -322,6 +323,7 @@ In addition to the connector index `.elastic-connectors`, we have an additional 
   "_meta" : {
     "version" : 1
   },
+  "dynamic": false,
   "properties" : {
     "cancelation_requested_at" : { "type" : "date" },
     "canceled_at" : { "type" : "date" },
