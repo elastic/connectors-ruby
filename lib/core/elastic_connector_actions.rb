@@ -339,6 +339,7 @@ module Core
       # Creation of connector index should be handled by Kibana, this method is only used by ftest.rb
       def ensure_connectors_index_exists
         mappings = {
+          :dynamic => false,
           :properties => {
             :api_key_id => { :type => :keyword },
             :configuration => { :type => :object },
@@ -460,6 +461,7 @@ module Core
       # Creation of job index should be handled by Kibana, this method is only used by ftest.rb
       def ensure_job_index_exists
         mappings = {
+          :dynamic => false,
           :properties => {
             :cancelation_requested_at => { :type => :date },
             :canceled_at => { :type => :date },
