@@ -157,12 +157,18 @@ module Core
         )
       end
 
-      def update_connector_last_sync_status(connector_id, last_sync_status)
+      def update_connector_sync_start(connector_id)
         doc = connector_with_concurrency_control(connector_id)
+
+        body = {
+            last_sync_status: Connectors::SyncStatus::IN_PROGRESS,
+            last_sync_error: nil,
+            status: Connectors::ConnectorStatus::CONNECTED
+        }
 
         update_connector_fields(
           connector_id,
-          { last_sync_status: last_sync_status },
+          body,
           doc[:seq_no],
           doc[:primary_term]
         )

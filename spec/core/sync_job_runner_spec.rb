@@ -107,7 +107,7 @@ describe Core::SyncJobRunner do
 
     allow(Core::ElasticConnectorActions).to receive(:fetch_document_ids).and_return(existing_document_ids)
     allow(Core::ElasticConnectorActions).to receive(:update_connector_status)
-    allow(Core::ElasticConnectorActions).to receive(:update_connector_last_sync_status)
+    allow(Core::ElasticConnectorActions).to receive(:update_connector_sync_start)
 
     allow(Connectors::REGISTRY).to receive(:connector_class).and_return(connector_class)
     allow(Core::Ingestion::EsSink).to receive(:new).and_return(sink)
@@ -158,7 +158,7 @@ describe Core::SyncJobRunner do
   describe '#execute' do
     shared_examples_for 'claims the job' do
       it '' do
-        expect(Core::ElasticConnectorActions).to receive(:update_connector_last_sync_status)
+        expect(Core::ElasticConnectorActions).to receive(:update_connector_sync_start)
         expect(job).to receive(:make_running!)
 
         subject.execute
@@ -226,7 +226,7 @@ describe Core::SyncJobRunner do
 
     context 'when failing to make connector running' do
       before(:each) do
-        allow(Core::ElasticConnectorActions).to receive(:update_connector_last_sync_status).and_raise(StandardError)
+        allow(Core::ElasticConnectorActions).to receive(:update_connector_sync_start).and_raise(StandardError)
       end
 
       it_behaves_like 'does not run a sync'
