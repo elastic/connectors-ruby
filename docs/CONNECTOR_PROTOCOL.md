@@ -235,7 +235,7 @@ This is our main communication index, used to communicate the connector's config
     },
     "preferences" : {
       "properties" : {
-        "extract_full_html" : { "type" : "boolean" }pr
+        "extract_full_html" : { "type" : "boolean" }
       }
     },
     "scheduling" : {
