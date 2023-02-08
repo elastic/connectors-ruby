@@ -16,8 +16,6 @@ module Utility
     JOB_INDEX = '.elastic-connectors-sync-jobs'
     CONTENT_INDEX_PREFIX = 'search-'
     CRAWLER_SERVICE_TYPE = 'elastic-crawler'
-    FILTERING_RULES_FEATURE = 'filtering_rules'
-    FILTERING_ADVANCED_FEATURE = 'filtering_advanced_config'
 
     # Maximum number of operations in BULK Elasticsearch operation that will ingest the data
     DEFAULT_MAX_INGESTION_QUEUE_SIZE = 500
