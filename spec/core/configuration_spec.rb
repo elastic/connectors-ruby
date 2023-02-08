@@ -57,8 +57,10 @@ describe Core::Configuration do
                   :configuration => configuration,
                   :status => Connectors::ConnectorStatus::NEEDS_CONFIGURATION,
                   :features => {
-                    Utility::Constants::FILTERING_RULES_FEATURE => true,
-                    Utility::Constants::FILTERING_ADVANCED_FEATURE => true
+                    :sync_rules => {
+                      :basic => { :enabled => true },
+                      :advanced => { :enabled => true }
+                    }
                   }
                 ))
 

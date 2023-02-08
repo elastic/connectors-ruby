@@ -68,12 +68,14 @@ module Core
       self[:features] || {}
     end
 
-    # being defensive here to avoid regressions, will be subject to change in the near future
+    # .dig version is the modern features way of doing things,
+    # Right-hand of OR operator is legacy features support
+    # When this is fixed with a migration, we can go ahead
     def filtering_rule_feature_enabled?
-      !!features[:filtering_rules]
+      !!features.dig(:sync_rules, :basic, :enabled) || !!features[:filtering_rules]
     end
     def filtering_advanced_config_feature_enabled?
-      !!features[:filtering_advanced_config]
+      !!features.dig(:sync_rules, :advanced, :enabled) || !!features[:filtering_advanced_config]
     end
 
     def any_filtering_feature_enabled?

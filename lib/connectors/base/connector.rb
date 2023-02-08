@@ -44,8 +44,8 @@ module Connectors
 
       def self.kibana_features
         [
-          Utility::Constants::FILTERING_RULES_FEATURE,
-          Utility::Constants::FILTERING_ADVANCED_FEATURE
+          { :feature => :sync_rules, :subfeature => :basic, :enabled => true },
+          { :feature => :sync_rules, :subfeature => :advanced, :enabled => true }
         ]
       end
 

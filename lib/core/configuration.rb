@@ -24,7 +24,19 @@ module Core
             return
           end
           configuration = connector_class.configurable_fields_indifferent_access
-          features = connector_class.kibana_features.each_with_object({}) { |feature, hsh| hsh[feature] = true }
+
+          features = {}
+
+          connector_class.kibana_features.each do |feature_definition, _hsh|
+            feature = feature_definition[:feature]
+            subfeature = feature_definition[:subfeature]
+            enabled = feature_definition[:enabled]
+
+            features[feature] = {} unless features.key?(feature)
+
+            features[feature][subfeature] = { :enabled => enabled }
+          end
+
           doc = {
             :configuration => configuration,
             :features => features

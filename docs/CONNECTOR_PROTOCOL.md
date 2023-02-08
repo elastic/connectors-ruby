@@ -55,8 +55,11 @@ This is our main communication index, used to communicate the connector's config
   description: string;  -> The description of the connector
   error: string;        -> Optional error message
   features: {
-    filtering_advanced_config: boolean; -> Whether to display filtering advanced config in the Kibana UI
-    filtering_rules: boolean;           -> Whether to display filtering rules in the Kibana UI
+    [feature_name]: {
+        [subfeature_name]: {
+            enabled: boolean; -> Whether this feature is enabled
+        }
+    };                                  -> Features to enable/disable for this connector
   };
   filtering: [          -> Array of filtering rules, connectors use the first entry by default
     {          

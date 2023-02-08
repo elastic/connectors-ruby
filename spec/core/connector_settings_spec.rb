@@ -304,8 +304,10 @@ describe Core::ConnectorSettings do
 
     let(:features) {
       {
-        :filtering_rules => filtering_rules_feature_enabled,
-        :filtering_advanced_config => filtering_advanced_config_feature_enabled
+        :sync_rules => {
+          :basic => { :enabled => filtering_rules_feature_enabled },
+          :advanced => { :enabled => filtering_advanced_config_feature_enabled }
+        }
       }
     }
 
@@ -366,6 +368,33 @@ describe Core::ConnectorSettings do
     end
 
     context 'when features are present' do
+      context 'when features are in legacy format' do
+        let(:features) {
+          {
+            :filtering_rules => filtering_rules_feature_enabled,
+            :filtering_advanced_config => filtering_advanced_config_feature_enabled
+          }
+        }
+
+        context 'when filtering rule feature is disabled' do
+          let(:filtering_rules_feature_enabled) {
+            false
+          }
+
+          it_behaves_like 'filtering rule feature is disabled'
+        end
+
+        context 'when filtering rule feature is enabled' do
+          let(:filtering_rules_feature_enabled) {
+            true
+          }
+
+          it 'returns enabled' do
+            expect(subject.filtering_rule_feature_enabled?).to be_truthy
+          end
+        end
+      end
+
       context 'when filtering rule feature is disabled' do
         let(:filtering_rules_feature_enabled) {
           false
@@ -408,6 +437,33 @@ describe Core::ConnectorSettings do
     end
 
     context 'when features are present' do
+      context 'when features are in legacy format' do
+        let(:features) {
+          {
+            :filtering_rules => filtering_rules_feature_enabled,
+            :filtering_advanced_config => filtering_advanced_config_feature_enabled
+          }
+        }
+
+        context 'when filtering advanced config feature is disabled' do
+          let(:filtering_advanced_config_feature_enabled) {
+            false
+          }
+
+          it_behaves_like 'filtering advanced config feature is disabled'
+        end
+
+        context 'when filtering advanced config feature is enabled' do
+          let(:filtering_advanced_config_feature_enabled) {
+            true
+          }
+
+          it 'returns enabled' do
+            expect(subject.filtering_advanced_config_feature_enabled?).to be_truthy
+          end
+        end
+      end
+
       context 'when filtering advanced config feature is disabled' do
         let(:filtering_advanced_config_feature_enabled) {
           false
