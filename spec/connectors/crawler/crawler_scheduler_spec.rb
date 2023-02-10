@@ -55,9 +55,7 @@ describe Connectors::Crawler::Scheduler do
       let(:connector_settings) { double }
 
       let(:sync_now) { false }
-      let(:last_synced) { 1.day.ago.beginning_of_day.to_s }
-      let(:parsed_last_synced) { Time.parse(last_synced) }
-      let(:sync_enabled) { true }
+      let(:sync_enabled) { false }
       let(:sync_interval) { '0 0 * * * ?' }
       let(:scheduling_settings) do
         {
@@ -68,23 +66,19 @@ describe Connectors::Crawler::Scheduler do
 
       let(:weekly_enabled) { false }
       let(:weekly_interval) { '0 0 * * 1 ?' }
-      let(:weekly_last_synced) { 1.week.ago.beginning_of_day.to_s }
       let(:monthly_enabled) { false }
       let(:monthly_interval) { '0 0 * 1 * ?' }
-      let(:monthly_last_synced) { 1.month.ago.beginning_of_day.to_s }
       let(:custom_scheduling_settings) do
         {
           :weekly_key => {
             :name => 'weekly',
             :enabled => weekly_enabled,
-            :interval => weekly_interval,
-            :last_synced => weekly_last_synced
+            :interval => weekly_interval
           },
           :monthly_key => {
             :name => 'monthly',
             :enabled => monthly_enabled,
-            :interval => monthly_interval,
-            :last_synced => monthly_last_synced
+            :interval => monthly_interval
           }
         }
       end
@@ -104,7 +98,6 @@ describe Connectors::Crawler::Scheduler do
 
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(true)
         allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
-        allow(connector_settings).to receive(:last_synced).and_return(last_synced)
         allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
         allow(connector_settings).to receive(:custom_scheduling_settings).and_return(custom_scheduling_settings)
         allow(connector_settings).to receive(:valid_index_name?).and_return(true)
@@ -114,10 +107,6 @@ describe Connectors::Crawler::Scheduler do
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(weekly_interval)
         allow(Utility::Cron).to receive(:quartz_to_crontab).with(monthly_interval)
         allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
-
-        allow(cron_parser).to receive(:next_time).with(parsed_last_synced).and_return(next_trigger_time)
-        allow(cron_parser).to receive(:next_time).with(Time.parse(weekly_last_synced)).and_return(weekly_next_trigger_time)
-        allow(cron_parser).to receive(:next_time).with(Time.parse(monthly_last_synced)).and_return(monthly_next_trigger_time)
       end
 
       context 'when none are enabled' do
@@ -126,10 +115,11 @@ describe Connectors::Crawler::Scheduler do
 
       context 'when one custom scheduling is enabled and ready to sync' do
         let(:monthly_enabled) { true }
-        let(:monthly_next_trigger_time) { 1.day.ago }
+        let(:monthly_next_trigger_time) { Time.now + poll_interval - 10 }
 
         before(:each) do
           allow(Utility::Cron).to receive(:quartz_to_crontab).with(monthly_interval)
+          allow(cron_parser).to receive(:next_time).and_return(monthly_next_trigger_time)
         end
 
         it_behaves_like 'triggers', :monthly_key
@@ -139,21 +129,29 @@ describe Connectors::Crawler::Scheduler do
         let(:weekly_enabled) { true }
         let(:monthly_enabled) { true }
 
-        let(:weekly_next_trigger_time) { 1.day.ago }
-        let(:monthly_next_trigger_time) { 1.day.ago }
+        let(:weekly_next_trigger_time) { Time.now + poll_interval - 10 }
+        let(:monthly_next_trigger_time) { Time.now + poll_interval - 10 }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).and_return(weekly_next_trigger_time, monthly_next_trigger_time)
+        end
 
         # it will return the first custom scheduling it encounters
         it_behaves_like 'triggers', :weekly_key
       end
 
       context 'when base scheduling and all custom scheduling are enabled and require a sync' do
-        let(:enabled) { true }
+        let(:sync_enabled) { true }
         let(:weekly_enabled) { true }
         let(:monthly_enabled) { true }
 
-        let(:next_trigger_time) { 1.day.ago }
-        let(:weekly_next_trigger_time) { 1.day.ago }
-        let(:monthly_next_trigger_time) { 1.day.ago }
+        let(:next_trigger_time) { Time.now + poll_interval - 10 }
+        let(:weekly_next_trigger_time) { Time.now + poll_interval - 10 }
+        let(:monthly_next_trigger_time) { Time.now + poll_interval - 10 }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
+        end
 
         # it will return the base scheduling
         it_behaves_like 'triggers', nil
