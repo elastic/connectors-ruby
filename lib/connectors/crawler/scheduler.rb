@@ -56,7 +56,7 @@ module Connectors
       def custom_schedule_triggered(cs)
         cs.custom_scheduling_settings.each do |key, custom_scheduling|
           identifier = "#{cs.formatted} - #{custom_scheduling[:name]}"
-          if schedule_triggered?(custom_scheduling, identifier, custom_scheduling[:last_synced])
+          if schedule_triggered?(custom_scheduling, identifier)
             return key
           end
         end

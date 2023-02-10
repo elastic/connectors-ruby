@@ -80,7 +80,7 @@ module Core
         return true
       end
 
-      schedule_triggered?(connector_settings.scheduling_settings, connector_settings.formatted, connector_settings.last_synced)
+      schedule_triggered?(connector_settings.scheduling_settings, connector_settings.formatted)
     end
 
     def heartbeat_triggered?(connector_settings)
@@ -149,7 +149,7 @@ module Core
       end
     end
 
-    def schedule_triggered?(scheduling_settings, identifier, last_synced)
+    def schedule_triggered?(scheduling_settings, identifier)
       # Don't sync if sync is explicitly disabled
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
         Utility::Logger.debug("#{identifier.capitalize} scheduling is disabled.")
@@ -179,16 +179,10 @@ module Core
         return false
       end
 
-      # We want to sync when sync never actually happened
-      if last_synced.nil? || last_synced.empty?
-        Utility::Logger.info("#{identifier.capitalize} has never synced yet, running initial sync.")
-        return true
-      end
+      next_trigger_time = cron_parser.next_time(Time.now)
 
-      next_trigger_time = cron_parser.next_time(Time.parse(last_synced))
-
-      # Sync if next trigger for the connector is in past
-      if next_trigger_time < Time.now
+      # Sync if next trigger happens before the next poll
+      if next_trigger_time <= Time.now + @poll_interval
         Utility::Logger.info("#{identifier.capitalize} sync is triggered by cron schedule #{current_schedule}.")
         return true
       end
