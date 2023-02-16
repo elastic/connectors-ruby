@@ -12,14 +12,14 @@ describe Core::JobCleanUp do
   describe '.execute' do
     let(:connectors) { [] }
     let(:orphaned_jobs) { [] }
-    let(:stuck_jobs) { [] }
+    let(:idle_jobs) { [] }
     let(:job1) { double }
     let(:job2) { double }
 
     before(:each) do
       allow(Core::ConnectorSettings).to receive(:fetch_all_connectors).and_return(connectors)
       allow(Core::ConnectorJob).to receive(:orphaned_jobs).and_return(orphaned_jobs)
-      allow(Core::ConnectorJob).to receive(:stuck_jobs).and_return(stuck_jobs)
+      allow(Core::ConnectorJob).to receive(:idle_jobs).and_return(idle_jobs)
     end
 
     it 'should not clean up orphaned jobs' do
@@ -29,7 +29,7 @@ describe Core::JobCleanUp do
       described_class.execute
     end
 
-    it 'should not mark stuck jobs error' do
+    it 'should not mark idle jobs error' do
       expect_any_instance_of(Core::ConnectorJob).to_not receive(:error!)
       expect(Core::ConnectorJob).to_not receive(:fetch_by_id)
       expect(Core::ConnectorSettings).to_not receive(:fetch_by_id)
@@ -56,8 +56,8 @@ describe Core::JobCleanUp do
       end
     end
 
-    context 'with stuck jobs' do
-      let(:stuck_jobs) { [job1, job2] }
+    context 'with idle jobs' do
+      let(:idle_jobs) { [job1, job2] }
       let(:connector) { double }
       let(:connector_id) { '1' }
       let(:id1) { '1' }
@@ -74,7 +74,7 @@ describe Core::JobCleanUp do
         allow(job2).to receive(:connector).and_return(connector)
       end
 
-      it 'should mark stuck jobs error' do
+      it 'should mark idle jobs error' do
         expect(job1).to receive(:error!)
         expect(job2).to receive(:error!)
         expect(connector).to receive(:update_last_sync!).twice
