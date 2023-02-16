@@ -14,7 +14,7 @@ Before getting started, review important information about this feature:
 
 - [Terminology](docs/TERMINOLOGY.md)
 - [Getting help and providing feedback](docs/SUPPORT.md)
-- [Understand the connector protocol](docs/CONNECTOR_PROTOCOL.md)
+- [Understand the connector protocol](https://github.com/elastic/connectors-python/blob/main/docs/CONNECTOR_PROTOCOL.md)
 
 Build, deploy, and operate your own connector:
 
@@ -33,7 +33,7 @@ How to publish your connector:
 - [Developer guide](docs/DEVELOPING.md)
 - [Security Policy](docs/SECURITY.md)
 - [Elastic-internal guide](docs/INTERNAL.md)
-- [Connector Protocol](docs/CONNECTOR_PROTOCOL.md)
+- [Connector Protocol](https://github.com/elastic/connectors-python/blob/main/docs/CONNECTOR_PROTOCOL.md)
 - [Configuration](docs/CONFIG.md)
 - [Terminology](docs/TERMINOLOGY.md)
 - [Contributing guide](docs/CONTRIBUTING.md)
