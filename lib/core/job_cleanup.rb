@@ -14,7 +14,7 @@ module Core
     class << self
       def execute(connector_id = nil)
         process_orphaned_jobs
-        process_stuck_jobs(connector_id)
+        process_idle_jobs(connector_id)
       end
 
       private
@@ -36,16 +36,16 @@ module Core
         Utility::Logger.info("Successfully deleted #{result['deleted']} out of #{result['total']} orphaned jobs.")
       end
 
-      def process_stuck_jobs(connector_id = nil)
-        Utility::Logger.debug("Start cleaning up stuck jobs for #{connector_id ? "connector #{connector_id}" : 'native connectors'}...")
-        stuck_jobs = ConnectorJob.stuck_jobs(connector_id)
-        if stuck_jobs.empty?
-          Utility::Logger.debug('No stuck jobs found. Skipping...')
+      def process_idle_jobs(connector_id = nil)
+        Utility::Logger.debug("Start cleaning up idle jobs for #{connector_id ? "connector #{connector_id}" : 'native connectors'}...")
+        idle_jobs = ConnectorJob.idle_jobs(connector_id)
+        if idle_jobs.empty?
+          Utility::Logger.debug('No idle jobs found. Skipping...')
           return
         end
 
         marked_count = 0
-        stuck_jobs.each do |job|
+        idle_jobs.each do |job|
           job.error!('The job has not seen any update for some time.')
           Utility::Logger.debug("Successfully marked job #{job.id} as error.")
 
@@ -59,7 +59,7 @@ module Core
         rescue StandardError => e
           Utility::ExceptionTracking.log_exception(e)
         end
-        Utility::Logger.info("Successfully marked #{marked_count} out of #{stuck_jobs.count} stuck jobs as error.")
+        Utility::Logger.info("Successfully marked #{marked_count} out of #{idle_jobs.count} idle jobs as error.")
       end
     end
   end

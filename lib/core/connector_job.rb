@@ -15,7 +15,7 @@ require 'utility'
 module Core
   class ConnectorJob
     DEFAULT_PAGE_SIZE = 100
-    STUCK_THRESHOLD = 60
+    IDLE_THRESHOLD = 60
 
     def self.fetch_by_id(job_id)
       es_response = ElasticConnectorActions.get_job(job_id)
@@ -46,7 +46,7 @@ module Core
       ElasticConnectorActions.delete_jobs_by_query(query)
     end
 
-    def self.stuck_jobs(connector_id = nil, page_size = DEFAULT_PAGE_SIZE)
+    def self.idle_jobs(connector_id = nil, page_size = DEFAULT_PAGE_SIZE)
       connector_ids = if connector_id
                         [connector_id]
                       else
@@ -57,7 +57,7 @@ module Core
           filter: [
               { terms: { 'connector.id': connector_ids } },
               { terms: { status: Connectors::SyncStatus::ACTIVE_STATUSES } },
-              { range: { last_seen: { lte: "now-#{STUCK_THRESHOLD}s" } } }
+              { range: { last_seen: { lte: "now-#{IDLE_THRESHOLD}s" } } }
           ]
         }
       }
