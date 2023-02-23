@@ -35,7 +35,7 @@ module ConnectorsSdk
         end
 
         def additional_parameters
-          { :prompt => 'consent' }
+          { :prompt => 'select_account' }
         end
       end
     end
