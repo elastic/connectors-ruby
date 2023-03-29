@@ -86,13 +86,20 @@ module ConnectorsSdk
       end
 
       def groups(fields: [])
-        request_all(:endpoint => 'groups/', :fields => fields)
+        request_all(:endpoint => 'me/transitiveMemberOf/microsoft.graph.group/', :fields => fields)
       end
 
       def group_root_site(group_id, fields: [])
+        # Continues sync if the Graph API encounters an unsuccesful request (e.g. 404)
         query_params = transform_fields_to_request_query_params(fields)
 
-        request_endpoint(:endpoint => "groups/#{group_id}/sites/root", :query_params => query_params)
+        begin
+          p "Retrieving site for #{group_id}"
+          request_endpoint(:endpoint => "groups/#{group_id}/sites/root", :query_params => query_params)
+        rescue StandardError, ClientError, Office365InvalidCursorsError => e
+          puts "An error occurred retrieving site for group ID #{group_id}: #{e}"
+          nil
+        end
       end
 
       def sites(fields: [])

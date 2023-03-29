@@ -58,6 +58,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
     end
     let(:drive_ids) { share_point_site_drive_ids }
     let(:groups_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}groups/?$select=id,createdDateTime" }
+    let(:my_groups_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}me/transitiveMemberOf/microsoft.graph.group/?$select=id,createdDateTime" }
     let(:sites_url) { "#{ConnectorsSdk::Office365::CustomClient::BASE_URL}sites/?$select=id,name&search=&top=10" }
     let(:sites_body) { connectors_fixture_raw('office365/sites.json') }
     let(:site_1_id) { 'enterprisesearch.sharepoint.com,f62543c6-b329-4e0a-96c1-c1a065f5be3f,23ed25a9-4dee-4750-afb0-acb21475a499' }
@@ -76,6 +77,7 @@ describe ConnectorsSdk::SharePoint::Extractor do
       stub_request(:get, site_1_drive_url).to_return(:status => 200, :body => site_drive_1_body)
       stub_request(:get, site_2_drive_url).to_return(:status => 200, :body => site_drive_2_body)
       stub_request(:get, groups_url).to_return(:status => 200, :body => groups_body)
+      stub_request(:get, my_groups_url).to_return(:status => 200, :body => groups_body)
     end
 
     context 'when drive ids are all' do
@@ -314,7 +316,8 @@ describe ConnectorsSdk::SharePoint::Extractor do
   def expect_groups(groups)
     stub_request(:get, "#{graph_base_url}groups/?$select=id,createdDateTime")
       .to_return(graph_response(:value => groups))
-
+    stub_request(:get, "#{graph_base_url}me/transitiveMemberOf/microsoft.graph.group/?$select=id,createdDateTime")
+      .to_return(graph_response(:value => groups))
     groups
   end
 
