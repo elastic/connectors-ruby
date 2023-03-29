@@ -58,6 +58,7 @@ describe ConnectorsSdk::Base::Connector do
         ]
       }
 
+      mock_endpoint('me/transitiveMemberOf/microsoft.graph.group/?$select=id,createdDateTime', groups)
       mock_endpoint('sites/?$select=id,name&search=&top=10', sites)
       mock_endpoint('groups/?$select=id,createdDateTime', groups)
       mock_endpoint('groups/1234/sites/root?$select=id,name', sites)

@@ -126,6 +126,8 @@ describe ConnectorsSdk::Office365::CustomClient do
     let(:recent_site_drives_body) { connectors_fixture_raw(directory + 'site_drives_for_recently_created_site.json') } # returns 2 results
 
     before(:each) do
+      stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'me/transitiveMemberOf/microsoft.graph.group/?$select=id,createdDateTime')
+        .to_return(:status => status, :body => groups_mapped_body)
       stub_request(:get, ConnectorsSdk::Office365::CustomClient::BASE_URL + 'groups/?$select=id,createdDateTime')
         .to_return(:status => status, :body => groups_mapped_body)
 
