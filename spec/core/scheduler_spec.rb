@@ -38,7 +38,7 @@ describe Core::Scheduler do
       let(:sync_now) { false }
       let(:sync_enabled) { true }
       let(:sync_interval) { '0 0 * * * ?' }
-      let(:scheduling_settings) do
+      let(:full_sync_scheduling) do
         {
           :enabled => sync_enabled,
           :interval => sync_interval
@@ -57,7 +57,7 @@ describe Core::Scheduler do
         allow(connector_settings).to receive(:id).and_return('123')
         allow(connector_settings).to receive(:connector_status).and_return('configured')
         allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
-        allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
+        allow(connector_settings).to receive(:full_sync_scheduling).and_return(full_sync_scheduling)
         allow(connector_settings).to receive(:valid_index_name?).and_return(valid_index_name)
         allow(connector_settings).to receive(:formatted).and_return('')
 

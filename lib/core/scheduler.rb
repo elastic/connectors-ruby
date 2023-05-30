@@ -80,7 +80,7 @@ module Core
         return true
       end
 
-      schedule_triggered?(connector_settings.scheduling_settings, connector_settings.formatted)
+      schedule_triggered?(connector_settings.full_sync_scheduling, connector_settings.formatted)
     end
 
     def heartbeat_triggered?(connector_settings)

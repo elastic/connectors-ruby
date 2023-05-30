@@ -89,7 +89,7 @@ module App
     def enable_scheduling
       return unless connector_registered?
 
-      previous_schedule = Core::ConnectorSettings.fetch_by_id(connector_id)&.scheduling_settings&.fetch(:interval, nil)
+      previous_schedule = Core::ConnectorSettings.fetch_by_id(connector_id)&.full_sync_scheduling&.fetch(:interval, nil)
       if previous_schedule.present?
         puts "Please enter a valid crontab expression for scheduling. Previous schedule was: #{previous_schedule}."
       else
