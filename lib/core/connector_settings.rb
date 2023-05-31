@@ -103,7 +103,11 @@ module Core
     end
 
     def scheduling_settings
-      self[:scheduling]
+      self[:scheduling] || {}
+    end
+
+    def full_sync_scheduling
+      scheduling_settings[:full]
     end
 
     def custom_scheduling_settings

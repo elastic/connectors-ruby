@@ -57,7 +57,7 @@ describe Connectors::Crawler::Scheduler do
       let(:sync_now) { false }
       let(:sync_enabled) { false }
       let(:sync_interval) { '0 0 * * * ?' }
-      let(:scheduling_settings) do
+      let(:full_sync_scheduling) do
         {
           :enabled => sync_enabled,
           :interval => sync_interval
@@ -98,7 +98,7 @@ describe Connectors::Crawler::Scheduler do
 
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(true)
         allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
-        allow(connector_settings).to receive(:scheduling_settings).and_return(scheduling_settings)
+        allow(connector_settings).to receive(:full_sync_scheduling).and_return(full_sync_scheduling)
         allow(connector_settings).to receive(:custom_scheduling_settings).and_return(custom_scheduling_settings)
         allow(connector_settings).to receive(:valid_index_name?).and_return(true)
         allow(connector_settings).to receive(:formatted).and_return('Formatted')
