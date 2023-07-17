@@ -61,7 +61,6 @@ module Core
 
       def connectors_meta
         # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
-        print("getting the connectors_meta")
         alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX, :ignore => 404).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
         alias_mappings.dig(index, 'mappings', '_meta') || {
