@@ -59,13 +59,13 @@ GEM
       dry-initializer (~> 3.0)
       dry-schema (~> 1.8, >= 1.8.0)
     ecs-logging (1.0.0)
-    elastic-transport (8.2.1)
+    elastic-transport (8.2.2)
       faraday (< 3)
       multi_json
-    elasticsearch (8.8.0)
+    elasticsearch (8.9.0)
       elastic-transport (~> 8)
-      elasticsearch-api (= 8.8.0)
-    elasticsearch-api (8.8.0)
+      elasticsearch-api (= 8.9.0)
+    elasticsearch-api (8.9.0)
       multi_json
     et-orbi (1.2.7)
       tzinfo
@@ -222,7 +222,7 @@ DEPENDENCIES
   dry-schema (= 1.8.0)
   dry-validation (= 1.7.0)
   ecs-logging (~> 1.0.0)
-  elasticsearch (~> 8.8.0)
+  elasticsearch (~> 8.9.0)
   faraday (~> 1.10.0)
   faraday_middleware (= 1.0.0)
   forwardable (~> 1.3.2)
