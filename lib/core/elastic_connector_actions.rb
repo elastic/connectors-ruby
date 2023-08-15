@@ -61,9 +61,14 @@ module Core
 
       def connectors_meta
         # TODO: remove the usage of with_indifferent_access. Ideally this should return a hash or nil if not found
-        alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX).with_indifferent_access
+        alias_mappings = client.indices.get_mapping(:index => Utility::Constants::CONNECTORS_INDEX, :ignore => 404).with_indifferent_access
         index = get_latest_index_in_alias(Utility::Constants::CONNECTORS_INDEX, alias_mappings.keys)
-        alias_mappings.dig(index, 'mappings', '_meta') || {}
+        alias_mappings.dig(index, 'mappings', '_meta') || {
+          :extract_binary_content => true,
+          :name => 'ent-search-generic-ingestion',
+          :reduce_whitespace => true,
+          :run_ml_inference => false,
+        }
       end
 
       def search_connectors(query, page_size, offset)
