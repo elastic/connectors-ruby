@@ -9,10 +9,10 @@ source 'https://rubygems.org'
 gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
-gem 'activesupport', '~>6.0.6.1'
+gem 'activesupport', '~>6.1.7.3'
 gem 'mime-types', '= 3.1'
 gem 'tzinfo-data'
-gem 'tzinfo'
+gem 'tzinfo', '~> 2.0'
 gem 'fugit', '~> 1.5.3'
 gem 'remedy', '~> 0.3.0'
 gem 'ecs-logging', '~> 1.0.0'
@@ -34,7 +34,7 @@ group :test do
   gem 'rubocop-performance', '1.11.5'
   gem 'rspec-mocks'
   gem 'webmock'
-  gem 'rack', '>= 2.2.3.1'
+  gem 'rack', '>= 2.2.6.4'
   gem 'rack-test'
   gem 'ruby-debug-ide'
   gem 'pry-remote'
