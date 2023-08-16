@@ -2,7 +2,7 @@
   "targetBranchChoices": [
     { "name": "main", "checked": true },
     "8.10",
-    "8.9",
+    "8.9"
   ],
   "fork": false,
   "targetPRLabels": ["backport"],
