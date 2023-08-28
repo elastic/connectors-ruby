@@ -17,3 +17,5 @@ require_relative 'core/connector_settings'
 require_relative 'core/elastic_connector_actions'
 require_relative 'core/filtering/validation_status'
 require_relative 'core/scheduler'
+
+print "test"
