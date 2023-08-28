@@ -1,0 +1,4 @@
+steps:
+  - label: "Placeholder Pipeline"
+    command: echo "Hello!"
+
