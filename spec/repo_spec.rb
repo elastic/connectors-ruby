@@ -18,6 +18,7 @@ describe 'Repository' do
 
     it 'is included in our Gemspecs' do
       gemspecs.each do |gemspec|
+        print 'hello'
         expect(File.read(gemspec)).to include(notice_file)
       end
     end
