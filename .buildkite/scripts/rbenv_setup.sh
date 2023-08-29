@@ -2,5 +2,5 @@
 
 set -euxo pipefail
 
-rbenv install $(cat .ruby-version)
-rbenv global $(cat .ruby-version)
+eval "$(~/.rbenv/bin/rbenv install $(cat .ruby-version))"
+eval "$(~/.rbenv/bin/rbenv global $(cat .ruby-version))"

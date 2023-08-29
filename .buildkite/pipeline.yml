@@ -6,23 +6,23 @@ steps:
   - label: ":safety_vest: Connectors Tests"
     commands:
       - "./.buildkite/scripts/rbenv_setup.sh"
-      - 'make install test'
+      - 'PATH=$PATH:~/.rbenv/bin make install test'
     artifact_paths:
       - "index.html"
   - label: ":wrench: Linter"
     commands:
       - "./.buildkite/scripts/rbenv_setup.sh"
-      - 'make install lint'
+      - 'PATH=$PATH:~/.rbenv/bin make install lint'
   - label: ":package: Docker"
     commands:
       - "./.buildkite/scripts/rbenv_setup.sh"
-      - 'make build-docker'
+      - 'PATH=$PATH:~/.rbenv/bin make build-docker'
   - label: ":package: Packaging"
     commands:
       - "./.buildkite/scripts/rbenv_setup.sh"
       - 'curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
       - 'chmod +x yq'
-      - 'YQ=`realpath yq` make install build_service build_service_gem'
+      - 'PATH=$PATH:~/.rbenv/bin YQ=`realpath yq` make install build_service build_service_gem'
       - 'gem install .gems/connectors_service-8.*'
     artifact_paths:
       - "app/.gems/*.gem"
