@@ -1,22 +1,28 @@
 agents:
-  image: "docker.elastic.co/swiftype/ent-search-ci-dev-base-20220124:latest"
+  provider: "gcp"
+  machineType: "n1-standard-2"
   useVault: true
+  image: family/enterprise-search-ubuntu-2204-connectors-py
 
 defaultTimeoutInMinutes: 45
 steps:
   - label: ":safety_vest: Connectors Tests"
     commands:
+      - "./.buildkite/scripts/rbenv_setup.sh"
       - 'make install test'
     artifact_paths:
       - "index.html"
   - label: ":wrench: Linter"
     commands:
+      - "./.buildkite/scripts/rbenv_setup.sh"
       - 'make install lint'
   - label: ":package: Docker"
     commands:
+      - "./.buildkite/scripts/rbenv_setup.sh"
       - 'make build-docker'
   - label: ":package: Packaging"
     commands:
+      - "./.buildkite/scripts/rbenv_setup.sh"
       - 'curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
       - 'chmod +x yq'
       - 'YQ=`realpath yq` make install build_service build_service_gem'
