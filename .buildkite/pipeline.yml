@@ -1,8 +1,5 @@
 agents:
-  provider: "gcp"
-  machineType: "n1-standard-2"
-  useVault: true
-  image: family/enterprise-search-ubuntu-2204-connectors-py
+  image: docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest
 
 defaultTimeoutInMinutes: 45
 steps:
