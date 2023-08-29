@@ -1,34 +1,21 @@
 agents:
-  provider: "gcp"
-  machineType: "n1-standard-8"
+  image: "ruby:2.6.9"
 
 defaultTimeoutInMinutes: 45
 steps:
-  - label: ":safety-vest: Connectors Tests"
+  - label: ":safety_vest: Connectors Tests"
     commands:
-      - 'curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash'
-      - 'ln -s ~/.rbenv/versions/multiruby-mri-"$(cat .ruby-version)" ~/.rbenv/versions/"$(cat .ruby-version)"'
-      - 'eval "$(~/.rbenv/bin/rbenv init - bash)"'
       - 'make install test'
     artifact_paths:
       - "index.html"
   - label: ":wrench: Linter"
     commands:
-      - 'curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash'
-      - 'ln -s ~/.rbenv/versions/multiruby-mri-"$(cat .ruby-version)" ~/.rbenv/versions/"$(cat .ruby-version)"'
-      - 'eval "$(~/.rbenv/bin/rbenv init - bash)"'
       - 'make install lint'
   - label: ":package: Docker"
     commands:
-      - 'curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash'
-      - 'ln -s ~/.rbenv/versions/multiruby-mri-"$(cat .ruby-version)" ~/.rbenv/versions/"$(cat .ruby-version)"'
-      - 'eval "$(~/.rbenv/bin/rbenv init - bash)"'
       - 'make build-docker'
   - label: ":package: Packaging"
     commands:
-      - 'curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash'
-      - 'ln -s ~/.rbenv/versions/multiruby-mri-"$(cat .ruby-version)" ~/.rbenv/versions/"$(cat .ruby-version)"'
-      - 'eval "$(~/.rbenv/bin/rbenv init - bash)"'
       - 'curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64'
       - 'chmod +x yq'
       - 'YQ=`realpath yq` make install build_service build_service_gem'
