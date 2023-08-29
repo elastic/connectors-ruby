@@ -1,5 +1,6 @@
 agents:
   image: "docker.elastic.co/swiftype/ent-search-ci-dev-base-20220124:latest"
+  useVault: true
 
 defaultTimeoutInMinutes: 45
 steps:
