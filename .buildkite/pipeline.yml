@@ -1,5 +1,5 @@
 agents:
-  image: "ruby:2.6.9"
+  image: "docker.elastic.co/swiftype/ent-search-ci-dev-base-20220124:latest"
 
 defaultTimeoutInMinutes: 45
 steps:
