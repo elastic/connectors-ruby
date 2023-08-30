@@ -1,24 +1,23 @@
 agents:
   provider: "gcp"
   machineType: "n1-standard-8"
-  useVault: true
 
 defaultTimeoutInMinutes: 45
 
 steps:
   - label: ":safety_vest: Connectors Tests"
     commands:
-      - "./.buildkite/scripts/run_command.sh tests"
+      - ".buildkite/scripts/run_command.sh tests"
     artifact_paths:
       - "coverage/index.html"
   - label: ":wrench: Linter"
     commands:
-      - "./.buildkite/scripts/run_command.sh linter"
+      - ".buildkite/scripts/run_command.sh linter"
   - label: ":package: Docker"
     commands:
-      - "./.buildkite/scripts/run_command.sh docker"
+      - ".buildkite/scripts/run_command.sh docker"
   - label: ":package: Packaging"
     commands:
-      - "./.buildkite/scripts/run_command.sh packaging"
+      - ".buildkite/scripts/run_command.sh packaging"
     artifact_paths:
       - ".gems/*.gem"
