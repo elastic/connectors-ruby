@@ -10,7 +10,7 @@ function install_ruby_version() {
     rbenv global $ruby_version
 }
 
-function install_docker() {
+# function install_docker() {
     # apt-cache madison docker-ce | awk '{ print $3 }'
 
     # curl -fsSL https://get.docker.com | sh
@@ -32,7 +32,7 @@ function install_docker() {
     #    docker-ce docker-ce-cli containerd.io \
     #    docker-buildx-plugin docker-compose-plugin
     #service docker start
-}
+# }
 
 case $1 in
 
@@ -51,7 +51,7 @@ case $1 in
   docker)
     echo "running docker build"
     # install_ruby_version
-    install_docker
+    # install_docker
     make build-docker
     ;;
 
