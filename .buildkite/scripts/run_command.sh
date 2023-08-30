@@ -19,7 +19,7 @@ PROJECT_ROOT=$(realpath "$(dirname "$BUILDKITE_DIR")")
 SHARED_SCRIPT_DIR="${SCRIPT_WORKING_DIR}/shared"
 
 DOCKER_IMAGE="docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest"
-SCRIPT_CMD=".buildkite/scripts/run_command.sh ${COMMAND_TO_RUN}"
+SCRIPT_CMD="/ci/.buildkite/scripts/run_ci_step.sh ${COMMAND_TO_RUN}"
 
 docker run --interactive --rm             \
              --sig-proxy=true --init      \
