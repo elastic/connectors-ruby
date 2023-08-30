@@ -18,12 +18,18 @@ BUILDKITE_DIR=$(realpath "$(dirname "$SCRIPT_WORKING_DIR")")
 PROJECT_ROOT=$(realpath "$(dirname "$BUILDKITE_DIR")")
 SHARED_SCRIPT_DIR="${SCRIPT_WORKING_DIR}/shared"
 
-source "${SHARED_SCRIPT_DIR}/pull_shared_scripts.sh"
-source "${SHARED_SCRIPT_DIR}/docker-retry.sh"
-source "${SHARED_SCRIPT_DIR}/run_docker_ci_script.sh"
-
 DOCKER_IMAGE="docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest"
 SCRIPT_CMD=".buildkite/scripts/run_command.sh ${COMMAND_TO_RUN}"
-ENV_VARS=("GIT_REVISION=${BUILDKITE_COMMIT-}" "BUILD_ID=${BUILDKITE_BUILD_NUMBER-}" "setuser:root")
 
-runDockerCIScript "${DOCKER_IMAGE}" "${SCRIPT_CMD}" "${ENV_VARS[@]}"
+docker run --interactive --rm             \
+             --sig-proxy=true --init      \
+             --user "root"                \
+             --volume "$PROJECT_ROOT:/ci" \
+             --workdir /ci                \
+             --env HOME=/ci               \
+             --env REVISION               \
+             --env CI                     \
+             --env GIT_REVISION=${BUILDKITE_COMMIT-}   \
+             --env BUILD_ID=${BUILDKITE_BUILD_NUMBER-} \
+             $DOCKER_IMAGE                \
+             bash -c "${SCRIPT_CMD}"
