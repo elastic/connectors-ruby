@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-export PATH="$PATH:~/.rbenv/bin"
+export PATH="$PATH:/root/.rbenv/bin:/root/.rbenv/plugins/ruby-build/bin:/ci/.rbenv/shims"
 
 function install_ruby_version() {
     local ruby_version=$(cat .ruby-version)
