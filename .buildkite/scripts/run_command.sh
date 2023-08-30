@@ -32,4 +32,4 @@ docker run --interactive --rm             \
              --env GIT_REVISION=${BUILDKITE_COMMIT-}   \
              --env BUILD_ID=${BUILDKITE_BUILD_NUMBER-} \
              $DOCKER_IMAGE                \
-             bash -c "${SCRIPT_CMD}"
+             /bin/bash -c "/bin/bash ${SCRIPT_CMD}"
