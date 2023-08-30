@@ -15,8 +15,7 @@ steps:
       - "./.buildkite/scripts/run_command.sh linter"
   - label: ":package: Docker"
     commands:
-      - "echo 'test docker output'"
-      # - "./.buildkite/scripts/run_command.sh docker"
+      - "./.buildkite/scripts/run_command.sh docker"
   - label: ":package: Packaging"
     commands:
       - "./.buildkite/scripts/run_command.sh packaging"
