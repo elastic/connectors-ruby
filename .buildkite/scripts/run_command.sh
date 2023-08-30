@@ -31,5 +31,5 @@ docker run --interactive --rm             \
              --env CI                     \
              --env GIT_REVISION=${BUILDKITE_COMMIT-}   \
              --env BUILD_ID=${BUILDKITE_BUILD_NUMBER-} \
-             --entrypoint "/bin/bash ${SCRIPT_CMD}"    \
+             --entrypoint "${SCRIPT_CMD}" \
              $DOCKER_IMAGE
