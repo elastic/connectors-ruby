@@ -27,7 +27,6 @@ docker run --interactive --rm             \
              --volume "$PROJECT_ROOT:/ci" \
              --workdir /ci                \
              --env HOME=/ci               \
-             --env REVISION               \
              --env CI                     \
              --env GIT_REVISION=${BUILDKITE_COMMIT-}   \
              --env BUILD_ID=${BUILDKITE_BUILD_NUMBER-} \
