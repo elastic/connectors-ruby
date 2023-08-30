@@ -20,4 +20,4 @@ steps:
     commands:
       - "./.buildkite/scripts/run_command.sh packaging"
     artifact_paths:
-      - "app/.gems/*.gem"
+      - ".gems/*.gem"
