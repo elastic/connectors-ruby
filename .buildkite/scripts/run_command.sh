@@ -2,47 +2,26 @@
 
 set -euxo pipefail
 
-export PATH="$PATH:~/.rbenv/bin"
+COMMAND_TO_RUN=${1:-}
 
-function install_ruby_version() {
-    local ruby_version=$(cat .ruby-version)
-    curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
-    echo 'eval "$(~/.rbenv/bin/rbenv init - bash)"' >> ~/.bashrc
-    rbenv install $ruby_version
-    rbenv global $ruby_version
+if [[ "${COMMAND_TO_RUN:-}" == "" ]]; then
+    echo "Usage: run_pipline_command {tests|linter|docker|packaging}"
+    exit 2
+fi
+
+function realpath {
+  echo "$(cd "$(dirname "$1")"; pwd)"/"$(basename "$1")";
 }
 
-case $1 in
+SCRIPT_WORKING_DIR=$(realpath "$(dirname "$0")")
+BUILDKITE_DIR=$(realpath "$(dirname "$SCRIPT_WORKING_DIR")")
+PROJECT_ROOT=$(realpath "$(dirname "$BUILDKITE_DIR")")
+SHARED_SCRIPT_DIR="${SCRIPT_WORKING_DIR}/shared"
 
-  tests)
-    echo "running unit tests"
-    install_ruby_version
-    make install test
-    ;;
+source "${SHARED_SCRIPT_DIR}/pull_shared_scripts.sh"
 
-  linter)
-    echo "running linter"
-    install_ruby_version
-    make install lint
-    ;;
+DOCKER_IMAGE="docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest"
+SCRIPT_CMD=".buildkite/scripts/run_command.sh ${COMMAND_TO_RUN}"
+ENV_VARS=("GIT_REVISION=${BUILDKITE_COMMIT-}" "BUILD_ID=${BUILDKITE_BUILD_NUMBER-}")
 
-  docker)
-    echo "running docker build"
-    # install_ruby_version
-    # install_docker
-    make build-docker
-    ;;
-
-  packaging)
-    echo "running packaging"
-    install_ruby_version
-    curl -L -o yq https://github.com/mikefarah/yq/releases/download/v4.21.1/yq_linux_amd64
-    chmod +x yq
-    YQ=`realpath yq` make install build_service build_service_gem
-    gem install .gems/connectors_service-8.*
-    ;;
-
-  *)
-    echo "Usage: run_command {tests|linter|docker|packaging}"
-    ;;
-esac
+runDockerCIScript "${DOCKER_IMAGE}" "${SCRIPT_CMD}" "${ENV_VARS[@]}"
