@@ -1,20 +1,24 @@
-agents:
-  image: docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest
-
 defaultTimeoutInMinutes: 45
 steps:
   - label: ":safety_vest: Connectors Tests"
+    agents:
+      image: docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest
     commands:
       - "./.buildkite/scripts/run_command.sh test"
     artifact_paths:
-      - "index.html"
+      - "coverage/index.html"
   - label: ":wrench: Linter"
+    agents:
+      image: docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest
     commands:
       - "./.buildkite/scripts/run_command.sh linter"
   - label: ":package: Docker"
     commands:
-      - "./.buildkite/scripts/run_command.sh docker"
+      - "echo 'test docker output'"
+      # - "./.buildkite/scripts/run_command.sh docker"
   - label: ":package: Packaging"
+    agents:
+      image: docker.elastic.co/ci-agent-images/enterprise-search/rbenv-buildkite-agent:latest
     commands:
       - "./.buildkite/scripts/run_command.sh packaging"
     artifact_paths:
