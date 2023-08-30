@@ -5,9 +5,17 @@ set -euxo pipefail
 COMMAND_TO_RUN=${1:-}
 
 if [[ "${COMMAND_TO_RUN:-}" == "" ]]; then
-    echo "Usage: run_pipline_command {tests|linter|docker|packaging}"
+    echo "Usage: run_command.sh {tests|linter|docker|packaging}"
     exit 2
 fi
+
+function realpath {
+  echo "$(cd "$(dirname "$1")"; pwd)"/"$(basename "$1")";
+}
+
+SCRIPT_WORKING_DIR=$(realpath "$(dirname "$0")")
+BUILDKITE_DIR=$(realpath "$(dirname "$SCRIPT_WORKING_DIR")")
+PROJECT_ROOT=$(realpath "$(dirname "$BUILDKITE_DIR")")
 
 if [[ "${COMMAND_TO_RUN:-}" == "docker" ]]; then
   echo "running docker build"
