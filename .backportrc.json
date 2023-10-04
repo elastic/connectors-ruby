@@ -1,13 +1,14 @@
 {
   "targetBranchChoices": [
     { "name": "main", "checked": true },
+    "8.11",
     "8.10",
     "8.9"
   ],
   "fork": false,
   "targetPRLabels": ["backport"],
   "branchLabelMapping": {
-    "^v8.11.0$": "main",
+    "^v8.12.0$": "main",
     "^v(\\d+).(\\d+)(.\\d+)+$": "$1.$2"
   },
   "upstream": "elastic/connectors-ruby"
