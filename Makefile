@@ -1,4 +1,5 @@
 YQ ?= "yq"
+RUBY_CFLAGS ?= -w
 .phony: test ftest lint autocorrect update_config autocorrect-unsafe install build-docker run-docker exec_app tag exec_cli
 .phony: build_utility build_service release_utility_dev release_service_dev release_utility release_service build_utility_gem build_service_gem
 
@@ -67,7 +68,7 @@ push_gem:
 	bundle _$(shell cat .bundler-version)_ exec gem push .gems/*
 
 install:
-	RUBY_CFLAGS="-w" rbenv install -s
+	RUBY_CFLAGS="$(RUBY_CFLAGS)" rbenv install -s
 	- gem install bundler -v $(shell cat .bundler-version) && rbenv rehash
 	bundle _$(shell cat .bundler-version)_ install --jobs 1
 
