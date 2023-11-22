@@ -9,7 +9,7 @@ RUN apt-get update && \
     uuid-runtime curl ca-certificates git make build-essential \
     libssl-dev libreadline-dev zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
-RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.24.2/yq_linux_amd64.tar.gz | tar -xzvf - && \
+RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.40.2/yq_linux_amd64.tar.gz | tar -xzvf - && \
     mv yq_linux_amd64 /usr/bin/yq
 RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv && \
     curl -L https://github.com/sstephenson/ruby-build/archive/v20231114.tar.gz | tar -zxvf - -C /tmp/ && \
