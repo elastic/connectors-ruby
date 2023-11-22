@@ -204,6 +204,7 @@ PLATFORMS
   universal-java-11
   x86-mingw32
   x86_64-darwin-20
+  x86_64-linux
 
 DEPENDENCIES
   activesupport (~> 6.1.7.3)
