@@ -13,11 +13,3 @@ steps:
   - label: ":wrench: Linter"
     commands:
       - ".buildkite/scripts/run_command.sh linter"
-  - label: ":package: Docker"
-    commands:
-      - ".buildkite/scripts/run_command.sh docker"
-  - label: ":package: Packaging"
-    commands:
-      - ".buildkite/scripts/run_command.sh packaging"
-    artifact_paths:
-      - ".gems/*.gem"
