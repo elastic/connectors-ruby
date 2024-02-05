@@ -1,8 +1,14 @@
-# Elastic Enterprise Search Connectors 
+# Elastic Workplace Search Connectors 
 
 ![logo](logo-enterprise-search.png)
 
-The home of Elastic Enterprise Connector Packages. Use connector packages to
+___
+**For new users, we recommend using our Elasticsearch native tools, rather than the standalone Workplace Search product. See [this blog post](https://www.elastic.co/blog/evolution-workplace-search-private-data-elasticsearch) for more information about upgrading your internal knowledge search, to make it an amazing experience for your users!**
+
+We recommend using the new [GA connector framework](https://www.elastic.co/guide/en/enterprise-search/current/connectors-framework.html), [Elastic Confluence connector](https://www.elastic.co/guide/en/enterprise-search/current/connectors-confluence.html) and [SharePoint Online connector](https://www.elastic.co/guide/en/enterprise-search/current/connectors-sharepoint-online.html) to ingest your content in regular Elasticsearch indices.
+___
+
+The home of Workplace Search Connector Packages. Use connector packages to
 customize connectors such as Workplace Search Content Sources for advanced use
 cases.
 
