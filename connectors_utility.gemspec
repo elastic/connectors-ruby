@@ -46,8 +46,8 @@ Gem::Specification.new do |s|
   s.license     = 'Elastic-2.0'
   s.add_dependency 'activesupport', '>= 5.2'
   s.add_dependency 'ecs-logging', '~> 1.0.0'
-  s.add_dependency 'fugit', '~> 1.5.3'
-  s.add_dependency 'mime-types', '= 3.1'
+  s.add_dependency 'fugit', '~> 1.11', '>= 1.11.1'
+  s.add_dependency 'mime-types', '~> 3.6'
   s.add_dependency 'tzinfo'
   s.add_dependency 'tzinfo-data'
 end
