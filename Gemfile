@@ -10,10 +10,10 @@ gem 'bundler', File.read(File.join(__dir__, '.bundler-version')).strip
 
 # Dependencies for connectors
 gem 'activesupport', '~>6.1.7.3'
-gem 'mime-types', '= 3.1'
+gem 'mime-types', '~> 3.6'
 gem 'tzinfo-data'
 gem 'tzinfo', '~> 2.0'
-gem 'fugit', '~> 1.5.3'
+gem 'fugit', '~> 1.11', '>= 1.11.1'
 gem 'remedy', '~> 0.3.0'
 gem 'ecs-logging', '~> 1.0.0'
 
