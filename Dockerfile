@@ -1,4 +1,4 @@
-FROM ubuntu:mantic-20231011
+FROM ubuntu:noble-20241118.1
 
 WORKDIR /app
 COPY . /app
