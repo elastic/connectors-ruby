@@ -62,7 +62,7 @@ module Core
 
     private
 
-    def sync_triggered?(connector_settings)
+    def sync_triggered?(connector_settings, time_at_poll_start = Time.now)
       unless connector_settings.valid_index_name?
         Utility::Logger.warn("The index name of #{connector_settings.formatted} is invalid.")
         return false
@@ -80,7 +80,7 @@ module Core
         return true
       end
 
-      schedule_triggered?(connector_settings.full_sync_scheduling, connector_settings.formatted)
+      schedule_triggered?(connector_settings.full_sync_scheduling, connector_settings.formatted, time_at_poll_start)
     end
 
     def heartbeat_triggered?(connector_settings)
@@ -149,7 +149,7 @@ module Core
       end
     end
 
-    def schedule_triggered?(scheduling_settings, identifier)
+    def schedule_triggered?(scheduling_settings, identifier, time_at_poll_start = Time.now)
       # Don't sync if sync is explicitly disabled
       unless scheduling_settings.present? && scheduling_settings[:enabled] == true
         Utility::Logger.debug("#{identifier.capitalize} scheduling is disabled.")
@@ -179,12 +179,15 @@ module Core
         return false
       end
 
-      next_trigger_time = cron_parser.next_time(Time.now)
-
+      next_trigger_time = cron_parser.next_time(time_at_poll_start)
       # Sync if next trigger happens before the next poll
-      if next_trigger_time <= Time.now + @poll_interval
+      poll_window = time_at_poll_start + @poll_interval
+      if next_trigger_time <= poll_window
         Utility::Logger.info("#{identifier.capitalize} sync is triggered by cron schedule #{current_schedule}.")
         return true
+      else
+        # log that a sync was not triggered, share the next trigger time and when poll interval was meant to end
+        Utility::Logger.debug("Sync for #{identifier.capitalize} not triggered, as #{next_trigger_time} occurs after the current interval: #{poll_window}.")
       end
 
       false
