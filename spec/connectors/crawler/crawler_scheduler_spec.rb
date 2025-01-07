@@ -88,15 +88,14 @@ describe Connectors::Crawler::Scheduler do
       let(:next_trigger_time) { 1.day.from_now }
       let(:weekly_next_trigger_time) { 1.day.from_now }
       let(:monthly_next_trigger_time) { 1.day.from_now }
-      let(:time_now) { Time.now }
 
       let(:cron_parser) { instance_double(Fugit::Cron) }
 
       before(:each) do
         allow(Core::ConnectorSettings).to receive(:fetch_crawler_connectors).and_return(connector_settings)
 
-        allow(subject).to receive(:sync_triggered?).with(connector_settings, Time.now).and_call_original
-        allow(subject).to receive(:custom_sync_triggered?).with(connector_settings, Time.now).and_call_original
+        allow(subject).to receive(:sync_triggered?).with(connector_settings, Timecop.freeze(Time.now)).and_call_original
+        allow(subject).to receive(:custom_sync_triggered?).with(connector_settings, Timecop.freeze(Time.now)).and_call_original
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(true)
         allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
         allow(connector_settings).to receive(:full_sync_scheduling).and_return(full_sync_scheduling)
@@ -138,9 +137,7 @@ describe Connectors::Crawler::Scheduler do
         end
 
         # it will return the first custom scheduling it encounters
-        Timecop.freeze(Time.now) do
-          it_behaves_like 'triggers', :weekly_key
-        end
+        it_behaves_like 'triggers', :weekly_key
       end
 
       context 'when base scheduling and all custom scheduling are enabled and require a sync' do
