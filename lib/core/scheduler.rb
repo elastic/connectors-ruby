@@ -187,7 +187,7 @@ module Core
         return true
       else
         # log that a sync was not triggered, share the next trigger time and when poll interval was meant to end
-        Utility::Logger.debug("Sync for #{identifier.capitalize} not triggered, as #{next_trigger_time} occurs after the current interval: #{poll_window}.")
+        Utility::Logger.debug("Sync for #{identifier.capitalize} not triggered as #{next_trigger_time} occurs after the poll window #{poll_window}. Poll window began at #{time_at_poll_start}, poll interval is #{@poll_interval} seconds.")
       end
 
       false

@@ -163,7 +163,7 @@ describe Connectors::Crawler::Scheduler do
         it_behaves_like 'triggers', nil
       end
 
-      context 'when base and custom scheduling are enabled but are scheduled after the poll interval' do
+      context 'when base and custom scheduling are enabled and are scheduled after the poll interval' do
         let(:sync_enabled) { true }
         let(:weekly_enabled) { true }
         let(:monthly_enabled) { true }
@@ -174,9 +174,25 @@ describe Connectors::Crawler::Scheduler do
 
         before(:each) do
           allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
+          expect(Utility::Logger).to receive(:debug).exactly(3).times.with(instance_of(String)) # expect three debug messages because three schedules are not being triggered
         end
 
         it_behaves_like 'does not trigger'
+      end
+
+      context 'when base and custom scheduling are enabled, but one is scheduled after the poll interval' do
+        let(:sync_enabled) { true }
+        let(:weekly_enabled) { true }
+
+        let(:next_trigger_time) { time_at_poll_start + poll_interval + 10 }
+        let(:weekly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time)
+          expect(Utility::Logger).to receive(:debug).exactly(1).times.with(instance_of(String))
+        end
+
+        it_behaves_like 'triggers', :weekly_key
       end
 
       context 'when base and custom scheduling are enabled and require sync and are scheduled at the start of the poll interval' do
