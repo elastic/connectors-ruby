@@ -1,5 +1,6 @@
 require 'core/connector_settings'
 require 'connectors/crawler/scheduler'
+require 'timecop'
 
 describe Connectors::Crawler::Scheduler do
   subject { described_class.new(poll_interval, heartbeat_interval) }
@@ -67,7 +68,7 @@ describe Connectors::Crawler::Scheduler do
       let(:weekly_enabled) { false }
       let(:weekly_interval) { '0 0 * * 1 ?' }
       let(:monthly_enabled) { false }
-      let(:monthly_interval) { '0 0 * 1 * ?' }
+      let(:monthly_interval) { '0 0 1 * * ?' }
       let(:custom_scheduling_settings) do
         {
           :weekly_key => {
@@ -88,14 +89,15 @@ describe Connectors::Crawler::Scheduler do
       let(:weekly_next_trigger_time) { 1.day.from_now }
       let(:monthly_next_trigger_time) { 1.day.from_now }
 
+      let(:time_at_poll_start) { Timecop.freeze(Time.now) }
+
       let(:cron_parser) { instance_double(Fugit::Cron) }
 
       before(:each) do
         allow(Core::ConnectorSettings).to receive(:fetch_crawler_connectors).and_return(connector_settings)
 
-        allow(subject).to receive(:sync_triggered?).with(connector_settings).and_call_original
-        allow(subject).to receive(:custom_sync_triggered?).with(connector_settings).and_call_original
-
+        allow(subject).to receive(:sync_triggered?).with(connector_settings, time_at_poll_start).and_call_original
+        allow(subject).to receive(:custom_sync_triggered?).with(connector_settings, time_at_poll_start).and_call_original
         allow(connector_settings).to receive(:connector_status_allows_sync?).and_return(true)
         allow(connector_settings).to receive(:sync_now?).and_return(sync_now)
         allow(connector_settings).to receive(:full_sync_scheduling).and_return(full_sync_scheduling)
@@ -109,13 +111,17 @@ describe Connectors::Crawler::Scheduler do
         allow(Fugit::Cron).to receive(:parse).and_return(cron_parser)
       end
 
+      after(:each) do
+        Timecop.return
+      end
+
       context 'when none are enabled' do
         it_behaves_like 'does not trigger', :sync
       end
 
       context 'when one custom scheduling is enabled and ready to sync' do
         let(:monthly_enabled) { true }
-        let(:monthly_next_trigger_time) { Time.now + poll_interval - 10 }
+        let(:monthly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
 
         before(:each) do
           allow(Utility::Cron).to receive(:quartz_to_crontab).with(monthly_interval)
@@ -125,12 +131,12 @@ describe Connectors::Crawler::Scheduler do
         it_behaves_like 'triggers', :monthly_key
       end
 
-      context 'when all custom schedulings are enabled and ready to sync' do
+      context 'when all custom scheduling is enabled and ready to sync' do
         let(:weekly_enabled) { true }
         let(:monthly_enabled) { true }
 
-        let(:weekly_next_trigger_time) { Time.now + poll_interval - 10 }
-        let(:monthly_next_trigger_time) { Time.now + poll_interval - 10 }
+        let(:weekly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
+        let(:monthly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
 
         before(:each) do
           allow(cron_parser).to receive(:next_time).and_return(weekly_next_trigger_time, monthly_next_trigger_time)
@@ -145,15 +151,86 @@ describe Connectors::Crawler::Scheduler do
         let(:weekly_enabled) { true }
         let(:monthly_enabled) { true }
 
-        let(:next_trigger_time) { Time.now + poll_interval - 10 }
-        let(:weekly_next_trigger_time) { Time.now + poll_interval - 10 }
-        let(:monthly_next_trigger_time) { Time.now + poll_interval - 10 }
+        let(:next_trigger_time) { time_at_poll_start + poll_interval - 10 }
+        let(:weekly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
+        let(:monthly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
 
         before(:each) do
           allow(cron_parser).to receive(:next_time).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
         end
 
         # it will return the base scheduling
+        it_behaves_like 'triggers', nil
+      end
+
+      context 'when base and custom scheduling are enabled and are scheduled after the poll interval' do
+        let(:sync_enabled) { true }
+        let(:weekly_enabled) { true }
+        let(:monthly_enabled) { true }
+
+        let(:next_trigger_time) { time_at_poll_start + poll_interval + 10 }
+        let(:weekly_next_trigger_time) { time_at_poll_start + poll_interval + 10 }
+        let(:monthly_next_trigger_time) { time_at_poll_start + poll_interval + 10 }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
+        end
+
+        # functionally the same as shared test 'does not trigger' but with an extra expect() to check for debug messages
+        it 'does not yield task' do
+          # expect three debug messages because three schedules are not being triggered
+          expect(Utility::Logger).to receive(:debug).exactly(3).times.with(match(/^Sync for (\w+.*)|( - \w+) not triggered as .*/))
+          expect { |b| subject.when_triggered(&b) }.to_not yield_control
+        end
+      end
+
+      context 'when base and custom scheduling are enabled, but one is scheduled after the poll interval' do
+        let(:sync_enabled) { true }
+        let(:weekly_enabled) { true }
+
+        let(:next_trigger_time) { time_at_poll_start + poll_interval + 10 }
+        let(:weekly_next_trigger_time) { time_at_poll_start + poll_interval - 10 }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time)
+        end
+
+        # functionally the same as shared test 'triggers', but with an extra expect() to check for a debug message
+        it 'yields :sync task with an optional scheduling_key value' do
+          expect(Utility::Logger).to receive(:debug).exactly(1).times.with(match(/^Sync for (\w+.*)|( - \w+) not triggered as .*/))
+          expect { |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings, :sync, :weekly_key)
+        end
+      end
+
+      context 'when base and custom scheduling are enabled and require sync and are scheduled at the start of the poll interval' do
+        let(:sync_enabled) { true }
+        let(:weekly_enabled) { true }
+        let(:monthly_enabled) { true }
+
+        let(:next_trigger_time) { time_at_poll_start }
+        let(:weekly_next_trigger_time) { time_at_poll_start }
+        let(:monthly_next_trigger_time) { time_at_poll_start }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
+        end
+
+        it_behaves_like 'triggers', nil
+      end
+
+      context 'when base and custom scheduling are enabled and require sync and are scheduled at end of the poll interval' do
+        let(:sync_enabled) { true }
+        let(:weekly_enabled) { true }
+        let(:monthly_enabled) { true }
+
+        let(:next_trigger_time) { time_at_poll_start + poll_interval }
+        let(:weekly_next_trigger_time) { time_at_poll_start + poll_interval }
+        let(:monthly_next_trigger_time) { time_at_poll_start + poll_interval }
+
+        before(:each) do
+          allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
+        end
+
         it_behaves_like 'triggers', nil
       end
     end

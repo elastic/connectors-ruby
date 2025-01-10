@@ -24,14 +24,15 @@ module Connectors
 
       def when_triggered
         loop do
+          time_at_poll_start = Time.now # grab the time right before we iterate over all connectors
           connector_settings.each do |cs|
             # crawler only supports :sync
-            if sync_triggered?(cs)
+            if sync_triggered?(cs, time_at_poll_start)
               yield cs, :sync, nil
               next
             end
 
-            schedule_key = custom_schedule_triggered(cs)
+            schedule_key = custom_schedule_triggered(cs, time_at_poll_start)
             yield cs, :sync, schedule_key if schedule_key
           end
         rescue *Utility::AUTHORIZATION_ERRORS => e
@@ -53,10 +54,10 @@ module Connectors
       end
 
       # custom scheduling has no ordering, so the first-found schedule is returned
-      def custom_schedule_triggered(cs)
+      def custom_schedule_triggered(cs, time_at_poll_start)
         cs.custom_scheduling_settings.each do |key, custom_scheduling|
           identifier = "#{cs.formatted} - #{custom_scheduling[:name]}"
-          if schedule_triggered?(custom_scheduling, identifier)
+          if schedule_triggered?(custom_scheduling, identifier, time_at_poll_start)
             return key
           end
         end
