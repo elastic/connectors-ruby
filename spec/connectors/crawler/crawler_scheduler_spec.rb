@@ -174,10 +174,14 @@ describe Connectors::Crawler::Scheduler do
 
         before(:each) do
           allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time, monthly_next_trigger_time)
-          expect(Utility::Logger).to receive(:debug).exactly(3).times.with(instance_of(String)) # expect three debug messages because three schedules are not being triggered
         end
 
-        it_behaves_like 'does not trigger'
+        # functionally the same as shared test 'does not trigger' but with an extra expect() to check for debug messages
+        it 'does not yield task' do
+          # expect three debug messages because three schedules are not being triggered
+          expect(Utility::Logger).to receive(:debug).exactly(3).times.with(match(/^Sync for (\w+.*)|( - \w+) not triggered as .*/))
+          expect { |b| subject.when_triggered(&b) }.to_not yield_control
+        end
       end
 
       context 'when base and custom scheduling are enabled, but one is scheduled after the poll interval' do
@@ -189,10 +193,13 @@ describe Connectors::Crawler::Scheduler do
 
         before(:each) do
           allow(cron_parser).to receive(:next_time).with(time_at_poll_start).and_return(next_trigger_time, weekly_next_trigger_time)
-          expect(Utility::Logger).to receive(:debug).exactly(1).times.with(instance_of(String))
         end
 
-        it_behaves_like 'triggers', :weekly_key
+        # functionally the same as shared test 'triggers', but with an extra expect() to check for a debug message
+        it 'yields :sync task with an optional scheduling_key value' do
+          expect(Utility::Logger).to receive(:debug).exactly(1).times.with(match(/^Sync for (\w+.*)|( - \w+) not triggered as .*/))
+          expect { |b| subject.when_triggered(&b) }.to yield_with_args(connector_settings, :sync, :weekly_key)
+        end
       end
 
       context 'when base and custom scheduling are enabled and require sync and are scheduled at the start of the poll interval' do
