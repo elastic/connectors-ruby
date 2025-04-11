@@ -1,6 +1,15 @@
 # Elastic Ruby connectors
 
-![logo](logo-enterprise-search.png)
+> [!IMPORTANT]
+> _**Enterprise Search will be discontinued in 9.0.**_
+>
+> Starting with Elastic version 9.0, we're deprecating the standalone Enterprise Search product with its included features and functionalities (including [Workplace Search](https://www.elastic.co/guide/en/workplace-search/8.x/index.html) and [App Search](https://www.elastic.co/guide/en/app-search/8.x/index.html)). They remain supported in their current form in version 8.x and will only receive security upgrades and fixes. Workplace Search Connector Packages will continue to be supported in their current form throughout 8.x versions, according to our EOL policy: https://www.elastic.co/support/eol.
+> We recommend transitioning to our actively developed [Elastic Stack](https://www.elastic.co/elastic-stack) tools for your search use cases. However, if you're still using any Enterprise Search products, we recommend using the latest stable release.
+>
+> Here are some useful links with more information:
+> * Enterprise Search FAQ: https://www.elastic.co/resources/enterprise-search/enterprise-search-faq
+> * Migrating to 9.x from Enterprise Search 8.x versions: https://www.elastic.co/guide/en/enterprise-search/current/upgrading-to-9-x.html
+___
 
 The home of Elastic connector service and native connectors in Ruby language. This repository contains the framework for customizing Elastic native connectors, or writing your own connectors for advanced use cases.
 
@@ -8,7 +17,7 @@ Any connector implementation in this repository is only for reference, for suppo
 
 **The connector will be operated by an administrative user from within Kibana.**
 
-> Note: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.
+> Note: The connector framework is a tech preview feature. Tech preview features are subject to change and are not covered by the support SLA of general release (GA) features.
 
 Before getting started, review important information about this feature:
 
